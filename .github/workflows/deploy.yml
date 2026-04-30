@@ -19,7 +19,7 @@ jobs:
         host: 185.217.127.114
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
-        port: ${{ secrets.SERVER_PORT || 22 }}
+        port: 22
         script_stop: true
         script: |
           # Ensure target directory exists
