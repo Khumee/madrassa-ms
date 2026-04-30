@@ -1,9 +1,20 @@
 const fs = require('fs');
 const path = require('path');
-const db = require('./db');
+const mysql = require('mysql2/promise');
 
 async function migrate() {
     console.log('Starting migrations...');
+
+    // 1. First, connect without a database to ensure it exists
+    const connection = await mysql.createConnection({
+        host: process.env.DB_HOST || 'localhost',
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD
+    });
+    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${process.env.DB_NAME || 'kui'}\``);
+    await connection.end();
+
+    const db = require('./db');
     
     // Create schema history table if it doesn't exist
     await db.execute(`
