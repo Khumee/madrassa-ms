@@ -49,6 +49,10 @@ jobs:
           EOF
           
           npm install --production
+          # Explicitly run migrations and seeding
+          npm run migrate
+          npm run seed
+          
           # This will start the app if it's new, or restart it if it already exists
           pm2 start server.js --name "kui-ms" || pm2 restart "kui-ms"
           pm2 save
