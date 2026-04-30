@@ -81,6 +81,7 @@ app.get('/', isAuthenticated, async (req, res) => {
 app.get('/attendance/students/:classId', isAuthenticated, async (req, res) => {
     const { classId } = req.params;
     const date = req.query.date || DateTime.now().toISODate();
+    try {
         console.log(`🔍 Loading attendance for ClassID: ${classId}, Date: ${date}`);
         const [students] = await db.execute(
             `SELECT s.*, a.status 
