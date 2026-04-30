@@ -3,7 +3,7 @@ name: Deploy to Server
 on:
   push:
     branches:
-      - main  # Change this to your default branch name
+      - main
 
 jobs:
   deploy:
@@ -20,25 +20,32 @@ jobs:
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: ${{ secrets.SERVER_PORT || 22 }}
+        script_stop: true
         script: |
+          # Ensure target directory exists
           if [ ! -d "/var/www/kui-ms" ]; then
-            echo "Directory does not exist. Cloning for the first time..."
+            echo "Cloning repository..."
             sudo mkdir -p /var/www/kui-ms
-            sudo chown ${{ secrets.SERVER_USER }}:${{ secrets.SERVER_USER }} /var/www/kui-ms
+            sudo chown -R ${{ secrets.SERVER_USER }}:${{ secrets.SERVER_USER }} /var/www/kui-ms
             git clone https://github.com/${{ github.repository }}.git /var/www/kui-ms
           fi
+          
           cd /var/www/kui-ms
           git pull origin main
           
-          # Create .env file from secrets
-          echo "PORT=3000" > .env
-          echo "DB_HOST=localhost" >> .env
-          echo "DB_PORT=3306" >> .env
-          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
-          echo "SESSION_SECRET=${{ secrets.SESSION_SECRET }}" >> .env
+          # Force create .env file
+          cat <<EOF > .env
+          PORT=3000
+          DB_HOST=localhost
+          DB_PORT=3306
+          DB_USER=${{ secrets.DB_USER }}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          DB_NAME=${{ secrets.DB_NAME }}
+          SESSION_SECRET=${{ secrets.SESSION_SECRET }}
+          EOF
           
           npm install --production
-          # This will automatically run migrations and seeds because of our npm start logic
-          pm2 restart kui-ms || pm2 start server.js --name "kui-ms"
+          # Stop old process and start fresh to ensure everything is updated
+          pm2 delete kui-ms || true
+          pm2 start server.js --name "kui-ms"
+          pm2 save
