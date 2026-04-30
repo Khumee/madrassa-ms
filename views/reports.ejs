@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تقارير الحضور</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav>
+        <div class="logo">كليّة العلوم الإسلامية</div>
+        <a href="/" class="btn btn-primary">الرئيسية</a>
+    </nav>
+
+    <div class="container">
+        <h1>تقارير حضور الطلاب</h1>
+        
+        <% Object.keys(groupedReport).forEach(className => { %>
+            <div class="card" style="margin-bottom: 30px;">
+                <h2 style="color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 10px;">فصل: <%= className %></h2>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                    <thead>
+                        <tr style="background: #f4f4f4;">
+                            <th style="padding: 10px; text-align: right;">اسم الطالب</th>
+                            <th style="padding: 10px;">إجمالي الأيام</th>
+                            <th style="padding: 10px;">أيام الحضور</th>
+                            <th style="padding: 10px;">النسبة المئوية</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% groupedReport[className].forEach(student => { %>
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 10px;"><%= student.name %></td>
+                                <td style="padding: 10px; text-align: center;"><%= student.total_days %></td>
+                                <td style="padding: 10px; text-align: center;"><%= student.present_days %></td>
+                                <td style="padding: 10px; text-align: center;">
+                                    <span style="font-weight: bold; color: <%= student.percentage >= 80 ? 'var(--success)' : 'var(--danger)' %>">
+                                        <%= student.percentage || 0 %>%
+                                    </span>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        <% }) %>
+
+        <% if (Object.keys(groupedReport).length === 0) { %>
+            <div class="card">
+                <p style="text-align: center;">لا توجد بيانات حضور مسجلة بعد.</p>
+            </div>
+        <% } %>
+    </div>
+</body>
+</html>

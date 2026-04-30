@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - نظام الحضور</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="/logo.jpg" alt="Logo" style="height: 40px; border-radius: 5px;">
+            <div class="logo">كليّة العلوم الإسلامية</div>
+        </div>
+        <div>
+            <a href="/logout" class="btn btn-danger">خروج</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header style="margin-bottom: 30px; text-align: center;">
+            <h1>لوحة التحكم</h1>
+            <p style="color: #666;"><%= today %></p>
+        </header>
+
+        <section class="card">
+            <h2 style="margin-bottom: 20px;">حضور الطلاب حسب الفصول</h2>
+            <div class="class-grid">
+                <% classes.forEach(cls => { %>
+                    <a href="/attendance/students/<%= cls.id %>" class="class-card">
+                        <h3><%= cls.name_ar %></h3>
+                    </a>
+                <% }) %>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 style="margin-bottom: 20px;">إدارة</h2>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <a href="/teachers" class="btn btn-secondary">حضور المعلمين</a>
+                <a href="/reports" class="btn btn-primary">التقارير</a>
+                <a href="/students/add" class="btn btn-accent" style="background: var(--accent); color: white;">إضافة طالب</a>
+                <a href="/students/manage" class="btn btn-accent" style="background: #34495e; color: white;">إدارة الطلاب</a>
+                <a href="/teachers/manage" class="btn btn-accent" style="background: #34495e; color: white;">إدارة المعلمين</a>
+                <a href="/teachers/add" class="btn btn-accent" style="background: var(--accent); color: white;">إضافة معلم</a>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

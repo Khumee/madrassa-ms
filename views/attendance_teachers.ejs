@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حضور المعلمين</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav>
+        <div class="logo">كليّة العلوم الإسلامية</div>
+        <a href="/" class="btn btn-primary">الرئيسية</a>
+    </nav>
+
+    <div class="container">
+        <header style="margin-bottom: 20px;">
+            <h1>حضور المعلمين</h1>
+            <input type="date" id="datePicker" value="<%= date %>" class="btn" style="background: white; border: 1px solid #ddd;">
+        </header>
+
+        <div class="card">
+            <ul class="attendance-list">
+                <% teachers.forEach(teacher => { %>
+                    <li class="student-item" data-id="<%= teacher.id %>">
+                        <span><%= teacher.name %></span>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <label>عدد الحصص:</label>
+                            <input type="number" class="classes-taken btn" value="<%= teacher.classes_taken || 0 %>" min="0" max="8" style="width: 60px; text-align: center; background: #f9f9f9; border: 1px solid #ddd;">
+                        </div>
+                    </li>
+                <% }) %>
+            </ul>
+            <button id="saveBtn" class="btn btn-secondary" style="width: 100%; margin-top: 20px;">حفظ الحضور</button>
+        </div>
+    </div>
+
+    <script src="/js/main.js"></script>
+    <script>
+        document.getElementById('saveBtn').addEventListener('click', async function() {
+            const date = document.getElementById('datePicker').value;
+            const attendance = {};
+            document.querySelectorAll('.student-item').forEach(item => {
+                const id = item.getAttribute('data-id');
+                const count = item.querySelector('.classes-taken').value;
+                attendance[id] = count;
+            });
+
+            const res = await fetch('/attendance/teachers/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ date, attendance })
+            });
+
+            if (res.ok) {
+                showToast('تم الحفظ بنجاح', 'success');
+            } else {
+                showToast('حدث خطأ أثناء الحفظ', 'error');
+            }
+        });
+
+        document.getElementById('datePicker').addEventListener('change', function() {
+            window.location.href = `?date=${this.value}`;
+        });
+    </script>
+</body>
+</html>

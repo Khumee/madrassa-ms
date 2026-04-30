@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول - نظام الحضور</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="login-page">
+    <div class="container" style="display: flex; height: 100vh; align-items: center; justify-content: center;">
+        <div class="card" style="width: 100%; max-width: 400px;">
+            <h2 style="text-align: center; margin-bottom: 20px;">كليّة العلوم الإسلامية</h2>
+            <h3 style="text-align: center; margin-bottom: 30px; color: #666;">تسجيل الدخول</h3>
+            
+            <% if (error) { %>
+                <div style="background: #fee; color: #c00; padding: 10px; border-radius: 5px; margin-bottom: 20px;">
+                    <%= error %>
+                </div>
+            <% } %>
+
+            <form action="/login" method="POST">
+                <div style="margin-bottom: 15px;">
+                    <label>اسم المستخدم</label>
+                    <input type="text" name="username" value="مدیر" class="btn" style="width: 100%; text-align: right; background: #f9f9f9; border: 1px solid #ddd; color: #333;" required>
+                </div>
+                <div style="margin-bottom: 25px;">
+                    <label>كلمة المرور</label>
+                    <input type="password" name="password" value="مدیر" class="btn" style="width: 100%; text-align: right; background: #f9f9f9; border: 1px solid #ddd; color: #333;" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">دخول</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

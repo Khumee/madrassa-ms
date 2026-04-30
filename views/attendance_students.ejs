@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حضور الطلاب - <%= classInfo.name_ar %></title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .status-btn.active[data-status="present"] { background: var(--success); color: white; border-color: var(--success); }
+        .status-btn.active[data-status="absent"] { background: var(--danger); color: white; border-color: var(--danger); }
+        .status-btn.active[data-status="leave"] { background: var(--warning); color: white; border-color: var(--warning); }
+        .status-btn.active[data-status="online"] { background: #3498db; color: white; border-color: #3498db; }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">كليّة العلوم الإسلامية</div>
+        <a href="/" class="btn btn-primary">الرئيسية</a>
+    </nav>
+
+    <div class="container">
+        <header style="margin-bottom: 20px;">
+            <h1>حضور فصل: <%= classInfo.name_ar %></h1>
+            <input type="date" id="datePicker" value="<%= date %>" class="btn" style="background: white; border: 1px solid #ddd;">
+        </header>
+
+        <div class="card">
+            <ul class="attendance-list">
+                <% students.forEach(student => { %>
+                    <li class="student-item" data-id="<%= student.id %>">
+                        <span><%= student.name %></span>
+                        <div class="status-toggle">
+                            <div class="status-btn <%= student.status === 'present' ? 'active' : '' %>" data-status="present" title="حاضر">ح</div>
+                            <div class="status-btn <%= student.status === 'absent' ? 'active' : '' %>" data-status="absent" title="غائب">غ</div>
+                            <div class="status-btn <%= student.status === 'leave' ? 'active' : '' %>" data-status="leave" title="رخصة">ر</div>
+                            <div class="status-btn <%= student.status === 'online' ? 'active' : '' %>" data-status="online" title="أونلاين">ن</div>
+                        </div>
+                    </li>
+                <% }) %>
+            </ul>
+
+            <div style="margin-top: 30px; border-top: 2px solid #eee; padding-top: 20px;">
+                <h3 style="margin-bottom: 15px;">سجل حضور الأسبوع (آخر 7 أيام)</h3>
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.9em;">
+                    <thead>
+                        <tr style="background: #f4f4f4;">
+                            <th style="padding: 8px;">التاريخ</th>
+                            <th style="padding: 8px; color: var(--success);">ح</th>
+                            <th style="padding: 8px; color: var(--danger);">غ</th>
+                            <th style="padding: 8px; color: var(--warning);">ر</th>
+                            <th style="padding: 8px; color: #3498db;">ن</th>
+                            <th style="padding: 8px;">إجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% history.forEach(day => { %>
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 8px;"><%= day.date_str %></td>
+                                <td style="padding: 8px; text-align: center;"><%= day.present %></td>
+                                <td style="padding: 8px; text-align: center;"><%= day.absent %></td>
+                                <td style="padding: 8px; text-align: center;"><%= day.leave_count %></td>
+                                <td style="padding: 8px; text-align: center;"><%= day.online %></td>
+                                <td style="padding: 8px; text-align: center;">
+                                    <button type="button" class="btn btn-danger" style="padding: 2px 8px; font-size: 0.8em;" onclick="showConfirm('حذف سجلات هذا اليوم؟', () => window.location.href='/attendance/delete-day/<%= classInfo.id %>/<%= day.date_str %>')">حذف</button>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+
+            <button id="saveBtn" class="btn btn-secondary" style="width: 100%; margin-top: 20px;">حفظ الحضور</button>
+        </div>
+    </div>
+
+    <script src="/js/main.js"></script>
+    <script>
+        document.querySelectorAll('.status-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const parent = this.parentElement;
+                parent.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        document.getElementById('saveBtn').addEventListener('click', async function() {
+            const date = document.getElementById('datePicker').value;
+            const attendance = {};
+            document.querySelectorAll('.student-item').forEach(item => {
+                const id = item.getAttribute('data-id');
+                const status = item.querySelector('.status-btn.active')?.getAttribute('data-status') || 'present';
+                attendance[id] = status;
+            });
+
+            const res = await fetch('/attendance/students/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ date, attendance })
+            });
+
+            if (res.ok) {
+                showToast('تم الحفظ بنجاح', 'success');
+            } else {
+                showToast('حدث خطأ أثناء الحفظ', 'error');
+            }
+        });
+
+        document.getElementById('datePicker').addEventListener('change', function() {
+            window.location.href = `?date=${this.value}`;
+        });
+    </script>
+</body>
+</html>

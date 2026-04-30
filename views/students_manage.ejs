@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الطلاب</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav>
+        <div class="logo">كليّة العلوم الإسلامية</div>
+        <a href="/" class="btn btn-primary">الرئيسية</a>
+    </nav>
+
+    <div class="container">
+        <div class="card" style="max-width: 1000px;">
+            <h1>إدارة الطلاب</h1>
+            <p>تعديل بيانات الطلاب المسجلين</p>
+
+            <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                <thead>
+                    <tr style="background: var(--primary); color: white;">
+                        <th style="padding: 10px;">الاسم</th>
+                        <th style="padding: 10px;">الفصل</th>
+                        <th style="padding: 10px;">رقم القيد</th>
+                        <th style="padding: 10px;">إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% students.forEach(student => { %>
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td colspan="4" style="padding: 0;">
+                                <form action="/students/edit/<%= student.id %>" method="POST" style="display: flex; width: 100%; align-items: center; padding: 10px; gap: 10px;">
+                                    <div style="flex: 2;">
+                                        <input type="text" name="name" value="<%= student.name %>" class="btn" style="width: 100%; background: #f9f9f9; text-align: center; border: 1px solid #eee;" required>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <select name="classId" class="btn" style="width: 100%; background: #f9f9f9; border: 1px solid #eee; text-align: center;">
+                                            <% classes.forEach(cls => { %>
+                                                <option value="<%= cls.id %>" <%= student.class_id === cls.id ? 'selected' : '' %>><%= cls.name_ar %></option>
+                                            <% }) %>
+                                        </select>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <input type="text" name="rollNumber" value="<%= student.roll_number %>" class="btn" style="width: 100%; background: #f9f9f9; text-align: center; border: 1px solid #eee;">
+                                    </div>
+                                    <div>
+                                        <button type="submit" class="btn btn-secondary">تعديل</button>
+                                        <button type="button" class="btn btn-danger" onclick="showConfirm('هل أنت متأكد من حذف هذا الطالب؟', () => window.location.href='/students/delete/<%= student.id %>')" style="padding: 10px 15px;">حذف</a>
+                                    </div>
+                                </form>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{
+  "name": "mas",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "npm run migrate && npm run seed && start http://localhost:3000 && node server.js",
+    "migrate": "node migrate.js",
+    "seed": "node seed.js && node seed_data.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "body-parser": "^2.2.2",
+    "dotenv": "^17.4.2",
+    "ejs": "^5.0.2",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "luxon": "^3.7.2",
+    "mysql2": "^3.22.3"
+  }
+}

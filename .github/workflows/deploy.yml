@@ -1,0 +1,44 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - main  # Change this to your default branch name
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Deploy via SSH
+      uses: appleboy/ssh-action@master
+      with:
+        host: 185.217.127.114
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: ${{ secrets.SERVER_PORT || 22 }}
+        script: |
+          if [ ! -d "/var/www/kui-ms" ]; then
+            echo "Directory does not exist. Cloning for the first time..."
+            sudo mkdir -p /var/www/kui-ms
+            sudo chown ${{ secrets.SERVER_USER }}:${{ secrets.SERVER_USER }} /var/www/kui-ms
+            git clone https://github.com/${{ github.repository }}.git /var/www/kui-ms
+          fi
+          cd /var/www/kui-ms
+          git pull origin main
+          
+          # Create .env file from secrets
+          echo "PORT=3000" > .env
+          echo "DB_HOST=localhost" >> .env
+          echo "DB_PORT=3306" >> .env
+          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+          echo "SESSION_SECRET=${{ secrets.SESSION_SECRET }}" >> .env
+          
+          npm install --production
+          # This will automatically run migrations and seeds because of our npm start logic
+          pm2 restart kui-ms || pm2 start server.js --name "kui-ms"
