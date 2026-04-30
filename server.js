@@ -67,7 +67,11 @@ app.get('/', isAuthenticated, async (req, res) => {
         const [allClasses] = await db.execute('SELECT * FROM classes');
         // Hide classes 1, 3, 4, 7 (Aula, Salisa, Rabia, Sabiya)
         const hiddenIds = [1, 3, 4, 7];
-        const classes = allClasses.filter(c => !hiddenIds.includes(parseInt(c.id)));
+        const classes = allClasses.filter(c => {
+            const id = parseInt(c.id);
+            return !hiddenIds.includes(id);
+        });
+        console.log("Active Classes Count:", classes.length);
         const today = DateTime.now().toISODate();
         res.render('dashboard', { classes, today });
     } catch (err) {

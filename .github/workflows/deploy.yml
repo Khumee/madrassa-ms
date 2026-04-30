@@ -35,7 +35,10 @@ jobs:
           cd /var/www/kui-ms
           # Update the remote URL to ensure the token is current
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-          git pull origin main
+          
+          # Force the server to match GitHub exactly
+          git fetch origin main
+          git reset --hard origin/main
           
           # Force create .env file
           cat <<EOF > .env
