@@ -46,6 +46,7 @@ async function migrate() {
             const statements = sql.split(';').filter(s => s.trim() !== '');
             
             for (let statement of statements) {
+                console.log(`Executing statement: ${statement.trim().substring(0, 50)}...`);
                 await db.execute(statement);
             }
             

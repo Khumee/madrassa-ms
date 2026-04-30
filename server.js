@@ -81,7 +81,7 @@ app.get('/', isAuthenticated, async (req, res) => {
 app.get('/attendance/students/:classId', isAuthenticated, async (req, res) => {
     const { classId } = req.params;
     const date = req.query.date || DateTime.now().toISODate();
-    try {
+        console.log(`🔍 Loading attendance for ClassID: ${classId}, Date: ${date}`);
         const [students] = await db.execute(
             `SELECT s.*, a.status 
              FROM students s 
@@ -89,6 +89,8 @@ app.get('/attendance/students/:classId', isAuthenticated, async (req, res) => {
              WHERE s.class_id = ?`, 
             [date, classId]
         );
+        console.log(`✅ Found ${students.length} students for this class.`);
+
         // Get weekly history (last 7 days)
         const [history] = await db.execute(
             `SELECT DATE_FORMAT(date, '%Y-%m-%d') as date_str, 
@@ -99,9 +101,10 @@ app.get('/attendance/students/:classId', isAuthenticated, async (req, res) => {
              FROM attendance_students 
              WHERE student_id IN (SELECT id FROM students WHERE class_id = ?)
              GROUP BY date 
-             ORDER BY date DESC LIMIT 7`,
+             ORDER BY date DESC LIMIT 14`,
             [classId]
         );
+        console.log(`📊 Weekly history rows found: ${history.length}`);
 
         const [classInfo] = await db.execute('SELECT * FROM classes WHERE id = ?', [classId]);
         res.render('attendance_students', { students, classInfo: classInfo[0], date, history });
@@ -198,7 +201,7 @@ app.post('/students/edit/:id', isAuthenticated, async (req, res) => {
     const { name, classId, rollNumber } = req.body;
     try {
         await db.execute('UPDATE students SET name = ?, class_id = ?, roll_number = ? WHERE id = ?', [name, classId, rollNumber, id]);
-        res.redirect('/students/manage');
+        res.redirect('/students/manage?success=true');
     } catch (err) {
         console.error(err);
         res.status(500).send('Error updating student');
@@ -248,7 +251,7 @@ app.post('/teachers/edit/:id', isAuthenticated, async (req, res) => {
     const { name, subject } = req.body;
     try {
         await db.execute('UPDATE teachers SET name = ?, subject = ? WHERE id = ?', [name, subject, id]);
-        res.redirect('/teachers/manage');
+        res.redirect('/teachers/manage?success=true');
     } catch (err) {
         console.error(err);
         res.status(500).send('Error updating teacher');
@@ -288,12 +291,13 @@ app.get('/reports', isAuthenticated, async (req, res) => {
         const [rows] = await db.execute(`
             SELECT s.name, c.name_ar as class_name,
             COUNT(a.id) as total_days,
-            SUM(CASE WHEN a.status = 'present' THEN 1 ELSE 0 END) as present_days,
-            ROUND(SUM(CASE WHEN a.status = 'present' THEN 1 ELSE 0 END) * 100 / NULLIF(COUNT(a.id), 0), 2) as percentage
+            SUM(CASE WHEN a.status = 'present' OR a.status = 'online' THEN 1 ELSE 0 END) as present_days,
+            IFNULL(ROUND(SUM(CASE WHEN a.status = 'present' OR a.status = 'online' THEN 1 ELSE 0 END) * 100 / NULLIF(COUNT(a.id), 0), 2), 0) as percentage
             FROM students s
             JOIN classes c ON s.class_id = c.id
             LEFT JOIN attendance_students a ON s.id = a.student_id
             GROUP BY s.id, c.name_ar
+            ORDER BY c.id, s.name
         `);
 
         // Group rows by class_name, filtering out hidden classes
