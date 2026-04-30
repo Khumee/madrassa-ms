@@ -23,8 +23,10 @@ jobs:
         script_stop: true
         script: |
           # Ensure target directory exists
-          if [ ! -d "/var/www/kui-ms" ]; then
-            echo "Cloning repository..."
+          # Ensure target directory is a valid git repo
+          if [ ! -d "/var/www/kui-ms/.git" ]; then
+            echo "Directory is not a valid git repo. Performing fresh clone..."
+            sudo rm -rf /var/www/kui-ms
             sudo mkdir -p /var/www/kui-ms
             sudo chown -R ${{ secrets.SERVER_USER }}:${{ secrets.SERVER_USER }} /var/www/kui-ms
             git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git /var/www/kui-ms
