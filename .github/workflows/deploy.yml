@@ -49,7 +49,6 @@ jobs:
           EOF
           
           npm install --production
-          # Stop old process and start fresh to ensure everything is updated
-          pm2 delete kui-ms || true
-          pm2 start server.js --name "kui-ms"
+          # This will start the app if it's new, or restart it if it already exists
+          pm2 start server.js --name "kui-ms" || pm2 restart "kui-ms"
           pm2 save
