@@ -65,12 +65,10 @@ app.get('/logout', (req, res) => {
 app.get('/', isAuthenticated, async (req, res) => {
     try {
         const [allClasses] = await db.execute('SELECT * FROM classes');
-        // Hide classes 1, 3, 4, 7 (Aula, Salisa, Rabia, Sabiya)
-        const hiddenIds = [1, 3, 4, 7];
-        const classes = allClasses.filter(c => {
-            const id = parseInt(c.id);
-            return !hiddenIds.includes(id);
-        });
+        // Hide specific classes by their Arabic names
+        const hiddenNames = ['الأولى', 'الثالثة', 'الرابعة', 'السابعة'];
+        const classes = allClasses.filter(c => !hiddenNames.includes(c.name_ar));
+        
         console.log("Active Classes Count:", classes.length);
         const today = DateTime.now().toISODate();
         res.render('dashboard', { classes, today });
