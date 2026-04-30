@@ -27,7 +27,7 @@ jobs:
             echo "Cloning repository..."
             sudo mkdir -p /var/www/kui-ms
             sudo chown -R ${{ secrets.SERVER_USER }}:${{ secrets.SERVER_USER }} /var/www/kui-ms
-            git clone https://github.com/${{ github.repository }}.git /var/www/kui-ms
+            git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git /var/www/kui-ms
           fi
           
           cd /var/www/kui-ms
