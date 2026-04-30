@@ -33,6 +33,8 @@ jobs:
           fi
           
           cd /var/www/kui-ms
+          # Update the remote URL to ensure the token is current
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
           git pull origin main
           
           # Force create .env file
