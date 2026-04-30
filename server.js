@@ -180,8 +180,10 @@ app.post('/attendance/teachers/save', isAuthenticated, async (req, res) => {
 // Student Management
 app.get('/students/manage', isAuthenticated, async (req, res) => {
     try {
-        const [students] = await db.execute('SELECT s.*, c.name_ar as class_name FROM students s LEFT JOIN classes c ON s.class_id = c.id');
-        const [classes] = await db.execute('SELECT * FROM classes');
+        const [students] = await db.execute('SELECT s.*, c.name_ar as class_name FROM students s JOIN classes c ON s.class_id = c.id ORDER BY s.class_id, s.name');
+        const [allClasses] = await db.execute('SELECT * FROM classes');
+        const hiddenIds = [1, 3, 4, 7];
+        const classes = allClasses.filter(c => !hiddenIds.includes(parseInt(c.id)));
         res.render('students_manage', { students, classes });
     } catch (err) {
         console.error(err);
@@ -292,8 +294,10 @@ app.get('/reports', isAuthenticated, async (req, res) => {
             GROUP BY s.id, c.name_ar
         `);
 
-        // Group rows by class_name
+        // Group rows by class_name, filtering out hidden classes
+        const hiddenNames = ['الأولى', 'الثالثة', 'الرابعة', 'السابعة'];
         const groupedReport = rows.reduce((acc, student) => {
+            if (hiddenNames.includes(student.class_name)) return acc;
             if (!acc[student.class_name]) acc[student.class_name] = [];
             acc[student.class_name].push(student);
             return acc;
