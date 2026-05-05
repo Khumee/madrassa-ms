@@ -1,53 +1,77 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>حضور المعلمين</title>
-    <link rel="stylesheet" href="/css/style.css">
-</head>
-<body>
-    <nav>
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <img src="/logo.jpg" alt="Logo" style="height: 40px; border-radius: 5px;">
-            <div class="logo">كليّة العلوم الإسلامية</div>
-        </div>
-        <a href="/" class="btn btn-primary">الرئيسية</a>
-    </nav>
+<%- include('partials/header') %>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
-    <div class="container">
-        <header style="margin-bottom: 20px;">
-            <h1>حضور المعلمين</h1>
-            <input type="date" id="datePicker" value="<%= date %>" class="btn" style="background: white; border: 1px solid #ddd;">
-        </header>
-
-        <div class="card">
-            <ul class="attendance-list">
-                <% teachers.forEach(teacher => { %>
-                    <li class="student-item" data-id="<%= teacher.id %>">
-                        <span><%= teacher.name %></span>
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <label>عدد الحصص:</label>
-                            <input type="number" class="classes-taken btn" value="<%= teacher.classes_taken || 0 %>" min="0" max="8" style="width: 60px; text-align: center; background: #f9f9f9; border: 1px solid #ddd;">
-                        </div>
-                    </li>
-                <% }) %>
-            </ul>
-            <button id="saveBtn" class="btn btn-secondary" style="width: 100%; margin-top: 20px;">حفظ الحضور</button>
+<div class="row mb-5">
+    <div class="col-md-12 text-center">
+        <h1 class="fw-bold text-primary">حضور المعلمين</h1>
+        <div class="d-flex justify-content-center mt-3">
+            <div class="input-group" style="max-width: 300px;">
+                <span class="input-group-text bg-primary text-white border-0"><i class="bi bi-calendar3"></i></span>
+                <input type="date" id="datePicker" value="<%= date %>" class="form-control border-0 shadow-sm">
+            </div>
         </div>
     </div>
+</div>
 
-    <script src="/js/main.js"></script>
-    <script>
-        document.getElementById('saveBtn').addEventListener('click', async function() {
-            const date = document.getElementById('datePicker').value;
-            const attendance = {};
-            document.querySelectorAll('.student-item').forEach(item => {
-                const id = item.getAttribute('data-id');
-                const count = item.querySelector('.classes-taken').value;
-                attendance[id] = count;
-            });
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+            <div class="card-header bg-white p-4 border-0">
+                <h4 class="fw-bold mb-0 text-primary">قائمة المعلمين</h4>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    <% teachers.forEach(teacher => { %>
+                        <div class="list-group-item p-4 teacher-row" data-id="<%= teacher.id %>">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <h5 class="fw-bold mb-1"><%= teacher.name %></h5>
+                                    <span class="badge bg-light text-muted border rounded-pill px-3">
+                                        <%= teacher.scheduled_count %> حصص مجدولة اليوم
+                                    </span>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center justify-content-md-end gap-3 mt-3 mt-md-0">
+                                        <div class="text-center">
+                                            <label class="small text-muted d-block mb-2">عدد الحصص المنجزة</label>
+                                            <div class="input-group shadow-sm" style="width: 150px;">
+                                                <button class="btn btn-outline-secondary border-0 bg-light" onclick="this.parentNode.querySelector('input').stepDown()">-</button>
+                                                <input type="number" class="classes-taken form-control border-0 bg-light text-center fw-bold" 
+                                                       value="<%= teacher.classes_taken || 0 %>" 
+                                                       min="0" max="10">
+                                                <button class="btn btn-outline-secondary border-0 bg-light" onclick="this.parentNode.querySelector('input').stepUp()">+</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+            <div class="card-footer bg-light p-4 border-0">
+                <button id="saveBtn" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-sm">
+                    <i class="bi bi-check-circle-fill me-2"></i>حفظ سجل الحضور
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
+<script>
+    document.getElementById('saveBtn').addEventListener('click', async function() {
+        this.disabled = true;
+        this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>جاري الحفظ...';
+        
+        const date = document.getElementById('datePicker').value;
+        const attendance = {};
+        document.querySelectorAll('.teacher-row').forEach(item => {
+            const id = item.getAttribute('data-id');
+            const count = item.querySelector('.classes-taken').value;
+            attendance[id] = count;
+        });
+
+        try {
             const res = await fetch('/attendance/teachers/save', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -55,15 +79,23 @@
             });
 
             if (res.ok) {
-                showToast('تم الحفظ بنجاح', 'success');
+                alert('تم حفظ حضور المعلمين بنجاح');
+                location.reload();
             } else {
-                showToast('حدث خطأ أثناء الحفظ', 'error');
+                alert('حدث خطأ أثناء الحفظ');
             }
-        });
+        } catch (err) {
+            console.error(err);
+            alert('خطأ في الاتصال بالسيرفر');
+        } finally {
+            this.disabled = false;
+            this.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>حفظ سجل الحضور';
+        }
+    });
 
-        document.getElementById('datePicker').addEventListener('change', function() {
-            window.location.href = `?date=${this.value}`;
-        });
-    </script>
-</body>
-</html>
+    document.getElementById('datePicker').addEventListener('change', function() {
+        window.location.href = `?date=${this.value}`;
+    });
+</script>
+
+<%- include('partials/footer') %>

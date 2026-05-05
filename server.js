@@ -291,17 +291,19 @@ app.post('/attendance/students/save', hasRole(['ناظم', 'مدير', 'مسؤو
 // Teacher Attendance
 app.get('/teachers', isAuthenticated, async (req, res) => {
     const date = req.query.date || DateTime.now().toISODate();
+    const dayName = DateTime.fromISO(date).setLocale('en').toFormat('cccc');
     try {
         const [teachers] = await db.execute(
-            `SELECT t.*, a.classes_taken 
+            `SELECT t.*, a.classes_taken,
+             (SELECT COUNT(*) FROM periods WHERE teacher_id = t.id AND day_of_week = ?) as scheduled_count
              FROM teachers t 
              LEFT JOIN attendance_teachers a ON t.id = a.teacher_id AND a.date = ?`, 
-            [date]
+            [dayName, date]
         );
         res.render('attendance_teachers', { teachers, date });
     } catch (err) {
         console.error(err);
-        res.status(500).send('Error loading teachers');
+        res.status(500).send('Error loading teacher attendance');
     }
 });
 
@@ -730,7 +732,9 @@ app.get('/periods/manage', hasRole(['ناظم', 'مدير', 'admin']), async (re
 app.get('/users/manage', hasRole(['ناظم', 'مدير']), async (req, res) => {
     try {
         const [users] = await db.execute(`
-            SELECT u.id, u.username, u.full_name, u.role, u.created_at,
+            SELECT u.id, u.username, 
+            COALESCE(t.name, s.name, 'Admin') as full_name, 
+            u.role, u.created_at,
             s.roll_number as student_id, t.id_number as teacher_id
             FROM users u
             LEFT JOIN students s ON u.id = s.user_id
@@ -749,10 +753,15 @@ app.post('/users/update', hasRole(['ناظم', 'مدير']), async (req, res) =>
     try {
         if (password && password.trim() !== '') {
             const hashed = await bcrypt.hash(password, 10);
-            await db.execute('UPDATE users SET username = ?, full_name = ?, password = ?, role = ? WHERE id = ?', [username, fullName, hashed, role, userId]);
+            await db.execute('UPDATE users SET username = ?, password = ?, role = ? WHERE id = ?', [username, hashed, role, userId]);
         } else {
-            await db.execute('UPDATE users SET username = ?, full_name = ?, role = ? WHERE id = ?', [username, fullName, role, userId]);
+            await db.execute('UPDATE users SET username = ?, role = ? WHERE id = ?', [username, role, userId]);
         }
+        
+        // Also update name in linked tables if applicable
+        await db.execute('UPDATE teachers SET name = ? WHERE user_id = ?', [fullName, userId]);
+        await db.execute('UPDATE students SET name = ? WHERE user_id = ?', [fullName, userId]);
+
         res.json({ success: true });
     } catch (err) {
         console.error(err);
