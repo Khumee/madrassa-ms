@@ -56,13 +56,24 @@
 <div class="row mb-5">
     <div class="col-md-12">
         <div class="card shadow-sm border-0 rounded-4">
-            <div class="card-header bg-white p-4 border-0">
+            <div class="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <h3 class="fw-bold mb-0 text-success">إنجاز المعلمين (الكتب)</h3>
+                <div style="min-width: 250px;">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-success text-white border-0"><i class="bi bi-filter"></i></span>
+                        <select id="teacherProgressFilter" class="form-select border-success-subtle" onchange="filterTeacherProgress()">
+                            <option value="all">كل المعلمين</option>
+                            <% teachers.forEach(t => { %>
+                                <option value="<%= t.name %>"><%= t.name %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                </div>
             </div>
             <div class="card-body p-4">
                 <div class="row g-4">
                     <% teacherProgress.forEach(tp => { %>
-                        <div class="col-md-4">
+                        <div class="col-md-4 teacher-progress-card" data-teacher="<%= tp.teacher_name %>">
                             <div class="p-3 border rounded-4 bg-light shadow-sm h-100">
                                 <div class="d-flex justify-content-between align-items-start mb-2">
                                     <h6 class="fw-bold mb-0"><%= tp.book_title %></h6>
@@ -181,6 +192,18 @@ function filterStudents() {
     cards.forEach(card => {
         const visibleRows = card.querySelectorAll('.student-row[style=""]');
         card.style.display = visibleRows.length > 0 || filter === '' ? '' : 'none';
+    });
+}
+
+function filterTeacherProgress() {
+    const selected = document.getElementById('teacherProgressFilter').value;
+    const cards = document.querySelectorAll('.teacher-progress-card');
+    cards.forEach(card => {
+        if (selected === 'all' || card.getAttribute('data-teacher') === selected) {
+            card.style.display = '';
+        } else {
+            card.style.display = 'none';
+        }
     });
 }
 </script>

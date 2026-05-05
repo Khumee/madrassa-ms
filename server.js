@@ -187,10 +187,11 @@ app.get('/dashboard/teacher', hasRole(['أستاذ']), async (req, res) => {
         );
 
         const [assignedBooks] = await db.execute(`
-            SELECT tb.*, b.title as book_title
+            SELECT tb.*, b.title as book_title, c.name_ar as class_name
             FROM teacher_books tb
             JOIN books b ON tb.book_id = b.id
             JOIN sessions s ON tb.session_id = s.id
+            LEFT JOIN classes c ON tb.class_id = c.id
             WHERE tb.teacher_id = ? AND s.is_active = TRUE
         `, [teacherId]);
 
@@ -674,19 +675,44 @@ app.post('/teacher-books/delete/:id', hasRole(['ناظم', 'مدير']), async (
 app.post('/book/update-progress', hasRole(['أستاذ', 'ناظم', 'مدير']), async (req, res) => {
     const { assignmentId, pageNumber } = req.body;
     const date = DateTime.now().toISODate();
+    
+    if (!assignmentId || !pageNumber) {
+        return res.status(400).json({ success: false, error: 'بيانات غير مكتملة' });
+    }
+
     try {
+        // 0. Fetch assignment limits to validate
+        const [assignment] = await db.execute('SELECT start_page, end_page FROM teacher_books WHERE id = ?', [assignmentId]);
+        if (!assignment.length) {
+            return res.json({ success: false, error: 'سجل التوزيع غير موجود' });
+        }
+        
+        const { start_page, end_page } = assignment[0];
+        const numPage = parseInt(pageNumber);
+        
+        if (numPage < start_page || numPage > end_page) {
+            return res.json({ success: false, error: `رقم الصفحة يجب أن يكون بين ${start_page} و ${end_page}` });
+        }
+
+        // 1. Log the progress in history
         await db.execute(
             `INSERT INTO book_progress (assignment_id, date, page_number, marked_by) 
              VALUES (?, ?, ?, ?) 
              ON DUPLICATE KEY UPDATE page_number = ?`,
             [assignmentId, date, pageNumber, req.session.userId, pageNumber]
         );
-        // Also update current_page in the assignment record
-        await db.execute('UPDATE teacher_books SET current_page = ? WHERE id = ?', [pageNumber, assignmentId]);
+        
+        // 2. Update current_page in the assignment record
+        const [result] = await db.execute('UPDATE teacher_books SET current_page = ? WHERE id = ?', [pageNumber, assignmentId]);
+        
+        if (result.affectedRows === 0) {
+            return res.json({ success: false, error: 'لم يتم العثور على سجل التوزيع' });
+        }
+
         res.json({ success: true });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ success: false });
+        console.error('Error updating book progress:', err);
+        res.status(500).json({ success: false, error: 'حدث خطأ في السيرفر أثناء التحديث' });
     }
 });
 

@@ -74,15 +74,16 @@
                                     </div>
 
                                     <div class="d-flex gap-2">
-                                        <div class="input-group input-group-sm">
+                                        <div class="input-group shadow-sm" style="max-width: 150px;">
                                             <span class="input-group-text bg-light border-0">ص</span>
                                             <input type="number" id="page_<%= b.id %>" 
-                                                   class="form-control border-0 bg-light px-2" 
+                                                   class="form-control border-0 bg-light px-3 fw-bold" 
                                                    value="<%= b.current_page %>"
-                                                   style="max-width: 80px;">
+                                                   min="<%= b.start_page %>"
+                                                   max="<%= b.end_page %>">
                                         </div>
-                                        <button class="btn btn-success btn-sm px-3 rounded-3 fw-bold" 
-                                                onclick="updateProgress(<%= b.id %>)">تحديث</button>
+                                        <button class="btn btn-success btn-sm px-4 rounded-3 fw-bold" 
+                                                onclick="updateProgress(<%= b.id %>, <%= b.start_page %>, <%= b.end_page %>)">تحديث</button>
                                     </div>
                                     
                                     <div class="mt-3 pt-2 border-top">
@@ -107,21 +108,38 @@
 </div>
 
 <script>
-async function updateProgress(assignmentId) {
-    const pageNumber = document.getElementById(`page_${assignmentId}`).value;
-    if (!pageNumber) return alert('يرجى إدخال رقم الصفحة');
+async function updateProgress(assignmentId, startPage, endPage) {
+    const pageInput = document.getElementById(`page_${assignmentId}`);
+    const pageNumber = parseInt(pageInput.value);
+
+    if (isNaN(pageNumber) || pageNumber < startPage || pageNumber > endPage) {
+        return showToast(`يرجى إدخال رقم صفحة بين ${startPage} و ${endPage}`, 'danger');
+    }
     
-    const res = await fetch('/book/update-progress', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ assignmentId, pageNumber })
-    });
-    const data = await res.json();
-    if (data.success) {
-        alert('تم تحديث التقدم بنجاح');
-        location.reload();
-    } else {
-        alert('فشل تحديث التقدم');
+    const btn = event.currentTarget;
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+    try {
+        const res = await fetch('/book/update-progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ assignmentId, pageNumber })
+        });
+        
+        const data = await res.json();
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('فشل التحديث: ' + (data.error || 'خطأ غير معروف'));
+        }
+    } catch (err) {
+        console.error(err);
+        alert('حدث خطأ في الاتصال بالسيرفر');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
     }
 }
 </script>
