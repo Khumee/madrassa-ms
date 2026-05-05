@@ -9,6 +9,7 @@ const { DateTime } = require('luxon');
 require('dotenv').config();
 
 const app = express();
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3000;
 
 // Middleware
@@ -55,13 +56,18 @@ app.post('/login', async (req, res) => {
                 req.session.userId = user.id;
                 req.session.role = user.role;
                 
-                // Unified Redirection
-                if (user.role === 'طالب_علم') return res.redirect('/dashboard/student');
-                if (user.role === 'مسؤول_الصف') return res.redirect('/dashboard/cr');
-                if (user.role === 'أستاذ') return res.redirect('/dashboard/teacher');
-                if (user.role === 'ناظم' || user.role === 'مدير') return res.redirect('/');
-                
-                return res.redirect('/');
+                return req.session.save((err) => {
+                    if (err) {
+                        console.error('Session save error:', err);
+                        return res.render('login', { error: 'Session Error' });
+                    }
+                    // Unified Redirection
+                    if (user.role === 'طالب_علم') return res.redirect('/dashboard/student');
+                    if (user.role === 'مسؤول_الصف') return res.redirect('/dashboard/cr');
+                    if (user.role === 'أستاذ') return res.redirect('/dashboard/teacher');
+                    
+                    return res.redirect('/');
+                });
             }
         }
         res.render('login', { error: 'Invalid username or password' });
