@@ -47,12 +47,12 @@
                                     </td>
                                     <td class="px-4 text-center">
                                         <button class="btn btn-sm btn-primary rounded-pill px-3" 
-                                                onclick="openEditModal(<%= JSON.stringify(user) %>)">
-                                            تعديل
+                                                onclick="openEditModal(<%= JSON.stringify(user) %>)" title="تعديل">
+                                            <i class="bi bi-pencil-square"></i>
                                         </button>
                                         <button class="btn btn-sm btn-outline-warning rounded-pill px-3 ms-2" 
-                                                onclick="resetPassword(<%= user.id %>)">
-                                            إعادة تعيين
+                                                onclick="resetPassword(<%= user.id %>)" title="إعادة تعيين كلمة المرور">
+                                            <i class="bi bi-key-fill"></i>
                                         </button>
                                     </td>
                                 </tr>

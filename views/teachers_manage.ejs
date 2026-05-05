@@ -35,13 +35,13 @@
                                     </td>
                                     <td class="px-4 text-center">
                                         <button class="btn btn-sm btn-primary rounded-pill px-3" 
-                                                onclick="openEditModal(<%= JSON.stringify(teacher) %>)">
-                                            تعديل
+                                                onclick="openEditModal(<%= JSON.stringify(teacher) %>)" title="تعديل">
+                                            <i class="bi bi-pencil-square"></i>
                                         </button>
                                         <a href="/teachers/delete/<%= teacher.id %>" 
                                            class="btn btn-sm btn-outline-danger rounded-pill px-3 ms-2"
-                                           onclick="return confirm('هل أنت متأكد من حذف هذا المعلم؟')">
-                                            حذف
+                                           onclick="return confirm('هل أنت متأكد من حذف هذا المعلم؟')" title="حذف">
+                                            <i class="bi bi-trash"></i>
                                         </a>
                                     </td>
                                 </tr>
