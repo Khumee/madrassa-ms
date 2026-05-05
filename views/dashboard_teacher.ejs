@@ -49,33 +49,47 @@
                         <% assignedBooks.forEach(b => { 
                             const total = b.end_page - b.start_page;
                             const completed = b.current_page - b.start_page;
-                            const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+                            const percentage = total > 0 ? Math.min(100, Math.max(0, Math.round((completed / total) * 100))) : 0;
                         %>
                             <div class="col-md-6">
-                                <div class="p-4 border rounded-4 bg-light shadow-sm">
-                                    <h5 class="fw-bold text-dark mb-3"><%= b.book_title %></h5>
+                                <div class="p-4 border-0 rounded-4 bg-white shadow-sm h-100 position-relative">
+                                    <h5 class="fw-bold text-dark mb-1"><%= b.book_title %></h5>
+                                    <p class="text-muted small mb-3"><%= b.class_name %></p>
                                     
-                                    <div class="d-flex justify-content-between mb-2 small text-muted">
-                                        <span>الهدف: <%= b.end_page %></span>
-                                        <span class="fw-bold text-success"><%= percentage %>%</span>
+                                    <div class="d-flex justify-content-between align-items-end mb-2">
+                                        <div>
+                                            <span class="text-muted x-small d-block">المستوى الحالي</span>
+                                            <span class="fw-bold text-primary fs-5">صفحة <%= b.current_page %></span>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="text-muted small">الهدف: <%= b.end_page %></span>
+                                            <span class="badge bg-success-subtle text-success ms-1"><%= percentage %>%</span>
+                                        </div>
                                     </div>
-                                    <div class="progress mb-4" style="height: 10px; border-radius: 5px;">
-                                        <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" 
+                                    
+                                    <div class="progress mb-4" style="height: 8px; border-radius: 4px; background-color: #f0f0f0;">
+                                        <div class="progress-bar bg-success" 
                                              role="progressbar" 
                                              style="width: <%= percentage %>%"></div>
                                     </div>
 
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-white border-end-0">ص</span>
-                                        <input type="number" id="page_<%= b.id %>" 
-                                               class="form-control border-start-0" 
-                                               value="<%= b.current_page %>" 
-                                               placeholder="الصفحة الحالية">
-                                        <button class="btn btn-success px-4" 
+                                    <div class="d-flex gap-2">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text bg-light border-0">ص</span>
+                                            <input type="number" id="page_<%= b.id %>" 
+                                                   class="form-control border-0 bg-light px-2" 
+                                                   value="<%= b.current_page %>"
+                                                   style="max-width: 80px;">
+                                        </div>
+                                        <button class="btn btn-success btn-sm px-3 rounded-3 fw-bold" 
                                                 onclick="updateProgress(<%= b.id %>)">تحديث</button>
                                     </div>
-                                    <div class="mt-2 text-center">
-                                        <small class="text-muted">آخر تحديث: صفحة <%= b.current_page %></small>
+                                    
+                                    <div class="mt-3 pt-2 border-top">
+                                        <small class="text-muted" style="font-size: 0.75rem;">
+                                            <i class="bi bi-clock-history me-1"></i>
+                                            آخر تحديث: صفحة <%= b.current_page %>
+                                        </small>
                                     </div>
                                 </div>
                             </div>
