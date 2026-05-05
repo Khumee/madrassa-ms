@@ -6,7 +6,7 @@
   "scripts": {
     "start": "npm run migrate && npm run seed && node -e \"if(process.platform==='win32') require('child_process').execSync('start http://localhost:3000')\" && node server.js",
     "migrate": "node migrate.js",
-    "seed": "node seed.js && node migrate_users.js && node fix_roles.js && node migrate_roles_final.js && node fix_usernames.js && node update_mudeer_pass.js",
+    "seed": "node seed.js && node migrate_users.js && node fix_roles.js && node migrate_roles_final.js && node fix_usernames.js && node fix_nazims.js && node update_mudeer_pass.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
