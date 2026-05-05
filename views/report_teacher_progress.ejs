@@ -14,11 +14,22 @@
 
 <div class="row">
     <div class="col-md-12">
-        <div class="card shadow-sm border-0 rounded-4">
-            <div class="card-body p-5">
-                <div style="height: 400px;">
-                    <canvas id="progressChart"></canvas>
-                </div>
+                <% 
+                    const bookTitles = [...new Set(progress.map(p => p.book_title))];
+                %>
+
+                <% bookTitles.forEach((title, index) => { %>
+                    <div class="card shadow-sm border-0 rounded-4 mb-5">
+                        <div class="card-header bg-white p-4 border-0">
+                            <h5 class="fw-bold mb-0 text-success"><i class="bi bi-graph-up-arrow me-2"></i>تحليل تقدم كتاب: <%= title %></h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div style="height: 300px;">
+                                <canvas id="chart_<%= index %>"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
                 
                 <hr class="my-5">
                 
@@ -65,62 +76,65 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-const ctx = document.getElementById('progressChart').getContext('2d');
 const rawData = <%- JSON.stringify(progress) %>;
 
 // Group data by book
 const booksData = {};
 rawData.forEach(d => {
-    if (!booksData[d.book_title]) booksData[d.book_title] = [];
-    booksData[d.book_title].push({ 
+    const title = d.book_title;
+    if (!booksData[title]) booksData[title] = [];
+    booksData[title].push({ 
         x: d.date.split('T')[0], 
         y: d.page_number 
     });
 });
 
-const datasets = Object.keys(booksData).map((title, index) => {
-    const colors = ['#0d6efd', '#198754', '#dc3545', '#ffc107', '#0dcaf0', '#6610f2', '#6f42c1', '#d63384'];
-    return {
-        label: title,
-        data: booksData[title],
-        borderColor: colors[index % colors.length],
-        backgroundColor: colors[index % colors.length] + '22',
-        tension: 0.3,
-        fill: true,
-        pointRadius: 4,
-        pointHoverRadius: 6
-    };
-});
+const colors = ['#0d6efd', '#198754', '#dc3545', '#ffc107', '#0dcaf0', '#6610f2', '#6f42c1', '#d63384'];
 
-new Chart(ctx, {
-    type: 'line',
-    data: { datasets },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'top',
-                rtl: true,
-                labels: { font: { family: 'inherit', size: 14 } }
-            },
-            tooltip: {
-                rtl: true,
-                bodyFont: { family: 'inherit' },
-                titleFont: { family: 'inherit' }
-            }
+Object.keys(booksData).forEach((title, index) => {
+    const canvasId = `chart_${index}`;
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            datasets: [{
+                label: title,
+                data: booksData[title],
+                borderColor: colors[index % colors.length],
+                backgroundColor: colors[index % colors.length] + '22',
+                tension: 0.3,
+                fill: true,
+                pointRadius: 5,
+                pointHoverRadius: 8,
+                borderWidth: 3
+            }]
         },
-        scales: {
-            x: {
-                grid: { display: false },
-                title: { display: true, text: 'التاريخ' }
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    rtl: true,
+                    bodyFont: { family: 'inherit' },
+                    titleFont: { family: 'inherit' }
+                }
             },
-            y: {
-                beginAtZero: false,
-                title: { display: true, text: 'رقم الصفحة' }
+            scales: {
+                x: {
+                    grid: { display: false },
+                    title: { display: true, text: 'التاريخ', font: { weight: 'bold' } }
+                },
+                y: {
+                    beginAtZero: false,
+                    title: { display: true, text: 'رقم الصفحة', font: { weight: 'bold' } }
+                }
             }
         }
-    }
+    });
 });
 </script>
 
