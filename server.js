@@ -426,7 +426,7 @@ app.post('/students/add', hasRole(['ناظم', 'مدير', 'مسؤول_الصف'
         const [studentResult] = await db.execute('INSERT INTO students (name, class_id, user_id) VALUES (?, ?, ?)', [name, classId, userId]);
         const studentId = studentResult.insertId;
         const year = new Date().getFullYear().toString().slice(-2);
-        const rollNumber = `S-${year}-${classId}-${1000 + studentId}`;
+        const rollNumber = `S-${year}-${1000 + studentId}`;
         
         await db.execute('UPDATE students SET roll_number = ? WHERE id = ?', [rollNumber, studentId]);
         
