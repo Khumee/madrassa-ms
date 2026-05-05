@@ -5,7 +5,8 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 const db = require('./db');
-const { DateTime } = require('luxon');
+const { DateTime, Settings } = require('luxon');
+Settings.defaultZone = 'Asia/Karachi';
 require('dotenv').config();
 
 const app = express();
