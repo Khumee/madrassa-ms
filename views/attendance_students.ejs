@@ -96,10 +96,11 @@
                 attendance[id] = status;
             });
 
+            const classId = '<%= classInfo.id %>';
             const res = await fetch('/attendance/students/save', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ date, attendance })
+                body: JSON.stringify({ date, attendance, classId })
             });
 
             if (res.ok) {

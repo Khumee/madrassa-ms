@@ -83,7 +83,9 @@
                 <div class="d-flex gap-2 flex-wrap">
                     <a href="/teachers" class="btn btn-secondary rounded-pill px-4">📝 حضور المعلمين</a>
                     <a href="/teachers/manage" class="btn btn-secondary rounded-pill px-4">👥 إدارة المعلمين</a>
-                    <a href="/teachers/add" class="btn btn-success rounded-pill px-4">➕ إضافة معلم</a>
+                    <% if (role === 'مدير') { %>
+                        <a href="/teachers/add" class="btn btn-success rounded-pill px-4">➕ إضافة معلم</a>
+                    <% } %>
                     <a href="/periods/manage" class="btn btn-info rounded-pill px-4">📅 جدول الحصص</a>
                 </div>
             </div>

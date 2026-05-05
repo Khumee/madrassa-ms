@@ -40,6 +40,11 @@ const hasRole = (roles) => {
     };
 };
 
+const getCRClassId = async (userId) => {
+    const [student] = await db.execute('SELECT class_id FROM students WHERE user_id = ?', [userId]);
+    return student.length ? student[0].class_id : null;
+};
+
 // Routes
 app.get('/login', (req, res) => {
     res.render('login', { error: null });
@@ -119,7 +124,7 @@ app.get('/', isAuthenticated, async (req, res) => {
             const hiddenNames = ['الأولى', 'الثالثة', 'الرابعة', 'السابعة'];
             const classes = allClasses.filter(c => !hiddenNames.includes(c.name_ar));
             const today = DateTime.now().setLocale('ar').toFormat('cccc, dd MMMM yyyy');
-            return res.render('dashboard', { classes, today });
+            return res.render('dashboard', { classes, today, role });
         }
         
         res.redirect('/logout');
@@ -201,8 +206,12 @@ app.get('/dashboard/teacher', hasRole(['أستاذ']), async (req, res) => {
     }
 });
 
-app.get('/attendance/students/:classId', isAuthenticated, async (req, res) => {
+app.get('/attendance/students/:classId', hasRole(['ناظم', 'مدير', 'مسؤول_الصف']), async (req, res) => {
     const { classId } = req.params;
+    if (req.session.role === 'مسؤول_الصف') {
+        const crClassId = await getCRClassId(req.session.userId);
+        if (crClassId != classId) return res.status(403).send('Unauthorized');
+    }
     const date = req.query.date || DateTime.now().toISODate();
     try {
         console.log(`🔍 Loading attendance for ClassID: ${classId}, Date: ${date}`);
@@ -238,8 +247,12 @@ app.get('/attendance/students/:classId', isAuthenticated, async (req, res) => {
     }
 });
 
-app.get('/attendance/delete-day/:classId/:date', isAuthenticated, async (req, res) => {
+app.get('/attendance/delete-day/:classId/:date', hasRole(['ناظم', 'مدير', 'مسؤول_الصف']), async (req, res) => {
     const { classId, date } = req.params;
+    if (req.session.role === 'مسؤول_الصف') {
+        const crClassId = await getCRClassId(req.session.userId);
+        if (crClassId != classId) return res.status(403).send('Unauthorized');
+    }
     try {
         await db.execute(
             `DELETE FROM attendance_students 
@@ -253,8 +266,12 @@ app.get('/attendance/delete-day/:classId/:date', isAuthenticated, async (req, re
     }
 });
 
-app.post('/attendance/students/save', isAuthenticated, async (req, res) => {
-    const { date, attendance } = req.body; // attendance: { studentId: status }
+app.post('/attendance/students/save', hasRole(['ناظم', 'مدير', 'مسؤول_الصف']), async (req, res) => {
+    const { date, attendance, classId } = req.body; // attendance: { studentId: status }
+    if (req.session.role === 'مسؤول_الصف') {
+        const crClassId = await getCRClassId(req.session.userId);
+        if (crClassId != classId) return res.status(403).send('Unauthorized');
+    }
     try {
         for (const [studentId, status] of Object.entries(attendance)) {
             await db.execute(
@@ -307,23 +324,50 @@ app.post('/attendance/teachers/save', isAuthenticated, async (req, res) => {
 });
 
 // Student Management
-app.get('/students/manage', isAuthenticated, async (req, res) => {
+app.get('/students/manage', hasRole(['ناظم', 'مدير', 'مسؤول_الصف']), async (req, res) => {
     try {
-        const [students] = await db.execute('SELECT s.*, c.name_ar as class_name FROM students s JOIN classes c ON s.class_id = c.id ORDER BY s.class_id, s.name');
-        const [allClasses] = await db.execute('SELECT * FROM classes');
+        let studentsQuery = 'SELECT s.*, c.name_ar as class_name FROM students s JOIN classes c ON s.class_id = c.id';
+        let queryParams = [];
+        let crClassId = null;
+
+        if (req.session.role === 'مسؤول_الصف') {
+            crClassId = await getCRClassId(req.session.userId);
+            if (!crClassId) return res.status(403).send('CR class not found');
+            studentsQuery += ' WHERE s.class_id = ?';
+            queryParams.push(crClassId);
+        }
+        studentsQuery += ' ORDER BY s.class_id, s.name';
+
+        const [students] = await db.execute(studentsQuery, queryParams);
+        
+        let classesQuery = 'SELECT * FROM classes';
+        let classParams = [];
+        if (crClassId) {
+            classesQuery += ' WHERE id = ?';
+            classParams.push(crClassId);
+        }
+        const [allClasses] = await db.execute(classesQuery, classParams);
         const hiddenIds = [1, 3, 4, 7];
         const classes = allClasses.filter(c => !hiddenIds.includes(parseInt(c.id)));
-        res.render('students_manage', { students, classes });
+        
+        res.render('students_manage', { students, classes, role: req.session.role, crClassId });
     } catch (err) {
         console.error(err);
         res.status(500).send('Error loading management page');
     }
 });
 
-app.post('/students/edit/:id', isAuthenticated, async (req, res) => {
+app.post('/students/edit/:id', hasRole(['ناظم', 'مدير', 'مسؤول_الصف']), async (req, res) => {
     const { id } = req.params;
     const { name, classId } = req.body;
     try {
+        if (req.session.role === 'مسؤول_الصف') {
+            const crClassId = await getCRClassId(req.session.userId);
+            const [student] = await db.execute('SELECT class_id FROM students WHERE id = ?', [id]);
+            if (!student.length || student[0].class_id !== crClassId || crClassId != classId) {
+                return res.status(403).send('Unauthorized to edit this student or change to this class');
+            }
+        }
         await db.execute('UPDATE students SET name = ?, class_id = ? WHERE id = ?', [name, classId, id]);
         res.redirect('/students/manage?success=true');
     } catch (err) {
@@ -332,9 +376,16 @@ app.post('/students/edit/:id', isAuthenticated, async (req, res) => {
     }
 });
 
-app.get('/students/delete/:id', isAuthenticated, async (req, res) => {
+app.get('/students/delete/:id', hasRole(['ناظم', 'مدير', 'مسؤول_الصف']), async (req, res) => {
     const { id } = req.params;
     try {
+        if (req.session.role === 'مسؤول_الصف') {
+            const crClassId = await getCRClassId(req.session.userId);
+            const [student] = await db.execute('SELECT class_id FROM students WHERE id = ?', [id]);
+            if (!student.length || student[0].class_id !== crClassId) {
+                return res.status(403).send('Unauthorized to delete this student');
+            }
+        }
         await db.execute('DELETE FROM students WHERE id = ?', [id]);
         res.redirect('/students/manage');
     } catch (err) {
@@ -343,18 +394,30 @@ app.get('/students/delete/:id', isAuthenticated, async (req, res) => {
     }
 });
 
-app.get('/students/add', isAuthenticated, async (req, res) => {
-    const [classes] = await db.execute('SELECT * FROM classes');
-    res.render('student_add', { classes });
+app.get('/students/add', hasRole(['ناظم', 'مدير', 'مسؤول_الصف']), async (req, res) => {
+    let classesQuery = 'SELECT * FROM classes';
+    let params = [];
+    if (req.session.role === 'مسؤول_الصف') {
+        const crClassId = await getCRClassId(req.session.userId);
+        classesQuery += ' WHERE id = ?';
+        params.push(crClassId);
+    }
+    const [classes] = await db.execute(classesQuery, params);
+    res.render('student_add', { classes, role: req.session.role });
 });
 
-app.post('/students/add', isAuthenticated, async (req, res) => {
+app.post('/students/add', hasRole(['ناظم', 'مدير', 'مسؤول_الصف']), async (req, res) => {
     const { name, classId } = req.body;
     try {
+        if (req.session.role === 'مسؤول_الصف') {
+            const crClassId = await getCRClassId(req.session.userId);
+            if (crClassId != classId) return res.status(403).send('Unauthorized to add to this class');
+        }
+        
         // 1. Create User account first
         const username = name.split(' ')[0] + Math.floor(Math.random() * 1000); // Temporary unique username
         const password = await bcrypt.hash('1234', 10);
-        const [userResult] = await db.execute('INSERT INTO users (username, full_name, password, role) VALUES (?, ?, ?, ?)', [username, name, password, 'طالب_علم']);
+        const [userResult] = await db.execute('INSERT INTO users (username, password, role) VALUES (?, ?, ?)', [username, password, 'طالب_علم']);
         const userId = userResult.insertId;
 
         // 2. Insert Student and use the generated ID to create a Roll Number
@@ -365,7 +428,6 @@ app.post('/students/add', isAuthenticated, async (req, res) => {
         await db.execute('UPDATE students SET roll_number = ? WHERE id = ?', [rollNumber, studentId]);
         
         // 3. Update username to be the real first name (as per previous logic)
-        // (Wait, I should just use the logic from fix_usernames.js here)
         let finalUsername = name.split(' ')[0];
         const [existing] = await db.execute('SELECT id FROM users WHERE username = ?', [finalUsername]);
         if (existing.length > 0) finalUsername += studentId;
@@ -379,17 +441,17 @@ app.post('/students/add', isAuthenticated, async (req, res) => {
 });
 
 // Teacher Management
-app.get('/teachers/manage', isAuthenticated, async (req, res) => {
+app.get('/teachers/manage', hasRole(['ناظم', 'مدير']), async (req, res) => {
     try {
         const [teachers] = await db.execute('SELECT * FROM teachers');
-        res.render('teachers_manage', { teachers });
+        res.render('teachers_manage', { teachers, role: req.session.role });
     } catch (err) {
         console.error(err);
         res.status(500).send('Error loading management page');
     }
 });
 
-app.post('/teachers/edit/:id', isAuthenticated, async (req, res) => {
+app.post('/teachers/edit/:id', hasRole(['ناظم', 'مدير']), async (req, res) => {
     const { id } = req.params;
     const { name, subject } = req.body;
     try {
@@ -401,7 +463,7 @@ app.post('/teachers/edit/:id', isAuthenticated, async (req, res) => {
     }
 });
 
-app.get('/teachers/delete/:id', isAuthenticated, async (req, res) => {
+app.get('/teachers/delete/:id', hasRole(['ناظم', 'مدير']), async (req, res) => {
     const { id } = req.params;
     try {
         await db.execute('DELETE FROM teachers WHERE id = ?', [id]);
@@ -412,17 +474,17 @@ app.get('/teachers/delete/:id', isAuthenticated, async (req, res) => {
     }
 });
 
-app.get('/teachers/add', isAuthenticated, (req, res) => {
+app.get('/teachers/add', hasRole(['مدير']), (req, res) => {
     res.render('teacher_add');
 });
 
-app.post('/teachers/add', isAuthenticated, async (req, res) => {
+app.post('/teachers/add', hasRole(['مدير']), async (req, res) => {
     const { name, subject } = req.body;
     try {
         // 1. Create User account first
         const username = name.split(' ')[0] + Math.floor(Math.random() * 1000); // Temporary unique username
         const password = await bcrypt.hash('1234', 10);
-        const [userResult] = await db.execute('INSERT INTO users (username, full_name, password, role) VALUES (?, ?, ?, ?)', [username, name, password, 'أستاذ']);
+        const [userResult] = await db.execute('INSERT INTO users (username, password, role) VALUES (?, ?, ?)', [username, password, 'أستاذ']);
         const userId = userResult.insertId;
 
         // 2. Insert Teacher and use the generated ID to create an ID Number
