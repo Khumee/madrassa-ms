@@ -1,58 +1,108 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>كليّة العلوم الإسلامية</title>
-    <link rel="icon" href="/logo.jpg">
-    <link rel="stylesheet" href="/css/style.css">
-</head>
-<body>
-    <nav>
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <img src="/logo.jpg" alt="Logo" style="height: 40px; border-radius: 5px;">
-            <div class="logo">كليّة العلوم الإسلامية</div>
-        </div>
-        <div>
-            <a href="/logout" class="btn btn-danger">خروج</a>
-        </div>
-    </nav>
+<%- include('partials/header') %>
 
-    <div class="container">
-        <header style="margin-bottom: 30px; text-align: center;">
-            <h1>لوحة التحكم</h1>
-            <p style="color: #666;"><%= today %></p>
-        </header>
-
-        <section class="card">
-            <h2 style="margin-bottom: 20px;">حضور الطلاب حسب الفصول</h2>
-            <div class="class-grid">
-                <% classes.forEach(cls => { %>
-                    <a href="/attendance/students/<%= cls.id %>" class="class-card">
-                        <h3><%= cls.name_ar %></h3>
-                    </a>
-                <% }) %>
-            </div>
-        </section>
-
-        <section class="card">
-            <h2 style="margin-bottom: 20px; color: var(--primary);">إدارة الطلاب</h2>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 25px;">
-                <a href="/students/manage" class="btn btn-accent" style="background: #34495e; color: white;">📂 إدارة الطلاب</a>
-                <a href="/students/add" class="btn btn-accent" style="background: var(--accent); color: white;">➕ إضافة طالب</a>
-                <a href="/reports" class="btn btn-primary">📊 التقارير</a>
-            </div>
-
-            <h2 style="margin-bottom: 20px; color: var(--primary); border-top: 1px solid #eee; padding-top: 20px;">إدارة المعلمين</h2>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <a href="/teachers" class="btn btn-secondary">📝 حضور المعلمين</a>
-                <a href="/teachers/manage" class="btn btn-accent" style="background: #34495e; color: white;">👥 إدارة المعلمين</a>
-                <a href="/teachers/add" class="btn btn-accent" style="background: var(--accent); color: white;">➕ إضافة معلم</a>
-            </div>
-        </section>
-        <footer style="margin-top: 50px; text-align: center; color: #aaa; font-size: 0.8rem;">
-            Version 2.0 - Active Classes Only
-        </footer>
+<div class="row">
+    <div class="col-md-12 text-center mb-5">
+        <h1 class="display-4 fw-bold text-primary">لوحة التحكم</h1>
+        <p class="lead text-muted"><%= today %></p>
     </div>
-</body>
-</html>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h3 class="card-title mb-4">حضور الطلاب حسب الفصول</h3>
+                <div class="row g-3">
+                    <% classes.forEach(cls => { %>
+                        <div class="col-md-3">
+                            <a href="/attendance/students/<%= cls.id %>" class="btn btn-outline-primary w-100 py-3 rounded-3 fw-bold">
+                                <%= cls.name_ar %>
+                            </a>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h3 class="card-title mb-4">الوصول السريع</h3>
+                <div class="row g-3">
+                    <div class="col-md-3 mb-3">
+                        <a href="/users/manage" class="btn btn-outline-primary w-100 py-3 rounded-4 shadow-sm border-0 bg-white h-100 d-flex flex-column align-items-center justify-content-center">
+                            <i class="bi bi-people-fill fs-3 mb-2"></i>
+                            <span class="fw-bold">إدارة المستخدمين</span>
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="/books/manage" class="btn btn-outline-info w-100 py-3 rounded-4 shadow-sm border-0 bg-white h-100 d-flex flex-column align-items-center justify-content-center">
+                            <i class="bi bi-book-half fs-3 mb-2"></i>
+                            <span class="fw-bold">إدارة الكتب</span>
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="/teacher-books/manage" class="btn btn-outline-success w-100 py-3 rounded-4 shadow-sm border-0 bg-white h-100 d-flex flex-column align-items-center justify-content-center">
+                            <i class="bi bi-person-check fs-3 mb-2"></i>
+                            <span class="fw-bold">توزيع الكتب</span>
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="/reports" class="btn btn-outline-warning w-100 py-3 rounded-4 shadow-sm border-0 bg-white h-100 d-flex flex-column align-items-center justify-content-center">
+                            <i class="bi bi-bar-chart-fill fs-3 mb-2"></i>
+                            <span class="fw-bold">التقارير العامة</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-body p-4">
+                <h3 class="card-title mb-4 text-primary">إدارة الطلاب</h3>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="/students/manage" class="btn btn-secondary rounded-pill px-4">📂 إدارة الطلاب</a>
+                    <a href="/students/add" class="btn btn-success rounded-pill px-4">➕ إضافة طالب</a>
+                    <a href="/reports" class="btn btn-primary rounded-pill px-4">📊 التقارير</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-body p-4">
+                <h3 class="card-title mb-4 text-primary">إدارة المعلمين</h3>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="/teachers" class="btn btn-secondary rounded-pill px-4">📝 حضور المعلمين</a>
+                    <a href="/teachers/manage" class="btn btn-secondary rounded-pill px-4">👥 إدارة المعلمين</a>
+                    <a href="/teachers/add" class="btn btn-success rounded-pill px-4">➕ إضافة معلم</a>
+                    <a href="/periods/manage" class="btn btn-info rounded-pill px-4">📅 جدول الحصص</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h3 class="card-title mb-3 text-primary">الإعدادات</h3>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="/profile/change-password" class="btn btn-outline-secondary rounded-pill px-4">🔑 تغيير كلمة المرور</a>
+                    <a href="/users/manage" class="btn btn-outline-danger rounded-pill px-4">👤 إدارة المستخدمين والأدوار</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

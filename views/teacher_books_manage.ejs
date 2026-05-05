@@ -1,0 +1,225 @@
+<%- include('partials/header') %>
+
+<div class="row mb-5 align-items-center">
+    <div class="col-md-8">
+        <h1 class="fw-bold text-primary">توزيع الكتب على المعلمين</h1>
+        <p class="text-muted">ربط المعلمين بالكتب وتحديد الصفحات المقررة لكل فصل دراسي</p>
+    </div>
+    <div class="col-md-4 text-start">
+        <a href="/" class="btn btn-outline-primary rounded-pill px-4">
+            <i class="bi bi-house-door me-2"></i>الرجوع للوحة التحكم
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-success text-white rounded-top-4 p-3">
+                <h5 class="mb-0">إسناد كتاب جديد</h5>
+            </div>
+            <div class="card-body p-4">
+                <form action="/teacher-books/assign" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">المعلم</label>
+                        <select name="teacherId" class="form-select" required>
+                            <option value="">اختر المعلم...</option>
+                            <% teachers.forEach(t => { %>
+                                <option value="<%= t.id %>"><%= t.name %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">الكتاب</label>
+                        <select name="bookId" class="form-select" required>
+                            <option value="">اختر الكتاب...</option>
+                            <% books.forEach(b => { %>
+                                <option value="<%= b.id %>"><%= b.title %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">الصف (Saf)</label>
+                        <select name="classId" class="form-select" required>
+                            <option value="">اختر الصف...</option>
+                            <% classes.forEach(c => { %>
+                                <option value="<%= c.id %>"><%= c.name %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">الفصل الدراسي</label>
+                        <select name="sessionId" class="form-select" required>
+                            <% sessions.forEach(s => { %>
+                                <option value="<%= s.id %>" <%= s.is_active ? 'selected' : '' %>><%= s.name %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-bold">من صفحة</label>
+                            <input type="number" name="startPage" class="form-control" value="1" required>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-bold">إلى صفحة</label>
+                            <input type="number" name="endPage" class="form-control" value="500" required>
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success rounded-pill py-2 fw-bold">إتمام الإسناد</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <% 
+            const grouped = {};
+            assignments.forEach(a => {
+                if (!grouped[a.teacher_name]) grouped[a.teacher_name] = [];
+                grouped[a.teacher_name].push(a);
+            });
+        %>
+
+        <% Object.keys(grouped).forEach(teacherName => { %>
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                <div class="card-header bg-white p-4 border-0">
+                    <h5 class="fw-bold mb-0 text-success">
+                        <i class="bi bi-person-workspace me-2"></i>المعلم: <%= teacherName %>
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 text-end">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="px-4">الكتاب</th>
+                                    <th>الصف (Saf)</th>
+                                    <th>الفصل</th>
+                                    <th>المدى (الصفحات)</th>
+                                    <th class="px-4 text-center">الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% grouped[teacherName].forEach(a => { %>
+                                    <tr>
+                                        <td class="px-4 fw-bold"><%= a.book_title %></td>
+                                        <td>
+                                            <span class="badge bg-primary-subtle text-primary border rounded-pill px-3">
+                                                <%= a.class_name || 'غير محدد' %>
+                                            </span>
+                                        </td>
+                                        <td><span class="badge bg-light text-dark border rounded-pill"><%= a.session_name %></span></td>
+                                        <td>
+                                            <small class="text-muted">من <%= a.start_page %> إلى <%= a.end_page %></small>
+                                        </td>
+                                        <td class="px-4 text-center">
+                                            <button class="btn btn-sm btn-primary rounded-pill px-3" 
+                                                    onclick="openEditModal(<%= JSON.stringify(a) %>)">
+                                                تعديل
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger rounded-pill px-3 ms-1" 
+                                                    onclick="deleteAssignment(<%= a.id %>)">
+                                                إلغاء
+                                            </button>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        <% }) %>
+    </div>
+</div>
+
+<!-- Edit Assignment Modal -->
+<div class="modal fade" id="editAssignmentModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <div class="modal-header bg-primary text-white rounded-top-4">
+                <h5 class="modal-title">تعديل مدى الصفحات</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="editAssignmentForm">
+                    <input type="hidden" id="editAssignmentId">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">الكتاب: <span id="displayBookTitle" class="text-primary"></span></label>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-bold">من صفحة</label>
+                            <input type="number" id="editStartPage" class="form-control" required>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-bold">إلى صفحة</label>
+                            <input type="number" id="editEndPage" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">الصف (Saf)</label>
+                        <select id="editClassId" class="form-select" required>
+                            <% classes.forEach(c => { %>
+                                <option value="<%= c.id %>"><%= c.name %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">الفصل الدراسي</label>
+                        <select id="editSessionId" class="form-select" required>
+                            <% sessions.forEach(s => { %>
+                                <option value="<%= s.id %>"><%= s.name %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary rounded-pill py-2">حفظ التغييرات</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let editModal;
+document.addEventListener('DOMContentLoaded', () => {
+    editModal = new bootstrap.Modal(document.getElementById('editAssignmentModal'));
+});
+
+function openEditModal(a) {
+    document.getElementById('editAssignmentId').value = a.id;
+    document.getElementById('displayBookTitle').innerText = a.book_title;
+    document.getElementById('editStartPage').value = a.start_page;
+    document.getElementById('editEndPage').value = a.end_page;
+    document.getElementById('editClassId').value = a.class_id;
+    document.getElementById('editSessionId').value = a.session_id;
+    editModal.show();
+}
+
+document.getElementById('editAssignmentForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('editAssignmentId').value;
+    const startPage = document.getElementById('editStartPage').value;
+    const endPage = document.getElementById('editEndPage').value;
+    const classId = document.getElementById('editClassId').value;
+    const sessionId = document.getElementById('editSessionId').value;
+
+    const res = await fetch(`/teacher-books/edit/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ startPage, endPage, classId, sessionId })
+    });
+    if ((await res.json()).success) location.reload();
+});
+
+async function deleteAssignment(id) {
+    if (!confirm('هل أنت متأكد من إلغاء هذا الإسناد؟')) return;
+    const res = await fetch(`/teacher-books/delete/${id}`, { method: 'POST' });
+    if ((await res.json()).success) location.reload();
+}
+</script>
+
+<%- include('partials/footer') %>

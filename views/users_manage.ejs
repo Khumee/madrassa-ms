@@ -1,0 +1,177 @@
+<%- include('partials/header') %>
+
+<div class="row mb-5 align-items-center">
+    <div class="col-md-6">
+        <h1 class="fw-bold text-primary">إدارة المستخدمين والأدوار</h1>
+        <p class="text-muted">تحكم في الأسماء، الحسابات، والصلاحيات</p>
+    </div>
+    <div class="col-md-6 text-start">
+        <div class="btn-group rounded-pill shadow-sm bg-white p-1">
+            <button class="btn btn-primary rounded-pill px-4 filter-btn active" onclick="filterUsers('all', this)">الكل</button>
+            <button class="btn btn-outline-primary rounded-pill px-4 filter-btn" onclick="filterUsers('أستاذ', this)">المعلمون</button>
+            <button class="btn btn-outline-primary rounded-pill px-4 filter-btn" onclick="filterUsers('طالب_علم', this)">الطلاب</button>
+            <button class="btn btn-outline-primary rounded-pill px-4 filter-btn" onclick="filterUsers('ناظم', this)">الإدارة</button>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 text-end">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-4">رقم التعريف</th>
+                                <th>الاسم الكامل</th>
+                                <th>اسم المستخدم</th>
+                                <th>الدور</th>
+                                <th class="px-4 text-center">الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody">
+                            <% users.forEach(user => { %>
+                                <tr class="user-row" data-role="<%= user.role %>">
+                                    <td class="px-4">
+                                        <span class="badge bg-light text-muted border rounded-pill px-3">
+                                            <%= user.teacher_id || user.student_id || 'ADMIN' %>
+                                        </span>
+                                    </td>
+                                    <td class="fw-bold"><%= user.full_name || 'Admin' %></td>
+                                    <td><code class="bg-light px-2 py-1 rounded text-primary"><%= user.username %></code></td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border rounded-pill px-3">
+                                            <%= (user.role || '').replace(/_/g, ' ') %>
+                                        </span>
+                                    </td>
+                                    <td class="px-4 text-center">
+                                        <button class="btn btn-sm btn-primary rounded-pill px-3" 
+                                                onclick="openEditModal(<%= JSON.stringify(user) %>)">
+                                            تعديل
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-warning rounded-pill px-3 ms-2" 
+                                                onclick="resetPassword(<%= user.id %>)">
+                                            إعادة تعيين
+                                        </button>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="editUserModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <div class="modal-header bg-primary text-white rounded-top-4">
+                <h5 class="modal-title">تعديل بيانات المستخدم</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="editUserForm">
+                    <input type="hidden" id="editUserId">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">الاسم الكامل</label>
+                        <input type="text" id="editFullName" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">اسم المستخدم (Username)</label>
+                        <input type="text" id="editUsername" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">الدور (Role)</label>
+                        <select id="editRole" class="form-select" required>
+                            <option value="طالب_علم">طالب علم</option>
+                            <option value="مسؤول_الصف">مسؤول الصف</option>
+                            <option value="أستاذ">أستاذ</option>
+                            <option value="ناظم">ناظم</option>
+                            <option value="مدير">مدير</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">كلمة مرور جديدة (اتركه فارغاً للحفاظ على الحالية)</label>
+                        <input type="password" id="editPassword" class="form-control" placeholder="********">
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary rounded-pill py-2">حفظ التغييرات</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let editModal;
+document.addEventListener('DOMContentLoaded', () => {
+    editModal = new bootstrap.Modal(document.getElementById('editUserModal'));
+});
+
+function filterUsers(role, btn) {
+    const rows = document.querySelectorAll('.user-row');
+    rows.forEach(row => {
+        if (role === 'all' || row.getAttribute('data-role') === role) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+
+    // Update active button state
+    document.querySelectorAll('.filter-btn').forEach(b => {
+        b.classList.remove('btn-primary', 'active');
+        b.classList.add('btn-outline-primary');
+    });
+    btn.classList.remove('btn-outline-primary');
+    btn.classList.add('btn-primary', 'active');
+}
+
+function openEditModal(user) {
+    document.getElementById('editUserId').value = user.id;
+    document.getElementById('editFullName').value = user.full_name || '';
+    document.getElementById('editUsername').value = user.username;
+    document.getElementById('editRole').value = user.role;
+    document.getElementById('editPassword').value = '';
+    editModal.show();
+}
+
+document.getElementById('editUserForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const userId = document.getElementById('editUserId').value;
+    const fullName = document.getElementById('editFullName').value;
+    const username = document.getElementById('editUsername').value;
+    const role = document.getElementById('editRole').value;
+    const password = document.getElementById('editPassword').value;
+
+    const res = await fetch('/users/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, fullName, username, role, password })
+    });
+    
+    const data = await res.json();
+    if (data.success) {
+        location.reload();
+    } else {
+        alert('فشل التحديث: ' + (data.error || 'خطأ غير معروف'));
+    }
+});
+
+async function resetPassword(userId) {
+    if (!confirm('هل أنت متأكد من إعادة تعيين كلمة المرور إلى 1234؟')) return;
+    const res = await fetch('/users/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId })
+    });
+    if ((await res.json()).success) alert('تمت إعادة التعيين بنجاح');
+}
+</script>
+
+<%- include('partials/footer') %>

@@ -1,40 +1,44 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إضافة طالب جديد</title>
-    <link rel="stylesheet" href="/css/style.css">
-</head>
-<body>
-    <nav>
-        <div class="logo">كليّة العلوم الإسلامية</div>
-        <a href="/" class="btn btn-primary">الرئيسية</a>
-    </nav>
+<%- include('partials/header') %>
 
-    <div class="container">
-        <div class="card">
-            <h1>إضافة طالب جديد</h1>
-            <form action="/students/add" method="POST">
-                <div style="margin-bottom: 15px;">
-                    <label>اسم الطالب</label>
-                    <input type="text" name="name" class="btn" style="width: 100%; text-align: right; background: #f9f9f9; border: 1px solid #ddd; color: #333;" required>
-                </div>
-                <div style="margin-bottom: 15px;">
-                    <label>الفصل</label>
-                    <select name="classId" class="btn" style="width: 100%; text-align: right; background: #f9f9f9; border: 1px solid #ddd; color: #333;" required>
-                        <% classes.forEach(cls => { %>
-                            <option value="<%= cls.id %>"><%= cls.name_ar %></option>
-                        <% }) %>
-                    </select>
-                </div>
-                <div style="margin-bottom: 25px;">
-                    <label>رقم القيد</label>
-                    <input type="text" name="rollNumber" class="btn" style="width: 100%; text-align: right; background: #f9f9f9; border: 1px solid #ddd; color: #333;">
-                </div>
-                <button type="submit" class="btn btn-secondary" style="width: 100%;">إضافة</button>
-            </form>
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-primary text-white p-4 rounded-top-4">
+                <h2 class="fw-bold mb-0">إضافة طالب جديد</h2>
+            </div>
+            <div class="card-body p-4">
+                <form action="/students/add" method="POST">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">اسم الطالب الكامل</label>
+                        <input type="text" name="name" class="form-control form-control-lg rounded-3" 
+                               placeholder="مثال: محمد عبد الله" required>
+                        <div class="form-text">سيتم إنشاء حساب مستخدم تلقائياً لهذا الطالب.</div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">الفصل</label>
+                        <select name="classId" class="form-select form-select-lg rounded-3" required>
+                            <option value="">اختر الفصل...</option>
+                            <% classes.forEach(cls => { %>
+                                <option value="<%= cls.id %>"><%= cls.name_ar %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+
+                    <div class="alert alert-info border-0 rounded-3">
+                        <i class="bi bi-info-circle me-2"></i>
+                        سيتم توليد <strong>رقم القيد</strong> تلقائياً بعد الحفظ.
+                    </div>
+
+                    <div class="d-grid mt-5">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill py-3 fw-bold">
+                            حفظ البيانات
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</body>
-</html>
+</div>
+
+<%- include('partials/footer') %>

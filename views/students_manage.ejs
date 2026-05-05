@@ -1,74 +1,117 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إدارة الطلاب</title>
-    <link rel="stylesheet" href="/css/style.css">
-</head>
-<body>
-    <nav>
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <img src="/logo.jpg" alt="Logo" style="height: 40px; border-radius: 5px;">
-            <div class="logo">كليّة العلوم الإسلامية</div>
-        </div>
-        <a href="/" class="btn btn-primary">الرئيسية</a>
-    </nav>
+<%- include('partials/header') %>
 
-    <div class="container">
-        <div class="card" style="max-width: 1000px;">
-            <h1>إدارة الطلاب</h1>
-            <p>تعديل بيانات الطلاب المسجلين</p>
+<div class="row mb-5">
+    <div class="col-md-12">
+        <h1 class="fw-bold text-primary">إدارة الطلاب</h1>
+        <p class="text-muted">تعديل بيانات الطلاب وإدارة الفصول</p>
+    </div>
+</div>
 
-            <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-                <thead>
-                    <tr style="background: #f4f4f4;">
-                        <th style="padding: 10px;">الاسم</th>
-                        <th style="padding: 10px;">الفصل</th>
-                        <th style="padding: 10px;">رقم القيد</th>
-                        <th style="padding: 10px;">إجراء</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% students.forEach(student => { %>
-                        <tr style="border-bottom: 1px solid #ddd;">
-                            <td colspan="4" style="padding: 0;">
-                                <form action="/students/edit/<%= student.id %>" method="POST" style="display: flex; width: 100%; align-items: center; padding: 10px; gap: 10px;">
-                                    <div style="flex: 2;">
-                                        <input type="text" name="name" value="<%= student.name %>" class="btn" style="width: 100%; background: #f9f9f9; text-align: center; border: 1px solid #eee;" required>
-                                    </div>
-                                    <div style="flex: 1;">
-                                        <select name="classId" class="btn" style="width: 100%; background: #f9f9f9; border: 1px solid #eee; text-align: center;">
-                                            <% classes.forEach(cls => { %>
-                                                <option value="<%= cls.id %>" <%= student.class_id === cls.id ? 'selected' : '' %>><%= cls.name_ar %></option>
-                                            <% }) %>
-                                        </select>
-                                    </div>
-                                    <div style="flex: 1;">
-                                        <input type="text" name="rollNumber" value="<%= student.roll_number %>" class="btn" style="width: 100%; background: #f9f9f9; text-align: center; border: 1px solid #eee;">
-                                    </div>
-                                    <div>
-                                        <button type="submit" class="btn btn-secondary">تعديل</button>
-                                        <button type="button" class="btn btn-danger" onclick="showConfirm('هل أنت متأكد من حذف هذا الطالب؟', () => window.location.href='/students/delete/<%= student.id %>')" style="padding: 10px 15px;">حذف</a>
-                                    </div>
-                                </form>
-                            </td>
-                        </tr>
-                    <% }) %>
-                </tbody>
-            </table>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 text-end">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-4">رقم القيد (Roll No)</th>
+                                <th>الاسم الكامل</th>
+                                <th>الفصل الحالي</th>
+                                <th class="px-4 text-center">الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% students.forEach(student => { %>
+                                <tr>
+                                    <td class="px-4">
+                                        <span class="badge bg-light text-primary border rounded-pill px-3">
+                                            <%= student.roll_number %>
+                                        </span>
+                                    </td>
+                                    <td class="fw-bold"><%= student.name %></td>
+                                    <td>
+                                        <span class="badge bg-info text-white rounded-pill px-3">
+                                            <%= student.class_name %>
+                                        </span>
+                                    </td>
+                                    <td class="px-4 text-center">
+                                        <button class="btn btn-sm btn-primary rounded-pill px-3" 
+                                                onclick="openEditModal(<%= JSON.stringify(student) %>, <%= JSON.stringify(classes) %>)">
+                                            تعديل
+                                        </button>
+                                        <a href="/students/delete/<%= student.id %>" 
+                                           class="btn btn-sm btn-outline-danger rounded-pill px-3 ms-2"
+                                           onclick="return confirm('هل أنت متأكد من حذف هذا الطالب؟')">
+                                            حذف
+                                        </a>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
-    <script src="/js/main.js"></script>
-    <script>
-        window.onload = () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('success')) {
-                showToast('تم تحديث البيانات بنجاح', 'success');
-                // Clean URL
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
-        };
-    </script>
-</body>
-</html>
+</div>
+
+<!-- Edit Student Modal -->
+<div class="modal fade" id="editStudentModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <div class="modal-header bg-primary text-white rounded-top-4">
+                <h5 class="modal-title">تعديل بيانات الطالب</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form action="" id="editStudentForm" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">رقم القيد (غير قابل للتعديل)</label>
+                        <input type="text" id="editRollNumber" class="form-control bg-light" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">الاسم الكامل</label>
+                        <input type="text" name="name" id="editName" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">الفصل</label>
+                        <select name="classId" id="editClassId" class="form-select" required>
+                            <!-- Classes will be injected by JS -->
+                        </select>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary rounded-pill py-2">حفظ التغييرات</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let editModal;
+document.addEventListener('DOMContentLoaded', () => {
+    editModal = new bootstrap.Modal(document.getElementById('editStudentModal'));
+});
+
+function openEditModal(student, classes) {
+    document.getElementById('editStudentForm').action = `/students/edit/${student.id}`;
+    document.getElementById('editRollNumber').value = student.roll_number;
+    document.getElementById('editName').value = student.name;
+    
+    const classSelect = document.getElementById('editClassId');
+    classSelect.innerHTML = '';
+    classes.forEach(cls => {
+        const opt = document.createElement('option');
+        opt.value = cls.id;
+        opt.text = cls.name_ar;
+        opt.selected = (cls.id === student.class_id);
+        classSelect.appendChild(opt);
+    });
+    
+    editModal.show();
+}
+</script>
+
+<%- include('partials/footer') %>

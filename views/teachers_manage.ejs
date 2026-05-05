@@ -1,66 +1,103 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إدارة المعلمين</title>
-    <link rel="stylesheet" href="/css/style.css">
-</head>
-<body>
-    <nav>
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <img src="/logo.jpg" alt="Logo" style="height: 40px; border-radius: 5px;">
-            <div class="logo">كليّة العلوم الإسلامية</div>
-        </div>
-        <a href="/" class="btn btn-primary">الرئيسية</a>
-    </nav>
+<%- include('partials/header') %>
 
-    <div class="container">
-        <div class="card" style="max-width: 1000px;">
-            <h1>إدارة المعلمين</h1>
-            <p>تعديل بيانات المعلمين</p>
+<div class="row mb-5">
+    <div class="col-md-12">
+        <h1 class="fw-bold text-primary">إدارة المعلمين</h1>
+        <p class="text-muted">تعديل بيانات المعلمين وإدارة الملفات الشخصية</p>
+    </div>
+</div>
 
-            <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-                <thead>
-                    <tr style="background: var(--primary); color: white;">
-                        <th style="padding: 10px;">الاسم</th>
-                        <th style="padding: 10px;">المادة / التخصص</th>
-                        <th style="padding: 10px;">إجراءات</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% teachers.forEach(teacher => { %>
-                        <tr style="border-bottom: 1px solid #ddd;">
-                            <td colspan="3" style="padding: 0;">
-                                <form action="/teachers/edit/<%= teacher.id %>" method="POST" style="display: flex; width: 100%; align-items: center; padding: 10px; gap: 10px;">
-                                    <div style="flex: 2;">
-                                        <input type="text" name="name" value="<%= teacher.name %>" class="btn" style="width: 100%; background: #f9f9f9; text-align: center; border: 1px solid #eee;" required>
-                                    </div>
-                                    <div style="flex: 2;">
-                                        <input type="text" name="subject" value="<%= teacher.subject %>" class="btn" style="width: 100%; background: #f9f9f9; text-align: center; border: 1px solid #eee;">
-                                    </div>
-                                    <div>
-                                        <button type="submit" class="btn btn-secondary">تعديل</button>
-                                        <a href="/teachers/delete/<%= teacher.id %>" class="btn btn-danger" onclick="return confirm('هل أنت متأكد؟')" style="padding: 10px 15px;">حذف</a>
-                                    </div>
-                                </form>
-                            </td>
-                        </tr>
-                    <% }) %>
-                </tbody>
-            </table>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 text-end">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-4">رقم الهوية (Teacher ID)</th>
+                                <th>اسم المعلم</th>
+                                <th>المادة / التخصص</th>
+                                <th class="px-4 text-center">الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% teachers.forEach(teacher => { %>
+                                <tr>
+                                    <td class="px-4">
+                                        <code class="bg-light text-success border rounded px-3 py-1">
+                                            <%= teacher.id_number %>
+                                        </code>
+                                    </td>
+                                    <td class="fw-bold"><%= teacher.name %></td>
+                                    <td>
+                                        <span class="text-muted"><%= teacher.subject || 'غير محدد' %></span>
+                                    </td>
+                                    <td class="px-4 text-center">
+                                        <button class="btn btn-sm btn-primary rounded-pill px-3" 
+                                                onclick="openEditModal(<%= JSON.stringify(teacher) %>)">
+                                            تعديل
+                                        </button>
+                                        <a href="/teachers/delete/<%= teacher.id %>" 
+                                           class="btn btn-sm btn-outline-danger rounded-pill px-3 ms-2"
+                                           onclick="return confirm('هل أنت متأكد من حذف هذا المعلم؟')">
+                                            حذف
+                                        </a>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
-    <script src="/js/main.js"></script>
-    <script>
-        window.onload = () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('success')) {
-                showToast('تم تحديث البيانات بنجاح', 'success');
-                // Clean URL
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
-        };
-    </script>
-</body>
-</html>
+</div>
+
+<!-- Edit Teacher Modal -->
+<div class="modal fade" id="editTeacherModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <div class="modal-header bg-primary text-white rounded-top-4">
+                <h5 class="modal-title">تعديل بيانات المعلم</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form action="" id="editTeacherForm" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">رقم الهوية (غير قابل للتعديل)</label>
+                        <input type="text" id="editIdNumber" class="form-control bg-light" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">اسم المعلم الكامل</label>
+                        <input type="text" name="name" id="editTeacherName" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">المادة / التخصص</label>
+                        <input type="text" name="subject" id="editSubject" class="form-control">
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary rounded-pill py-2">حفظ التغييرات</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let editTeacherModal;
+document.addEventListener('DOMContentLoaded', () => {
+    editTeacherModal = new bootstrap.Modal(document.getElementById('editTeacherModal'));
+});
+
+function openEditModal(teacher) {
+    document.getElementById('editTeacherForm').action = `/teachers/edit/${teacher.id}`;
+    document.getElementById('editIdNumber').value = teacher.id_number;
+    document.getElementById('editTeacherName').value = teacher.name;
+    document.getElementById('editSubject').value = teacher.subject || '';
+    editTeacherModal.show();
+}
+</script>
+
+<%- include('partials/footer') %>

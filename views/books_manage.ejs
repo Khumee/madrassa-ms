@@ -1,0 +1,137 @@
+<%- include('partials/header') %>
+
+<div class="row mb-5 align-items-center">
+    <div class="col-md-8">
+        <h1 class="fw-bold text-primary">إدارة الكتب</h1>
+        <p class="text-muted">إضافة وتعديل قائمة الكتب المتاحة في الكلية</p>
+    </div>
+    <div class="col-md-4 text-start">
+        <a href="/" class="btn btn-outline-primary rounded-pill px-4">
+            <i class="bi bi-house-door me-2"></i>الرجوع للوحة التحكم
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-primary text-white rounded-top-4 p-3">
+                <h5 class="mb-0">إضافة كتاب جديد</h5>
+            </div>
+            <div class="card-body p-4">
+                <form action="/books/add" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">اسم الكتاب</label>
+                        <input type="text" name="title" class="form-control" required placeholder="مثال: البخاري">
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary rounded-pill py-2 fw-bold">حفظ الكتاب</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 text-end">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-4">#</th>
+                                <th>اسم الكتاب</th>
+                                <th class="px-4 text-center">الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% books.forEach((book, index) => { %>
+                                <tr>
+                                    <td class="px-4 text-muted"><%= index + 1 %></td>
+                                    <td class="fw-bold"><%= book.title %></td>
+                                    <td class="px-4 text-center">
+                                        <button class="btn btn-sm btn-primary rounded-pill px-3" 
+                                                onclick="openEditModal(<%= JSON.stringify(book) %>)">
+                                            تعديل
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger rounded-pill px-3 ms-1" 
+                                                onclick="deleteBook(<%= book.id %>)">
+                                            حذف
+                                        </button>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Book Modal -->
+<div class="modal fade" id="editBookModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <div class="modal-header bg-primary text-white rounded-top-4">
+                <h5 class="modal-title">تعديل اسم الكتاب</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="editBookForm">
+                    <input type="hidden" id="editBookId">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">اسم الكتاب</label>
+                        <input type="text" id="editBookTitle" class="form-control" required>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary rounded-pill py-2">حفظ التغييرات</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let editBookModal;
+document.addEventListener('DOMContentLoaded', () => {
+    editBookModal = new bootstrap.Modal(document.getElementById('editBookModal'));
+});
+
+function openEditModal(book) {
+    document.getElementById('editBookId').value = book.id;
+    document.getElementById('editBookTitle').value = book.title;
+    editBookModal.show();
+}
+
+document.getElementById('editBookForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('editBookId').value;
+    const title = document.getElementById('editBookTitle').value;
+
+    const res = await fetch(`/books/edit/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title })
+    });
+    const data = await res.json();
+    if (data.success) {
+        location.reload();
+    } else {
+        alert('فشل التعديل: ' + data.error);
+    }
+});
+
+async function deleteBook(id) {
+    if (!confirm('هل أنت متأكد من حذف هذا الكتاب؟ سيؤدي ذلك لحذفه من جميع التوزيعات.')) return;
+    const res = await fetch(`/books/delete/${id}`, { method: 'POST' });
+    const data = await res.json();
+    if (data.success) {
+        location.reload();
+    } else {
+        alert('فشل الحذف: ' + data.error);
+    }
+}
+</script>
+
+<%- include('partials/footer') %>

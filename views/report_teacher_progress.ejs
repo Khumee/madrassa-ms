@@ -1,0 +1,127 @@
+<%- include('partials/header') %>
+
+<div class="row mb-5">
+    <div class="col-md-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/reports">التقارير</a></li>
+                <li class="breadcrumb-item active">تقرير المعلم</li>
+            </ol>
+        </nav>
+        <h1 class="fw-bold text-primary">تقرير تقدم المعلم: <%= teacher.name %></h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-5">
+                <div style="height: 400px;">
+                    <canvas id="progressChart"></canvas>
+                </div>
+                
+                <hr class="my-5">
+                
+                <h4 class="fw-bold mb-4">السجل التاريخي للإنجاز</h4>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle text-end">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-4">التاريخ</th>
+                                <th>الكتاب</th>
+                                <th>الصفحة الحالية</th>
+                                <th>المدى المقرر</th>
+                                <th class="px-4 text-center">النسبة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% progress.forEach(row => { 
+                                const total = row.end_page - row.start_page;
+                                const completed = row.page_number - row.start_page;
+                                const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+                            %>
+                                <tr>
+                                    <td class="px-4 text-muted"><%= row.date.toISOString().split('T')[0] %></td>
+                                    <td class="fw-bold"><%= row.book_title %></td>
+                                    <td><span class="badge bg-light text-primary border px-3"><%= row.page_number %></span></td>
+                                    <td><small class="text-muted">من <%= row.start_page %> إلى <%= row.end_page %></small></td>
+                                    <td class="px-4 text-center">
+                                        <div class="d-flex align-items-center justify-content-center gap-2">
+                                            <div class="progress flex-grow-1" style="height: 6px; width: 80px;">
+                                                <div class="progress-bar bg-success" role="progressbar" style="width: <%= percentage %>%"></div>
+                                            </div>
+                                            <span class="small fw-bold"><%= percentage %>%</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('progressChart').getContext('2d');
+const rawData = <%- JSON.stringify(progress) %>;
+
+// Group data by book
+const booksData = {};
+rawData.forEach(d => {
+    if (!booksData[d.book_title]) booksData[d.book_title] = [];
+    booksData[d.book_title].push({ 
+        x: d.date.split('T')[0], 
+        y: d.page_number 
+    });
+});
+
+const datasets = Object.keys(booksData).map((title, index) => {
+    const colors = ['#0d6efd', '#198754', '#dc3545', '#ffc107', '#0dcaf0', '#6610f2', '#6f42c1', '#d63384'];
+    return {
+        label: title,
+        data: booksData[title],
+        borderColor: colors[index % colors.length],
+        backgroundColor: colors[index % colors.length] + '22',
+        tension: 0.3,
+        fill: true,
+        pointRadius: 4,
+        pointHoverRadius: 6
+    };
+});
+
+new Chart(ctx, {
+    type: 'line',
+    data: { datasets },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'top',
+                rtl: true,
+                labels: { font: { family: 'inherit', size: 14 } }
+            },
+            tooltip: {
+                rtl: true,
+                bodyFont: { family: 'inherit' },
+                titleFont: { family: 'inherit' }
+            }
+        },
+        scales: {
+            x: {
+                grid: { display: false },
+                title: { display: true, text: 'التاريخ' }
+            },
+            y: {
+                beginAtZero: false,
+                title: { display: true, text: 'رقم الصفحة' }
+            }
+        }
+    }
+});
+</script>
+
+<%- include('partials/footer') %>

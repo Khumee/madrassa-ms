@@ -1,0 +1,115 @@
+<%- include('partials/header') %>
+
+<div class="row mb-5">
+    <div class="col-md-12">
+        <h1 class="fw-bold text-primary">أهلاً، <%= teacher.name %></h1>
+        <p class="text-muted"><%= today %></p>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Today's Schedule -->
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm border-0 rounded-4 h-100">
+            <div class="card-header bg-white p-4 border-0">
+                <h4 class="fw-bold mb-0 text-primary"><i class="bi bi-calendar-check me-2"></i>حصص اليوم</h4>
+            </div>
+            <div class="card-body p-4 pt-0">
+                <% if (periods.length > 0) { %>
+                    <div class="list-group list-group-flush">
+                        <% periods.forEach(p => { %>
+                            <div class="list-group-item px-0 py-3 border-bottom">
+                                <h6 class="fw-bold mb-1"><%= p.subject %></h6>
+                                <div class="d-flex justify-content-between text-muted small">
+                                    <span><%= p.class_name %></span>
+                                    <span><%= p.start_time %> - <%= p.end_time %></span>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-clock-history fs-1 mb-3 d-block"></i>
+                        لا توجد حصص مجدولة اليوم.
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assigned Books Progress -->
+    <div class="col-md-8 mb-4">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-white p-4 border-0">
+                <h4 class="fw-bold mb-0 text-success"><i class="bi bi-book-half me-2"></i>تقدم الكتب المقررة</h4>
+            </div>
+            <div class="card-body p-4 pt-0">
+                <% if (assignedBooks.length > 0) { %>
+                    <div class="row g-4">
+                        <% assignedBooks.forEach(b => { 
+                            const total = b.end_page - b.start_page;
+                            const completed = b.current_page - b.start_page;
+                            const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+                        %>
+                            <div class="col-md-6">
+                                <div class="p-4 border rounded-4 bg-light shadow-sm">
+                                    <h5 class="fw-bold text-dark mb-3"><%= b.book_title %></h5>
+                                    
+                                    <div class="d-flex justify-content-between mb-2 small text-muted">
+                                        <span>الهدف: <%= b.end_page %></span>
+                                        <span class="fw-bold text-success"><%= percentage %>%</span>
+                                    </div>
+                                    <div class="progress mb-4" style="height: 10px; border-radius: 5px;">
+                                        <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" 
+                                             role="progressbar" 
+                                             style="width: <%= percentage %>%"></div>
+                                    </div>
+
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white border-end-0">ص</span>
+                                        <input type="number" id="page_<%= b.id %>" 
+                                               class="form-control border-start-0" 
+                                               value="<%= b.current_page %>" 
+                                               placeholder="الصفحة الحالية">
+                                        <button class="btn btn-success px-4" 
+                                                onclick="updateProgress(<%= b.id %>)">تحديث</button>
+                                    </div>
+                                    <div class="mt-2 text-center">
+                                        <small class="text-muted">آخر تحديث: صفحة <%= b.current_page %></small>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-journal-x fs-1 mb-3 d-block"></i>
+                        لم يتم تعيين كتب لك في هذا الفصل الدراسي.
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function updateProgress(assignmentId) {
+    const pageNumber = document.getElementById(`page_${assignmentId}`).value;
+    if (!pageNumber) return alert('يرجى إدخال رقم الصفحة');
+    
+    const res = await fetch('/book/update-progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assignmentId, pageNumber })
+    });
+    const data = await res.json();
+    if (data.success) {
+        alert('تم تحديث التقدم بنجاح');
+        location.reload();
+    } else {
+        alert('فشل تحديث التقدم');
+    }
+}
+</script>
+
+<%- include('partials/footer') %>

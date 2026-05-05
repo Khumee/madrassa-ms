@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>كليّة العلوم الإسلامية</title>
+    <link rel="icon" href="/logo.jpg">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #ecf0f1;
+            --accent: #27ae60;
+        }
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .btn-primary { background-color: var(--primary); border: none; }
+        .btn-success { background-color: var(--accent); border: none; }
+        nav {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        .logo { font-size: 1.5rem; fw-bold; color: var(--primary); }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="d-flex align-items-center gap-2">
+            <img src="/logo.jpg" alt="Logo" style="height: 40px; border-radius: 5px;">
+            <a href="/" class="logo text-decoration-none">كليّة العلوم الإسلامية</a>
+        </div>
+        <div>
+            <a href="/logout" class="btn btn-outline-danger rounded-pill">خروج</a>
+        </div>
+    </nav>
+    <div class="container pb-5">

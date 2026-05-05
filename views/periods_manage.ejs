@@ -1,0 +1,91 @@
+<%- include('partials/header') %>
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <h4 class="fw-bold mb-4">إضافة حصة جديدة</h4>
+                    <form action="/periods/add" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">الأستاذ</label>
+                            <select name="teacherId" class="form-select" required>
+                                <% teachers.forEach(t => { %>
+                                    <option value="<%= t.id %>"><%= t.name %></option>
+                                <% }) %>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">الفصل</label>
+                            <select name="classId" class="form-select" required>
+                                <% classes.forEach(c => { %>
+                                    <option value="<%= c.id %>"><%= c.name_ar %></option>
+                                <% }) %>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">اليوم</label>
+                            <select name="dayOfWeek" class="form-select" required>
+                                <option value="Monday">الاثنين</option>
+                                <option value="Tuesday">الثلاثاء</option>
+                                <option value="Wednesday">الأربعاء</option>
+                                <option value="Thursday">الخميس</option>
+                                <option value="Friday">الجمعة</option>
+                                <option value="Saturday">السبت</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">المادة</label>
+                            <input type="text" name="subject" class="form-control" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label">من</label>
+                                <input type="time" name="startTime" class="form-control" required>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label">إلى</label>
+                                <input type="time" name="endTime" class="form-control" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">إضافة</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4">
+                    <h4 class="fw-bold mb-4">الجدول الدراسي</h4>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>اليوم</th>
+                                    <th>الأستاذ</th>
+                                    <th>الفصل</th>
+                                    <th>المادة</th>
+                                    <th>الوقت</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% periods.forEach(p => { %>
+                                    <tr>
+                                        <td><%= p.day_of_week %></td>
+                                        <td><%= p.teacher_name %></td>
+                                        <td><%= p.class_name %></td>
+                                        <td><%= p.subject %></td>
+                                        <td><%= p.start_time %> - <%= p.end_time %></td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

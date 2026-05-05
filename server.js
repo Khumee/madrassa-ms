@@ -31,6 +31,14 @@ const isAuthenticated = (req, res, next) => {
     res.redirect('/login');
 };
 
+const hasRole = (roles) => {
+    return (req, res, next) => {
+        if (!req.session.userId) return res.redirect('/login');
+        if (roles.includes(req.session.role)) return next();
+        res.status(403).send('Unauthorized');
+    };
+};
+
 // Routes
 app.get('/login', (req, res) => {
     res.render('login', { error: null });
@@ -46,6 +54,13 @@ app.post('/login', async (req, res) => {
             if (match) {
                 req.session.userId = user.id;
                 req.session.role = user.role;
+                
+                // Unified Redirection
+                if (user.role === 'طالب_علم') return res.redirect('/dashboard/student');
+                if (user.role === 'مسؤول_الصف') return res.redirect('/dashboard/cr');
+                if (user.role === 'أستاذ') return res.redirect('/dashboard/teacher');
+                if (user.role === 'ناظم' || user.role === 'مدير') return res.redirect('/');
+                
                 return res.redirect('/');
             }
         }
@@ -61,20 +76,122 @@ app.get('/logout', (req, res) => {
     res.redirect('/login');
 });
 
+app.get('/profile/change-password', isAuthenticated, (req, res) => {
+    res.render('change_password', { error: null, success: null });
+});
+
+app.post('/profile/change-password', isAuthenticated, async (req, res) => {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+    try {
+        const [user] = await db.execute('SELECT password FROM users WHERE id = ?', [req.session.userId]);
+        const match = await bcrypt.compare(currentPassword, user[0].password);
+        if (!match) return res.render('change_password', { error: 'Current password incorrect', success: null });
+        if (newPassword !== confirmPassword) return res.render('change_password', { error: 'Passwords do not match', success: null });
+        
+        const hashed = await bcrypt.hash(newPassword, 10);
+        await db.execute('UPDATE users SET password = ? WHERE id = ?', [hashed, req.session.userId]);
+        res.render('change_password', { error: null, success: 'Password updated successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error updating password');
+    }
+});
+
 // Dashboard
 app.get('/', isAuthenticated, async (req, res) => {
     try {
-        const [allClasses] = await db.execute('SELECT * FROM classes');
-        // Hide specific classes by their Arabic names
-        const hiddenNames = ['الأولى', 'الثالثة', 'الرابعة', 'السابعة'];
-        const classes = allClasses.filter(c => !hiddenNames.includes(c.name_ar));
+        const role = req.session.role;
         
-        console.log("Active Classes Count:", classes.length);
-        const today = DateTime.now().toISODate();
-        res.render('dashboard', { classes, today });
+        if (role === 'طالب_علم') {
+            return res.redirect('/dashboard/student');
+        } else if (role === 'مسؤول_الصف') {
+            return res.redirect('/dashboard/cr');
+        } else if (role === 'أستاذ') {
+            return res.redirect('/dashboard/teacher');
+        } else if (role === 'ناظم' || role === 'مدير') {
+            const [allClasses] = await db.execute('SELECT * FROM classes');
+            const hiddenNames = ['الأولى', 'الثالثة', 'الرابعة', 'السابعة'];
+            const classes = allClasses.filter(c => !hiddenNames.includes(c.name_ar));
+            const today = DateTime.now().setLocale('ar').toFormat('cccc, dd MMMM yyyy');
+            return res.render('dashboard', { classes, today });
+        }
+        
+        res.redirect('/logout');
     } catch (err) {
         console.error(err);
         res.status(500).send('Error loading dashboard');
+    }
+});
+
+// Role-Specific Dashboards
+app.get('/dashboard/student', hasRole(['طالب_علم']), async (req, res) => {
+    try {
+        const [student] = await db.execute('SELECT * FROM students WHERE user_id = ?', [req.session.userId]);
+        if (!student[0]) return res.status(404).send('Student record not found');
+        
+        const [attendance] = await db.execute(
+            'SELECT * FROM attendance_students WHERE student_id = ? ORDER BY date DESC LIMIT 30',
+            [student[0].id]
+        );
+        res.render('dashboard_student', { student: student[0], attendance });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
+});
+
+app.get('/dashboard/cr', hasRole(['مسؤول_الصف']), async (req, res) => {
+    // CR can see class attendance
+    try {
+        const [student] = await db.execute('SELECT * FROM students WHERE user_id = ?', [req.session.userId]);
+        if (!student[0]) return res.status(404).send('Record not found');
+        
+        const classId = student[0].class_id;
+        const [students] = await db.execute(
+            'SELECT s.*, a.status FROM students s LEFT JOIN attendance_students a ON s.id = a.student_id AND a.date = CURDATE() WHERE s.class_id = ?',
+            [classId]
+        );
+        const [classInfo] = await db.execute('SELECT * FROM classes WHERE id = ?', [classId]);
+        res.render('dashboard_cr', { students, classInfo: classInfo[0] });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
+});
+
+app.get('/dashboard/teacher', hasRole(['أستاذ']), async (req, res) => {
+    try {
+        const [teacher] = await db.execute('SELECT * FROM teachers WHERE user_id = ?', [req.session.userId]);
+        if (!teacher[0]) return res.status(404).send('Teacher record not found');
+        
+        const teacherId = teacher[0].id;
+        const dayName = DateTime.now().setLocale('en').toFormat('cccc');
+        
+        const [periods] = await db.execute(
+            `SELECT p.*, c.name_ar as class_name 
+             FROM periods p 
+             JOIN classes c ON p.class_id = c.id 
+             WHERE p.teacher_id = ? AND p.day_of_week = ?`,
+            [teacherId, dayName]
+        );
+
+        const [assignedBooks] = await db.execute(`
+            SELECT tb.*, b.title as book_title
+            FROM teacher_books tb
+            JOIN books b ON tb.book_id = b.id
+            JOIN sessions s ON tb.session_id = s.id
+            WHERE tb.teacher_id = ? AND s.is_active = TRUE
+        `, [teacherId]);
+
+        res.render('dashboard_teacher', { 
+            teacher: teacher[0], 
+            periods, 
+            assignedBooks,
+            today: DateTime.now().setLocale('ar').toFormat('cccc, dd MMMM yyyy') 
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error loading teacher dashboard');
     }
 });
 
@@ -199,9 +316,9 @@ app.get('/students/manage', isAuthenticated, async (req, res) => {
 
 app.post('/students/edit/:id', isAuthenticated, async (req, res) => {
     const { id } = req.params;
-    const { name, classId, rollNumber } = req.body;
+    const { name, classId } = req.body;
     try {
-        await db.execute('UPDATE students SET name = ?, class_id = ?, roll_number = ? WHERE id = ?', [name, classId, rollNumber, id]);
+        await db.execute('UPDATE students SET name = ?, class_id = ? WHERE id = ?', [name, classId, id]);
         res.redirect('/students/manage?success=true');
     } catch (err) {
         console.error(err);
@@ -226,10 +343,29 @@ app.get('/students/add', isAuthenticated, async (req, res) => {
 });
 
 app.post('/students/add', isAuthenticated, async (req, res) => {
-    const { name, classId, rollNumber } = req.body;
+    const { name, classId } = req.body;
     try {
-        await db.execute('INSERT INTO students (name, class_id, roll_number) VALUES (?, ?, ?)', [name, classId, rollNumber]);
-        res.redirect('/');
+        // 1. Create User account first
+        const username = name.split(' ')[0] + Math.floor(Math.random() * 1000); // Temporary unique username
+        const password = await bcrypt.hash('1234', 10);
+        const [userResult] = await db.execute('INSERT INTO users (username, full_name, password, role) VALUES (?, ?, ?, ?)', [username, name, password, 'طالب_علم']);
+        const userId = userResult.insertId;
+
+        // 2. Insert Student and use the generated ID to create a Roll Number
+        const [studentResult] = await db.execute('INSERT INTO students (name, class_id, user_id) VALUES (?, ?, ?)', [name, classId, userId]);
+        const studentId = studentResult.insertId;
+        const rollNumber = 1000 + studentId;
+        
+        await db.execute('UPDATE students SET roll_number = ? WHERE id = ?', [rollNumber, studentId]);
+        
+        // 3. Update username to be the real first name (as per previous logic)
+        // (Wait, I should just use the logic from fix_usernames.js here)
+        let finalUsername = name.split(' ')[0];
+        const [existing] = await db.execute('SELECT id FROM users WHERE username = ?', [finalUsername]);
+        if (existing.length > 0) finalUsername += studentId;
+        await db.execute('UPDATE users SET username = ? WHERE id = ?', [finalUsername, userId]);
+
+        res.redirect('/students/manage');
     } catch (err) {
         console.error(err);
         res.status(500).send('Error adding student');
@@ -277,8 +413,27 @@ app.get('/teachers/add', isAuthenticated, (req, res) => {
 app.post('/teachers/add', isAuthenticated, async (req, res) => {
     const { name, subject } = req.body;
     try {
-        await db.execute('INSERT INTO teachers (name, subject) VALUES (?, ?)', [name, subject]);
-        res.redirect('/');
+        // 1. Create User account first
+        const username = name.split(' ')[0] + Math.floor(Math.random() * 1000); // Temporary unique username
+        const password = await bcrypt.hash('1234', 10);
+        const [userResult] = await db.execute('INSERT INTO users (username, full_name, password, role) VALUES (?, ?, ?, ?)', [username, name, password, 'أستاذ']);
+        const userId = userResult.insertId;
+
+        // 2. Insert Teacher and use the generated ID to create an ID Number
+        const [teacherResult] = await db.execute('INSERT INTO teachers (name, subject, user_id) VALUES (?, ?, ?)', [name, subject, userId]);
+        const teacherId = teacherResult.insertId;
+        const year = new Date().getFullYear();
+        const idNumber = `${year}-${1000 + teacherId}`;
+        
+        await db.execute('UPDATE teachers SET id_number = ? WHERE id = ?', [idNumber, teacherId]);
+        
+        // 3. Finalize Username
+        let finalUsername = name.split(' ')[0];
+        const [existing] = await db.execute('SELECT id FROM users WHERE username = ?', [finalUsername]);
+        if (existing.length > 0) finalUsername += userResult.insertId;
+        await db.execute('UPDATE users SET username = ? WHERE id = ?', [finalUsername, userId]);
+
+        res.redirect('/teachers/manage');
     } catch (err) {
         console.error(err);
         res.status(500).send('Error adding teacher');
@@ -297,25 +452,283 @@ app.get('/reports', isAuthenticated, async (req, res) => {
             FROM students s
             JOIN classes c ON s.class_id = c.id
             LEFT JOIN attendance_students a ON s.id = a.student_id
-            GROUP BY s.id, c.name_ar
-            ORDER BY c.id, s.name
+            GROUP BY s.id, c.id, s.name, c.name_ar
         `);
 
-        // Group rows by class_name, filtering out hidden classes
-        const hiddenNames = ['الأولى', 'الثالثة', 'الرابعة', 'السابعة'];
-        const groupedReport = rows.reduce((acc, student) => {
-            if (hiddenNames.includes(student.class_name)) return acc;
-            if (!acc[student.class_name]) acc[student.class_name] = [];
-            acc[student.class_name].push(student);
-            return acc;
-        }, {});
+        const groupedReport = {};
+        rows.forEach(row => {
+            if (!groupedReport[row.class_name]) groupedReport[row.class_name] = [];
+            row.percentage = row.total_days > 0 ? Math.round((row.present_days / row.total_days) * 100) : 0;
+            groupedReport[row.class_name].push(row);
+        });
 
-        res.render('reports', { groupedReport });
+        // Get Teacher Book Progress for active session
+        const [teacherProgress] = await db.execute(`
+            SELECT t.name as teacher_name, b.title as book_title, tb.start_page, tb.end_page, tb.current_page
+            FROM teacher_books tb
+            JOIN teachers t ON tb.teacher_id = t.id
+            JOIN books b ON tb.book_id = b.id
+            JOIN sessions s ON tb.session_id = s.id
+            WHERE s.is_active = TRUE
+        `);
+
+        teacherProgress.forEach(tp => {
+            const total = tp.end_page - tp.start_page;
+            const completed = tp.current_page - tp.start_page;
+            tp.percentage = total > 0 ? Math.min(100, Math.max(0, Math.round((completed / total) * 100))) : 0;
+        });
+
+        const [teachers] = await db.execute(`
+            SELECT t.*, 
+            (SELECT COUNT(*) FROM periods WHERE teacher_id = t.id) as period_count,
+            (SELECT COUNT(*) FROM teacher_books WHERE teacher_id = t.id AND session_id = (SELECT id FROM sessions WHERE is_active = TRUE)) as book_count
+            FROM teachers t
+        `);
+        res.render('reports', { groupedReport, teachers, teacherProgress });
     } catch (err) {
         console.error(err);
-        res.status(500).send('Error loading reports');
+        res.status(500).send('Error generating reports');
     }
 });
+
+// Books Management
+app.get('/books/manage', hasRole(['ناظم', 'مدير']), async (req, res) => {
+    try {
+        const [books] = await db.execute('SELECT * FROM books ORDER BY title');
+        res.render('books_manage', { books });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error loading books');
+    }
+});
+
+app.post('/books/add', hasRole(['ناظم', 'مدير']), async (req, res) => {
+    const { title } = req.body;
+    try {
+        await db.execute('INSERT INTO books (title) VALUES (?)', [title]);
+        res.redirect('/books/manage');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error adding book');
+    }
+});
+
+app.post('/books/edit/:id', hasRole(['ناظم', 'مدير']), async (req, res) => {
+    const { id } = req.params;
+    const { title } = req.body;
+    try {
+        await db.execute('UPDATE books SET title = ? WHERE id = ?', [title, id]);
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+app.post('/books/delete/:id', hasRole(['ناظم', 'مدير']), async (req, res) => {
+    const { id } = req.params;
+    try {
+        await db.execute('DELETE FROM books WHERE id = ?', [id]);
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// Teacher-Book Assignments
+app.get('/teacher-books/manage', hasRole(['ناظم', 'مدير']), async (req, res) => {
+    try {
+        const [assignments] = await db.execute(`
+            SELECT tb.*, t.name as teacher_name, b.title as book_title, s.name as session_name, c.name_ar as class_name
+            FROM teacher_books tb
+            JOIN teachers t ON tb.teacher_id = t.id
+            JOIN books b ON tb.book_id = b.id
+            JOIN sessions s ON tb.session_id = s.id
+            LEFT JOIN classes c ON tb.class_id = c.id
+            ORDER BY s.name DESC, t.name
+        `);
+        const [teachers] = await db.execute('SELECT id, name FROM teachers');
+        const [books] = await db.execute('SELECT id, title FROM books');
+        const [sessions] = await db.execute('SELECT id, name, is_active FROM sessions ORDER BY name DESC');
+        const [classes] = await db.execute('SELECT id, name_ar as name FROM classes');
+        res.render('teacher_books_manage', { assignments, teachers, books, sessions, classes });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error loading assignments');
+    }
+});
+
+app.post('/teacher-books/assign', hasRole(['ناظم', 'مدير']), async (req, res) => {
+    const { teacherId, bookId, sessionId, startPage, endPage, classId } = req.body;
+    try {
+        await db.execute(
+            `INSERT INTO teacher_books (teacher_id, book_id, session_id, start_page, end_page, current_page, class_id) 
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [teacherId, bookId, sessionId, startPage, endPage, startPage, classId]
+        );
+        res.redirect('/teacher-books/manage');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error assigning book');
+    }
+});
+
+app.post('/teacher-books/edit/:id', hasRole(['ناظم', 'مدير']), async (req, res) => {
+    const { id } = req.params;
+    const { startPage, endPage, sessionId, classId } = req.body;
+    try {
+        await db.execute(
+            'UPDATE teacher_books SET start_page = ?, end_page = ?, session_id = ?, class_id = ? WHERE id = ?',
+            [startPage, endPage, sessionId, classId, id]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+app.post('/teacher-books/delete/:id', hasRole(['ناظم', 'مدير']), async (req, res) => {
+    const { id } = req.params;
+    try {
+        await db.execute('DELETE FROM teacher_books WHERE id = ?', [id]);
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+app.post('/book/update-progress', hasRole(['أستاذ', 'ناظم', 'مدير']), async (req, res) => {
+    const { assignmentId, pageNumber } = req.body;
+    const date = DateTime.now().toISODate();
+    try {
+        await db.execute(
+            `INSERT INTO book_progress (assignment_id, date, page_number, marked_by) 
+             VALUES (?, ?, ?, ?) 
+             ON DUPLICATE KEY UPDATE page_number = ?`,
+            [assignmentId, date, pageNumber, req.session.userId, pageNumber]
+        );
+        // Also update current_page in the assignment record
+        await db.execute('UPDATE teacher_books SET current_page = ? WHERE id = ?', [pageNumber, assignmentId]);
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false });
+    }
+});
+
+// Teacher Progress Report (Graph)
+app.get('/reports/teacher/:teacherId', isAuthenticated, async (req, res) => {
+    const { teacherId } = req.params;
+    try {
+        const [teacher] = await db.execute('SELECT * FROM teachers WHERE id = ?', [teacherId]);
+        const [progress] = await db.execute(
+            `SELECT bp.*, b.title as book_title, tb.start_page, tb.end_page 
+             FROM book_progress bp 
+             JOIN teacher_books tb ON bp.assignment_id = tb.id
+             JOIN books b ON tb.book_id = b.id 
+             WHERE tb.teacher_id = ? 
+             ORDER BY bp.date ASC`,
+            [teacherId]
+        );
+        res.render('report_teacher_progress', { teacher: teacher[0], progress });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error loading teacher report');
+    }
+});
+
+// Period Management (Nazim/Mudeer)
+app.get('/periods/manage', hasRole(['ناظم', 'مدير', 'admin']), async (req, res) => {
+    try {
+        const [periods] = await db.execute(
+            `SELECT p.*, t.name as teacher_name, c.name_ar as class_name 
+             FROM periods p 
+             JOIN teachers t ON p.teacher_id = t.id 
+             JOIN classes c ON p.class_id = c.id`
+        );
+        const [teachers] = await db.execute('SELECT * FROM teachers');
+        const [classes] = await db.execute('SELECT * FROM classes');
+        res.render('periods_manage', { periods, teachers, classes });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error loading periods');
+    }
+});
+
+// User Management (Nazim/Mudeer)
+app.get('/users/manage', hasRole(['ناظم', 'مدير']), async (req, res) => {
+    try {
+        const [users] = await db.execute(`
+            SELECT u.id, u.username, u.full_name, u.role, u.created_at,
+            s.roll_number as student_id, t.id_number as teacher_id
+            FROM users u
+            LEFT JOIN students s ON u.id = s.user_id
+            LEFT JOIN teachers t ON u.id = t.user_id
+            ORDER BY u.role, u.username
+        `);
+        res.render('users_manage', { users });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error loading users');
+    }
+});
+
+app.post('/users/update', hasRole(['ناظم', 'مدير']), async (req, res) => {
+    const { userId, username, fullName, password, role } = req.body;
+    try {
+        if (password && password.trim() !== '') {
+            const hashed = await bcrypt.hash(password, 10);
+            await db.execute('UPDATE users SET username = ?, full_name = ?, password = ?, role = ? WHERE id = ?', [username, fullName, hashed, role, userId]);
+        } else {
+            await db.execute('UPDATE users SET username = ?, full_name = ?, role = ? WHERE id = ?', [username, fullName, role, userId]);
+        }
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+app.post('/users/update-role', hasRole(['ناظم', 'مدير', 'admin']), async (req, res) => {
+    const { userId, newRole } = req.body;
+    try {
+        await db.execute('UPDATE users SET role = ? WHERE id = ?', [newRole, userId]);
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false });
+    }
+});
+
+app.post('/users/reset-password', hasRole(['ناظم', 'مدير']), async (req, res) => {
+    const { userId } = req.body;
+    const defaultPassword = await bcrypt.hash('1234', 10);
+    try {
+        await db.execute('UPDATE users SET password = ? WHERE id = ?', [defaultPassword, userId]);
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false });
+    }
+});
+
+app.post('/periods/add', hasRole(['ناظم', 'مدير']), async (req, res) => {
+    const { teacherId, classId, dayOfWeek, startTime, endTime, subject } = req.body;
+    try {
+        await db.execute(
+            'INSERT INTO periods (teacher_id, class_id, day_of_week, start_time, end_time, subject) VALUES (?, ?, ?, ?, ?, ?)',
+            [teacherId, classId, dayOfWeek, startTime, endTime, subject]
+        );
+        res.redirect('/periods/manage');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error adding period');
+    }
+});
+
 
 // Start Server
 app.listen(PORT, () => {

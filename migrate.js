@@ -47,7 +47,7 @@ async function migrate() {
             
             for (let statement of statements) {
                 console.log(`Executing statement: ${statement.trim().substring(0, 50)}...`);
-                await db.execute(statement);
+                await db.query(statement);
             }
             
             await db.execute('INSERT INTO schema_history (version, script_name) VALUES (?, ?)', [version, file]);
