@@ -7,88 +7,72 @@
     </div>
 </div>
 
-<!-- Teacher Summary Table -->
-<div class="row mb-5">
-    <div class="col-md-12">
-        <div class="card shadow-sm border-0 rounded-4">
-            <div class="card-header bg-white p-4 border-0">
-                <h3 class="fw-bold mb-0 text-primary">ملخص المعلمين</h3>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0 text-end">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="px-4">اسم المعلم</th>
-                                <th>عدد الكتب المقررة</th>
-                                <th>عدد الحصص (Periods)</th>
-                                <th class="px-4 text-center">الإجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% teachers.forEach(t => { %>
-                                <tr>
-                                    <td class="px-4 fw-bold"><%= t.name %></td>
-                                    <td>
-                                        <span class="badge bg-info-subtle text-info border rounded-pill px-3">
-                                            <%= t.book_count %> كتب
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-warning-subtle text-warning border rounded-pill px-3">
-                                            <%= t.period_count %> حصص
-                                        </span>
-                                    </td>
-                                    <td class="px-4 text-center">
-                                        <a href="/reports/teacher/<%= t.id %>" class="btn btn-sm btn-outline-primary rounded-pill px-3">عرض التفاصيل</a>
-                                    </td>
-                                </tr>
-                            <% }) %>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Teacher Progress Section -->
+<!-- Student Attendance Section (Top) -->
 <div class="row mb-5">
     <div class="col-md-12">
         <div class="card shadow-sm border-0 rounded-4">
             <div class="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <h3 class="fw-bold mb-0 text-success">إنجاز المعلمين (الكتب)</h3>
-                <div style="min-width: 250px;">
-                    <div class="input-group input-group-sm">
-                        <span class="input-group-text bg-success text-white border-0"><i class="bi bi-filter"></i></span>
-                        <select id="teacherProgressFilter" class="form-select border-success-subtle" onchange="filterTeacherProgress()">
-                            <option value="all">كل المعلمين</option>
-                            <% teachers.forEach(t => { %>
-                                <option value="<%= t.name %>"><%= t.name %></option>
-                            <% }) %>
-                        </select>
-                    </div>
+                <h3 class="fw-bold mb-0 text-primary">تقارير حضور الطلاب</h3>
+                <div class="d-flex gap-2">
+                    <select id="classFilterSelect" class="form-select form-select-sm border-primary-subtle" style="width: 150px;" onchange="filterByClass()">
+                        <option value="all">كل الصفوف</option>
+                        <% Object.keys(groupedReport).forEach(className => { %>
+                            <option value="<%= className %>"><%= className %></option>
+                        <% }) %>
+                    </select>
+                    <input type="text" id="studentFilter" class="form-control form-control-sm border-primary-subtle" placeholder="ابحث عن طالب..." style="width: 200px;" onkeyup="filterStudents()">
                 </div>
             </div>
             <div class="card-body p-4">
-                <div class="row g-4">
-                    <% teacherProgress.forEach(tp => { %>
-                        <div class="col-md-4 teacher-progress-card" data-teacher="<%= tp.teacher_name %>">
-                            <div class="p-3 border rounded-4 bg-light shadow-sm h-100">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <h6 class="fw-bold mb-0"><%= tp.book_title %></h6>
-                                    <span class="badge bg-success rounded-pill px-2"><%= tp.percentage %>%</span>
-                                </div>
-                                <p class="small text-muted mb-3">المعلم: <%= tp.teacher_name %></p>
-                                <div class="progress mb-2" style="height: 10px; border-radius: 5px;">
-                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
-                                         role="progressbar" 
-                                         style="width: <%= tp.percentage %>%"></div>
-                                </div>
-                                <div class="d-flex justify-content-between small text-muted">
-                                    <span>بداية: <%= tp.start_page %></span>
-                                    <span class="fw-bold text-dark">الحالي: <%= tp.current_page %></span>
-                                    <span>نهاية: <%= tp.end_page %></span>
+                <div class="accordion accordion-flush" id="attendanceAccordion">
+                    <% Object.keys(groupedReport).forEach((className, index) => { 
+                        const students = groupedReport[className];
+                        const avg = Math.round(students.reduce((acc, s) => acc + s.percentage, 0) / students.length);
+                    %>
+                        <div class="accordion-item border rounded-4 mb-3 overflow-hidden student-class-card" data-class-name="<%= className %>">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed p-4 bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_<%= index %>">
+                                    <div class="d-flex justify-content-between align-items-center w-100 me-3">
+                                        <span class="fw-bold text-dark fs-5"><%= className %></span>
+                                        <div class="d-flex gap-3 text-muted small">
+                                            <span class="badge bg-white border text-primary rounded-pill px-3"><%= students.length %> طلاب</span>
+                                            <span class="badge bg-white border text-success rounded-pill px-3">متوسط الحضور: <%= avg %>%</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </h2>
+                            <div id="collapse_<%= index %>" class="accordion-collapse collapse" data-bs-parent="#attendanceAccordion">
+                                <div class="accordion-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0 text-end">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th class="px-4">اسم الطالب</th>
+                                                    <th>إجمالي الأيام</th>
+                                                    <th>أيام الحضور</th>
+                                                    <th class="px-4 text-center">النسبة المئوية</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <% students.forEach(student => { %>
+                                                    <tr class="student-row" data-name="<%= student.name.toLowerCase() %>">
+                                                        <td class="px-4"><%= student.name %></td>
+                                                        <td><%= student.total_days %></td>
+                                                        <td><%= student.present_days %></td>
+                                                        <td class="px-4 text-center">
+                                                            <div class="d-flex align-items-center justify-content-center gap-2">
+                                                                <div class="progress flex-grow-1" style="height: 8px; width: 100px;">
+                                                                    <div class="progress-bar bg-<%= student.percentage >= 80 ? 'success' : 'danger' %>" 
+                                                                         role="progressbar" style="width: <%= student.percentage %>%"></div>
+                                                                </div>
+                                                                <span class="fw-bold"><%= student.percentage %>%</span>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                <% }) %>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -99,80 +83,83 @@
     </div>
 </div>
 
-<!-- Filters Section for Attendance -->
-<div class="row mb-4">
-    <div class="col-md-6">
-        <div class="card shadow-sm border-0">
-            <div class="card-body p-4">
-                <h5 class="fw-bold mb-3">البحث عن معلم</h5>
-                <div class="input-group">
-                    <select id="teacherSelect" class="form-select">
-                        <option value="">اختر المعلم...</option>
-                        <% teachers.forEach(t => { %>
-                            <option value="<%= t.id %>"><%= t.name %></option>
-                        <% }) %>
-                    </select>
-                    <button class="btn btn-primary" onclick="viewTeacherReport()">عرض التقارير التفصيلية</button>
+<!-- Unified Teacher Performance Overview (Bottom) -->
+<div class="row mb-5">
+    <div class="col-md-12">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <h3 class="fw-bold mb-0 text-success">إنجاز المعلمين</h3>
+                <div style="min-width: 250px;">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-success text-white border-0"><i class="bi bi-search"></i></span>
+                        <input type="text" id="teacherUnifiedFilter" class="form-control border-success-subtle" placeholder="ابحث عن معلم..." onkeyup="filterUnifiedTeachers()">
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="card shadow-sm border-0">
             <div class="card-body p-4">
-                <h5 class="fw-bold mb-3">تصفية الطلاب</h5>
-                <input type="text" id="studentFilter" class="form-control" placeholder="ابحث عن طالب..." onkeyup="filterStudents()">
-            </div>
-        </div>
-    </div>
-</div>
+                <div class="row g-4">
+                    <% teachers.forEach(t => { %>
+                        <div class="col-md-6 teacher-perf-card" data-name="<%= t.name.toLowerCase() %>">
+                            <div class="p-4 border rounded-4 bg-white shadow-sm h-100 d-flex flex-column">
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-person-badge me-2 text-primary"></i><%= t.name %></h5>
+                                    <div class="d-flex gap-2">
+                                        <span class="badge bg-info-subtle text-info border rounded-pill px-3"><%= t.book_count %> كتب</span>
+                                        <span class="badge bg-warning-subtle text-warning border rounded-pill px-3"><%= t.period_count %> حصص</span>
+                                    </div>
+                                </div>
 
-<div id="studentReports">
-    <% Object.keys(groupedReport).forEach(className => { %>
-        <div class="card shadow-sm border-0 rounded-4 mb-5 student-class-card">
-            <div class="card-header bg-white p-4 border-0">
-                <h3 class="fw-bold mb-0 text-primary">حضور فصل: <%= className %></h3>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="px-4">اسم الطالب</th>
-                                <th>إجمالي الأيام</th>
-                                <th>أيام الحضور</th>
-                                <th class="px-4 text-center">النسبة المئوية</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% groupedReport[className].forEach(student => { %>
-                                <tr class="student-row" data-name="<%= student.name.toLowerCase() %>">
-                                    <td class="px-4"><%= student.name %></td>
-                                    <td><%= student.total_days %></td>
-                                    <td><%= student.present_days %></td>
-                                    <td class="px-4 text-center">
-                                        <div class="d-flex align-items-center justify-content-center gap-2">
-                                            <div class="progress flex-grow-1" style="height: 8px; width: 100px;">
-                                                <div class="progress-bar bg-<%= student.percentage >= 80 ? 'success' : 'danger' %>" 
-                                                     role="progressbar" style="width: <%= student.percentage %>%"></div>
+                                <div class="flex-grow-1">
+                                    <% const myBooks = teacherProgress.filter(tp => tp.teacher_name === t.name); %>
+                                    <% if (myBooks.length > 0) { %>
+                                        <h6 class="text-muted small mb-3">تقدم الكتب المقررة:</h6>
+                                        <% myBooks.forEach(tp => { %>
+                                            <div class="mb-3">
+                                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                                    <span class="small fw-bold"><%= tp.book_title %></span>
+                                                    <span class="small text-muted">ص <%= tp.current_page %> / <%= tp.end_page %></span>
+                                                </div>
+                                                <div class="progress" style="height: 8px; border-radius: 4px; background-color: #f0f0f0;">
+                                                    <div class="progress-bar bg-success" role="progressbar" style="width: <%= tp.percentage %>%"></div>
+                                                </div>
                                             </div>
-                                            <span class="fw-bold"><%= student.percentage %>%</span>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <% }) %>
-                        </tbody>
-                    </table>
+                                        <% }) %>
+                                    <% } else { %>
+                                        <div class="text-center py-3 text-muted small">لم يتم إسناد كتب بعد</div>
+                                    <% } %>
+                                </div>
+
+                                <div class="mt-4 pt-3 border-top text-center">
+                                    <a href="/reports/teacher/<%= t.id %>" class="btn btn-outline-primary btn-sm rounded-pill px-4">
+                                        عرض التقرير التفصيلي <i class="bi bi-arrow-left ms-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
                 </div>
             </div>
         </div>
-    <% }) %>
+    </div>
 </div>
 
 <script>
 function viewTeacherReport() {
     const id = document.getElementById('teacherSelect').value;
     if (id) window.location.href = `/reports/teacher/${id}`;
+}
+
+function filterByClass() {
+    const selected = document.getElementById('classFilterSelect').value;
+    const cards = document.querySelectorAll('.student-class-card');
+    cards.forEach(card => {
+        const className = card.getAttribute('data-class-name');
+        if (selected === 'all' || className === selected) {
+            card.style.display = '';
+        } else {
+            card.style.display = 'none';
+        }
+    });
 }
 
 function filterStudents() {
@@ -182,24 +169,25 @@ function filterStudents() {
     
     rows.forEach(row => {
         const name = row.getAttribute('data-name');
-        if (name.includes(filter)) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
+        row.style.display = name.includes(filter) ? '' : 'none';
     });
 
     cards.forEach(card => {
         const visibleRows = card.querySelectorAll('.student-row[style=""]');
-        card.style.display = visibleRows.length > 0 || filter === '' ? '' : 'none';
+        const isClassMatch = document.getElementById('classFilterSelect').value === 'all' || 
+                           card.getAttribute('data-class-name') === document.getElementById('classFilterSelect').value;
+        
+        card.style.display = (visibleRows.length > 0 && isClassMatch) ? '' : 'none';
     });
 }
 
-function filterTeacherProgress() {
-    const selected = document.getElementById('teacherProgressFilter').value;
-    const cards = document.querySelectorAll('.teacher-progress-card');
+
+function filterUnifiedTeachers() {
+    const filter = document.getElementById('teacherUnifiedFilter').value.toLowerCase();
+    const cards = document.querySelectorAll('.teacher-perf-card');
     cards.forEach(card => {
-        if (selected === 'all' || card.getAttribute('data-teacher') === selected) {
+        const name = card.getAttribute('data-name');
+        if (name.includes(filter)) {
             card.style.display = '';
         } else {
             card.style.display = 'none';
