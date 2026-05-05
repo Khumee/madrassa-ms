@@ -11,18 +11,18 @@ async function fix() {
     const newName = 'مفتی فہد انور'; // Assuming Fahad based on context of Farhan correction
     
     await db.execute('UPDATE teachers SET name = ? WHERE name = ?', [newName, oldName]);
-    await db.execute('UPDATE users SET full_name = ?, role = "ناظم" WHERE full_name = ?', [newName, "ناظم", oldName]);
     
-    // 2. Set Nazim role for others
+    // 2. Set Nazim role using the linked user_id from the teachers table
     const nazims = ['مفتی مشرف بیگ اشرف', 'مولانا قمر علی شاہ', newName];
     
     for (const name of nazims) {
-        await db.execute('UPDATE users SET role = "ناظم" WHERE full_name = ?', [name]);
+        await db.execute(`
+            UPDATE users 
+            SET role = "ناظم" 
+            WHERE id = (SELECT user_id FROM teachers WHERE name = ?)
+        `, [name]);
         console.log(`Promoted ${name} to ناظم`);
     }
-
-    // Also update Mufti Musharraf's role specifically if not found by full_name
-    await db.execute('UPDATE users SET role = "ناظم" WHERE username = "مشرف"');
     
     console.log('Updates completed.');
     process.exit(0);
