@@ -1,11 +1,15 @@
 <%- include('partials/header') %>
 
-<div class="row mb-5 align-items-center">
-    <div class="col-md-8">
-        <h1 class="fw-bold text-primary">توزيع الكتب على المعلمين</h1>
-        <p class="text-muted">ربط المعلمين بالكتب وتحديد الصفحات المقررة لكل فصل دراسي</p>
+<div class="row mb-4 align-items-center">
+    <div class="col-md-6">
+        <h1 class="fw-bold text-primary mb-0">توزيع الكتب على المعلمين</h1>
+        <div class="mt-2">
+            <span class="badge bg-success-subtle text-success border rounded-pill px-4 py-2 fs-6">
+                <i class="bi bi-calendar-check me-2"></i>الفصل الدراسي الحالي: 1447-1448
+            </span>
+        </div>
     </div>
-    <div class="col-md-4 text-start">
+    <div class="col-md-6 text-start">
         <a href="/" class="btn btn-outline-primary rounded-pill px-4">
             <i class="bi bi-house-door me-2"></i>الرجوع للوحة التحكم
         </a>
@@ -20,6 +24,7 @@
             </div>
             <div class="card-body p-4">
                 <form action="/teacher-books/assign" method="POST">
+                    <input type="hidden" name="sessionId" value="<%= sessions.find(s => s.is_active).id %>">
                     <div class="mb-3">
                         <label class="form-label fw-bold">المعلم</label>
                         <select name="teacherId" class="form-select" required>
@@ -44,14 +49,6 @@
                             <option value="">اختر الصف...</option>
                             <% classes.forEach(c => { %>
                                 <option value="<%= c.id %>"><%= c.name %></option>
-                            <% }) %>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">الفصل الدراسي</label>
-                        <select name="sessionId" class="form-select" required>
-                            <% sessions.forEach(s => { %>
-                                <option value="<%= s.id %>" <%= s.is_active ? 'selected' : '' %>><%= s.name %></option>
                             <% }) %>
                         </select>
                     </div>
@@ -95,7 +92,6 @@
                                 <tr>
                                     <th class="px-4">الكتاب</th>
                                     <th>الصف (Saf)</th>
-                                    <th>الفصل</th>
                                     <th>المدى (الصفحات)</th>
                                     <th class="px-4 text-center">الإجراءات</th>
                                 </tr>
@@ -109,7 +105,6 @@
                                                 <%= a.class_name || 'غير محدد' %>
                                             </span>
                                         </td>
-                                        <td><span class="badge bg-light text-dark border rounded-pill"><%= a.session_name %></span></td>
                                         <td>
                                             <small class="text-muted">من <%= a.start_page %> إلى <%= a.end_page %></small>
                                         </td>
@@ -166,14 +161,7 @@
                             <% }) %>
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">الفصل الدراسي</label>
-                        <select id="editSessionId" class="form-select" required>
-                            <% sessions.forEach(s => { %>
-                                <option value="<%= s.id %>"><%= s.name %></option>
-                            <% }) %>
-                        </select>
-                    </div>
+                    <input type="hidden" id="editSessionId">
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-primary rounded-pill py-2">حفظ التغييرات</button>
                     </div>
