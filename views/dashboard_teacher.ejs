@@ -82,8 +82,11 @@
                                                    min="<%= b.start_page %>"
                                                    max="<%= b.end_page %>">
                                         </div>
-                                        <button class="btn btn-success btn-sm px-4 rounded-3 fw-bold" 
-                                                onclick="updateProgress(<%= b.id %>, <%= b.start_page %>, <%= b.end_page %>)">تحديث</button>
+                                        <button class="btn btn-success btn-sm px-2 rounded-3 shadow-sm" 
+                                                onclick="updateProgress(<%= b.id %>, <%= b.start_page %>, <%= b.end_page %>)"
+                                                title="تحديث التقدم">
+                                            <i class="bi bi-arrow-left-short fs-5"></i>
+                                        </button>
                                     </div>
                                     
                                     <div class="mt-3 pt-2 border-top">
@@ -119,7 +122,7 @@ async function updateProgress(assignmentId, startPage, endPage) {
     const btn = event.currentTarget;
     const originalText = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm" style="width: 1rem; height: 1rem;"></span>';
 
     try {
         const res = await fetch('/book/update-progress', {
@@ -132,11 +135,11 @@ async function updateProgress(assignmentId, startPage, endPage) {
         if (data.success) {
             location.reload();
         } else {
-            alert('فشل التحديث: ' + (data.error || 'خطأ غير معروف'));
+            showToast('فشل التحديث: ' + (data.error || 'خطأ غير معروف'), 'danger');
         }
     } catch (err) {
         console.error(err);
-        alert('حدث خطأ في الاتصال بالسيرفر');
+        showToast('حدث خطأ في الاتصال بالسيرفر', 'danger');
     } finally {
         btn.disabled = false;
         btn.innerHTML = originalText;
