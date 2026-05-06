@@ -571,11 +571,12 @@ app.get('/reports', hasRole(['ناظم', 'مدير']), async (req, res) => {
 
         // Get Teacher Book Progress for active session
         const [teacherProgress] = await db.execute(`
-            SELECT t.name as teacher_name, b.title as book_title, tb.start_page, tb.end_page, tb.current_page
+            SELECT tb.id as assignment_id, t.name as teacher_name, b.title as book_title, tb.start_page, tb.end_page, tb.current_page, c.name_ar as class_name
             FROM teacher_books tb
             JOIN teachers t ON tb.teacher_id = t.id
             JOIN books b ON tb.book_id = b.id
             JOIN sessions s ON tb.session_id = s.id
+            LEFT JOIN classes c ON tb.class_id = c.id
             WHERE s.is_active = TRUE
         `);
 

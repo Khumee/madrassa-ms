@@ -124,7 +124,11 @@
                                             <small class="text-muted">من <%= a.start_page %> إلى <%= a.end_page %></small>
                                         </td>
                                         <td class="px-4 text-center">
-                                            <button class="btn btn-sm btn-primary rounded-pill px-3" 
+                                            <button class="btn btn-sm btn-success rounded-pill px-3 ms-1" 
+                                                    onclick="openProgressModal(<%= JSON.stringify(a) %>)">
+                                                تحديث التقدم
+                                            </button>
+                                            <button class="btn btn-sm btn-primary rounded-pill px-3 ms-1" 
                                                     onclick="openEditModal(<%= JSON.stringify(a) %>)">
                                                 تعديل
                                             </button>
@@ -186,10 +190,45 @@
     </div>
 </div>
 
+<!-- Update Progress Modal -->
+<div class="modal fade" id="updateProgressModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <div class="modal-header bg-success text-white rounded-top-4">
+                <h5 class="modal-title">تحديث تقدم الكتاب</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="updateProgressForm">
+                    <input type="hidden" id="progAssignmentId">
+                    <div class="mb-3 text-center">
+                        <h6 class="fw-bold text-dark mb-1" id="progBookTitle"></h6>
+                        <p class="text-muted small" id="progTeacherName"></p>
+                    </div>
+                    <div class="mb-4 text-center">
+                        <label class="form-label fw-bold d-block mb-3">رقم الصفحة الحالية</label>
+                        <div class="d-flex align-items-center justify-content-center gap-3">
+                            <input type="number" id="progPageNumber" 
+                                   class="form-control border-0 shadow-sm rounded-3 text-center fw-bold text-success bg-light" 
+                                   style="height: 60px; font-size: 1.5rem; width: 150px;"
+                                   required>
+                        </div>
+                        <small class="text-muted mt-2 d-block" id="progRangeText"></small>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success rounded-pill py-2 fw-bold">حفظ التحديث</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-let editModal;
+let editModal, progressModal;
 document.addEventListener('DOMContentLoaded', () => {
     editModal = new bootstrap.Modal(document.getElementById('editAssignmentModal'));
+    progressModal = new bootstrap.Modal(document.getElementById('updateProgressModal'));
 });
 
 function openEditModal(a) {
@@ -201,6 +240,35 @@ function openEditModal(a) {
     document.getElementById('editSessionId').value = a.session_id;
     editModal.show();
 }
+
+function openProgressModal(a) {
+    document.getElementById('progAssignmentId').value = a.id;
+    document.getElementById('progBookTitle').innerText = a.book_title;
+    document.getElementById('progTeacherName').innerText = `المعلم: ${a.teacher_name}`;
+    document.getElementById('progPageNumber').value = a.current_page;
+    document.getElementById('progPageNumber').min = a.start_page;
+    document.getElementById('progPageNumber').max = a.end_page;
+    document.getElementById('progRangeText').innerText = `النطاق المسموح: من ${a.start_page} إلى ${a.end_page}`;
+    progressModal.show();
+}
+
+document.getElementById('updateProgressForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const assignmentId = document.getElementById('progAssignmentId').value;
+    const pageNumber = document.getElementById('progPageNumber').value;
+    
+    const res = await fetch('/book/update-progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assignmentId, pageNumber })
+    });
+    const data = await res.json();
+    if (data.success) {
+        location.reload();
+    } else {
+        alert('خطأ: ' + (data.error || 'فشل التحديث'));
+    }
+});
 
 document.getElementById('editAssignmentForm').addEventListener('submit', async (e) => {
     e.preventDefault();
