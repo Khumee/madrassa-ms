@@ -325,7 +325,7 @@ app.post('/attendance/students/save', hasRole(['ناظم', 'مدير', 'مسؤو
 });
 
 // Teacher Attendance
-app.get('/teachers', isAuthenticated, async (req, res) => {
+app.get('/teachers', hasRole(['ناظم', 'مدير']), async (req, res) => {
     const date = req.query.date || DateTime.now().toISODate();
     const dayName = DateTime.fromISO(date).setLocale('en').toFormat('cccc');
     try {
@@ -343,7 +343,7 @@ app.get('/teachers', isAuthenticated, async (req, res) => {
     }
 });
 
-app.post('/attendance/teachers/save', isAuthenticated, async (req, res) => {
+app.post('/attendance/teachers/save', hasRole(['ناظم', 'مدير']), async (req, res) => {
     const { date, attendance } = req.body; // attendance: { teacherId: classesTaken }
     try {
         for (const [teacherId, count] of Object.entries(attendance)) {
@@ -480,7 +480,7 @@ app.post('/students/add', hasRole(['ناظم', 'مدير', 'مسؤول_الصف'
 });
 
 // Teacher Management
-app.get('/teachers/manage', hasRole(['ناظم', 'مدير']), async (req, res) => {
+app.get('/teachers/manage', hasRole(['ناظم', 'مدير', 'مسؤول_الصف']), async (req, res) => {
     try {
         const [teachers] = await db.execute('SELECT * FROM teachers');
         res.render('teachers_manage', { teachers, role: req.session.role });
@@ -490,7 +490,7 @@ app.get('/teachers/manage', hasRole(['ناظم', 'مدير']), async (req, res) 
     }
 });
 
-app.post('/teachers/edit/:id', hasRole(['ناظم', 'مدير']), async (req, res) => {
+app.post('/teachers/edit/:id', hasRole(['ناظم', 'مدير', 'مسؤول_الصف']), async (req, res) => {
     const { id } = req.params;
     const { name, subject } = req.body;
     try {
@@ -502,7 +502,7 @@ app.post('/teachers/edit/:id', hasRole(['ناظم', 'مدير']), async (req, re
     }
 });
 
-app.get('/teachers/delete/:id', hasRole(['ناظم', 'مدير']), async (req, res) => {
+app.get('/teachers/delete/:id', hasRole(['ناظم', 'مدير', 'مسؤول_الصف']), async (req, res) => {
     const { id } = req.params;
     try {
         await db.execute('DELETE FROM teachers WHERE id = ?', [id]);
@@ -548,7 +548,7 @@ app.post('/teachers/add', hasRole(['مدير']), async (req, res) => {
 });
 
 // Reports
-app.get('/reports', isAuthenticated, async (req, res) => {
+app.get('/reports', hasRole(['ناظم', 'مدير']), async (req, res) => {
     try {
         // Simple report: overall attendance percentage per student for the last 30 days
         const [rows] = await db.execute(`
@@ -599,7 +599,7 @@ app.get('/reports', isAuthenticated, async (req, res) => {
 });
 
 // Books Management
-app.get('/books/manage', hasRole(['ناظم', 'مدير']), async (req, res) => {
+app.get('/books/manage', hasRole(['ناظم', 'مدير', 'مسؤول_الصف']), async (req, res) => {
     try {
         const [books] = await db.execute('SELECT * FROM books ORDER BY title');
         res.render('books_manage', { books });
@@ -609,7 +609,7 @@ app.get('/books/manage', hasRole(['ناظم', 'مدير']), async (req, res) => 
     }
 });
 
-app.post('/books/add', hasRole(['ناظم', 'مدير']), async (req, res) => {
+app.post('/books/add', hasRole(['ناظم', 'مدير', 'مسؤول_الصف']), async (req, res) => {
     const { title } = req.body;
     try {
         await db.execute('INSERT INTO books (title) VALUES (?)', [title]);
@@ -620,7 +620,7 @@ app.post('/books/add', hasRole(['ناظم', 'مدير']), async (req, res) => {
     }
 });
 
-app.post('/books/edit/:id', hasRole(['ناظم', 'مدير']), async (req, res) => {
+app.post('/books/edit/:id', hasRole(['ناظم', 'مدير', 'مسؤول_الصف']), async (req, res) => {
     const { id } = req.params;
     const { title } = req.body;
     try {
@@ -632,7 +632,7 @@ app.post('/books/edit/:id', hasRole(['ناظم', 'مدير']), async (req, res) 
     }
 });
 
-app.post('/books/delete/:id', hasRole(['ناظم', 'مدير']), async (req, res) => {
+app.post('/books/delete/:id', hasRole(['ناظم', 'مدير', 'مسؤول_الصف']), async (req, res) => {
     const { id } = req.params;
     try {
         await db.execute('DELETE FROM books WHERE id = ?', [id]);
@@ -644,7 +644,7 @@ app.post('/books/delete/:id', hasRole(['ناظم', 'مدير']), async (req, res
 });
 
 // Teacher-Book Assignments
-app.get('/teacher-books/manage', hasRole(['ناظم', 'مدير']), async (req, res) => {
+app.get('/teacher-books/manage', hasRole(['ناظم', 'مدير', 'مسؤول_الصف']), async (req, res) => {
     try {
         const [assignments] = await db.execute(`
             SELECT tb.*, t.name as teacher_name, b.title as book_title, s.name as session_name, c.name_ar as class_name
@@ -666,7 +666,7 @@ app.get('/teacher-books/manage', hasRole(['ناظم', 'مدير']), async (req, 
     }
 });
 
-app.post('/teacher-books/assign', hasRole(['ناظم', 'مدير']), async (req, res) => {
+app.post('/teacher-books/assign', hasRole(['ناظم', 'مدير', 'مسؤول_الصف']), async (req, res) => {
     const { teacherId, bookId, sessionId, startPage, endPage, classId } = req.body;
     try {
         await db.execute(
@@ -681,7 +681,7 @@ app.post('/teacher-books/assign', hasRole(['ناظم', 'مدير']), async (req,
     }
 });
 
-app.post('/teacher-books/edit/:id', hasRole(['ناظم', 'مدير']), async (req, res) => {
+app.post('/teacher-books/edit/:id', hasRole(['ناظم', 'مدير', 'مسؤول_الصف']), async (req, res) => {
     const { id } = req.params;
     const { startPage, endPage, sessionId, classId } = req.body;
     try {
@@ -696,7 +696,7 @@ app.post('/teacher-books/edit/:id', hasRole(['ناظم', 'مدير']), async (re
     }
 });
 
-app.post('/teacher-books/delete/:id', hasRole(['ناظم', 'مدير']), async (req, res) => {
+app.post('/teacher-books/delete/:id', hasRole(['ناظم', 'مدير', 'مسؤول_الصف']), async (req, res) => {
     const { id } = req.params;
     try {
         await db.execute('DELETE FROM teacher_books WHERE id = ?', [id]);
@@ -752,7 +752,7 @@ app.post('/book/update-progress', hasRole(['أستاذ', 'ناظم', 'مدير']
 });
 
 // Teacher Progress Report (Graph)
-app.get('/reports/teacher/:teacherId', isAuthenticated, async (req, res) => {
+app.get('/reports/teacher/:teacherId', hasRole(['ناظم', 'مدير', 'أستاذ']), async (req, res) => {
     const { teacherId } = req.params;
     try {
         const [teacher] = await db.execute('SELECT * FROM teachers WHERE id = ?', [teacherId]);
@@ -773,7 +773,7 @@ app.get('/reports/teacher/:teacherId', isAuthenticated, async (req, res) => {
 });
 
 // Emergency Import Route (Full Sync)
-app.get('/admin/import-data', hasRole(['مدير', 'admin']), async (req, res) => {
+app.get('/admin/import-data', hasRole(['مدير']), async (req, res) => {
     try {
         console.log('Starting Complete Live Sync...');
         
@@ -974,7 +974,7 @@ app.get('/admin/import-data', hasRole(['مدير', 'admin']), async (req, res) =
 });
 
 // Period Management (Nazim/Mudeer)
-app.get('/periods/manage', hasRole(['ناظم', 'مدير', 'admin']), async (req, res) => {
+app.get('/periods/manage', hasRole(['ناظم', 'مدير', 'مسؤول_الصف']), async (req, res) => {
     const groupBy = req.query.groupBy || 'day'; // Default to day
     let orderBy = 'FIELD(p.day_of_week, "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"), p.start_time';
     
@@ -1051,7 +1051,7 @@ app.post('/users/update', hasRole(['ناظم', 'مدير']), async (req, res) =>
     }
 });
 
-app.post('/users/update-role', hasRole(['ناظم', 'مدير', 'admin']), async (req, res) => {
+app.post('/users/update-role', hasRole(['ناظم', 'مدير']), async (req, res) => {
     const { userId, newRole } = req.body;
     try {
         await db.execute('UPDATE users SET role = ? WHERE id = ?', [newRole, userId]);
@@ -1074,7 +1074,7 @@ app.post('/users/reset-password', hasRole(['ناظم', 'مدير']), async (req,
     }
 });
 
-app.get('/periods/full', async (req, res) => {
+app.get('/periods/full', isAuthenticated, async (req, res) => {
     try {
         const [periods] = await db.execute(
             `SELECT p.*, t.name as teacher_name, c.name_ar as class_name, b.title as book_title
@@ -1093,7 +1093,7 @@ app.get('/periods/full', async (req, res) => {
     }
 });
 
-app.post('/periods/add', hasRole(['ناظم', 'مدير']), async (req, res) => {
+app.post('/periods/add', hasRole(['ناظم', 'مدير', 'مسؤول_الصف']), async (req, res) => {
     const { teacherId, classId, dayOfWeek, startTime, endTime, subject, assignmentId, periodNumber } = req.body;
     try {
         await db.execute(
@@ -1107,7 +1107,7 @@ app.post('/periods/add', hasRole(['ناظم', 'مدير']), async (req, res) => 
     }
 });
 
-app.post('/periods/edit/:id', hasRole(['ناظم', 'مدير']), async (req, res) => {
+app.post('/periods/edit/:id', hasRole(['ناظم', 'مدير', 'مسؤول_الصف']), async (req, res) => {
     const { assignmentId, periodNumber, startTime, endTime } = req.body;
     try {
         // Fetch teacher_id and class_id from the assignment
@@ -1125,7 +1125,7 @@ app.post('/periods/edit/:id', hasRole(['ناظم', 'مدير']), async (req, res
     }
 });
 
-app.post('/periods/delete/:id', hasRole(['ناظم', 'مدير']), async (req, res) => {
+app.post('/periods/delete/:id', hasRole(['ناظم', 'مدير', 'مسؤول_الصف']), async (req, res) => {
     try {
         await db.execute('DELETE FROM periods WHERE id = ?', [req.params.id]);
         res.json({ success: true });
