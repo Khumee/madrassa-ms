@@ -154,8 +154,8 @@ nav {
         justify-content: space-between;
     }
     .status-btn {
-        width: 50px;
-        height: 50px;
+        width: 42px;
+        height: 42px;
     }
 }
 
@@ -293,6 +293,9 @@ table th, table td {
 @media (max-width: 600px) {
     h1 { font-size: 1.5rem; }
     .card { padding: 15px; }
+    .bi.fs-1 { font-size: 2rem !important; }
+    .bi.fs-2 { font-size: 1.75rem !important; }
+    .bi.fs-3 { font-size: 1.5rem !important; }
 }
 
 /* Light fade in for main content only */

@@ -141,11 +141,40 @@ app.get('/dashboard/student', hasRole(['طالب_علم']), async (req, res) => 
         const [student] = await db.execute('SELECT * FROM students WHERE user_id = ?', [req.session.userId]);
         if (!student[0]) return res.status(404).send('Student record not found');
         
+        const classId = student[0].class_id;
+        const dayName = DateTime.now().setLocale('en').toFormat('cccc');
+
+        // Get Today's Periods for this class
+        const [periods] = await db.execute(
+            `SELECT p.*, t.name as teacher_name 
+             FROM periods p 
+             JOIN teachers t ON p.teacher_id = t.id 
+             WHERE p.class_id = ? AND p.day_of_week = ?
+             ORDER BY p.period_number`,
+            [classId, dayName]
+        );
+
+        // Get Book Progress for this class
+        const [books] = await db.execute(`
+            SELECT tb.*, b.title as book_title, t.name as teacher_name
+            FROM teacher_books tb
+            JOIN books b ON tb.book_id = b.id
+            JOIN teachers t ON tb.teacher_id = t.id
+            JOIN sessions s ON tb.session_id = s.id
+            WHERE tb.class_id = ? AND s.is_active = TRUE
+        `, [classId]);
+
         const [attendance] = await db.execute(
             'SELECT * FROM attendance_students WHERE student_id = ? ORDER BY date DESC LIMIT 30',
             [student[0].id]
         );
-        res.render('dashboard_student', { student: student[0], attendance });
+        res.render('dashboard_student', { 
+            student: student[0], 
+            attendance, 
+            periods, 
+            books,
+            today: DateTime.now().setLocale('ar').toFormat('cccc, dd MMMM yyyy')
+        });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
