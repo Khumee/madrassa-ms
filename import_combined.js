@@ -20,11 +20,13 @@ async function sync() {
             zubair: zubairId
         };
 
+        const [oolaC] = await db.execute('SELECT id FROM classes WHERE name_ar = ?', ['الأولى']);
         const [saniaC] = await db.execute('SELECT id FROM classes WHERE name_ar = ?', ['الثانية']);
         const [khamisaC] = await db.execute('SELECT id FROM classes WHERE name_ar = ?', ['الخامسة']);
         const [sadisaC] = await db.execute('SELECT id FROM classes WHERE name_ar = ?', ['السادسة']);
         const [dauraC] = await db.execute('SELECT id FROM classes WHERE name_ar = ?', ['دورة حديث']);
         
+        const oolaId = oolaC[0].id;
         const saniaId = saniaC[0].id;
         const khamisaId = khamisaC[0].id;
         const sadisaId = sadisaC[0].id;
@@ -39,6 +41,28 @@ async function sync() {
         };
 
         const data = [
+            // OOLA (الأولى)
+            { c: oolaId, d: 'Monday', p: 1, t: teachers.hamza, s: 'اللغة العربية وحفظ الأحاديث والمحادثة العربية' },
+            { c: oolaId, d: 'Monday', p: 2, t: teachers.musharraf, s: 'اللغة الفارسية' },
+            { c: oolaId, d: 'Monday', p: 3, t: teachers.habib, s: 'التجويد والسيرة وحفظ القرآن والأدعية' },
+            { c: oolaId, d: 'Monday', p: 4, t: teachers.kamaal, s: 'گردانوں کا اجرا' },
+            { c: oolaId, d: 'Tuesday', p: 1, t: teachers.musharraf, s: 'اللغة الفارسية' },
+            { c: oolaId, d: 'Tuesday', p: 2, t: teachers.hasan, s: 'الصرف وتمرين الصرف' },
+            { c: oolaId, d: 'Tuesday', p: 3, t: teachers.habib, s: 'التجويد والسيرة وحفظ القرآن والأدعية' },
+            { c: oolaId, d: 'Tuesday', p: 4, t: teachers.kamaal, s: 'گردانوں کا اجرا' },
+            { c: oolaId, d: 'Wednesday', p: 1, t: teachers.hamza, s: 'اللغة العربية وحفظ الأحاديث والمحادثة العربية' },
+            { c: oolaId, d: 'Wednesday', p: 2, t: teachers.hasan, s: 'الصرف وتمرين الصرف' },
+            { c: oolaId, d: 'Wednesday', p: 3, t: teachers.hasan, s: 'الصرف وتمرين الصرف' },
+            { c: oolaId, d: 'Wednesday', p: 4, t: teachers.musharraf, s: 'اللغة الفارسية' },
+            { c: oolaId, d: 'Thursday', p: 1, t: teachers.hamza, s: 'اللغة العربية وحفظ الأحاديث والمحادثة العربية' },
+            { c: oolaId, d: 'Thursday', p: 2, t: teachers.kamaal, s: 'گردانوں کا اجرا' },
+            { c: oolaId, d: 'Thursday', p: 3, t: teachers.hasan, s: 'الصرف وتمرين الصرف' },
+            { c: oolaId, d: 'Thursday', p: 4, t: teachers.usman, s: 'النحو وتمرين النحو' },
+            { c: oolaId, d: 'Friday', p: 1, t: teachers.habib, s: 'التجويد والسيرة وحفظ القرآن والأدعية' },
+            { c: oolaId, d: 'Friday', p: 2, t: teachers.habib, s: 'التجويد والسيرة وحفظ القرآن والأدعية' },
+            { c: oolaId, d: 'Friday', p: 3, t: teachers.usman, s: 'النحو وتمرين النحو' },
+            { c: oolaId, d: 'Friday', p: 4, t: teachers.usman, s: 'النحو وتمرين النحو' },
+
             // SANIA (الثانية)
             { c: saniaId, d: 'Monday', p: 1, t: teachers.kamaal, s: 'تفسير عم' },
             { c: saniaId, d: 'Monday', p: 2, t: teachers.kamaal, s: 'الأدب والحديث' },
@@ -137,7 +161,13 @@ async function sync() {
             { c: dauraId, d: 'Friday', p: 2, t: teachers.hasan, s: 'الطحاوي' },
             { c: dauraId, d: 'Friday', p: 3, t: teachers.habib, s: 'سنن أبي داود (1) وموطأ مالك' },
             { c: dauraId, d: 'Friday', p: 4, t: teachers.habib, s: 'سنن أبي داود (1) وموطأ مالك' },
-            { c: dauraId, d: 'Friday', p: 5, t: teachers.baron, s: 'سنن أبي داود (2) وموطأ محمد' }
+            { c: dauraId, d: 'Friday', p: 5, t: teachers.baron, s: 'سنن أبي داود (2) وموطأ محمد' },
+            // SATURDAY for Daura
+            { c: dauraId, d: 'Saturday', p: 1, t: teachers.fahad, s: 'صحيح البخاري (1)' },
+            { c: dauraId, d: 'Saturday', p: 2, t: teachers.hasan, s: 'الطحاوي' },
+            { c: dauraId, d: 'Saturday', p: 3, t: teachers.baron, s: 'سنن أبي داود (2) وموطأ محمد' },
+            { c: dauraId, d: 'Saturday', p: 4, t: teachers.baron, s: 'سنن أبي داود (2) وموطأ محمد' },
+            { c: dauraId, d: 'Saturday', p: 5, t: teachers.baron, s: 'سنن أبي داود (2) وموطأ محمد' }
         ];
 
         for (const item of data) {
@@ -147,7 +177,7 @@ async function sync() {
             );
         }
 
-        console.log('Imported all 4 classes.');
+        console.log('Imported all 5 classes (including Saturday for Daura).');
         process.exit(0);
     } catch (err) {
         console.error(err);

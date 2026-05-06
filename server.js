@@ -811,10 +811,10 @@ app.get('/admin/import-data', hasRole(['مدير', 'admin']), async (req, res) =
 // Period Management (Nazim/Mudeer)
 app.get('/periods/manage', hasRole(['ناظم', 'مدير', 'admin']), async (req, res) => {
     const groupBy = req.query.groupBy || 'day'; // Default to day
-    let orderBy = 'FIELD(p.day_of_week, "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"), p.start_time';
+    let orderBy = 'FIELD(p.day_of_week, "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"), p.start_time';
     
     if (groupBy === 'teacher') {
-        orderBy = 't.name, FIELD(p.day_of_week, "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"), p.start_time';
+        orderBy = 't.name, FIELD(p.day_of_week, "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"), p.start_time';
     }
 
     try {
@@ -918,7 +918,7 @@ app.get('/periods/full', async (req, res) => {
              JOIN classes c ON p.class_id = c.id
              LEFT JOIN teacher_books tb ON p.assignment_id = tb.id
              LEFT JOIN books b ON tb.book_id = b.id
-             WHERE p.day_of_week NOT IN ('Saturday', 'Sunday')`
+             WHERE p.day_of_week NOT IN ('Sunday')`
         );
         const [classes] = await db.execute('SELECT * FROM classes');
         res.render('timetable_full', { periods, classes });

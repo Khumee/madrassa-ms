@@ -3,7 +3,7 @@
 <div class="row mb-4 align-items-center no-print">
     <div class="col-md-6">
         <h1 class="fw-bold text-primary mb-0">الجداول الدراسية لكل الفصول</h1>
-        <p class="text-muted">نظرة شاملة موزعة حسب الصفوف (Mon-Fri)</p>
+        <p class="text-muted">نظرة شاملة موزعة حسب الصفوف (Mon-Sat)</p>
     </div>
     <div class="col-md-6 text-start">
         <button onclick="window.print()" class="btn btn-dark rounded-pill px-4 me-2">
@@ -16,10 +16,10 @@
 </div>
 
 <% 
-    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const dayArabic = {
         'Monday': 'الاثنين', 'Tuesday': 'الثلاثاء', 'Wednesday': 'الأربعاء', 
-        'Thursday': 'الخميس', 'Friday': 'الجمعة'
+        'Thursday': 'الخميس', 'Friday': 'الجمعة', 'Saturday': 'السبت'
     };
     const periodArabic = { 1: 'الأولى', 2: 'الثانية', 3: 'الثالثة', 4: 'الرابعة', 5: 'الخامسة' };
 %>
@@ -45,10 +45,14 @@
                     </thead>
                     <tbody>
                         <% days.forEach(day => { %>
+                            <% 
+                                const dayPeriods = classPeriods.filter(p => p.day_of_week === day);
+                                if (day === 'Saturday' && dayPeriods.length === 0) return; // Hide Sat if no data for this class
+                            %>
                             <tr>
                                 <td class="fw-bold bg-light text-primary"><%= dayArabic[day] %></td>
                                 <% for(let i=1; i<=5; i++) { 
-                                    const period = classPeriods.find(p => p.day_of_week === day && p.period_number == i);
+                                    const period = dayPeriods.find(p => p.period_number == i);
                                 %>
                                     <td class="p-0 position-relative" style="height: 90px;">
                                         <% if (period) { %>
