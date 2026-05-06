@@ -752,16 +752,25 @@ app.get('/admin/import-data', hasRole(['مدير', 'admin']), async (req, res) =
         const [teachers] = await db.execute('SELECT * FROM teachers');
         const [classes] = await db.execute('SELECT * FROM classes');
         
+        await db.execute('DELETE FROM periods'); // Clear before re-import
+
         const dayMap = { 'الاثنين': 'Monday', 'الثلاثاء': 'Tuesday', 'الأربعاء': 'Wednesday', 'الخميس': 'Thursday', 'الجمعة': 'Friday', 'السبت': 'Saturday', 'الأحد': 'Sunday' };
         
         let currentDay = 'Monday';
         let currentClassId = classes[0].id;
         let count = 0;
+        let dayPeriodCounter = {}; // Track periods per day to stay within 1-5
 
         for (let line of lines) {
             line = line.trim();
             if (!line) continue;
-            for (let [ar, en] of Object.entries(dayMap)) { if (line.includes(ar)) { currentDay = en; break; } }
+            for (let [ar, en] of Object.entries(dayMap)) { 
+                if (line.includes(ar)) { 
+                    currentDay = en; 
+                    dayPeriodCounter[currentDay] = dayPeriodCounter[currentDay] || 1;
+                    break; 
+                } 
+            }
             for (let cls of classes) { if (line.includes(cls.name_ar)) { currentClassId = cls.id; break; } }
 
             for (let teacher of teachers) {
@@ -770,9 +779,13 @@ app.get('/admin/import-data', hasRole(['مدير', 'admin']), async (req, res) =
                 if (line.includes(shortName) || line.includes(teacher.name)) {
                     let subject = line.split(teacher.name)[0].split(shortName)[0].trim();
                     if (!subject || subject.length < 3) subject = teacher.subject || 'مقرر دراسي';
+                    
+                    const pNum = (dayPeriodCounter[currentDay] % 5) + 1;
+                    dayPeriodCounter[currentDay]++;
+
                     await db.execute(
-                        'INSERT INTO periods (teacher_id, class_id, day_of_week, subject, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?)',
-                        [teacher.id, currentClassId, currentDay, subject.substring(0, 100), '08:00:00', '09:00:00']
+                        'INSERT INTO periods (teacher_id, class_id, day_of_week, subject, start_time, end_time, period_number) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                        [teacher.id, currentClassId, currentDay, subject.substring(0, 100), '08:00:00', '09:00:00', pNum]
                     );
                     count++;
                 }
