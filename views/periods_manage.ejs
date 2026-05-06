@@ -1,90 +1,173 @@
 <%- include('partials/header') %>
 
-<div class="container mt-5">
-    <div class="row">
-        <div class="col-md-4">
-            <div class="card shadow-sm border-0 rounded-4 mb-4">
-                <div class="card-body p-4">
-                    <h4 class="fw-bold mb-4">إضافة حصة جديدة</h4>
-                    <form action="/periods/add" method="POST">
-                        <div class="mb-3">
-                            <label class="form-label">الأستاذ</label>
-                            <select name="teacherId" class="form-select" required>
-                                <% teachers.forEach(t => { %>
-                                    <option value="<%= t.id %>"><%= t.name %></option>
-                                <% }) %>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">الفصل</label>
-                            <select name="classId" class="form-select" required>
-                                <% classes.forEach(c => { %>
-                                    <option value="<%= c.id %>"><%= c.name_ar %></option>
-                                <% }) %>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">اليوم</label>
-                            <select name="dayOfWeek" class="form-select" required>
-                                <option value="Monday">الاثنين</option>
-                                <option value="Tuesday">الثلاثاء</option>
-                                <option value="Wednesday">الأربعاء</option>
-                                <option value="Thursday">الخميس</option>
-                                <option value="Friday">الجمعة</option>
-                                <option value="Saturday">السبت</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">المادة</label>
-                            <input type="text" name="subject" class="form-control" required>
-                        </div>
-                        <div class="row">
-                            <div class="col-6 mb-3">
-                                <label class="form-label">من</label>
-                                <input type="time" name="startTime" class="form-control" required>
-                            </div>
-                            <div class="col-6 mb-3">
-                                <label class="form-label">إلى</label>
-                                <input type="time" name="endTime" class="form-control" required>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">إضافة</button>
-                    </form>
-                </div>
+<div class="row mb-4 align-items-center">
+    <div class="col-md-6">
+        <h1 class="fw-bold text-primary mb-0">إدارة الجدول الدراسي</h1>
+        <p class="text-muted">توزيع الحصص والكتب على الأيام والفترات</p>
+    </div>
+    <div class="col-md-6 text-start">
+        <a href="/" class="btn btn-outline-primary rounded-pill px-4">
+            <i class="bi bi-house-door me-2"></i>الرجوع للوحة التحكم
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 rounded-4 mb-4">
+            <div class="card-header bg-primary text-white rounded-top-4 p-3">
+                <h5 class="mb-0">إضافة حصة جديدة</h5>
             </div>
-        </div>
-        
-        <div class="col-md-8">
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-body p-4">
-                    <h4 class="fw-bold mb-4">الجدول الدراسي</h4>
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>اليوم</th>
-                                    <th>الأستاذ</th>
-                                    <th>الفصل</th>
-                                    <th>المادة</th>
-                                    <th>الوقت</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <% periods.forEach(p => { %>
-                                    <tr>
-                                        <td><%= p.day_of_week %></td>
-                                        <td><%= p.teacher_name %></td>
-                                        <td><%= p.class_name %></td>
-                                        <td><%= p.subject %></td>
-                                        <td><%= p.start_time %> - <%= p.end_time %></td>
-                                    </tr>
-                                <% }) %>
-                            </tbody>
-                        </table>
+            <div class="card-body p-4">
+                <form action="/periods/add" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">توزيع الكتاب (Assignment)</label>
+                        <select name="assignmentId" id="assignmentSelect" class="form-select" required onchange="updateFieldsFromAssignment()">
+                            <option value="">اختر التوزيع...</option>
+                            <% assignments.forEach(a => { %>
+                                <option value="<%= a.id %>" data-teacher-id="<%= a.teacher_id %>" data-class-id="<%= a.class_id %>">
+                                    <%= a.teacher_name %> - <%= a.book_title %> (<%= a.class_name %>)
+                                </option>
+                            <% }) %>
+                        </select>
+                        <input type="hidden" name="teacherId" id="teacherIdInput">
+                        <input type="hidden" name="classId" id="classIdInput">
                     </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">اليوم</label>
+                        <select name="dayOfWeek" class="form-select" required>
+                            <option value="Saturday">السبت</option>
+                            <option value="Sunday">الأحد</option>
+                            <option value="Monday">الاثنين</option>
+                            <option value="Tuesday">الثلاثاء</option>
+                            <option value="Wednesday">الأربعاء</option>
+                            <option value="Thursday">الخميس</option>
+                            <option value="Friday">الجمعة</option>
+                        </select>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-bold">رقم الحصة</label>
+                            <select name="periodNumber" class="form-select" required>
+                                <% for(let i=1; i<=8; i++) { %>
+                                    <option value="<%= i %>">الحصة <%= i %></option>
+                                <% } %>
+                            </select>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-bold">المادة (اختياري)</label>
+                            <input type="text" name="subject" class="form-control" placeholder="أدخل المادة...">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-bold">وقت البدء</label>
+                            <input type="time" name="startTime" class="form-control" required>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-bold">وقت الانتهاء</label>
+                            <input type="time" name="endTime" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-2">
+                        <button type="submit" class="btn btn-primary rounded-pill py-2 fw-bold">حفظ الحصة</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-white p-4 border-0">
+                <h5 class="fw-bold mb-0 text-primary">الجدول الحالي</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 text-end">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-4">اليوم</th>
+                                <th>الحصة</th>
+                                <th>الأستاذ</th>
+                                <th>الفصل</th>
+                                <th>الكتاب / المادة</th>
+                                <th class="px-4 text-center">الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% 
+                                const dayArabic = {
+                                    'Saturday': 'السبت',
+                                    'Sunday': 'الأحد',
+                                    'Monday': 'الاثنين',
+                                    'Tuesday': 'الثلاثاء',
+                                    'Wednesday': 'الأربعاء',
+                                    'Thursday': 'الخميس',
+                                    'Friday': 'الجمعة'
+                                };
+                            %>
+                            <% periods.forEach(p => { %>
+                                <tr>
+                                    <td class="px-4 fw-bold text-dark"><%= dayArabic[p.day_of_week] || p.day_of_week %></td>
+                                    <td>
+                                        <span class="badge bg-secondary-subtle text-secondary border rounded-pill">
+                                            <%= p.period_number || 'غير محدد' %>
+                                        </span>
+                                    </td>
+                                    <td><%= p.teacher_name %></td>
+                                    <td><%= p.class_name %></td>
+                                    <td>
+                                        <div class="fw-bold"><%= p.book_title || p.subject || '-' %></div>
+                                        <small class="text-muted"><%= p.start_time.substring(0,5) %> - <%= p.end_time.substring(0,5) %></small>
+                                    </td>
+                                    <td class="px-4 text-center">
+                                        <button class="btn btn-sm btn-outline-danger rounded-pill px-3" 
+                                                onclick="deletePeriod(<%= p.id %>)">
+                                            حذف
+                                        </button>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                            <% if (periods.length === 0) { %>
+                                <tr>
+                                    <td colspan="6" class="text-center py-5 text-muted">لا توجد حصص مسجلة حالياً</td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+<script>
+function updateFieldsFromAssignment() {
+    const select = document.getElementById('assignmentSelect');
+    const option = select.options[select.selectedIndex];
+    if (option.value) {
+        document.getElementById('teacherIdInput').value = option.dataset.teacherId;
+        document.getElementById('classIdInput').value = option.dataset.classId;
+    }
+}
+
+async function deletePeriod(id) {
+    if (!confirm('هل أنت متأكد من حذف هذه الحصة؟')) return;
+    const res = await fetch(`/periods/delete/${id}`, { method: 'POST' });
+    if ((await res.json()).success) {
+        location.reload();
+    } else {
+        alert('حدث خطأ أثناء الحذف');
+    }
+}
+</script>
+
+<%- include('partials/footer') %>
     </div>
 </div>
 

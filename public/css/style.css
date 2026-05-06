@@ -20,12 +20,25 @@
 }
 
 body {
-    font-family: 'Noto Sans Arabic', sans-serif;
+    font-family: 'Noto Sans Arabic', sans-serif !important; /* Ensure it overrides header.ejs */
     background-color: var(--background);
     color: var(--text);
     direction: rtl;
     text-align: right;
+    font-size: 19px; /* Slightly larger than 18px as per user request for "small font" */
+    line-height: 1.7;
 }
+
+/* Ensure headings scale up too */
+h1, h2, h3, h4, h5, h6 {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+h1 { font-size: 2.5rem; }
+h3 { font-size: 1.8rem; }
+h4 { font-size: 1.5rem; }
+h5 { font-size: 1.25rem; }
 
 .container {
     max-width: 800px;
@@ -61,24 +74,37 @@ nav {
     padding: 20px;
     margin-bottom: 20px;
     box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-    transition: transform 0.3s ease;
-}
-
-.card:hover {
-    transform: translateY(-5px);
 }
 
 /* Buttons */
 .btn {
-    padding: 10px 20px;
-    border-radius: 8px;
+    padding: 12px 24px; /* Increased padding */
+    border-radius: 10px;
     border: none;
     cursor: pointer;
     font-weight: 600;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease-in-out;
     text-decoration: none;
     display: inline-block;
     text-align: center;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    color: #ffffff !important; /* Force text color to white on hover to prevent "hiding" */
+}
+
+/* Increase badge and small component widths to prevent cropping */
+.badge {
+    min-width: 2.5rem;
+    padding: 0.5em 1em !important;
+}
+
+.status-btn {
+    width: 48px !important; /* Increased from 40px to prevent 3-digit cropping */
+    height: 48px !important;
+    font-size: 1rem !important;
 }
 
 .btn-primary { background-color: var(--primary); color: white; }
@@ -170,11 +196,6 @@ table th, table td {
     box-shadow: 0 4px 15px rgba(44, 62, 80, 0.3);
 }
 
-.class-card:hover {
-    transform: scale(1.05);
-    box-shadow: 0 8px 25px rgba(44, 62, 80, 0.4);
-}
-
 .btn-secondary {
     background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
 }
@@ -183,8 +204,14 @@ table th, table td {
     background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
 }
 
-/* Transitions */
-* { transition: all 0.2s ease-in-out; }
+/* Dashboard Specific Large Buttons */
+.dashboard-btn {
+    padding: 20px 30px;
+    font-size: 1.2rem;
+    width: 100%;
+}
+
+/* Removed global transitions and heavy animations */
 
 /* Mobile specific fixes */
 @media (max-width: 600px) {
@@ -192,14 +219,9 @@ table th, table td {
     .card { padding: 15px; }
 }
 
-/* Fade in animation */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
+/* Light fade in for main content only */
 .container {
-    animation: fadeIn 0.5s ease-out;
+    animation: none; /* Removed heavy animation */
 }
 
 .toast {

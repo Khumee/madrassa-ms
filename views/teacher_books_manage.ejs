@@ -99,7 +99,22 @@
                             <tbody>
                                 <% grouped[teacherName].forEach(a => { %>
                                     <tr>
-                                        <td class="px-4 fw-bold"><%= a.book_title %></td>
+                                        <td class="px-4">
+                                            <div class="fw-bold text-dark"><%= a.book_title %></div>
+                                            <% 
+                                                const total = a.end_page - a.start_page;
+                                                const completed = a.current_page - a.start_page;
+                                                const percentage = total > 0 ? Math.min(100, Math.max(0, Math.round((completed / total) * 100))) : 0;
+                                            %>
+                                            <div class="mt-1 d-flex align-items-center gap-2" style="max-width: 200px;">
+                                                <div class="progress flex-grow-1" style="height: 6px; border-radius: 3px; background-color: #e9ecef;">
+                                                    <div class="progress-bar bg-success" style="width: <%= percentage %>%"></div>
+                                                </div>
+                                                <small class="text-muted" style="font-size: 0.7rem; white-space: nowrap;">
+                                                    ص <%= a.current_page %> (<%= percentage %>%)
+                                                </small>
+                                            </div>
+                                        </td>
                                         <td>
                                             <span class="badge bg-primary-subtle text-primary border rounded-pill px-3">
                                                 <%= a.class_name || 'غير محدد' %>

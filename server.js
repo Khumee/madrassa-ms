@@ -188,13 +188,18 @@ app.get('/dashboard/teacher', hasRole(['أستاذ']), async (req, res) => {
         );
 
         const [assignedBooks] = await db.execute(`
-            SELECT tb.*, b.title as book_title, c.name_ar as class_name
+            SELECT tb.*, b.title as book_title, c.name_ar as class_name,
+                   (SELECT COUNT(*) FROM periods p 
+                    WHERE p.assignment_id = tb.id AND p.day_of_week = ?) as has_period_today,
+                   (SELECT MIN(p.period_number) FROM periods p 
+                    WHERE p.assignment_id = tb.id AND p.day_of_week = ?) as first_period_today
             FROM teacher_books tb
             JOIN books b ON tb.book_id = b.id
             JOIN sessions s ON tb.session_id = s.id
             LEFT JOIN classes c ON tb.class_id = c.id
             WHERE tb.teacher_id = ? AND s.is_active = TRUE
-        `, [teacherId]);
+            ORDER BY has_period_today DESC, first_period_today ASC, tb.id DESC
+        `, [dayName, dayName, teacherId]);
 
         res.render('dashboard_teacher', { 
             teacher: teacher[0], 
@@ -742,14 +747,26 @@ app.get('/reports/teacher/:teacherId', isAuthenticated, async (req, res) => {
 app.get('/periods/manage', hasRole(['ناظم', 'مدير', 'admin']), async (req, res) => {
     try {
         const [periods] = await db.execute(
-            `SELECT p.*, t.name as teacher_name, c.name_ar as class_name 
+            `SELECT p.*, t.name as teacher_name, c.name_ar as class_name, b.title as book_title
              FROM periods p 
              JOIN teachers t ON p.teacher_id = t.id 
-             JOIN classes c ON p.class_id = c.id`
+             JOIN classes c ON p.class_id = c.id
+             LEFT JOIN teacher_books tb ON p.assignment_id = tb.id
+             LEFT JOIN books b ON tb.book_id = b.id
+             ORDER BY FIELD(p.day_of_week, 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'), p.start_time`
         );
         const [teachers] = await db.execute('SELECT * FROM teachers');
         const [classes] = await db.execute('SELECT * FROM classes');
-        res.render('periods_manage', { periods, teachers, classes });
+        const [assignments] = await db.execute(`
+            SELECT tb.id, t.name as teacher_name, b.title as book_title, c.name_ar as class_name
+            FROM teacher_books tb
+            JOIN teachers t ON tb.teacher_id = t.id
+            JOIN books b ON tb.book_id = b.id
+            JOIN classes c ON tb.class_id = c.id
+            JOIN sessions s ON tb.session_id = s.id
+            WHERE s.is_active = TRUE
+        `);
+        res.render('periods_manage', { periods, teachers, classes, assignments });
     } catch (err) {
         console.error(err);
         res.status(500).send('Error loading periods');
@@ -821,16 +838,26 @@ app.post('/users/reset-password', hasRole(['ناظم', 'مدير']), async (req,
 });
 
 app.post('/periods/add', hasRole(['ناظم', 'مدير']), async (req, res) => {
-    const { teacherId, classId, dayOfWeek, startTime, endTime, subject } = req.body;
+    const { teacherId, classId, dayOfWeek, startTime, endTime, subject, assignmentId, periodNumber } = req.body;
     try {
         await db.execute(
-            'INSERT INTO periods (teacher_id, class_id, day_of_week, start_time, end_time, subject) VALUES (?, ?, ?, ?, ?, ?)',
-            [teacherId, classId, dayOfWeek, startTime, endTime, subject]
+            'INSERT INTO periods (teacher_id, class_id, day_of_week, start_time, end_time, subject, assignment_id, period_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [teacherId, classId, dayOfWeek, startTime, endTime, subject || null, assignmentId || null, periodNumber || null]
         );
         res.redirect('/periods/manage');
     } catch (err) {
         console.error(err);
         res.status(500).send('Error adding period');
+    }
+});
+
+app.post('/periods/delete/:id', hasRole(['ناظم', 'مدير']), async (req, res) => {
+    try {
+        await db.execute('DELETE FROM periods WHERE id = ?', [req.params.id]);
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false });
     }
 });
 
