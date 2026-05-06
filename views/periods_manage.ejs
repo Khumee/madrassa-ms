@@ -15,6 +15,13 @@
     </div>
 </div>
 
+<% 
+    const dayArabic = {
+        'Saturday': 'السبت', 'Sunday': 'الأحد', 'Monday': 'الاثنين', 
+        'Tuesday': 'الثلاثاء', 'Wednesday': 'الأربعاء', 'Thursday': 'الخميس', 'Friday': 'الجمعة'
+    };
+%>
+
 <div class="row">
     <div class="col-md-4">
         <div class="card shadow-sm border-0 rounded-4 mb-4">
@@ -116,7 +123,6 @@
                         <div class="d-flex flex-wrap gap-2" id="dayFilters">
                             <button class="btn btn-sm btn-dark rounded-pill px-3 filter-chip active" data-filter="all" data-type="day">الكل</button>
                             <% 
-                                const dayArabic = { 'Monday': 'الاثنين', 'Tuesday': 'الثلاثاء', 'Wednesday': 'الأربعاء', 'Thursday': 'الخميس', 'Friday': 'الجمعة', 'Saturday': 'السبت', 'Sunday': 'الأحد' };
                                 const uniqueDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
                                 uniqueDays.forEach(day => { 
                             %>
@@ -139,16 +145,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <% 
-                                const dayArabic = {
-                                    'Saturday': 'السبت',
-                                    'Sunday': 'الأحد',
-                                    'Monday': 'الاثنين',
-                                    'Tuesday': 'الثلاثاء',
-                                    'Wednesday': 'الأربعاء',
-                                    'Thursday': 'الخميس',
-                                    'Friday': 'الجمعة'
-                                };
+                                <% 
                                 let lastGroup = '';
                                 periods.forEach(p => { 
                                     const currentGroup = groupBy === 'teacher' ? p.teacher_name : dayArabic[p.day_of_week];
