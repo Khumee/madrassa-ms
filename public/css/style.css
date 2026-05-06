@@ -256,6 +256,13 @@ table th, table td {
     overflow: hidden;
 }
 
+/* Responsive Table & Full Width Fixes */
+@media (min-width: 992px) {
+    .table-responsive { overflow-x: visible !important; }
+    .container, .container-fluid { max-width: 100% !important; padding-left: 2rem !important; padding-right: 2rem !important; }
+    .timetable-container-wide { max-width: 100% !important; }
+}
+
 /* Custom Vibrant Button Colors */
 .btn-indigo { background-color: #6610f2; border-color: #6610f2; color: #fff; }
 .btn-indigo:hover { background-color: #520dc2; border-color: #4d0ab6; color: #fff; }
