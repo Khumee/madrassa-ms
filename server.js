@@ -783,9 +783,19 @@ app.get('/admin/import-data', hasRole(['مدير', 'admin']), async (req, res) =
                     const pNum = (dayPeriodCounter[currentDay] % 5) + 1;
                     dayPeriodCounter[currentDay]++;
 
+                    // Map period number to exact times
+                    const timeMap = {
+                        1: { start: '18:00', end: '18:40' },
+                        2: { start: '18:40', end: '19:20' },
+                        3: { start: '19:40', end: '20:20' },
+                        4: { start: '20:20', end: '21:00' },
+                        5: { start: '21:00', end: '21:40' }
+                    };
+                    const times = timeMap[pNum];
+
                     await db.execute(
                         'INSERT INTO periods (teacher_id, class_id, day_of_week, subject, start_time, end_time, period_number) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                        [teacher.id, currentClassId, currentDay, subject.substring(0, 100), '08:00:00', '09:00:00', pNum]
+                        [teacher.id, currentClassId, currentDay, subject.substring(0, 100), times.start, times.end, pNum]
                     );
                     count++;
                 }
