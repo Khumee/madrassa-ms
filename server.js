@@ -743,6 +743,48 @@ app.get('/reports/teacher/:teacherId', isAuthenticated, async (req, res) => {
     }
 });
 
+// Emergency Import Route (Temporary)
+app.get('/admin/import-data', hasRole(['مدير', 'admin']), async (req, res) => {
+    try {
+        const fs = require('fs');
+        const content = fs.readFileSync('timetable_text.txt', 'utf8');
+        const lines = content.split('\n');
+        const [teachers] = await db.execute('SELECT * FROM teachers');
+        const [classes] = await db.execute('SELECT * FROM classes');
+        
+        const dayMap = { 'الاثنين': 'Monday', 'الثلاثاء': 'Tuesday', 'الأربعاء': 'Wednesday', 'الخميس': 'Thursday', 'الجمعة': 'Friday', 'السبت': 'Saturday', 'الأحد': 'Sunday' };
+        
+        let currentDay = 'Monday';
+        let currentClassId = classes[0].id;
+        let count = 0;
+
+        for (let line of lines) {
+            line = line.trim();
+            if (!line) continue;
+            for (let [ar, en] of Object.entries(dayMap)) { if (line.includes(ar)) { currentDay = en; break; } }
+            for (let cls of classes) { if (line.includes(cls.name_ar)) { currentClassId = cls.id; break; } }
+
+            for (let teacher of teachers) {
+                const names = teacher.name.split(' ');
+                const shortName = names[names.length - 1];
+                if (line.includes(shortName) || line.includes(teacher.name)) {
+                    let subject = line.split(teacher.name)[0].split(shortName)[0].trim();
+                    if (!subject || subject.length < 3) subject = teacher.subject || 'مقرر دراسي';
+                    await db.execute(
+                        'INSERT INTO periods (teacher_id, class_id, day_of_week, subject, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?)',
+                        [teacher.id, currentClassId, currentDay, subject.substring(0, 100), '08:00:00', '09:00:00']
+                    );
+                    count++;
+                }
+            }
+        }
+        res.send(`Successfully imported ${count} records. Please go back to /periods/manage`);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Import failed: ' + err.message);
+    }
+});
+
 // Period Management (Nazim/Mudeer)
 app.get('/periods/manage', hasRole(['ناظم', 'مدير', 'admin']), async (req, res) => {
     try {
