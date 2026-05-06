@@ -209,6 +209,17 @@ table th, table td {
     padding: 20px 30px;
     font-size: 1.2rem;
     width: 100%;
+    transition: all 0.2s ease-in-out;
+}
+
+.dashboard-btn:hover {
+    background-color: var(--primary) !important;
+    color: #ffffff !important;
+}
+
+.dashboard-btn:hover i, 
+.dashboard-btn:hover span {
+    color: #ffffff !important;
 }
 
 /* Removed global transitions and heavy animations */
