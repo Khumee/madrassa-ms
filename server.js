@@ -810,6 +810,13 @@ app.get('/admin/import-data', hasRole(['مدير', 'admin']), async (req, res) =
 
 // Period Management (Nazim/Mudeer)
 app.get('/periods/manage', hasRole(['ناظم', 'مدير', 'admin']), async (req, res) => {
+    const groupBy = req.query.groupBy || 'day'; // Default to day
+    let orderBy = 'FIELD(p.day_of_week, "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"), p.start_time';
+    
+    if (groupBy === 'teacher') {
+        orderBy = 't.name, FIELD(p.day_of_week, "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"), p.start_time';
+    }
+
     try {
         const [periods] = await db.execute(
             `SELECT p.*, t.name as teacher_name, c.name_ar as class_name, b.title as book_title
@@ -818,7 +825,7 @@ app.get('/periods/manage', hasRole(['ناظم', 'مدير', 'admin']), async (re
              JOIN classes c ON p.class_id = c.id
              LEFT JOIN teacher_books tb ON p.assignment_id = tb.id
              LEFT JOIN books b ON tb.book_id = b.id
-             ORDER BY FIELD(p.day_of_week, 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'), p.start_time`
+             ORDER BY ${orderBy}`
         );
         const [teachers] = await db.execute('SELECT * FROM teachers');
         const [classes] = await db.execute('SELECT * FROM classes');
@@ -831,7 +838,7 @@ app.get('/periods/manage', hasRole(['ناظم', 'مدير', 'admin']), async (re
             JOIN sessions s ON tb.session_id = s.id
             WHERE s.is_active = TRUE
         `);
-        res.render('periods_manage', { periods, teachers, classes, assignments });
+        res.render('periods_manage', { periods, teachers, classes, assignments, groupBy });
     } catch (err) {
         console.error(err);
         res.status(500).send('Error loading periods');

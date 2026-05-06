@@ -85,21 +85,24 @@
     </div>
     
     <div class="col-md-8">
-        <div class="card shadow-sm border-0 rounded-4">
-            <div class="card-header bg-white p-4 border-0">
-                <h5 class="fw-bold mb-0 text-primary">الجدول الحالي</h5>
+        <div class="card shadow-sm border-0 rounded-4 overflow-hidden mb-5">
+            <div class="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center">
+                <h3 class="card-title fw-bold mb-0">الجدول الحالي</h3>
+                <div class="btn-group rounded-pill overflow-hidden border">
+                    <a href="/periods/manage?groupBy=day" class="btn btn-sm <%= groupBy === 'day' ? 'btn-primary' : 'btn-white text-muted' %> px-3">حسب اليوم</a>
+                    <a href="/periods/manage?groupBy=teacher" class="btn btn-sm <%= groupBy === 'teacher' ? 'btn-primary' : 'btn-white text-muted' %> px-3">حسب الأستاذ</a>
+                </div>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0 text-end">
-                        <thead class="table-light">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light text-muted small text-uppercase">
                             <tr>
-                                <th class="px-4">اليوم</th>
-                                <th>الحصة</th>
-                                <th>الأستاذ</th>
-                                <th>الفصل</th>
-                                <th>الكتاب / المادة</th>
-                                <th class="px-4 text-center">الإجراءات</th>
+                                <th class="px-4" style="width: 15%;">الحصة</th>
+                                <th style="width: 25%;"><%= groupBy === 'teacher' ? 'اليوم' : 'الأستاذ' %></th>
+                                <th style="width: 15%;">الفصل</th>
+                                <th style="width: 30%;">الكتاب / المادة</th>
+                                <th class="px-4 text-center" style="width: 15%;">الإجراءات</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -113,16 +116,26 @@
                                     'Thursday': 'الخميس',
                                     'Friday': 'الجمعة'
                                 };
+                                let lastGroup = '';
+                                periods.forEach(p => { 
+                                    const currentGroup = groupBy === 'teacher' ? p.teacher_name : dayArabic[p.day_of_week];
+                                    if (currentGroup !== lastGroup) {
+                                        lastGroup = currentGroup;
                             %>
-                            <% periods.forEach(p => { %>
+                                <tr class="table-secondary">
+                                    <td colspan="5" class="px-4 fw-bold text-primary bg-primary-subtle border-0">
+                                        <i class="bi <%= groupBy === 'teacher' ? 'bi-person-badge' : 'bi-calendar-event' %> me-2"></i>
+                                        <%= currentGroup %>
+                                    </td>
+                                </tr>
+                            <% } %>
                                 <tr>
-                                    <td class="px-4 fw-bold text-dark"><%= dayArabic[p.day_of_week] || p.day_of_week %></td>
-                                    <td>
+                                    <td class="px-4">
                                         <span class="badge bg-secondary-subtle text-secondary border rounded-pill">
-                                            <%= p.period_number || 'غير محدد' %>
+                                            الحصة <%= p.period_number || 'غير محدد' %>
                                         </span>
                                     </td>
-                                    <td><%= p.teacher_name %></td>
+                                    <td><%= groupBy === 'teacher' ? dayArabic[p.day_of_week] : p.teacher_name %></td>
                                     <td><%= p.class_name %></td>
                                     <td>
                                         <div class="subject-text-wrap fw-bold text-dark"><%= p.book_title || p.subject || 'غير محدد' %></div>
@@ -130,7 +143,7 @@
                                     </td>
                                     <td class="px-4 text-center">
                                         <button class="btn btn-sm btn-outline-primary rounded-pill px-3 me-1" 
-                                                onclick="openEditModal(<%= JSON.stringify(p) %>)">
+                                                onclick='openEditModal(<%- JSON.stringify(p) %>)'>
                                             تعديل
                                         </button>
                                         <button class="btn btn-sm btn-outline-danger rounded-pill px-3" 
@@ -142,7 +155,7 @@
                             <% }) %>
                             <% if (periods.length === 0) { %>
                                 <tr>
-                                    <td colspan="6" class="text-center py-5 text-muted">لا توجد حصص مسجلة حالياً</td>
+                                    <td colspan="5" class="text-center py-5 text-muted">لا توجد حصص مسجلة حالياً</td>
                                 </tr>
                             <% } %>
                         </tbody>
