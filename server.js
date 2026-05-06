@@ -837,6 +837,23 @@ app.post('/users/reset-password', hasRole(['ناظم', 'مدير']), async (req,
     }
 });
 
+app.get('/periods/full', async (req, res) => {
+    try {
+        const [periods] = await db.execute(
+            `SELECT p.*, t.name as teacher_name, c.name_ar as class_name, b.title as book_title
+             FROM periods p 
+             JOIN teachers t ON p.teacher_id = t.id 
+             JOIN classes c ON p.class_id = c.id
+             LEFT JOIN teacher_books tb ON p.assignment_id = tb.id
+             LEFT JOIN books b ON tb.book_id = b.id`
+        );
+        res.render('timetable_full', { periods });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error loading full timetable');
+    }
+});
+
 app.post('/periods/add', hasRole(['ناظم', 'مدير']), async (req, res) => {
     const { teacherId, classId, dayOfWeek, startTime, endTime, subject, assignmentId, periodNumber } = req.body;
     try {

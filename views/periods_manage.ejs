@@ -6,6 +6,9 @@
         <p class="text-muted">توزيع الحصص والكتب على الأيام والفترات</p>
     </div>
     <div class="col-md-6 text-start">
+        <a href="/periods/full" class="btn btn-success rounded-pill px-4 me-2">
+            <i class="bi bi-calendar3 me-2"></i>عرض الجدول كاملاً
+        </a>
         <a href="/" class="btn btn-outline-primary rounded-pill px-4">
             <i class="bi bi-house-door me-2"></i>الرجوع للوحة التحكم
         </a>
@@ -122,7 +125,7 @@
                                     <td><%= p.teacher_name %></td>
                                     <td><%= p.class_name %></td>
                                     <td>
-                                        <div class="fw-bold"><%= p.book_title || p.subject || '-' %></div>
+                                        <div class="fw-bold"><%= p.book_title || '-' %></div>
                                         <small class="text-muted"><%= p.start_time.substring(0,5) %> - <%= p.end_time.substring(0,5) %></small>
                                     </td>
                                     <td class="px-4 text-center">
