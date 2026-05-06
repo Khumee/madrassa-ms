@@ -104,6 +104,7 @@
                 
                 <!-- Filter Chips -->
                 <div class="filters-container">
+                    <% if (groupBy !== 'day') { %>
                     <div class="mb-2">
                         <small class="text-muted d-block mb-1">تصفية حسب الأستاذ:</small>
                         <div class="d-flex flex-wrap gap-2" id="teacherFilters">
@@ -118,6 +119,7 @@
                             <% }) %>
                         </div>
                     </div>
+                    <% } %>
                     <div>
                         <small class="text-muted d-block mb-1">تصفية حسب اليوم:</small>
                         <div class="d-flex flex-wrap gap-2" id="dayFilters">
@@ -308,12 +310,21 @@ document.querySelectorAll('.filter-chip').forEach(chip => {
         activeFilters[type] = filter;
         
         // Update UI state
-        document.querySelectorAll(`.filter-chip[data-type="${type}"]`).forEach(c => c.classList.remove('active', 'btn-dark', 'btn-primary', 'btn-success', 'btn-danger', 'btn-warning', 'btn-info', 'btn-secondary'));
-        document.querySelectorAll(`.filter-chip[data-type="${type}"]`).forEach(c => c.classList.add(`btn-outline-${c.classList.contains('active') ? 'dark' : 'secondary'}`)); // Reset colors
+        document.querySelectorAll(`.filter-chip[data-type="${type}"]`).forEach(c => {
+            c.classList.remove('active', 'btn-dark', 'btn-primary', 'btn-success', 'btn-danger', 'btn-warning', 'btn-info', 'btn-secondary');
+            // Restore original outline color
+            const originalColor = c.getAttribute('class').match(/btn-outline-(\w+)/);
+            if (!originalColor) {
+                const colorMatch = c.dataset.filter === 'all' ? 'dark' : (c.classList.toString().match(/btn-(\w+)/) || [null, 'secondary'])[1];
+                c.classList.add(`btn-outline-${colorMatch}`);
+            }
+        });
         
         this.classList.add('active');
-        this.classList.remove('btn-outline-secondary', 'btn-outline-primary', 'btn-outline-success', 'btn-outline-danger', 'btn-outline-warning', 'btn-outline-info', 'btn-outline-dark');
-        this.classList.add(type === 'teacher' && filter !== 'all' ? `btn-${this.classList.toString().match(/outline-(\w+)/)[1]}` : 'btn-dark');
+        const colorMatch = this.classList.toString().match(/btn-outline-(\w+)/);
+        const color = colorMatch ? colorMatch[1] : 'dark';
+        this.classList.remove(`btn-outline-${color}`);
+        this.classList.add(`btn-${color}`);
 
         applyFilters();
     });
