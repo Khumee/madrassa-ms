@@ -65,14 +65,14 @@
                         </div>
                     </div>
 
-                    <div class="row">
+                    <div class="row d-none">
                         <div class="col-6 mb-3">
                             <label class="form-label fw-bold">وقت البدء</label>
-                            <input type="time" name="startTime" id="addStartTime" class="form-control" required>
+                            <input type="time" name="startTime" id="addStartTime" class="form-control">
                         </div>
                         <div class="col-6 mb-3">
                             <label class="form-label fw-bold">وقت الانتهاء</label>
-                            <input type="time" name="endTime" id="addEndTime" class="form-control" required>
+                            <input type="time" name="endTime" id="addEndTime" class="form-control">
                         </div>
                     </div>
 
@@ -139,16 +139,16 @@
                                     <td><%= p.class_name %></td>
                                     <td>
                                         <div class="subject-text-wrap fw-bold text-dark"><%= p.book_title || p.subject || 'غير محدد' %></div>
-                                        <small class="text-muted"><%= p.start_time.substring(0,5) %> - <%= p.end_time.substring(0,5) %></small>
+
                                     </td>
                                     <td class="px-4 text-center">
-                                        <button class="btn btn-sm btn-outline-primary rounded-pill px-3 me-1" 
-                                                onclick='openEditModal(<%- JSON.stringify(p) %>)'>
-                                            تعديل
+                                        <button class="btn btn-sm btn-outline-primary rounded-circle p-2 lh-1 me-1" 
+                                                onclick='openEditModal(<%- JSON.stringify(p) %>)' title="تعديل">
+                                            <i class="bi bi-pencil-square"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-outline-danger rounded-pill px-3" 
-                                                onclick="deletePeriod(<%= p.id %>)">
-                                            حذف
+                                        <button class="btn btn-sm btn-outline-danger rounded-circle p-2 lh-1" 
+                                                onclick="deletePeriod(<%= p.id %>)" title="حذف">
+                                            <i class="bi bi-trash"></i>
                                         </button>
                                     </td>
                                 </tr>
@@ -192,14 +192,14 @@
                             <% } %>
                         </select>
                     </div>
-                    <div class="row">
+                    <div class="row d-none">
                         <div class="col-6 mb-3">
                             <label class="form-label fw-bold">وقت البدء</label>
-                            <input type="time" name="startTime" id="editStartTime" class="form-control" required>
+                            <input type="time" name="startTime" id="editStartTime" class="form-control">
                         </div>
                         <div class="col-6 mb-3">
                             <label class="form-label fw-bold">وقت الانتهاء</label>
-                            <input type="time" name="endTime" id="editEndTime" class="form-control" required>
+                            <input type="time" name="endTime" id="editEndTime" class="form-control">
                         </div>
                     </div>
                 </div>
