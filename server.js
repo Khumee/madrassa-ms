@@ -868,6 +868,24 @@ app.post('/periods/add', hasRole(['ناظم', 'مدير']), async (req, res) => 
     }
 });
 
+app.post('/periods/edit/:id', hasRole(['ناظم', 'مدير']), async (req, res) => {
+    const { assignmentId, periodNumber, startTime, endTime } = req.body;
+    try {
+        // Fetch teacher_id and class_id from the assignment
+        const [assignment] = await db.execute('SELECT teacher_id, class_id FROM teacher_books WHERE id = ?', [assignmentId]);
+        if (assignment.length > 0) {
+            await db.execute(
+                'UPDATE periods SET assignment_id = ?, period_number = ?, start_time = ?, end_time = ?, teacher_id = ?, class_id = ? WHERE id = ?',
+                [assignmentId, periodNumber, startTime, endTime, assignment[0].teacher_id, assignment[0].class_id, req.params.id]
+            );
+        }
+        res.redirect('/periods/manage');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error updating period');
+    }
+});
+
 app.post('/periods/delete/:id', hasRole(['ناظم', 'مدير']), async (req, res) => {
     try {
         await db.execute('DELETE FROM periods WHERE id = ?', [req.params.id]);

@@ -125,10 +125,14 @@
                                     <td><%= p.teacher_name %></td>
                                     <td><%= p.class_name %></td>
                                     <td>
-                                        <div class="fw-bold"><%= p.book_title || '-' %></div>
+                                        <div class="fw-bold"><%= p.book_title || p.subject || 'غير محدد' %></div>
                                         <small class="text-muted"><%= p.start_time.substring(0,5) %> - <%= p.end_time.substring(0,5) %></small>
                                     </td>
                                     <td class="px-4 text-center">
+                                        <button class="btn btn-sm btn-outline-primary rounded-pill px-3 me-1" 
+                                                onclick="openEditModal(<%= JSON.stringify(p) %>)">
+                                            تعديل
+                                        </button>
                                         <button class="btn btn-sm btn-outline-danger rounded-pill px-3" 
                                                 onclick="deletePeriod(<%= p.id %>)">
                                             حذف
@@ -149,7 +153,63 @@
     </div>
 </div>
 
+<!-- Edit Period Modal -->
+<div class="modal fade" id="editPeriodModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-4 border-0">
+            <div class="modal-header bg-primary text-white border-0">
+                <h5 class="modal-title text-white">تعديل الحصة</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editPeriodForm" method="POST">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">توزيع الكتاب</label>
+                        <select name="assignmentId" id="editAssignmentId" class="form-select" required>
+                            <% assignments.forEach(a => { %>
+                                <option value="<%= a.id %>"><%= a.teacher_name %> - <%= a.book_title %> (<%= a.class_name %>)</option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">رقم الحصة</label>
+                        <select name="periodNumber" id="editPeriodNumber" class="form-select" required>
+                            <% for(let i=1; i<=8; i++) { %>
+                                <option value="<%= i %>">الحصة <%= i %></option>
+                            <% } %>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-bold">وقت البدء</label>
+                            <input type="time" name="startTime" id="editStartTime" class="form-control" required>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-bold">وقت الانتهاء</label>
+                            <input type="time" name="endTime" id="editEndTime" class="form-control" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">حفظ التغييرات</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
+function openEditModal(period) {
+    const modal = new bootstrap.Modal(document.getElementById('editPeriodModal'));
+    document.getElementById('editPeriodForm').action = `/periods/edit/${period.id}`;
+    document.getElementById('editAssignmentId').value = period.assignment_id || '';
+    document.getElementById('editPeriodNumber').value = period.period_number || 1;
+    document.getElementById('editStartTime').value = period.start_time.substring(0,5);
+    document.getElementById('editEndTime').value = period.end_time.substring(0,5);
+    modal.show();
+}
+
 function updateFieldsFromAssignment() {
     const select = document.getElementById('assignmentSelect');
     const option = select.options[select.selectedIndex];
