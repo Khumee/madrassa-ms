@@ -22,7 +22,7 @@
                 <thead class="table-primary">
                     <tr>
                         <th style="width: 100px;">اليوم / الحصة</th>
-                        <% for(let i=1; i<=8; i++) { %>
+                        <% for(let i=1; i<=5; i++) { %>
                             <th>الحصة <%= i %></th>
                         <% } %>
                     </tr>
@@ -38,10 +38,10 @@
                     <% days.forEach(day => { %>
                         <tr>
                             <td class="table-light fw-bold"><%= dayArabic[day] %></td>
-                            <% for(let i=1; i<=8; i++) { 
+                            <% for(let i=1; i<=5; i++) { 
                                 const period = periods.find(p => p.day_of_week === day && p.period_number == i);
                             %>
-                                <td class="p-2" style="height: 100px; width: 12.5%;">
+                                <td class="p-2" style="height: 100px; width: 20%;">
                                     <% if (period) { %>
                                         <div class="p-2 rounded-3 bg-success-subtle border border-success-subtle h-100 d-flex flex-column justify-content-center">
                                             <div class="fw-bold text-dark small mb-1"><%= period.book_title || period.subject %></div>
