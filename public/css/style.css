@@ -256,6 +256,30 @@ table th, table td {
     overflow: hidden;
 }
 
+/* Custom Vibrant Button Colors */
+.btn-indigo { background-color: #6610f2; border-color: #6610f2; color: #fff; }
+.btn-indigo:hover { background-color: #520dc2; border-color: #4d0ab6; color: #fff; }
+.btn-outline-indigo { color: #6610f2; border-color: #6610f2; }
+.btn-outline-indigo:hover, .btn-outline-indigo.active { background-color: #6610f2; color: #fff; }
+
+.btn-orange { background-color: #fd7e14; border-color: #fd7e14; color: #fff; }
+.btn-orange:hover { background-color: #ca6510; border-color: #ca6510; color: #fff; }
+.btn-outline-orange { color: #fd7e14; border-color: #fd7e14; }
+.btn-outline-orange:hover, .btn-outline-orange.active { background-color: #fd7e14; color: #fff; }
+
+.btn-teal { background-color: #20c997; border-color: #20c997; color: #fff; }
+.btn-teal:hover { background-color: #1aa179; border-color: #1aa179; color: #fff; }
+.btn-outline-teal { color: #20c997; border-color: #20c997; }
+.btn-outline-teal:hover, .btn-outline-teal.active { background-color: #20c997; color: #fff; }
+
+.btn-purple { background-color: #6f42c1; border-color: #6f42c1; color: #fff; }
+.btn-purple:hover { background-color: #59359a; border-color: #59359a; color: #fff; }
+.btn-outline-purple { color: #6f42c1; border-color: #6f42c1; }
+.btn-outline-purple:hover, .btn-outline-purple.active { background-color: #6f42c1; color: #fff; }
+
+.filter-chip { transition: all 0.2s; }
+.filter-chip.active { box-shadow: 0 4px 10px rgba(0,0,0,0.15); transform: translateY(-1px); }
+
 /* Removed global transitions and heavy animations */
 
 /* Mobile specific fixes */

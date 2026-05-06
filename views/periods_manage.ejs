@@ -110,7 +110,7 @@
                         <div class="d-flex flex-wrap gap-2" id="teacherFilters">
                             <button class="btn btn-sm btn-dark rounded-pill px-3 filter-chip active" data-filter="all" data-type="teacher">الكل</button>
                             <% 
-                                const colors = ['primary', 'success', 'danger', 'warning', 'info', 'dark', 'secondary'];
+                                const colors = ['primary', 'success', 'danger', 'warning', 'info', 'indigo', 'orange', 'teal', 'purple'];
                                 const uniqueTeachers = [...new Set(periods.map(p => p.teacher_name))];
                                 uniqueTeachers.forEach((name, i) => { 
                                     const color = colors[i % colors.length];
