@@ -743,68 +743,204 @@ app.get('/reports/teacher/:teacherId', isAuthenticated, async (req, res) => {
     }
 });
 
-// Emergency Import Route (Temporary)
+// Emergency Import Route (Full Sync)
 app.get('/admin/import-data', hasRole(['مدير', 'admin']), async (req, res) => {
     try {
-        const fs = require('fs');
-        const content = fs.readFileSync('timetable_text.txt', 'utf8');
-        const lines = content.split('\n');
-        const [teachers] = await db.execute('SELECT * FROM teachers');
-        const [classes] = await db.execute('SELECT * FROM classes');
+        console.log('Starting Complete Live Sync...');
         
-        await db.execute('DELETE FROM periods'); // Clear before re-import
+        // 1. Get active session
+        const [sessions] = await db.execute('SELECT id FROM sessions WHERE is_active = TRUE LIMIT 1');
+        if (sessions.length === 0) return res.status(400).send('No active session found!');
+        const sessionId = sessions[0].id;
 
-        const dayMap = { 'الاثنين': 'Monday', 'الثلاثاء': 'Tuesday', 'الأربعاء': 'Wednesday', 'الخميس': 'Thursday', 'الجمعة': 'Friday', 'السبت': 'Saturday', 'الأحد': 'Sunday' };
-        
-        let currentDay = 'Monday';
-        let currentClassId = classes[0].id;
+        // 2. Clear existing mappings
+        await db.execute('DELETE FROM periods');
+
+        // 3. Ensure Zubair Teacher exists
+        const [zCheck] = await db.execute('SELECT id FROM teachers WHERE name LIKE ?', ['%زبیر%']);
+        let zubairId;
+        if (zCheck.length === 0) {
+            const [resZ] = await db.execute('INSERT INTO teachers (name, subject) VALUES (?, ?)', ['زبیر صاحب', 'هداية النحو']);
+            zubairId = resZ.insertId;
+        } else { zubairId = zCheck[0].id; }
+
+        // 4. Map Teacher names to IDs (Using Flexible Search)
+        const getT = async (name) => {
+            const [rows] = await db.execute('SELECT id FROM teachers WHERE name LIKE ?', [`%${name}%`]);
+            return rows.length > 0 ? rows[0].id : null;
+        };
+
+        const t = {
+            musharraf: await getT('مشرف'), habib: await getT('حبيب'), kamaal: await getT('کمال') || await getT('كمال'),
+            hasan: await getT('حسن'), usman: await getT('عبد القادر'), fahad: await getT('فہد'),
+            hamza: await getT('حمزه'), q_ejaz: await getT('قمر اعجاز'), baron: await getT('بارون'),
+            q_ali: await getT('قمر علی شاہ'), zubair: zubairId
+        };
+
+        // 5. Get Classes
+        const getC = async (name) => {
+            const [rows] = await db.execute('SELECT id FROM classes WHERE name_ar = ?', [name]);
+            return rows.length > 0 ? rows[0].id : null;
+        };
+
+        const c = {
+            oola: await getC('الأولى'), sania: await getC('الثانية'), khamisa: await getC('الخامسة'),
+            sadisa: await getC('السادسة'), daura: await getC('دورة حديث')
+        };
+
+        const times = {
+            1: { s: '18:00', e: '18:40' }, 2: { s: '18:40', e: '19:20' },
+            3: { s: '19:40', e: '20:20' }, 4: { s: '20:20', e: '21:00' },
+            5: { s: '21:00', e: '21:40' }
+        };
+
+        // 6. Data Matrix (From your images)
+        const data = [
+            { cid: c.oola, d: 'Monday', p: 1, tid: t.hamza, s: 'اللغة العربية وحفظ الأحاديث والمحادثة العربية' },
+            { cid: c.oola, d: 'Monday', p: 2, tid: t.musharraf, s: 'اللغة الفارسية' },
+            { cid: c.oola, d: 'Monday', p: 3, tid: t.habib, s: 'التجويد والسيرة وحفظ القرآن والأدعية' },
+            { cid: c.oola, d: 'Monday', p: 4, tid: t.kamaal, s: 'گردانوں کا اجرا' },
+            { cid: c.oola, d: 'Tuesday', p: 1, tid: t.musharraf, s: 'اللغة الفارسية' },
+            { cid: c.oola, d: 'Tuesday', p: 2, tid: t.hasan, s: 'الصرف وتمرين الصرف' },
+            { cid: c.oola, d: 'Tuesday', p: 3, tid: t.habib, s: 'التجويد والسيرة وحفظ القرآن والأدعية' },
+            { cid: c.oola, d: 'Tuesday', p: 4, tid: t.kamaal, s: 'گردانوں کا اجرا' },
+            { cid: c.oola, d: 'Wednesday', p: 1, tid: t.hamza, s: 'اللغة العربية وحفظ الأحاديث والمحادثة العربية' },
+            { cid: c.oola, d: 'Wednesday', p: 2, tid: t.hasan, s: 'الصرف وتمرين الصرف' },
+            { cid: c.oola, d: 'Wednesday', p: 3, tid: t.hasan, s: 'الصرف وتمرين الصرف' },
+            { cid: c.oola, d: 'Wednesday', p: 4, tid: t.musharraf, s: 'اللغة الفارسية' },
+            { cid: c.oola, d: 'Thursday', p: 1, tid: t.hamza, s: 'اللغة العربية وحفظ الأحاديث والمحادثة العربية' },
+            { cid: c.oola, d: 'Thursday', p: 2, tid: t.kamaal, s: 'گردانوں کا اجرا' },
+            { cid: c.oola, d: 'Thursday', p: 3, tid: t.hasan, s: 'الصرف وتمرين الصرف' },
+            { cid: c.oola, d: 'Thursday', p: 4, tid: t.usman, s: 'النحو وتمرين النحو' },
+            { cid: c.oola, d: 'Friday', p: 1, tid: t.habib, s: 'التجويد والسيرة وحفظ القرآن والأدعية' },
+            { cid: c.oola, d: 'Friday', p: 2, tid: t.habib, s: 'التجويد والسيرة وحفظ القرآن والأدعية' },
+            { cid: c.oola, d: 'Friday', p: 3, tid: t.usman, s: 'النحو وتمرين النحو' },
+            { cid: c.oola, d: 'Friday', p: 4, tid: t.usman, s: 'النحو وتمرين النحو' },
+
+            { cid: c.sania, d: 'Monday', p: 1, tid: t.kamaal, s: 'تفسير عم' },
+            { cid: c.sania, d: 'Monday', p: 2, tid: t.kamaal, s: 'الأدب والحديث' },
+            { cid: c.sania, d: 'Monday', p: 3, tid: t.zubair, s: 'هداية النحو' },
+            { cid: c.sania, d: 'Monday', p: 4, tid: t.usman, s: 'القدوري الأول' },
+            { cid: c.sania, d: 'Tuesday', p: 1, tid: t.kamaal, s: 'تفسير عم' },
+            { cid: c.sania, d: 'Tuesday', p: 2, tid: t.fahad, s: 'المنطق' },
+            { cid: c.sania, d: 'Tuesday', p: 3, tid: t.usman, s: 'القدوري الأول' },
+            { cid: c.sania, d: 'Tuesday', p: 4, tid: t.usman, s: 'القدوري الأول' },
+            { cid: c.sania, d: 'Wednesday', p: 1, tid: t.kamaal, s: 'تفسير عم' },
+            { cid: c.sania, d: 'Wednesday', p: 2, tid: t.zubair, s: 'هداية النحو' },
+            { cid: c.sania, d: 'Wednesday', p: 3, tid: t.usman, s: 'القدوري الأول' },
+            { cid: c.sania, d: 'Wednesday', p: 4, tid: t.baron, s: 'علم الصيغة' },
+            { cid: c.sania, d: 'Thursday', p: 1, tid: t.zubair, s: 'هداية النحو' },
+            { cid: c.sania, d: 'Thursday', p: 2, tid: t.fahad, s: 'المنطق' },
+            { cid: c.sania, d: 'Thursday', p: 3, tid: t.kamaal, s: 'الأدب والحديث' },
+            { cid: c.sania, d: 'Thursday', p: 4, tid: t.baron, s: 'علم الصيغة' },
+            { cid: c.sania, d: 'Friday', p: 1, tid: t.fahad, s: 'المنطق' },
+            { cid: c.sania, d: 'Friday', p: 2, tid: t.kamaal, s: 'الأدب والحديث' },
+            { cid: c.sania, d: 'Friday', p: 3, tid: t.baron, s: 'علم الصيغة' },
+            { cid: c.sania, d: 'Friday', p: 4, tid: t.baron, s: 'علم الصيغة' },
+
+            { cid: c.khamisa, d: 'Monday', p: 1, tid: t.fahad, s: 'شرح العقيدة الطحاوية' },
+            { cid: c.khamisa, d: 'Monday', p: 2, tid: t.hasan, s: 'أصول الفقه' },
+            { cid: c.khamisa, d: 'Monday', p: 4, tid: t.hamza, s: 'الهداية (الأول)' },
+            { cid: c.khamisa, d: 'Monday', p: 5, tid: t.kamaal, s: 'ديوان المتنبي والمعلقات' },
+            { cid: c.khamisa, d: 'Tuesday', p: 1, tid: t.fahad, s: 'شرح العقيدة الطحاوية' },
+            { cid: c.khamisa, d: 'Tuesday', p: 2, tid: t.hamza, s: 'الهداية (الأول)' },
+            { cid: c.khamisa, d: 'Tuesday', p: 3, tid: t.kamaal, s: 'ديوان المتنبي والمعلقات' },
+            { cid: c.khamisa, d: 'Tuesday', p: 4, tid: t.q_ali, s: 'الحديث وحفظ الحديث' },
+            { cid: c.khamisa, d: 'Tuesday', p: 5, tid: t.usman, s: 'مختصر المعاني' },
+            { cid: c.khamisa, d: 'Wednesday', p: 1, tid: t.hasan, s: 'أصول الفقه' },
+            { cid: c.khamisa, d: 'Wednesday', p: 3, tid: t.musharraf, s: 'معين الفلسفة والانتباهات' },
+            { cid: c.khamisa, d: 'Wednesday', p: 4, tid: t.kamaal, s: 'التفسير' },
+            { cid: c.khamisa, d: 'Wednesday', p: 5, tid: t.kamaal, s: 'التفسير' },
+            { cid: c.khamisa, d: 'Thursday', p: 2, tid: t.usman, s: 'مختصر المعاني' },
+            { cid: c.khamisa, d: 'Thursday', p: 3, tid: t.musharraf, s: 'معين الفلسفة والانتباهات' },
+            { cid: c.khamisa, d: 'Thursday', p: 4, tid: t.hamza, s: 'الهداية (الأول)' },
+            { cid: c.khamisa, d: 'Thursday', p: 5, tid: t.hasan, s: 'أصول الفقه' },
+            { cid: c.khamisa, d: 'Friday', p: 1, tid: t.hasan, s: 'أصول الفقه' },
+            { cid: c.khamisa, d: 'Friday', p: 2, tid: t.usman, s: 'مختصر المعاني' },
+            { cid: c.khamisa, d: 'Friday', p: 3, tid: t.kamaal, s: 'التفسير' },
+            { cid: c.khamisa, d: 'Friday', p: 4, tid: t.hamza, s: 'الهداية (الأول)' },
+            { cid: c.khamisa, d: 'Friday', p: 5, tid: t.hasan, s: 'أصول الفقه' },
+
+            { cid: c.sadisa, d: 'Monday', p: 1, tid: t.habib, s: 'الهداية (الجزء الثاني)' },
+            { cid: c.sadisa, d: 'Monday', p: 2, tid: t.q_ejaz, s: 'التوضيح (1)' },
+            { cid: c.sadisa, d: 'Monday', p: 3, tid: t.hamza, s: 'كتاب الآثار وخير الأصول' },
+            { cid: c.sadisa, d: 'Monday', p: 4, tid: t.habib, s: 'السراجي والفلکیات' },
+            { cid: c.sadisa, d: 'Monday', p: 5, tid: t.musharraf, s: 'التوضيح (2)' },
+            { cid: c.sadisa, d: 'Tuesday', p: 1, tid: t.habib, s: 'الهداية (الجزء الثاني)' },
+            { cid: c.sadisa, d: 'Tuesday', p: 2, tid: t.q_ejaz, s: 'التوضيح (1)' },
+            { cid: c.sadisa, d: 'Tuesday', p: 3, tid: t.hasan, s: 'تفسير الجلالين والفوز الكبير' },
+            { cid: c.sadisa, d: 'Tuesday', p: 4, tid: t.habib, s: 'السراجي والفلکیات' },
+            { cid: c.sadisa, d: 'Tuesday', p: 5, tid: t.hasan, s: 'تفسير الجلالين والفوز الكبير' },
+            { cid: c.sadisa, d: 'Wednesday', p: 1, tid: t.usman, s: 'اللغة العربية والعروض' },
+            { cid: c.sadisa, d: 'Wednesday', p: 2, tid: t.q_ejaz, s: 'التوضيح (1)' },
+            { cid: c.sadisa, d: 'Wednesday', p: 3, tid: t.hamza, s: 'كتاب الآثار وخير الأصول' },
+            { cid: c.sadisa, d: 'Wednesday', p: 4, tid: t.hasan, s: 'تفسير الجلالين والفوز الكبير' },
+            { cid: c.sadisa, d: 'Wednesday', p: 5, tid: t.musharraf, s: 'التوضيح (2)' },
+            { cid: c.sadisa, d: 'Thursday', p: 1, tid: t.fahad, s: 'شرح العقائد' },
+            { cid: c.sadisa, d: 'Thursday', p: 2, tid: t.musharraf, s: 'التوضيح (2)' },
+            { cid: c.sadisa, d: 'Thursday', p: 3, tid: t.fahad, s: 'شرح العقائد' },
+            { cid: c.sadisa, d: 'Thursday', p: 4, tid: t.musharraf, s: 'التوضيح (2)' },
+            { cid: c.sadisa, d: 'Thursday', p: 5, tid: t.usman, s: 'اللغة العربية والعروض' },
+            { cid: c.sadisa, d: 'Friday', p: 1, tid: t.usman, s: 'اللغة العربية والعروض' },
+            { cid: c.sadisa, d: 'Friday', p: 2, tid: t.fahad, s: 'شرح العقائد' },
+            { cid: c.sadisa, d: 'Friday', p: 3, tid: t.hamza, s: 'كتاب الآثار وخير الأصول' },
+            { cid: c.sadisa, d: 'Friday', p: 4, tid: t.fahad, s: 'شرح العقائد' },
+            { cid: c.sadisa, d: 'Friday', p: 5, tid: t.habib, s: 'الهداية (الجزء الثاني)' },
+
+            { cid: c.daura, d: 'Monday', p: 1, tid: t.q_ejaz, s: 'صحيح مسلم وجامع الترمذي' },
+            { cid: c.daura, d: 'Monday', p: 2, tid: t.hamza, s: 'الترمذي (1)' },
+            { cid: c.daura, d: 'Monday', p: 3, tid: t.usman, s: 'سنن النسائي' },
+            { cid: c.daura, d: 'Monday', p: 4, tid: t.fahad, s: 'صحيح البخاري (1)' },
+            { cid: c.daura, d: 'Monday', p: 5, tid: t.q_ali, s: 'شمائل الترمذي' },
+            { cid: c.daura, d: 'Tuesday', p: 1, tid: t.q_ejaz, s: 'صحيح مسلم وجامع الترمذي' },
+            { cid: c.daura, d: 'Tuesday', p: 2, tid: t.usman, s: 'سنن النسائي' },
+            { cid: c.daura, d: 'Tuesday', p: 3, tid: t.hamza, s: 'الترمذي (1)' },
+            { cid: c.daura, d: 'Tuesday', p: 4, tid: t.fahad, s: 'صحيح البخاري (1)' },
+            { cid: c.daura, d: 'Tuesday', p: 5, tid: t.q_ali, s: 'شمائل الترمذي' },
+            { cid: c.daura, d: 'Wednesday', p: 1, tid: t.q_ejaz, s: 'صحيح مسلم وجامع الترمذي' },
+            { cid: c.daura, d: 'Wednesday', p: 2, tid: t.hamza, s: 'الترمذي (1)' },
+            { cid: c.daura, d: 'Wednesday', p: 3, tid: t.habib, s: 'سنن أبي داود (1) وموطأ مالك' },
+            { cid: c.daura, d: 'Wednesday', p: 4, tid: t.fahad, s: 'صحيح البخاري (1)' },
+            { cid: c.daura, d: 'Wednesday', p: 5, tid: t.usman, s: 'سنن النسائي' },
+            { cid: c.daura, d: 'Thursday', p: 1, tid: t.hasan, s: 'الطحاوي' },
+            { cid: c.daura, d: 'Thursday', p: 2, tid: t.hasan, s: 'الطحاوي' },
+            { cid: c.daura, d: 'Thursday', p: 3, tid: t.habib, s: 'سنن أبي داود (1) وموطأ مالك' },
+            { cid: c.daura, d: 'Thursday', p: 4, tid: t.fahad, s: 'صحيح البخاري (1)' },
+            { cid: c.daura, d: 'Thursday', p: 5, tid: t.baron, s: 'سنن أبي داود (2) وموطأ محمد' },
+            { cid: c.daura, d: 'Friday', p: 1, tid: t.hamza, s: 'الترمذي (1)' },
+            { cid: c.daura, d: 'Friday', p: 2, tid: t.hasan, s: 'الطحاوي' },
+            { cid: c.daura, d: 'Friday', p: 3, tid: t.habib, s: 'سنن أبي داود (1) وموطأ مالك' },
+            { cid: c.daura, d: 'Friday', p: 4, tid: t.habib, s: 'سنن أبي داود (1) وموطأ مالك' },
+            { cid: c.daura, d: 'Friday', p: 5, tid: t.baron, s: 'سنن أبي داود (2) وموطأ محمد' },
+            { cid: c.daura, d: 'Saturday', p: 1, tid: t.fahad, s: 'صحيح البخاري (1)' },
+            { cid: c.daura, d: 'Saturday', p: 2, tid: t.hasan, s: 'الطحاوي' },
+            { cid: c.daura, d: 'Saturday', p: 3, tid: t.baron, s: 'سنن أبي داود (2) وموطأ محمد' },
+            { cid: c.daura, d: 'Saturday', p: 4, tid: t.baron, s: 'سنن أبي داود (2) وموطأ محمد' },
+            { cid: c.daura, d: 'Saturday', p: 5, tid: t.baron, s: 'سنن أبي داود (2) وموطأ محمد' }
+        ];
+
         let count = 0;
-        let dayPeriodCounter = {}; // Track periods per day to stay within 1-5
+        for (const item of data) {
+            if (!item.cid || !item.tid) continue;
+            
+            // Sync Book & Assignment
+            let [books] = await db.execute('SELECT id FROM books WHERE title = ?', [item.s]);
+            let bookId = books.length > 0 ? books[0].id : (await db.execute('INSERT INTO books (title) VALUES (?)', [item.s]))[0].insertId;
 
-        for (let line of lines) {
-            line = line.trim();
-            if (!line) continue;
-            for (let [ar, en] of Object.entries(dayMap)) { 
-                if (line.includes(ar)) { 
-                    currentDay = en; 
-                    dayPeriodCounter[currentDay] = dayPeriodCounter[currentDay] || 1;
-                    break; 
-                } 
-            }
-            for (let cls of classes) { if (line.includes(cls.name_ar)) { currentClassId = cls.id; break; } }
+            let [ass] = await db.execute('SELECT id FROM teacher_books WHERE teacher_id = ? AND book_id = ? AND class_id = ? AND session_id = ?', [item.tid, bookId, item.cid, sessionId]);
+            let assId = ass.length > 0 ? ass[0].id : (await db.execute('INSERT INTO teacher_books (teacher_id, book_id, class_id, session_id) VALUES (?, ?, ?, ?)', [item.tid, bookId, item.cid, sessionId]))[0].insertId;
 
-            for (let teacher of teachers) {
-                const names = teacher.name.split(' ');
-                const shortName = names[names.length - 1];
-                if (line.includes(shortName) || line.includes(teacher.name)) {
-                    let subject = line.split(teacher.name)[0].split(shortName)[0].trim();
-                    if (!subject || subject.length < 3) subject = teacher.subject || 'مقرر دراسي';
-                    
-                    const pNum = (dayPeriodCounter[currentDay] % 5) + 1;
-                    dayPeriodCounter[currentDay]++;
-
-                    // Map period number to exact times
-                    const timeMap = {
-                        1: { start: '18:00', end: '18:40' },
-                        2: { start: '18:40', end: '19:20' },
-                        3: { start: '19:40', end: '20:20' },
-                        4: { start: '20:20', end: '21:00' },
-                        5: { start: '21:00', end: '21:40' }
-                    };
-                    const times = timeMap[pNum];
-
-                    await db.execute(
-                        'INSERT INTO periods (teacher_id, class_id, day_of_week, subject, start_time, end_time, period_number) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                        [teacher.id, currentClassId, currentDay, subject.substring(0, 100), times.start, times.end, pNum]
-                    );
-                    count++;
-                }
-            }
+            await db.execute(
+                'INSERT INTO periods (day_of_week, period_number, teacher_id, class_id, subject, start_time, end_time, assignment_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                [item.d, item.p, item.tid, item.cid, item.s, times[item.p].s, times[item.p].e, assId]
+            );
+            count++;
         }
-        res.send(`Successfully imported ${count} records. Please go back to /periods/manage`);
+
+        res.send(`Successfully synchronized ${count} periods and created all necessary books/assignments. You can now go back to /periods/manage`);
     } catch (err) {
         console.error(err);
-        res.status(500).send('Import failed: ' + err.message);
+        res.status(500).send('Sync failed: ' + err.message);
     }
 });
 
