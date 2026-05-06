@@ -90,8 +90,8 @@
     }
     .period-box {
         transition: all 0.2s;
-        font-size: 0.9rem;
-        line-height: 1.2;
+        font-size: 0.85rem;
+        line-height: 1.1;
     }
     .subject-name {
         display: -webkit-box;
@@ -100,10 +100,22 @@
         overflow: hidden;
         text-overflow: ellipsis;
         color: #2c3e50;
+        word-break: break-word;
     }
     .teacher-name {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Desktop Optimizations */
+    @media (min-width: 992px) {
+        .timetable-container { max-width: 100%; padding: 0 20px; }
+        .period-box { font-size: 0.95rem; }
+        .subject-name { -webkit-line-clamp: 1; white-space: nowrap; }
+        .teacher-name { font-size: 0.8rem; }
     }
     
     /* Alternating colors for cells based on content */
