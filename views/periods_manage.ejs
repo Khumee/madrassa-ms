@@ -125,7 +125,7 @@
                                     <td><%= p.teacher_name %></td>
                                     <td><%= p.class_name %></td>
                                     <td>
-                                        <div class="fw-bold"><%= p.book_title || p.subject || 'غير محدد' %></div>
+                                        <div class="subject-text-wrap fw-bold text-dark"><%= p.book_title || p.subject || 'غير محدد' %></div>
                                         <small class="text-muted"><%= p.start_time.substring(0,5) %> - <%= p.end_time.substring(0,5) %></small>
                                     </td>
                                     <td class="px-4 text-center">

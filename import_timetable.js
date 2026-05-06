@@ -3,7 +3,7 @@ const fs = require('fs');
 
 async function importTimetable() {
     console.log('Importing timetable from text file...');
-    
+
     // Clear existing empty state if any
     await db.execute('DELETE FROM periods');
 
@@ -60,7 +60,7 @@ async function importTimetable() {
                 // Found a teacher! 
                 let subject = line.split(teacher.name)[0].split(shortName)[0].trim();
                 if (!subject || subject.length < 3) subject = teacher.subject || 'مقرر دراسي';
-                
+
                 await db.execute(
                     'INSERT INTO periods (teacher_id, class_id, day_of_week, subject, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?)',
                     [teacher.id, currentClassId, currentDay, subject.substring(0, 100), '08:00:00', '09:00:00']

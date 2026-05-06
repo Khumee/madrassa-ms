@@ -910,9 +910,11 @@ app.get('/periods/full', async (req, res) => {
              JOIN teachers t ON p.teacher_id = t.id 
              JOIN classes c ON p.class_id = c.id
              LEFT JOIN teacher_books tb ON p.assignment_id = tb.id
-             LEFT JOIN books b ON tb.book_id = b.id`
+             LEFT JOIN books b ON tb.book_id = b.id
+             WHERE p.day_of_week NOT IN ('Saturday', 'Sunday')`
         );
-        res.render('timetable_full', { periods });
+        const [classes] = await db.execute('SELECT * FROM classes');
+        res.render('timetable_full', { periods, classes });
     } catch (err) {
         console.error(err);
         res.status(500).send('Error loading full timetable');
