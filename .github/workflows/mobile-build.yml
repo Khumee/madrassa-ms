@@ -18,7 +18,6 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: gradle
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
@@ -28,8 +27,7 @@ jobs:
       - name: Build with Gradle
         run: |
           cd mobile
-          chmod +x gradlew || true
-          ./gradlew assembleDebug
+          gradle assembleDebug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
@@ -46,7 +44,7 @@ jobs:
           port: 22
           source: "mobile/app/build/outputs/apk/debug/app-debug.apk"
           target: "/var/www/kui-ms/public/"
-          strip_components: 6 # Remove mobile/app/build/outputs/apk/debug/
+          strip_components: 6
           
       - name: Rename APK on Server
         uses: appleboy/ssh-action@v1.2.0
