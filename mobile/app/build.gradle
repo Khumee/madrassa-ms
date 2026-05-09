@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace 'com.kui.ms'
+    namespace 'com.nukrim.madrasati'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.kui.ms"
+        applicationId "com.nukrim.madrasati"
         minSdk 24
         targetSdk 34
         versionCode 1

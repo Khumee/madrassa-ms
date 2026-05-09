@@ -1,4 +1,4 @@
-package com.kui.ms;
+package com.nukrim.madrasati;
 
 import android.os.Bundle;
 import android.webkit.WebSettings;
