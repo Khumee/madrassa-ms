@@ -35,7 +35,7 @@
   "دورة حديث": "دورة حديث",
   "Manage_Timetable": "إدارة جدول الحصص",
   "All_Classes_Timetable": "الجداول الدراسية لكل الفصول",
-  "Timetable_Overview": "نظرة شاملة موزعة حسب الصفوف (Mon-Sat)",
+  "Timetable_Overview": "نظرة شاملة موزعة حسب الصفوف (الإثنين - السبت)",
   "Filter": "تصفية",
   "Print": "طباعة",
   "Manage": "الإدارة",
@@ -119,5 +119,8 @@
   "Ontime": "مكتمل / في الوقت",
   "Extra_Makeup": "إضافي / تعويضي",
   "Shortage": "عجز في الحصص",
-  "Last_Updated": "آخر تحديث"
+  "Last_Updated": "آخر تحديث",
+  "Select_Book": "اختر الكتاب",
+  "Select_Teacher": "اختر الأستاذ",
+  "Select_Class": "اختر الصف"
 }

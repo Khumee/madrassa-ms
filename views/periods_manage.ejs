@@ -6,11 +6,7 @@
         <p class="text-muted"><%= __('Timetable_Header_Sub') %></p>
     </div>
     <div class="col-md-6 text-start">
-        <form action="/periods/generate-auto" method="POST" class="d-inline" onsubmit="return confirm('<%= __('Confirm_Auto_Generate') %>')">
-            <button type="submit" class="btn btn-warning rounded-pill px-4 me-2 text-dark fw-bold">
-                <i class="bi bi-cpu me-2"></i><%= __('Auto_Generate_Timetable') %>
-            </button>
-        </form>
+
         <a href="/periods/full" class="btn btn-success rounded-pill px-4 me-2">
             <i class="bi bi-calendar3 me-2"></i><%= __('View_Full_Timetable') %>
         </a>
@@ -38,57 +34,102 @@
                 <h5 class="mb-0"><%= __('Add_New_Period') %></h5>
             </div>
             <div class="card-body p-4">
-                <form action="/periods/add" method="POST">
+                <form id="addPeriodForm" method="POST">
+                    <!-- 1. Teacher select (comes on top!) -->
                     <div class="mb-3">
-                        <label class="form-label fw-bold"><%= __('Book_Assignment') %></label>
-                        <select name="assignmentId" id="assignmentSelect" class="form-select" required onchange="updateFieldsFromAssignment()">
-                            <option value=""><%= __('Select_Assignment') %></option>
-                            <% assignments.forEach(a => { %>
-                                <option value="<%= a.id %>" data-teacher-id="<%= a.teacher_id %>" data-class-id="<%= a.class_id %>">
-                                    <%= a.teacher_name %> - <%= a.book_title %> (<%= a.class_name %>)
-                                </option>
-                            <% }) %>
-                        </select>
-                        <input type="hidden" name="teacherId" id="teacherIdInput">
-                        <input type="hidden" name="classId" id="classIdInput">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-bold"><%= __('Day') %></label>
-                        <select name="dayOfWeek" class="form-select" required>
-                            <% dayNames.forEach(day => { %>
-                                <option value="<%= day %>"><%= __(day) %></option>
+                        <label class="form-label fw-bold"><%= __('Teachers') %></label>
+                        <select id="teacherSelect" class="form-select rounded-3" required onchange="filterBooksForSelectedTeacher()">
+                            <option value=""><%= __('Select_Teacher') %></option>
+                            <% teachers.forEach(t => { %>
+                                <option value="<%= t.id %>"><%= t.name %></option>
                             <% }) %>
                         </select>
                     </div>
 
-                    <div class="row">
-                        <div class="col-6 mb-3">
-                            <label class="form-label fw-bold"><%= __('Period_Number') %></label>
-                            <select name="periodNumber" class="form-select" id="addPeriodNumber" onchange="autoFillTimes('add')" required>
-                                <% for(let i=1; i<=7; i++) { %>
-                                    <option value="<%= i %>"><%= i <= 5 ? __('Period_Label') + ' ' + i : __('Extra_Period') + ' ' + (i - 5) %></option>
-                                <% } %>
-                            </select>
+                    <!-- 2. Books Listing (without teacher name) - Searchable custom select -->
+                    <div class="position-relative w-100 mb-3" id="bookSearchDropdownContainer">
+                        <label class="form-label fw-bold"><%= __('Books') %></label>
+                        <!-- Hidden input to store selected value -->
+                        <input type="hidden" name="bookId" id="bookSelect" required>
+                        
+                        <!-- Trigger input button that looks like a select (disabled by default) -->
+                        <div class="form-select rounded-3 text-start d-flex justify-content-between align-items-center cursor-pointer bg-white border" 
+                             id="bookSearchTrigger" style="min-height: 38px; cursor: pointer; border-color: #dee2e6; pointer-events: none; opacity: 0.6;">
+                            <span class="text-muted" id="bookSearchLabel"><%= __('Select_Book') %></span>
+                            <i class="bi bi-chevron-down text-muted small"></i>
                         </div>
-                        <div class="col-6 mb-3">
-                            <label class="form-label fw-bold"><%= __('Subject_Optional') %></label>
-                            <input type="text" name="subject" class="form-control" placeholder="<%= __('Enter_Subject_Placeholder') %>">
+                        
+                        <!-- Dropdown Menu -->
+                        <div class="dropdown-menu shadow-lg border border-light w-100 rounded-3 p-3 mt-1 position-absolute start-0 end-0 d-none" 
+                             id="bookSearchMenu" style="z-index: 1050; max-height: 300px; display: flex; flex-direction: column;">
+                            
+                            <!-- Search Input -->
+                            <div class="mb-2">
+                                <input type="text" class="form-control form-control-sm rounded-pill px-3" 
+                                       id="bookSearchInput" placeholder="<%= locals.lang === 'ur' ? 'کتاب تلاش کریں...' : 'ابحث عن كتاب...' %>" autocomplete="off">
+                            </div>
+                            
+                            <!-- Options List -->
+                            <div class="overflow-y-auto" style="flex: 1; max-height: 180px; overflow-y: auto;" id="bookOptionsList">
+                                <div class="dropdown-item py-2 px-3 rounded-2 cursor-pointer text-muted bg-light text-center small mb-1" data-value="" id="bookOptionNone">
+                                    <%= __('Select_Book') %>
+                                </div>
+                                <% books.forEach(b => { %>
+                                    <div class="dropdown-item py-2 px-3 rounded-2 cursor-pointer book-search-item" data-value="<%= b.id %>" data-title="<%= b.title %>">
+                                        <%= b.title %>
+                                    </div>
+                                <% }) %>
+                                <div class="text-center text-muted py-3 small d-none" id="bookNoResults">
+                                    <%= locals.lang === 'ur' ? 'کوئی کتاب نہیں ملی' : 'لم يتم العثور على كتب' %>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="row d-none">
-                        <div class="col-6 mb-3">
-                            <label class="form-label fw-bold"><%= __('Start_Time') %></label>
-                            <input type="time" name="startTime" id="addStartTime" class="form-control">
-                        </div>
-                        <div class="col-6 mb-3">
-                            <label class="form-label fw-bold"><%= __('End_Time') %></label>
-                            <input type="time" name="endTime" id="addEndTime" class="form-control">
+                    <!-- 3. Class (third dropdown) -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><%= __('Class') %></label>
+                        <select id="classSelect" class="form-select rounded-3" required disabled onchange="updateAssignmentId()">
+                            <option value=""><%= __('Select_Class') %></option>
+                        </select>
+                    </div>
+
+                    <!-- Hidden Inputs for Submission -->
+                    <input type="hidden" name="assignmentId" id="assignmentIdInput">
+                    <input type="hidden" name="teacherId" id="teacherIdInput">
+                    <input type="hidden" name="classId" id="classIdInput">
+
+                    <!-- 4. Days (Checkbox Badges) -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold d-block"><%= __('Day') %></label>
+                        <div class="d-flex flex-wrap gap-2">
+                            <% dayNames.forEach((day, index) => { %>
+                                <div class="position-relative">
+                                    <input type="checkbox" name="days" id="day_chk_<%= index %>" value="<%= day %>" class="btn-check" autocomplete="off">
+                                    <label class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1.5 fw-semibold" for="day_chk_<%= index %>">
+                                        <%= __(day) %>
+                                    </label>
+                                </div>
+                            <% }) %>
                         </div>
                     </div>
 
-                    <div class="d-grid mt-2">
+                    <!-- 5. Period number (Checkbox Badges) -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold d-block"><%= __('Period_Number') %></label>
+                        <div class="d-flex flex-wrap gap-2">
+                            <% for(let i=1; i<=7; i++) { %>
+                                <div class="position-relative">
+                                    <input type="checkbox" name="periods" id="period_chk_<%= i %>" value="<%= i %>" class="btn-check" autocomplete="off">
+                                    <label class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1.5 fw-semibold" for="period_chk_<%= i %>">
+                                        <%= i <= 5 ? __('Period_Label') + ' ' + i : __('Extra_Period') + ' ' + (i - 5) %>
+                                    </label>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-3">
                         <button type="submit" class="btn btn-primary rounded-pill py-2 fw-bold"><%= __('Save_Period') %></button>
                     </div>
                 </form>
@@ -219,14 +260,41 @@
             </div>
             <form id="editPeriodForm" method="POST">
                 <div class="modal-body p-4">
+                    <!-- 1. Books Listing - Dynamic dropdown from db -->
                     <div class="mb-3">
-                        <label class="form-label fw-bold"><%= __('Book_Assignment') %></label>
-                        <select name="assignmentId" id="editAssignmentId" class="form-select" required>
-                            <% assignments.forEach(a => { %>
-                                <option value="<%= a.id %>"><%= a.teacher_name %> - <%= a.book_title %> (<%= a.class_name %>)</option>
+                        <label class="form-label fw-bold"><%= __('Books') %></label>
+                        <select name="bookId" id="editBookSelect" class="form-select" required onchange="filterEditTeachersAndClasses()">
+                            <option value=""><%= __('Select_Book') %></option>
+                            <% books.forEach(b => { %>
+                                <option value="<%= b.id %>"><%= b.title %></option>
                             <% }) %>
                         </select>
                     </div>
+
+                    <!-- 2. Teacher Select - Dynamic dropdown from db -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><%= __('Teacher') %></label>
+                        <select name="teacherId" id="editTeacherSelect" class="form-select" required disabled onchange="filterEditClasses()">
+                            <option value=""><%= __('Select_Teacher') %></option>
+                            <% teachers.forEach(t => { %>
+                                <option value="<%= t.id %>"><%= t.name %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+
+                    <!-- 3. Class Select - Dynamic dropdown from db -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><%= __('Class') %></label>
+                        <select name="classId" id="editClassSelect" class="form-select" required disabled onchange="updateEditAssignmentId()">
+                            <option value=""><%= __('Select_Class') %></option>
+                            <% classes.forEach(c => { %>
+                                <option value="<%= c.id %>"><%= c.name_ar || c.name %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+
+                    <!-- Hidden input to store assignment ID -->
+                    <input type="hidden" name="assignmentId" id="editAssignmentIdInput">
                     <div class="mb-3">
                         <label class="form-label fw-bold"><%= __('Day') %></label>
                         <select name="dayOfWeek" id="editDayOfWeek" class="form-select" required>
@@ -263,16 +331,611 @@
     </div>
 </div>
 
+<!-- Conflict Alert Modal -->
+<div class="modal fade" id="conflictModal" tabindex="-1" aria-labelledby="conflictModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);">
+            <div class="modal-header bg-danger text-white border-0 py-3 rounded-top-4">
+                <h5 class="modal-title fw-bold text-white" id="conflictModalLabel">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <%= locals.lang === 'ur' ? 'کلاس شیڈول میں تعارض (تصادم)' : 'تعارض في جدول الحصص' %>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center p-4">
+                <div class="mb-3 text-danger">
+                    <i class="bi bi-x-circle-fill" style="font-size: 3.5rem;"></i>
+                </div>
+                <h4 class="fw-bold mb-3 text-dark" id="conflictTeacherName"></h4>
+                <p class="text-muted fs-5 mb-0" id="conflictModalMessage"></p>
+            </div>
+            <div class="modal-footer border-0 p-3 pt-0 justify-content-center">
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">
+                    <%= locals.lang === 'ur' ? 'بند کریں' : 'إغلاق' %>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
 <script>
+const assignments = <%- JSON.stringify(assignments) %>;
+const allTeachers = <%- JSON.stringify(teachers) %>;
+const allClasses = <%- JSON.stringify(classes) %>;
+const books = <%- JSON.stringify(books) %>;
+
+// 1. Searchable Book Select Logic
+document.addEventListener('DOMContentLoaded', () => {
+    const trigger = document.getElementById('bookSearchTrigger');
+    const menu = document.getElementById('bookSearchMenu');
+    const input = document.getElementById('bookSearchInput');
+    const hiddenSelect = document.getElementById('bookSelect');
+    const label = document.getElementById('bookSearchLabel');
+    const items = document.querySelectorAll('.book-search-item');
+    const noneItem = document.getElementById('bookOptionNone');
+    const noResults = document.getElementById('bookNoResults');
+    
+    if (!trigger) return;
+    
+    // Toggle dropdown visibility
+    trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        menu.classList.toggle('d-none');
+        if (!menu.classList.contains('d-none')) {
+            input.focus();
+            input.value = ''; // clear search query on focus
+            filterItems('');
+        }
+    });
+    
+    // Close dropdown on click outside
+    document.addEventListener('click', (e) => {
+        if (menu && !menu.contains(e.target) && !trigger.contains(e.target)) {
+            menu.classList.add('d-none');
+        }
+    });
+    
+    // Live Search filtering
+    input.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        filterItems(query);
+    });
+    
+    function filterItems(query) {
+        const teacherSelect = document.getElementById('teacherSelect');
+        const selectedTeacherId = teacherSelect ? teacherSelect.value : '';
+        
+        let assignedBookIds = [];
+        if (selectedTeacherId) {
+            const teacherAssignments = assignments.filter(a => a.teacher_id == selectedTeacherId);
+            assignedBookIds = [...new Set(teacherAssignments.map(a => a.book_id))];
+        }
+        
+        let visibleCount = 0;
+        items.forEach(item => {
+            const title = item.dataset.title.toLowerCase();
+            const val = item.dataset.value;
+            
+            const matchesQuery = title.includes(query);
+            const matchesTeacher = !selectedTeacherId || assignedBookIds.includes(parseInt(val)) || assignedBookIds.includes(String(val));
+            
+            if (matchesQuery && matchesTeacher) {
+                item.classList.remove('d-none');
+                visibleCount++;
+            } else {
+                item.classList.add('d-none');
+            }
+        });
+        
+        if (visibleCount === 0 && query !== '') {
+            noResults.classList.remove('d-none');
+        } else {
+            noResults.classList.add('d-none');
+        }
+    }
+    
+    // Select Option function
+    function selectOption(value, title) {
+        console.log('--- selectOption ---');
+        console.log('Value selected:', value);
+        console.log('Title selected:', title);
+        
+        hiddenSelect.value = value;
+        
+        if (value === '') {
+            label.textContent = "<%= __('Select_Book') %>";
+            label.classList.add('text-muted');
+        } else {
+            label.textContent = title;
+            label.classList.remove('text-muted');
+        }
+        
+        menu.classList.add('d-none');
+        
+        // Directly trigger the filter logic!
+        filterClassesForTeacherAndBook();
+    }
+    
+    items.forEach(item => {
+        item.addEventListener('click', () => {
+            selectOption(item.dataset.value, item.dataset.title);
+        });
+    });
+    
+    if (noneItem) {
+        noneItem.addEventListener('click', () => {
+            selectOption('', '');
+        });
+    }
+
+    // Restore last selected values if present (Cascading: Teacher -> Book -> Class)
+    const lastBookId = localStorage.getItem('lastSelectedBookId');
+    const lastBookTitle = localStorage.getItem('lastSelectedBookTitle');
+    const lastTeacherId = localStorage.getItem('lastSelectedTeacherId');
+    const lastClassId = localStorage.getItem('lastSelectedClassId');
+    
+    if (lastTeacherId) {
+        const teacherSelect = document.getElementById('teacherSelect');
+        if (teacherSelect && Array.from(teacherSelect.options).some(opt => opt.value == lastTeacherId)) {
+            teacherSelect.value = lastTeacherId;
+            
+            // Populate Books for this teacher
+            filterBooksForSelectedTeacher();
+            
+            if (lastBookId && lastBookTitle) {
+                selectOption(lastBookId, lastBookTitle);
+                
+                const classSelect = document.getElementById('classSelect');
+                if (lastClassId && classSelect) {
+                    if (Array.from(classSelect.options).some(opt => opt.value == lastClassId)) {
+                        classSelect.value = lastClassId;
+                        updateAssignmentId();
+                    }
+                }
+            }
+        }
+    }
+});
+
+// 2. Filter Books dynamically based on selected Teacher
+function filterBooksForSelectedTeacher() {
+    const teacherSelect = document.getElementById('teacherSelect');
+    const selectedTeacherId = teacherSelect.value;
+    
+    const trigger = document.getElementById('bookSearchTrigger');
+    const label = document.getElementById('bookSearchLabel');
+    const hiddenSelect = document.getElementById('bookSelect');
+    
+    // Reset Book selection
+    hiddenSelect.value = '';
+    label.textContent = "<%= __('Select_Book') %>";
+    label.classList.add('text-muted');
+    
+    // Clear and reset Class select
+    const classSelect = document.getElementById('classSelect');
+    classSelect.innerHTML = `<option value=""><%= __('Select_Class') %></option>`;
+    classSelect.disabled = true;
+    
+    if (!selectedTeacherId) {
+        trigger.style.pointerEvents = 'none';
+        trigger.style.opacity = '0.6';
+        updateAssignmentId();
+        return;
+    }
+    
+    trigger.style.pointerEvents = 'auto';
+    trigger.style.opacity = '1';
+    
+    // Find unique books assigned to this teacher in 'assignments'
+    const teacherAssignments = assignments.filter(a => a.teacher_id == selectedTeacherId);
+    const assignedBookIds = [...new Set(teacherAssignments.map(a => a.book_id))];
+    
+    console.log('Assigned Book IDs for Teacher:', assignedBookIds);
+    
+    // Filter searchable book list items
+    const items = document.querySelectorAll('.book-search-item');
+    let visibleCount = 0;
+    items.forEach(item => {
+        const val = item.dataset.value;
+        if (assignedBookIds.includes(parseInt(val)) || assignedBookIds.includes(String(val))) {
+            item.classList.remove('d-none');
+            visibleCount++;
+        } else {
+            item.classList.add('d-none');
+        }
+    });
+    
+    const noResults = document.getElementById('bookNoResults');
+    if (visibleCount === 0) {
+        noResults.classList.remove('d-none');
+    } else {
+        noResults.classList.add('d-none');
+    }
+    
+    // If only one book option is available, auto-select it!
+    if (visibleCount === 1) {
+        const singleItem = Array.from(items).find(item => !item.classList.contains('d-none'));
+        if (singleItem) {
+            selectOption(singleItem.dataset.value, singleItem.dataset.title);
+        }
+    } else {
+        updateAssignmentId();
+    }
+}
+
+// 3. Filter Classes dynamically based on selected Teacher & Book
+function filterClassesForTeacherAndBook() {
+    const teacherSelect = document.getElementById('teacherSelect');
+    const bookSelect = document.getElementById('bookSelect');
+    const classSelect = document.getElementById('classSelect');
+    
+    const selectedTeacherId = teacherSelect.value;
+    const selectedBookId = bookSelect.value;
+    
+    classSelect.innerHTML = `<option value=""><%= __('Select_Class') %></option>`;
+    
+    if (!selectedTeacherId || !selectedBookId) {
+        classSelect.disabled = true;
+        updateAssignmentId();
+        return;
+    }
+    
+    // Get unique classes assigned to this teacher and book
+    const matchAssignments = assignments.filter(a => a.teacher_id == selectedTeacherId && a.book_id == selectedBookId);
+    const assignedClassIds = [...new Set(matchAssignments.map(a => a.class_id))];
+    
+    console.log('Assigned Class IDs for Teacher & Book:', assignedClassIds);
+    
+    allClasses.forEach(c => {
+        if (assignedClassIds.includes(parseInt(c.id)) || assignedClassIds.includes(String(c.id))) {
+            const option = document.createElement('option');
+            option.value = c.id;
+            option.textContent = c.name_ar || c.name;
+            classSelect.appendChild(option);
+        }
+    });
+    
+    classSelect.disabled = false;
+    
+    // If only one class is available, auto-select it!
+    if (classSelect.options.length === 2) {
+        classSelect.value = classSelect.options[1].value;
+    }
+    updateAssignmentId();
+}
+
+function updateAssignmentId() {
+    const bookSelect = document.getElementById('bookSelect');
+    const teacherSelect = document.getElementById('teacherSelect');
+    const classSelect = document.getElementById('classSelect');
+    
+    const selectedBookId = bookSelect.value;
+    const selectedTeacherId = teacherSelect.value;
+    const selectedClassId = classSelect.value;
+    
+    const assignmentIdInput = document.getElementById('assignmentIdInput');
+    const teacherIdInput = document.getElementById('teacherIdInput');
+    const classIdInput = document.getElementById('classIdInput');
+    
+    if (selectedBookId && selectedTeacherId && selectedClassId) {
+        const match = assignments.find(a => 
+            a.book_id == selectedBookId && 
+            a.teacher_id == selectedTeacherId && 
+            a.class_id == selectedClassId
+        );
+        
+        if (match) {
+            assignmentIdInput.value = match.id;
+            teacherIdInput.value = selectedTeacherId;
+            classIdInput.value = selectedClassId;
+        } else {
+            assignmentIdInput.value = '';
+            teacherIdInput.value = selectedTeacherId;
+            classIdInput.value = selectedClassId;
+        }
+    } else {
+        assignmentIdInput.value = '';
+        teacherIdInput.value = '';
+        classIdInput.value = '';
+    }
+}
+
+// 3. Form Submission handling with AJAX, bookId support, and conflict modal
+document.addEventListener('DOMContentLoaded', () => {
+
+
+    const form = document.getElementById('addPeriodForm');
+    if (form) {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const bookId = document.getElementById('bookSelect').value;
+            const assignmentId = document.getElementById('assignmentIdInput').value;
+            const teacherId = document.getElementById('teacherIdInput').value;
+            const classId = document.getElementById('classIdInput').value;
+            
+            // Collect selected days and periods from checkboxes
+            const selectedDays = Array.from(document.querySelectorAll('input[name="days"]:checked')).map(el => el.value);
+            const selectedPeriods = Array.from(document.querySelectorAll('input[name="periods"]:checked')).map(el => parseInt(el.value));
+            
+            if (!bookId || !teacherId || !classId) {
+                alert('<%= locals.lang === "ur" ? "براہ کرم کتاب، استاد اور کلاس منتخب کریں۔" : "يرجى اختيار الكتاب والمعلم والصف." %>');
+                return;
+            }
+            if (selectedDays.length === 0) {
+                alert('<%= locals.lang === "ur" ? "براہ کرم کم از کم ایک دن منتخب کریں۔" : "يرجى اختيار يوم واحد على الأقل." %>');
+                return;
+            }
+            if (selectedPeriods.length === 0) {
+                alert('<%= locals.lang === "ur" ? "براہ کرم کم از کم ایک پیریڈ منتخب کریں۔" : "يرجى اختيار حصة واحدة على الأقل." %>');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/periods/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        bookId,
+                        assignmentId,
+                        teacherId,
+                        classId,
+                        days: selectedDays,
+                        periods: selectedPeriods
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const selectedBookTitle = document.getElementById('bookSearchLabel').textContent;
+                    localStorage.setItem('lastSelectedBookId', bookId);
+                    localStorage.setItem('lastSelectedBookTitle', selectedBookTitle);
+                    localStorage.setItem('lastSelectedTeacherId', teacherId);
+                    localStorage.setItem('lastSelectedClassId', classId);
+                    location.reload();
+                } else if (data.conflict) {
+                    document.getElementById('conflictTeacherName').innerText = data.teacherName;
+                    
+                    const dayLabels = {
+                        'ur': { 'Monday': 'پیر', 'Tuesday': 'منگل', 'Wednesday': 'بدھ', 'Thursday': 'جمعرات', 'Friday': 'جمعہ', 'Saturday': 'ہفتہ', 'Sunday': 'اتوار' },
+                        'ar': { 'Monday': 'الإثنين', 'Tuesday': 'الثلاثاء', 'Wednesday': 'الأربعاء', 'Thursday': 'الخميس', 'Friday': 'الجمعة', 'Saturday': 'السبت', 'Sunday': 'الأحد' }
+                    };
+                    const lang = '<%= locals.lang %>';
+                    const dayLabel = (dayLabels[lang] && dayLabels[lang][data.day]) ? dayLabels[lang][data.day] : data.day;
+                    
+                    let msg = '';
+                    if (lang === 'ur') {
+                        if (data.type === 'class') {
+                            msg = `اس کلاس (${data.className}) کے لیے پہلے ہی دن (${dayLabel}) پیریڈ (${data.periodNumber}) میں استاد "${data.teacherName}" کے ساتھ پیریڈ مقرر ہو چکا ہے۔`;
+                        } else {
+                            msg = `یہ استاد (${data.teacherName}) پہلے سے دن (${dayLabel}) پیریڈ (${data.periodNumber}) میں کلاس "${data.className}" کے لیے مقرر ہیں۔`;
+                        }
+                    } else {
+                        if (data.type === 'class') {
+                            msg = `هذا الصف (${data.className}) لديه بالفعل حصة مقررة يوم (${dayLabel}) في الحصة (${data.periodNumber}) مع الأستاذ "${data.teacherName}".`;
+                        } else {
+                            msg = `هذا الأستاذ (${data.teacherName}) مشغول بالفعل يوم (${dayLabel}) في الحصة (${data.periodNumber}) مع صف "${data.className}".`;
+                        }
+                    }
+                    document.getElementById('conflictModalMessage').innerText = msg;
+                    
+                    const conflictModal = new bootstrap.Modal(document.getElementById('conflictModal'));
+                    conflictModal.show();
+                } else {
+                    alert(data.error || 'Error saving period');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Server error occurred');
+            }
+        });
+    }
+
+    const editForm = document.getElementById('editPeriodForm');
+    if (editForm) {
+        editForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const bookId = document.getElementById('editBookSelect').value;
+            const assignmentId = document.getElementById('editAssignmentIdInput').value;
+            const teacherId = document.getElementById('editTeacherSelect').value;
+            const classId = document.getElementById('editClassSelect').value;
+            const dayOfWeek = document.getElementById('editDayOfWeek').value;
+            const periodNumber = document.getElementById('editPeriodNumber').value;
+            const startTime = document.getElementById('editStartTime').value;
+            const endTime = document.getElementById('editEndTime').value;
+            
+            if (!bookId || !teacherId || !classId) {
+                alert('<%= locals.lang === "ur" ? "براہ کرم کتاب، استاد اور کلاس منتخب کریں۔" : "يرجى اختيار الكتاب والمعلم والصف." %>');
+                return;
+            }
+            
+            const actionUrl = editForm.getAttribute('action');
+            
+            try {
+                const response = await fetch(actionUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        bookId,
+                        assignmentId,
+                        teacherId,
+                        classId,
+                        dayOfWeek,
+                        periodNumber,
+                        startTime,
+                        endTime
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    location.reload();
+                } else if (data.conflict) {
+                    document.getElementById('conflictTeacherName').innerText = data.teacherName;
+                    
+                    let msg = '';
+                    if ('<%= locals.lang %>' === 'ur') {
+                        if (data.type === 'class') {
+                            msg = `اس کلاس (${data.className}) کے لیے پہلے ہی اسی پیریڈ (${periodNumber}) میں استاد "${data.teacherName}" کے ساتھ پیریڈ مقرر ہو چکا ہے۔`;
+                        } else {
+                            msg = `یہ استاد (${data.teacherName}) پہلے سے اسی پیریڈ (${periodNumber}) میں کلاس "${data.className}" کے لیے مقرر ہیں۔`;
+                        }
+                    } else {
+                        if (data.type === 'class') {
+                            msg = `هذا الصف (${data.className}) لديه بالفعل حصة مقررة في هذا الوقت (${periodNumber}) مع الأستاذ "${data.teacherName}".`;
+                        } else {
+                            msg = `هذا الأستاذ (${data.teacherName}) مشغول بالفعل في هذه الحصة (${periodNumber}) مع صف "${data.className}".`;
+                        }
+                    }
+                    document.getElementById('conflictModalMessage').innerText = msg;
+                    
+                    const conflictModal = new bootstrap.Modal(document.getElementById('conflictModal'));
+                    conflictModal.show();
+                } else {
+                    alert(data.error || 'Error saving period');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Server error occurred');
+            }
+        });
+    }
+});
+
 function openEditModal(period) {
     const modal = new bootstrap.Modal(document.getElementById('editPeriodModal'));
     document.getElementById('editPeriodForm').action = `/periods/edit/${period.id}`;
-    document.getElementById('editAssignmentId').value = period.assignment_id || '';
+    
     document.getElementById('editDayOfWeek').value = period.day_of_week || 'Monday';
     document.getElementById('editPeriodNumber').value = period.period_number || 1;
-    document.getElementById('editStartTime').value = period.start_time.substring(0,5);
-    document.getElementById('editEndTime').value = period.end_time.substring(0,5);
+    document.getElementById('editStartTime').value = period.start_time ? period.start_time.substring(0,5) : '';
+    document.getElementById('editEndTime').value = period.end_time ? period.end_time.substring(0,5) : '';
+    
+    let bookId = '';
+    let teacherId = period.teacher_id || '';
+    let classId = period.class_id || '';
+    let assignmentId = period.assignment_id || '';
+    
+    if (assignmentId) {
+        const match = assignments.find(a => a.id == assignmentId);
+        if (match) {
+            bookId = match.book_id;
+            teacherId = match.teacher_id;
+            classId = match.class_id;
+        }
+    } else if (period.subject) {
+        const matchBook = books.find(b => b.title === period.subject);
+        if (matchBook) {
+            bookId = matchBook.id;
+        }
+    }
+    
+    document.getElementById('editBookSelect').value = bookId;
+    filterEditTeachersAndClasses(teacherId, classId);
+    
     modal.show();
+}
+
+function filterEditTeachersAndClasses(selectedTeacherId = '', selectedClassId = '') {
+    const bookSelect = document.getElementById('editBookSelect');
+    const teacherSelect = document.getElementById('editTeacherSelect');
+    const classSelect = document.getElementById('editClassSelect');
+    
+    const selectedBookId = bookSelect.value;
+    
+    teacherSelect.innerHTML = `<option value=""><%= __('Select_Teacher') %></option>`;
+    classSelect.innerHTML = `<option value=""><%= __('Select_Class') %></option>`;
+    
+    if (!selectedBookId) {
+        teacherSelect.disabled = true;
+        classSelect.disabled = true;
+        updateEditAssignmentId();
+        return;
+    }
+    
+    allTeachers.forEach(t => {
+        const option = document.createElement('option');
+        option.value = t.id;
+        option.textContent = t.name;
+        teacherSelect.appendChild(option);
+    });
+    
+    teacherSelect.disabled = false;
+    classSelect.disabled = true;
+    
+    if (selectedTeacherId) {
+        teacherSelect.value = selectedTeacherId;
+        filterEditClasses(selectedClassId);
+    } else if (teacherSelect.options.length === 2) {
+        teacherSelect.value = teacherSelect.options[1].value;
+        filterEditClasses();
+    } else {
+        updateEditAssignmentId();
+    }
+}
+
+function filterEditClasses(selectedClassId = '') {
+    const bookSelect = document.getElementById('editBookSelect');
+    const teacherSelect = document.getElementById('editTeacherSelect');
+    const classSelect = document.getElementById('editClassSelect');
+    
+    const selectedTeacherId = teacherSelect.value;
+    
+    classSelect.innerHTML = `<option value=""><%= __('Select_Class') %></option>`;
+    
+    if (!selectedTeacherId) {
+        classSelect.disabled = true;
+        updateEditAssignmentId();
+        return;
+    }
+    
+    allClasses.forEach(c => {
+        const option = document.createElement('option');
+        option.value = c.id;
+        option.textContent = c.name_ar || c.name;
+        classSelect.appendChild(option);
+    });
+    
+    classSelect.disabled = false;
+    
+    if (selectedClassId) {
+        classSelect.value = selectedClassId;
+    } else if (classSelect.options.length === 2) {
+        classSelect.value = classSelect.options[1].value;
+    }
+    updateEditAssignmentId();
+}
+
+function updateEditAssignmentId() {
+    const bookSelect = document.getElementById('editBookSelect');
+    const teacherSelect = document.getElementById('editTeacherSelect');
+    const classSelect = document.getElementById('editClassSelect');
+    
+    const selectedBookId = bookSelect.value;
+    const selectedTeacherId = teacherSelect.value;
+    const selectedClassId = classSelect.value;
+    
+    const assignmentInput = document.getElementById('editAssignmentIdInput');
+    
+    if (selectedBookId && selectedTeacherId && selectedClassId) {
+        const match = assignments.find(a => 
+            a.book_id == selectedBookId && 
+            a.teacher_id == selectedTeacherId && 
+            a.class_id == selectedClassId
+        );
+        if (match) {
+            assignmentInput.value = match.id;
+        } else {
+            assignmentInput.value = '';
+        }
+    } else {
+        assignmentInput.value = '';
+    }
 }
 
 function autoFillTimes(type) {
@@ -298,15 +961,6 @@ function autoFillTimes(type) {
 window.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('addPeriodNumber')) autoFillTimes('add');
 });
-
-function updateFieldsFromAssignment() {
-    const select = document.getElementById('assignmentSelect');
-    const option = select.options[select.selectedIndex];
-    if (option.value) {
-        document.getElementById('teacherIdInput').value = option.dataset.teacherId;
-        document.getElementById('classIdInput').value = option.dataset.classId;
-    }
-}
 
 async function deletePeriod(id) {
     if (!confirm('<%= __('Confirm_Delete_Period') %>')) return;

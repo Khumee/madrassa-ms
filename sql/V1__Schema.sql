@@ -1,24 +1,6 @@
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
-/*
- Navicat Premium Data Transfer
-
- Source Server         : local-mysql
- Source Server Type    : MySQL
- Source Server Version : 80406
- Source Host           : localhost:3306
- Source Schema         : kui
-
- Target Server Type    : MySQL
- Target Server Version : 80406
- File Encoding         : 65001
-
- Date: 17/05/2026 14:41:09
-*/
-
-
--- ----------------------------
 -- Table structure for attendance_students
 -- ----------------------------
 DROP TABLE IF EXISTS `attendance_students`;
@@ -117,9 +99,6 @@ CREATE TABLE `periods`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 289 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
--- Table structure for schema_history
--- ----------------------------
--- ----------------------------
 -- Table structure for sessions
 -- ----------------------------
 DROP TABLE IF EXISTS `sessions`;
@@ -204,5 +183,6 @@ CREATE TABLE `users`  (
   UNIQUE INDEX `username`(`username` ASC) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 49 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
+-- ----------------------------
 
 SET FOREIGN_KEY_CHECKS = 1;

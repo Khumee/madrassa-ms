@@ -1,5 +1,42 @@
 <%- include('partials/header') %>
 
+<%
+    // Helper function to generate visually distinct HSL background colors for teachers
+    function getTeacherPalette(name) {
+        // Strip honorific prefixes so teachers like "مولانا حبيب" and "مولانا حسن" don't collide
+        let cleanName = name.replace(/^(مولانا|مفتی|حافظ|استاد|الشيخ|شیخ)\s+/g, '').trim();
+        
+        // Polynomial rolling hash
+        let hash = 0;
+        const p = 31;
+        const m = 1e9 + 9;
+        for (let i = 0; i < cleanName.length; i++) {
+            hash = (hash * p + cleanName.charCodeAt(i)) % m;
+        }
+        
+        const colorsPalette = [
+            { bg: '#e0f2fe', text: '#0369a1', border: '#0ea5e9' }, // Soft Baby Blue
+            { bg: '#dcfce7', text: '#15803d', border: '#22c55e' }, // Soft Mint Green
+            { bg: '#ffedd5', text: '#c2410c', border: '#f97316' }, // Soft Peach Orange
+            { bg: '#ffe4e6', text: '#9f1239', border: '#f43f5e' }, // Soft Rose Pink
+            { bg: '#f3e8ff', text: '#6b21a8', border: '#a855f7' }, // Soft Lavender Purple
+            { bg: '#fef9c3', text: '#854d0e', border: '#eab308' }, // Soft Banana Yellow
+            { bg: '#ccfbf1', text: '#0f766e', border: '#14b8a6' }, // Soft Teal
+            { bg: '#fae8ff', text: '#86198f', border: '#d946ef' }, // Soft Lilac
+            { bg: '#ecfeff', text: '#155e75', border: '#06b6d4' }, // Soft Ice Cyan
+            { bg: '#fee2e2', text: '#991b1b', border: '#f87171' }, // Soft Coral Red
+            { bg: '#fef3c7', text: '#92400e', border: '#fbbf24' }, // Soft Apricot Gold
+            { bg: '#f0fdf4', text: '#166534', border: '#4ade80' }, // Soft Sage Green
+            { bg: '#e0e7ff', text: '#3730a3', border: '#6366f1' }, // Soft Slate Blue
+            { bg: '#f5f5f4', text: '#44403c', border: '#a8a29e' }, // Soft Slate Gray
+            { bg: '#f7fee7', text: '#3f6212', border: '#84cc16' }  // Soft Lime Green
+        ];
+        
+        const index = Math.abs(hash) % colorsPalette.length;
+        return colorsPalette[index];
+    }
+%>
+
 <div class="row mb-4 align-items-center no-print">
     <div class="col-md-6">
         <h1 class="fw-bold text-primary mb-0"><%= __('All_Classes_Timetable') %></h1>
@@ -22,11 +59,11 @@
 
 <!-- Expandable Filter Chips -->
 <div class="collapse no-print" id="filterCollapse">
-    <div class="card shadow-sm border-0 rounded-4 mb-4">
+    <div class="card shadow-sm border-0 rounded-4 mb-4" style="background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px);">
         <div class="card-body p-3">
             <div class="row g-4">
                 <div class="col-md-4 border-end">
-                    <small class="text-muted d-block mb-1 fw-bold"><%= __('Filter_By_Teacher') %></small>
+                    <small class="text-muted d-block mb-2 fw-bold"><%= __('Filter_By_Teacher') %></small>
                     <div class="d-flex flex-wrap gap-2" id="teacherFilters">
                         <button class="btn btn-sm btn-dark rounded-pill px-3 filter-chip active" data-filter="all" data-type="teacher"><%= __('All') %></button>
                         <% 
@@ -40,7 +77,7 @@
                     </div>
                 </div>
                 <div class="col-md-4 border-end">
-                    <small class="text-muted d-block mb-1 fw-bold"><%= __('Filter_By_Day') %></small>
+                    <small class="text-muted d-block mb-2 fw-bold"><%= __('Filter_By_Day') %></small>
                     <div class="d-flex flex-wrap gap-2" id="dayFilters">
                         <button class="btn btn-sm btn-dark rounded-pill px-3 filter-chip active" data-filter="all" data-type="day"><%= __('All') %></button>
                         <% 
@@ -52,7 +89,7 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <small class="text-muted d-block mb-1 fw-bold"><%= __('Filter_By_Class') %></small>
+                    <small class="text-muted d-block mb-2 fw-bold"><%= __('Filter_By_Class') %></small>
                     <div class="d-flex flex-wrap gap-2" id="classFilters">
                         <button class="btn btn-sm btn-dark rounded-pill px-3 filter-chip active" data-filter="all" data-type="class"><%= __('All') %></button>
                         <% classes.forEach(cls => { %>
@@ -82,16 +119,16 @@
         if (classPeriods.length === 0) return; 
     %>
         <div class="class-timetable mb-5" data-class="<%= cls.name_ar %>">
-            <div class="class-header bg-dark text-white p-3 text-center rounded-top fw-bold fs-4">
-                <%= __('Class_Prefix') %> <%= __(cls.name_ar) %>
+            <div class="class-header bg-dark text-white p-3 text-center rounded-top fw-bold fs-4 shadow-sm">
+                <i class="bi bi-mortarboard-fill me-2"></i><%= __('Class_Prefix') %> <%= __(cls.name_ar) %>
             </div>
             <div class="table-responsive">
-                <table class="table table-bordered align-middle text-center mb-0">
+                <table class="table table-bordered align-middle text-center mb-0" style="border-collapse: separate; border-spacing: 0;">
                     <thead class="bg-light">
                         <tr>
-                            <th style="width: 15%;"><%= __('Day_Period') %></th>
+                            <th class="py-3 fw-bold text-muted border-bottom-0" style="width: 15%;"><%= __('Day_Period') %></th>
                             <% for(let i=1; i<=maxPeriod; i++) { %>
-                                <th style="width: <%= 85 / maxPeriod %>%;"><%= __(periodKeys[i] || 'Period_' + i) %></th>
+                                <th class="py-3 fw-bold text-muted border-bottom-0" style="width: <%= 85 / maxPeriod %>%;"><%= __(periodKeys[i] || 'Period_' + i) %></th>
                             <% } %>
                         </tr>
                     </thead>
@@ -102,20 +139,31 @@
                                 if (day === 'Saturday' && dayPeriods.length === 0) return; 
                             %>
                             <tr class="day-row" data-day="<%= day %>">
-                                <td class="fw-bold bg-light text-primary"><%= __(day) %></td>
+                                <td class="fw-bold bg-light text-primary border-end-0 py-3"><%= __(day) %></td>
                                 <% for(let i=1; i<=maxPeriod; i++) { 
                                     const period = dayPeriods.find(p => p.period_number == i);
                                 %>
-                                    <td class="p-0 position-relative cell-container" style="height: 90px;">
+                                    <td class="p-1 position-relative cell-container" style="height: 105px;">
                                         <% if (period) { %>
-                                            <div class="period-box p-2 h-100 d-flex flex-column justify-content-center" data-teacher="<%= period.teacher_name %>">
-                                                <div class="subject-name fw-bold mb-1"><%= period.book_title || period.subject %></div>
-                                                <div class="teacher-name small text-primary text-truncate" title="<%= period.teacher_name %>"><%= period.teacher_name %></div>
+                                            <% 
+                                                const palette = getTeacherPalette(period.teacher_name);
+                                            %>
+                                            <div class="period-box p-3 h-100 d-flex flex-column justify-content-center border-start border-4 shadow-sm" 
+                                                 style="background: <%= palette.bg %>; color: <%= palette.text %>; border-color: <%= palette.border %> !important;" 
+                                                 data-teacher="<%= period.teacher_name %>">
+                                                <div class="subject-name fw-bold mb-1" style="font-size: 0.95rem; line-height: 1.2;"><%= period.book_title || period.subject %></div>
+                                                <div class="teacher-name small fw-bold opacity-75" style="font-size: 0.8rem;"><%= period.teacher_name %></div>
+                                                <% if (period.start_time) { %>
+                                                    <div class="period-time mt-1 small opacity-50 fw-semibold" style="font-size: 0.72rem;">
+                                                        <i class="bi bi-clock me-1"></i><%= period.start_time.substring(0,5) %> - <%= period.end_time.substring(0,5) %>
+                                                    </div>
+                                                <% } %>
+                                            </div>
+                                        <% } else { %>
+                                            <div class="h-100 d-flex align-items-center justify-content-center text-muted empty-dash rounded-3">
+                                                <i class="bi bi-dash-lg opacity-25"></i>
                                             </div>
                                         <% } %>
-                                        <div class="h-100 d-flex align-items-center justify-content-center text-muted empty-dash <%= period ? 'd-none' : '' %>">
-                                            <i class="bi bi-dash opacity-25"></i>
-                                        </div>
                                     </td>
                                 <% } %>
                             </tr>
@@ -129,26 +177,87 @@
 
 <style>
     .timetable-container-wide { width: 100%; margin: 0 auto; }
-    .class-timetable { box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-radius: 15px; overflow: hidden; border: 1px solid #eee; background: #fff; }
-    .period-box { transition: all 0.2s; font-size: 0.85rem; line-height: 1.1; }
-    .subject-name { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; color: #2c3e50; word-break: break-word; }
-    .teacher-name { font-size: 0.7rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     
-    @media (min-width: 992px) {
-        .timetable-container-wide { padding: 0 10px; }
-        .period-box { font-size: 1rem; }
-        .subject-name { -webkit-line-clamp: 1; white-space: nowrap; }
-        .teacher-name { font-size: 0.85rem; }
-        .class-timetable { margin-bottom: 3rem; }
+    .class-timetable { 
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.04); 
+        border-radius: 20px; 
+        overflow: hidden; 
+        border: 1px solid rgba(224, 224, 224, 0.6); 
+        background: #fff; 
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
     
-    .period-box:hover { background: #f8f9fa; }
+    .class-timetable:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 16px 45px rgba(0, 0, 0, 0.08);
+    }
     
+    .class-header {
+        background: linear-gradient(135deg, #1e293b, #0f172a);
+        color: #fff;
+        font-family: 'Outfit', 'Inter', sans-serif;
+        letter-spacing: 0.5px;
+    }
+
+    .table th {
+        font-family: 'Outfit', 'Inter', sans-serif;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+        background-color: #f8fafc;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .day-row td.fw-bold {
+        background-color: #f8fafc !important;
+        font-family: 'Outfit', 'Inter', sans-serif;
+        border-right: 1px solid #e2e8f0;
+    }
+
+    .period-box { 
+        transition: all 0.25s ease; 
+        font-size: 0.85rem; 
+        border-radius: 10px;
+        margin: 1px;
+    }
+    
+    .period-box:hover { 
+        transform: scale(1.03); 
+        box-shadow: 0 8px 20px rgba(0,0,0,0.08); 
+        cursor: pointer;
+    }
+    
+    .empty-dash {
+        background-color: #fcfcfc;
+        border: 1px dashed rgba(224, 224, 224, 0.4);
+    }
+
+    /* Print Styles */
     @media print {
         .no-print { display: none !important; }
-        .class-timetable { break-inside: avoid; margin-bottom: 1.5cm !important; border: 1.5px solid #000 !important; box-shadow: none !important; border-radius: 0; }
+        .class-timetable { 
+            break-inside: avoid; 
+            margin-bottom: 2cm !important; 
+            border: 2px solid #333 !important; 
+            box-shadow: none !important; 
+            border-radius: 0 !important; 
+            transform: none !important;
+        }
+        .class-header {
+            background: #333 !important;
+            color: #fff !important;
+            border-radius: 0 !important;
+        }
         body { background: white !important; }
         .timetable-container-wide { padding: 0 !important; }
+        .period-box {
+            border: 1px solid #ccc !important;
+            background: #fff !important;
+            color: #000 !important;
+            border-left: 5px solid #000 !important;
+            box-shadow: none !important;
+            transform: none !important;
+        }
     }
 </style>
 
