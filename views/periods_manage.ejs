@@ -2,38 +2,47 @@
 
 <div class="row mb-4 align-items-center">
     <div class="col-md-6">
-        <h1 class="fw-bold text-primary mb-0">إدارة الجدول الدراسي</h1>
-        <p class="text-muted">توزيع الحصص والكتب على الأيام والفترات</p>
+        <h1 class="fw-bold text-primary mb-0"><%= __('Manage_Timetable_Header') %></h1>
+        <p class="text-muted"><%= __('Timetable_Header_Sub') %></p>
     </div>
     <div class="col-md-6 text-start">
+        <form action="/periods/generate-auto" method="POST" class="d-inline" onsubmit="return confirm('<%= __('Confirm_Auto_Generate') %>')">
+            <button type="submit" class="btn btn-warning rounded-pill px-4 me-2 text-dark fw-bold">
+                <i class="bi bi-cpu me-2"></i><%= __('Auto_Generate_Timetable') %>
+            </button>
+        </form>
         <a href="/periods/full" class="btn btn-success rounded-pill px-4 me-2">
-            <i class="bi bi-calendar3 me-2"></i>عرض الجدول كاملاً
+            <i class="bi bi-calendar3 me-2"></i><%= __('View_Full_Timetable') %>
         </a>
         <a href="/" class="btn btn-outline-primary rounded-pill px-4">
-            <i class="bi bi-house-door me-2"></i>الرجوع للوحة التحكم
+            <i class="bi bi-house-door me-2"></i><%= __('Back_To_Dashboard') %>
         </a>
     </div>
 </div>
 
+<% if (typeof generateSuccess !== 'undefined' && generateSuccess === 'true') { %>
+    <div class="alert alert-success alert-dismissible fade show border-0 rounded-4 shadow-sm p-4 mb-4" role="alert">
+        <i class="bi bi-check-circle-fill me-2 fs-5"></i><%= __('Timetable_Generated_Success') %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+<% } %>
+
 <% 
-    const dayArabic = {
-        'Saturday': 'السبت', 'Sunday': 'الأحد', 'Monday': 'الاثنين', 
-        'Tuesday': 'الثلاثاء', 'Wednesday': 'الأربعاء', 'Thursday': 'الخميس', 'Friday': 'الجمعة'
-    };
+    const dayNames = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 %>
 
 <div class="row">
     <div class="col-md-4">
         <div class="card shadow-sm border-0 rounded-4 mb-4">
             <div class="card-header bg-primary text-white rounded-top-4 p-3">
-                <h5 class="mb-0">إضافة حصة جديدة</h5>
+                <h5 class="mb-0"><%= __('Add_New_Period') %></h5>
             </div>
             <div class="card-body p-4">
                 <form action="/periods/add" method="POST">
                     <div class="mb-3">
-                        <label class="form-label fw-bold">توزيع الكتاب (Assignment)</label>
+                        <label class="form-label fw-bold"><%= __('Book_Assignment') %></label>
                         <select name="assignmentId" id="assignmentSelect" class="form-select" required onchange="updateFieldsFromAssignment()">
-                            <option value="">اختر التوزيع...</option>
+                            <option value=""><%= __('Select_Assignment') %></option>
                             <% assignments.forEach(a => { %>
                                 <option value="<%= a.id %>" data-teacher-id="<%= a.teacher_id %>" data-class-id="<%= a.class_id %>">
                                     <%= a.teacher_name %> - <%= a.book_title %> (<%= a.class_name %>)
@@ -45,46 +54,42 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold">اليوم</label>
+                        <label class="form-label fw-bold"><%= __('Day') %></label>
                         <select name="dayOfWeek" class="form-select" required>
-                            <option value="Saturday">السبت</option>
-                            <option value="Sunday">الأحد</option>
-                            <option value="Monday">الاثنين</option>
-                            <option value="Tuesday">الثلاثاء</option>
-                            <option value="Wednesday">الأربعاء</option>
-                            <option value="Thursday">الخميس</option>
-                            <option value="Friday">الجمعة</option>
+                            <% dayNames.forEach(day => { %>
+                                <option value="<%= day %>"><%= __(day) %></option>
+                            <% }) %>
                         </select>
                     </div>
 
                     <div class="row">
                         <div class="col-6 mb-3">
-                            <label class="form-label fw-bold">رقم الحصة</label>
+                            <label class="form-label fw-bold"><%= __('Period_Number') %></label>
                             <select name="periodNumber" class="form-select" id="addPeriodNumber" onchange="autoFillTimes('add')" required>
-                                <% for(let i=1; i<=5; i++) { %>
-                                    <option value="<%= i %>">الحصة <%= i %></option>
+                                <% for(let i=1; i<=7; i++) { %>
+                                    <option value="<%= i %>"><%= i <= 5 ? __('Period_Label') + ' ' + i : __('Extra_Period') + ' ' + (i - 5) %></option>
                                 <% } %>
                             </select>
                         </div>
                         <div class="col-6 mb-3">
-                            <label class="form-label fw-bold">المادة (اختياري)</label>
-                            <input type="text" name="subject" class="form-control" placeholder="أدخل المادة...">
+                            <label class="form-label fw-bold"><%= __('Subject_Optional') %></label>
+                            <input type="text" name="subject" class="form-control" placeholder="<%= __('Enter_Subject_Placeholder') %>">
                         </div>
                     </div>
 
                     <div class="row d-none">
                         <div class="col-6 mb-3">
-                            <label class="form-label fw-bold">وقت البدء</label>
+                            <label class="form-label fw-bold"><%= __('Start_Time') %></label>
                             <input type="time" name="startTime" id="addStartTime" class="form-control">
                         </div>
                         <div class="col-6 mb-3">
-                            <label class="form-label fw-bold">وقت الانتهاء</label>
+                            <label class="form-label fw-bold"><%= __('End_Time') %></label>
                             <input type="time" name="endTime" id="addEndTime" class="form-control">
                         </div>
                     </div>
 
                     <div class="d-grid mt-2">
-                        <button type="submit" class="btn btn-primary rounded-pill py-2 fw-bold">حفظ الحصة</button>
+                        <button type="submit" class="btn btn-primary rounded-pill py-2 fw-bold"><%= __('Save_Period') %></button>
                     </div>
                 </form>
             </div>
@@ -95,14 +100,14 @@
         <div class="card shadow-sm border-0 rounded-4 overflow-hidden mb-5">
             <div class="card-header bg-white p-4 border-0">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h3 class="card-title fw-bold mb-0">الجدول الحالي</h3>
+                    <h3 class="card-title fw-bold mb-0"><%= __('Current_Timetable') %></h3>
                     <div class="d-flex gap-2">
                         <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
-                            <i class="bi bi-filter me-1"></i>تصفية <i class="bi bi-chevron-down small ms-1"></i>
+                            <i class="bi bi-filter me-1"></i><%= __('Filter') %> <i class="bi bi-chevron-down small ms-1"></i>
                         </button>
                         <div class="btn-group rounded-pill overflow-hidden border">
-                            <a href="/periods/manage?groupBy=day" class="btn btn-sm <%= groupBy === 'day' ? 'btn-primary' : 'btn-white text-muted' %> px-3">حسب اليوم</a>
-                            <a href="/periods/manage?groupBy=teacher" class="btn btn-sm <%= groupBy === 'teacher' ? 'btn-primary' : 'btn-white text-muted' %> px-3">حسب الأستاذ</a>
+                            <a href="/periods/manage?groupBy=day" class="btn btn-sm <%= groupBy === 'day' ? 'btn-primary' : 'btn-white text-muted' %> px-3"><%= __('Group_By_Day') %></a>
+                            <a href="/periods/manage?groupBy=teacher" class="btn btn-sm <%= groupBy === 'teacher' ? 'btn-primary' : 'btn-white text-muted' %> px-3"><%= __('Group_By_Teacher') %></a>
                         </div>
                     </div>
                 </div>
@@ -112,9 +117,9 @@
                     <div class="p-3 bg-light rounded-4 border border-primary-subtle border-dashed">
                         <% if (groupBy !== 'day') { %>
                         <div class="mb-3">
-                            <small class="text-muted d-block mb-1 fw-bold">تصفية حسب الأستاذ:</small>
+                            <small class="text-muted d-block mb-1 fw-bold"><%= __('Filter_By_Teacher') %></small>
                             <div class="d-flex flex-wrap gap-2" id="teacherFilters">
-                                <button class="btn btn-sm btn-dark rounded-pill px-3 filter-chip active" data-filter="all" data-type="teacher">الكل</button>
+                                <button class="btn btn-sm btn-dark rounded-pill px-3 filter-chip active" data-filter="all" data-type="teacher"><%= __('All') %></button>
                                 <% 
                                     const colors = ['primary', 'success', 'danger', 'warning', 'info', 'indigo', 'orange', 'teal', 'purple'];
                                     const uniqueTeachers = [...new Set(periods.map(p => p.teacher_name))];
@@ -127,14 +132,14 @@
                         </div>
                         <% } %>
                         <div>
-                            <small class="text-muted d-block mb-1 fw-bold">تصفية حسب اليوم:</small>
+                            <small class="text-muted d-block mb-1 fw-bold"><%= __('Filter_By_Day') %></small>
                             <div class="d-flex flex-wrap gap-2" id="dayFilters">
-                                <button class="btn btn-sm btn-dark rounded-pill px-3 filter-chip active" data-filter="all" data-type="day">الكل</button>
+                                <button class="btn btn-sm btn-dark rounded-pill px-3 filter-chip active" data-filter="all" data-type="day"><%= __('All') %></button>
                                 <% 
                                     const uniqueDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
                                     uniqueDays.forEach(day => { 
                                 %>
-                                    <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 filter-chip" data-filter="<%= dayArabic[day] %>" data-type="day"><%= dayArabic[day] %></button>
+                                    <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 filter-chip" data-filter="<%= day %>" data-type="day"><%= __(day) %></button>
                                 <% }) %>
                             </div>
                         </div>
@@ -146,18 +151,18 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="bg-light text-muted small text-uppercase">
                             <tr>
-                                <th class="px-4" style="width: 15%;">الحصة</th>
-                                <th style="width: 25%;"><%= groupBy === 'teacher' ? 'اليوم' : 'الأستاذ' %></th>
-                                <th style="width: 15%;">الفصل</th>
-                                <th style="width: 30%;">الكتاب / المادة</th>
-                                <th class="px-4 text-center" style="width: 15%;">الإجراءات</th>
+                                <th class="px-4" style="width: 15%;"><%= __('Period_Label') %></th>
+                                <th style="width: 25%;"><%= groupBy === 'teacher' ? __('Day') : __('Filter_By_Teacher').replace(':', '') %></th>
+                                <th style="width: 15%;"><%= __('Class') %></th>
+                                <th style="width: 30%;"><%= __('Book_Subject') %></th>
+                                <th class="px-4 text-center" style="width: 15%;"><%= __('Actions') %></th>
                             </tr>
                         </thead>
                         <tbody>
-                                <% 
+                            <% 
                                 let lastGroup = '';
                                 periods.forEach(p => { 
-                                    const currentGroup = groupBy === 'teacher' ? p.teacher_name : dayArabic[p.day_of_week];
+                                    const currentGroup = groupBy === 'teacher' ? p.teacher_name : __(p.day_of_week);
                                     if (currentGroup !== lastGroup) {
                                         lastGroup = currentGroup;
                             %>
@@ -168,25 +173,24 @@
                                     </td>
                                 </tr>
                             <% } %>
-                                <tr class="period-row" data-teacher="<%= p.teacher_name %>" data-day="<%= dayArabic[p.day_of_week] %>">
+                                <tr class="period-row" data-teacher="<%= p.teacher_name %>" data-day="<%= p.day_of_week %>">
                                     <td class="px-4">
                                         <span class="badge bg-secondary-subtle text-secondary border rounded-pill">
-                                            الحصة <%= p.period_number || 'غير محدد' %>
+                                            <%= __('Period_Label') %> <%= p.period_number || __('Not_Specified') %>
                                         </span>
                                     </td>
-                                    <td><%= groupBy === 'teacher' ? dayArabic[p.day_of_week] : p.teacher_name %></td>
+                                    <td><%= groupBy === 'teacher' ? __(p.day_of_week) : p.teacher_name %></td>
                                     <td><%= p.class_name %></td>
                                     <td>
-                                        <div class="subject-text-wrap fw-bold text-dark"><%= p.book_title || p.subject || 'غير محدد' %></div>
-
+                                        <div class="subject-text-wrap fw-bold text-dark"><%= p.book_title || p.subject || __('Not_Specified') %></div>
                                     </td>
                                     <td class="px-4 text-center">
                                         <button class="btn btn-sm btn-outline-primary rounded-circle p-2 lh-1 me-1" 
-                                                onclick='openEditModal(<%- JSON.stringify(p) %>)' title="تعديل">
+                                                onclick='openEditModal(<%- JSON.stringify(p) %>)' title="<%= __('Edit') %>">
                                             <i class="bi bi-pencil-square"></i>
                                         </button>
                                         <button class="btn btn-sm btn-outline-danger rounded-circle p-2 lh-1" 
-                                                onclick="deletePeriod(<%= p.id %>)" title="حذف">
+                                                onclick="deletePeriod(<%= p.id %>)" title="<%= __('Delete') %>">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </td>
@@ -194,7 +198,7 @@
                             <% }) %>
                             <% if (periods.length === 0) { %>
                                 <tr>
-                                    <td colspan="5" class="text-center py-5 text-muted">لا توجد حصص مسجلة حالياً</td>
+                                    <td colspan="5" class="text-center py-5 text-muted"><%= __('No_Periods_Registered') %></td>
                                 </tr>
                             <% } %>
                         </tbody>
@@ -210,13 +214,13 @@
     <div class="modal-dialog">
         <div class="modal-content rounded-4 border-0">
             <div class="modal-header bg-primary text-white border-0">
-                <h5 class="modal-title text-white">تعديل الحصة</h5>
+                <h5 class="modal-title text-white"><%= __('Edit_Period') %></h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form id="editPeriodForm" method="POST">
                 <div class="modal-body p-4">
                     <div class="mb-3">
-                        <label class="form-label fw-bold">توزيع الكتاب</label>
+                        <label class="form-label fw-bold"><%= __('Book_Assignment') %></label>
                         <select name="assignmentId" id="editAssignmentId" class="form-select" required>
                             <% assignments.forEach(a => { %>
                                 <option value="<%= a.id %>"><%= a.teacher_name %> - <%= a.book_title %> (<%= a.class_name %>)</option>
@@ -224,27 +228,35 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold">رقم الحصة</label>
+                        <label class="form-label fw-bold"><%= __('Day') %></label>
+                        <select name="dayOfWeek" id="editDayOfWeek" class="form-select" required>
+                            <% dayNames.forEach(day => { %>
+                                <option value="<%= day %>"><%= __(day) %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><%= __('Period_Number') %></label>
                         <select name="periodNumber" id="editPeriodNumber" class="form-select" onchange="autoFillTimes('edit')" required>
-                            <% for(let i=1; i<=5; i++) { %>
-                                <option value="<%= i %>">الحصة <%= i %></option>
+                            <% for(let i=1; i<=7; i++) { %>
+                                <option value="<%= i %>"><%= i <= 5 ? __('Period_Label') + ' ' + i : __('Extra_Period') + ' ' + (i - 5) %></option>
                             <% } %>
                         </select>
                     </div>
                     <div class="row d-none">
                         <div class="col-6 mb-3">
-                            <label class="form-label fw-bold">وقت البدء</label>
+                            <label class="form-label fw-bold"><%= __('Start_Time') %></label>
                             <input type="time" name="startTime" id="editStartTime" class="form-control">
                         </div>
                         <div class="col-6 mb-3">
-                            <label class="form-label fw-bold">وقت الانتهاء</label>
+                            <label class="form-label fw-bold"><%= __('End_Time') %></label>
                             <input type="time" name="endTime" id="editEndTime" class="form-control">
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer border-0 p-4 pt-0">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">إلغاء</button>
-                    <button type="submit" class="btn btn-primary rounded-pill px-4">حفظ التغييرات</button>
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal"><%= __('Cancel') %></button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4"><%= __('Save_Changes') %></button>
                 </div>
             </form>
         </div>
@@ -256,6 +268,7 @@ function openEditModal(period) {
     const modal = new bootstrap.Modal(document.getElementById('editPeriodModal'));
     document.getElementById('editPeriodForm').action = `/periods/edit/${period.id}`;
     document.getElementById('editAssignmentId').value = period.assignment_id || '';
+    document.getElementById('editDayOfWeek').value = period.day_of_week || 'Monday';
     document.getElementById('editPeriodNumber').value = period.period_number || 1;
     document.getElementById('editStartTime').value = period.start_time.substring(0,5);
     document.getElementById('editEndTime').value = period.end_time.substring(0,5);
@@ -296,12 +309,12 @@ function updateFieldsFromAssignment() {
 }
 
 async function deletePeriod(id) {
-    if (!confirm('هل أنت متأكد من حذف هذه الحصة؟')) return;
+    if (!confirm('<%= __('Confirm_Delete_Period') %>')) return;
     const res = await fetch(`/periods/delete/${id}`, { method: 'POST' });
     if ((await res.json()).success) {
         location.reload();
     } else {
-        alert('حدث خطأ أثناء الحذف');
+        alert('<%= __('Delete_Error') %>');
     }
 }
 

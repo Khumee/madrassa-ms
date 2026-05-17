@@ -2,7 +2,7 @@
 
 <div class="row">
     <div class="col-md-12 text-center mb-5">
-        <h1 class="display-4 fw-bold text-primary">لوحة التحكم</h1>
+        <h1 class="display-4 fw-bold text-primary"><%= __('Dashboard') %></h1>
         <p class="lead text-muted"><%= today %></p>
     </div>
 </div>
@@ -11,7 +11,7 @@
     <div class="col-md-12">
         <div class="card shadow-sm">
             <div class="card-body p-4">
-                <h3 class="card-title mb-4">حضور الطلاب حسب الفصول</h3>
+                <h3 class="card-title mb-4"><%= __('Student_Attendance_By_Class') %></h3>
                 <div class="row g-3">
                     <% classes.forEach(cls => { %>
                         <div class="col-6 col-md-4 col-lg-3">
@@ -19,7 +19,7 @@
                                 <div class="card h-100 border-0 shadow-sm text-center p-3 bg-light">
                                     <div class="card-body p-0 d-flex flex-column align-items-center justify-content-center">
                                         <i class="bi bi-mortarboard text-primary fs-3 mb-2"></i>
-                                        <h6 class="fw-bold mb-0 text-dark w-100" style="font-size: 0.9rem;"><%= cls.name_ar %></h6>
+                                        <h6 class="fw-bold mb-0 text-dark w-100" style="font-size: 0.9rem;"><%= __(cls.name_ar) %></h6>
                                     </div>
                                 </div>
                             </a>
@@ -35,30 +35,30 @@
     <div class="col-md-12">
         <div class="card shadow-sm">
             <div class="card-body p-4">
-                <h3 class="card-title mb-4">الوصول السريع</h3>
+                <h3 class="card-title mb-4"><%= __('Quick_Access') %></h3>
                 <div class="row g-3">
                     <div class="col-md-3 mb-3">
                         <a href="/users/manage" class="btn btn-outline-primary dashboard-btn rounded-4 shadow-sm border-0 h-100 d-flex flex-column align-items-center justify-content-center">
                             <i class="bi bi-people-fill fs-3 mb-2"></i>
-                            <span class="fw-bold">إدارة المستخدمين</span>
+                            <span class="fw-bold"><%= __('Manage_Users') %></span>
                         </a>
                     </div>
                     <div class="col-md-3 mb-3">
                         <a href="/books/manage" class="btn btn-outline-info dashboard-btn rounded-4 shadow-sm border-0 h-100 d-flex flex-column align-items-center justify-content-center">
                             <i class="bi bi-book-half fs-3 mb-2"></i>
-                            <span class="fw-bold">إدارة الكتب</span>
+                            <span class="fw-bold"><%= __('Manage_Books') %></span>
                         </a>
                     </div>
                     <div class="col-md-3 mb-3">
                         <a href="/teacher-books/manage" class="btn btn-outline-success dashboard-btn rounded-4 shadow-sm border-0 h-100 d-flex flex-column align-items-center justify-content-center">
                             <i class="bi bi-person-check fs-3 mb-2"></i>
-                            <span class="fw-bold">توزيع الكتب</span>
+                            <span class="fw-bold"><%= __('Book_Assignments') %></span>
                         </a>
                     </div>
                     <div class="col-md-3 mb-3">
                         <a href="/reports" class="btn btn-outline-warning dashboard-btn rounded-4 shadow-sm border-0 h-100 d-flex flex-column align-items-center justify-content-center">
                             <i class="bi bi-bar-chart-fill fs-3 mb-2"></i>
-                            <span class="fw-bold">التقارير العامة</span>
+                            <span class="fw-bold"><%= __('General_Reports') %></span>
                         </a>
                     </div>
                 </div>
@@ -71,11 +71,11 @@
     <div class="col-md-6">
         <div class="card shadow-sm h-100">
             <div class="card-body p-4">
-                <h3 class="card-title mb-4 text-primary">إدارة الطلاب</h3>
+                <h3 class="card-title mb-4 text-primary"><%= __('Student_Management') %></h3>
                 <div class="d-flex gap-2 flex-wrap">
-                    <a href="/students/manage" class="btn btn-secondary rounded-pill px-4">📂 إدارة الطلاب</a>
-                    <a href="/students/add" class="btn btn-success rounded-pill px-4">➕ إضافة طالب</a>
-                    <a href="/reports" class="btn btn-primary rounded-pill px-4">📊 التقارير</a>
+                    <a href="/students/manage" class="btn btn-secondary rounded-pill px-4">📂 <%= __('Student_Management') %></a>
+                    <a href="/students/add" class="btn btn-success rounded-pill px-4">➕ <%= __('Add_Student') %></a>
+                    <a href="/reports" class="btn btn-primary rounded-pill px-4">📊 <%= __('Reports') %></a>
                 </div>
             </div>
         </div>
@@ -84,15 +84,15 @@
     <div class="col-md-6">
         <div class="card shadow-sm h-100">
             <div class="card-body p-4">
-                <h3 class="card-title mb-4 text-primary">إدارة المعلمين</h3>
+                <h3 class="card-title mb-4 text-primary"><%= __('Teacher_Management') %></h3>
                 <div class="d-flex gap-2 flex-wrap">
-                    <a href="/teachers" class="btn btn-secondary rounded-pill px-4">📝 حضور المعلمين</a>
-                    <a href="/teachers/manage" class="btn btn-secondary rounded-pill px-4">👥 إدارة المعلمين</a>
+                    <a href="/teachers" class="btn btn-secondary rounded-pill px-4">📝 <%= __('Teacher_Attendance') %></a>
+                    <a href="/teachers/manage" class="btn btn-secondary rounded-pill px-4">👥 <%= __('Teacher_Management') %></a>
                     <% if (role === 'مدير') { %>
-                        <a href="/teachers/add" class="btn btn-success rounded-pill px-4">➕ إضافة معلم</a>
+                        <a href="/teachers/add" class="btn btn-success rounded-pill px-4">➕ <%= __('Add_Teacher') %></a>
                     <% } %>
-                    <a href="/periods/manage" class="btn btn-secondary rounded-pill px-4">📅 إدارة الجدول</a>
-                    <a href="/periods/full" class="btn btn-info rounded-pill px-4 text-white">🗓️ الجدول الكامل</a>
+                    <a href="/timetable/manage" class="btn btn-secondary rounded-pill px-4">📅 <%= __('Timetable') %></a>
+                    <a href="/periods/full" class="btn btn-info rounded-pill px-4 text-white">🗓️ <%= __('Full_Timetable') %></a>
                 </div>
             </div>
         </div>
@@ -103,10 +103,10 @@
     <div class="col-md-12">
         <div class="card shadow-sm">
             <div class="card-body p-4">
-                <h3 class="card-title mb-3 text-primary">الإعدادات</h3>
+                <h3 class="card-title mb-3 text-primary"><%= __('Settings') %></h3>
                 <div class="d-flex gap-2 flex-wrap">
-                    <a href="/profile/change-password" class="btn btn-outline-secondary rounded-pill px-4">🔑 تغيير كلمة المرور</a>
-                    <a href="/users/manage" class="btn btn-outline-danger rounded-pill px-4">👤 إدارة المستخدمين والأدوار</a>
+                    <a href="/profile/change-password" class="btn btn-outline-secondary rounded-pill px-4">🔑 <%= __('Change_Password') %></a>
+                    <a href="/users/manage" class="btn btn-outline-danger rounded-pill px-4">👤 <%= __('Manage_Users_Roles') %></a>
                 </div>
             </div>
         </div>

@@ -32,7 +32,7 @@
                                     <td class="fw-bold"><%= student.name %></td>
                                     <td>
                                         <span class="badge bg-info text-white rounded-pill px-3">
-                                            <%= student.class_name %>
+                                            <%= __(student.class_name) %>
                                         </span>
                                     </td>
                                     <td class="px-4 text-center">
@@ -102,10 +102,11 @@ function openEditModal(student, classes) {
     
     const classSelect = document.getElementById('editClassId');
     classSelect.innerHTML = '';
+    const userLang = '<%= lang %>';
     classes.forEach(cls => {
         const opt = document.createElement('option');
         opt.value = cls.id;
-        opt.text = cls.name_ar;
+        opt.text = (userLang === 'en') ? (cls.name_en || cls.name_ar) : cls.name_ar;
         opt.selected = (cls.id === student.class_id);
         classSelect.appendChild(opt);
     });

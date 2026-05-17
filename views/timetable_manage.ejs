@@ -1,0 +1,158 @@
+<%- include('partials/header') %>
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2 class="fw-bold"><i class="bi bi-calendar-week me-2 text-primary"></i> <%= __('Timetable') %></h2>
+    </div>
+    <div class="col-md-4 text-end">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPeriodModal">
+            <i class="bi bi-plus-circle me-1"></i> <%= __('Add_New_Period') %>
+        </button>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 text-end">
+                <thead class="table-light">
+                    <tr>
+                        <th class="text-end"><%= __('Day') %></th>
+                        <th class="text-end"><%= __('Period_Number') %></th>
+                        <th class="text-end"><%= __('Start_Time') %></th>
+                        <th class="text-end"><%= __('End_Time') %></th>
+                        <th class="text-end"><%= __('Class') %></th>
+                        <th class="text-end"><%= __('Teacher') %></th>
+                        <th class="text-end"><%= __('Book') %></th>
+                        <th class="text-center"><%= __('Actions') %></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (periods && periods.length > 0) { %>
+                        <% periods.forEach(p => { %>
+                            <tr>
+                                <td class="fw-bold text-dark"><%= __(p.day_of_week) %></td>
+                                <td><%= p.period_number || '-' %></td>
+                                <td><%= p.start_time || '-' %></td>
+                                <td><%= p.end_time || '-' %></td>
+                                <td><span class="badge bg-secondary"><%= p.class_name %></span></td>
+                                <td><%= p.teacher_name %></td>
+                                <td><span class="badge bg-info text-dark"><%= p.book_title %></span></td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deletePeriod(<%= p.id %>)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr><td colspan="8" class="text-center text-muted"><%= __('No_Periods_Registered') %></td></tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Period Modal -->
+<div class="modal fade" id="addPeriodModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><%= __('Add_New_Period') %></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-end">
+                <form id="addPeriodForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><%= __('Book_Assignment') %></label>
+                        <select name="assignment_id" class="form-select" required>
+                            <option value=""><%= __('Select_Assignment') %></option>
+                            <% assignments.forEach(a => { %>
+                                <option value="<%= a.id %>"><%= a.teacher_name %> - <%= a.book_title %> (<%= a.class_name %>)</option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><%= __('Day') %></label>
+                        <select name="day_of_week" class="form-select" required>
+                            <option value="Saturday"><%= __('Saturday') %></option>
+                            <option value="Sunday"><%= __('Sunday') %></option>
+                            <option value="Monday"><%= __('Monday') %></option>
+                            <option value="Tuesday"><%= __('Tuesday') %></option>
+                            <option value="Wednesday"><%= __('Wednesday') %></option>
+                            <option value="Thursday"><%= __('Thursday') %></option>
+                            <option value="Friday"><%= __('Friday') %></option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><%= __('Period_Number') %></label>
+                        <input type="number" name="period_number" class="form-control" required min="1" max="10">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold"><%= __('Start_Time') %></label>
+                            <input type="time" name="start_time" class="form-control">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold"><%= __('End_Time') %></label>
+                            <input type="time" name="end_time" class="form-control">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><%= __('Cancel') %></button>
+                <button type="button" class="btn btn-primary" onclick="submitPeriod()"><%= __('Save_Period') %></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function submitPeriod() {
+    const form = document.getElementById('addPeriodForm');
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+    
+    try {
+        const response = await fetch('/timetable/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        const result = await response.json();
+        
+        if (result.success) {
+            window.location.reload();
+        } else {
+            alert(result.error || 'Error saving period');
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Server error');
+    }
+}
+
+async function deletePeriod(id) {
+    if (!confirm('<%= __('Confirm_Delete_Period') %>')) return;
+    try {
+        const response = await fetch(`/timetable/delete/${id}`, { method: 'POST' });
+        const result = await response.json();
+        if (result.success) {
+            window.location.reload();
+        } else {
+            alert(result.error || 'Error deleting period');
+        }
+    } catch (err) {
+        alert('Server error');
+    }
+}
+</script>
+
+<%- include('partials/footer') %>

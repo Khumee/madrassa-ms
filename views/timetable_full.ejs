@@ -2,19 +2,21 @@
 
 <div class="row mb-4 align-items-center no-print">
     <div class="col-md-6">
-        <h1 class="fw-bold text-primary mb-0">الجداول الدراسية لكل الفصول</h1>
-        <p class="text-muted">نظرة شاملة موزعة حسب الصفوف (Mon-Sat)</p>
+        <h1 class="fw-bold text-primary mb-0"><%= __('All_Classes_Timetable') %></h1>
+        <p class="text-muted"><%= __('Timetable_Overview') %></p>
     </div>
     <div class="col-md-6 text-start">
         <button class="btn btn-outline-primary rounded-pill px-4 me-2" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
-            <i class="bi bi-filter me-2"></i>تصفية
+            <i class="bi bi-filter me-2"></i><%= __('Filter') %>
         </button>
         <button onclick="window.print()" class="btn btn-dark rounded-pill px-4 me-2">
-            <i class="bi bi-printer me-2"></i>طباعة
+            <i class="bi bi-printer me-2"></i><%= __('Print') %>
         </button>
-        <a href="/periods/manage" class="btn btn-outline-secondary rounded-pill px-4">
-            <i class="bi bi-gear me-2"></i>الإدارة
-        </a>
+        <% if (session && ['ناظم', 'مدير', 'عريب'].includes(session.role)) { %>
+            <a href="/periods/manage" class="btn btn-outline-secondary rounded-pill px-4">
+                <i class="bi bi-gear me-2"></i><%= __('Manage') %>
+            </a>
+        <% } %>
     </div>
 </div>
 
@@ -24,9 +26,9 @@
         <div class="card-body p-3">
             <div class="row g-4">
                 <div class="col-md-4 border-end">
-                    <small class="text-muted d-block mb-1 fw-bold">تصفية حسب الأستاذ:</small>
+                    <small class="text-muted d-block mb-1 fw-bold"><%= __('Filter_By_Teacher') %></small>
                     <div class="d-flex flex-wrap gap-2" id="teacherFilters">
-                        <button class="btn btn-sm btn-dark rounded-pill px-3 filter-chip active" data-filter="all" data-type="teacher">الكل</button>
+                        <button class="btn btn-sm btn-dark rounded-pill px-3 filter-chip active" data-filter="all" data-type="teacher"><%= __('All') %></button>
                         <% 
                             const colors = ['primary', 'success', 'danger', 'warning', 'info', 'indigo', 'orange', 'teal', 'purple'];
                             const uniqueTeachers = [...new Set(periods.map(p => p.teacher_name))];
@@ -38,24 +40,23 @@
                     </div>
                 </div>
                 <div class="col-md-4 border-end">
-                    <small class="text-muted d-block mb-1 fw-bold">تصفية حسب اليوم:</small>
+                    <small class="text-muted d-block mb-1 fw-bold"><%= __('Filter_By_Day') %></small>
                     <div class="d-flex flex-wrap gap-2" id="dayFilters">
-                        <button class="btn btn-sm btn-dark rounded-pill px-3 filter-chip active" data-filter="all" data-type="day">الكل</button>
+                        <button class="btn btn-sm btn-dark rounded-pill px-3 filter-chip active" data-filter="all" data-type="day"><%= __('All') %></button>
                         <% 
                             const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-                            const dayArabic = { 'Monday': 'الاثنين', 'Tuesday': 'الثلاثاء', 'Wednesday': 'الأربعاء', 'Thursday': 'الخميس', 'Friday': 'الجمعة', 'Saturday': 'السبت' };
                             days.forEach(day => { 
                         %>
-                            <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 filter-chip" data-filter="<%= dayArabic[day] %>" data-type="day"><%= dayArabic[day] %></button>
+                            <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 filter-chip" data-filter="<%= day %>" data-type="day"><%= __(day) %></button>
                         <% }) %>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <small class="text-muted d-block mb-1 fw-bold">تصفية حسب الصف:</small>
+                    <small class="text-muted d-block mb-1 fw-bold"><%= __('Filter_By_Class') %></small>
                     <div class="d-flex flex-wrap gap-2" id="classFilters">
-                        <button class="btn btn-sm btn-dark rounded-pill px-3 filter-chip active" data-filter="all" data-type="class">الكل</button>
+                        <button class="btn btn-sm btn-dark rounded-pill px-3 filter-chip active" data-filter="all" data-type="class"><%= __('All') %></button>
                         <% classes.forEach(cls => { %>
-                            <button class="btn btn-sm btn-outline-primary rounded-pill px-3 filter-chip" data-filter="<%= cls.name_ar %>" data-type="class"><%= cls.name_ar %></button>
+                            <button class="btn btn-sm btn-outline-primary rounded-pill px-3 filter-chip" data-filter="<%= cls.name_ar %>" data-type="class"><%= __(cls.name_ar) %></button>
                         <% }) %>
                     </div>
                 </div>
@@ -65,9 +66,14 @@
 </div>
 
 <% 
-    const periodArabic = { 1: 'الأولى', 2: 'الثانية', 3: 'الثالثة', 4: 'الرابعة', 5: 'الخامسة' };
-    const dayArabicMap = { 'Monday': 'الاثنين', 'Tuesday': 'الثلاثاء', 'Wednesday': 'الأربعاء', 'Thursday': 'الخميس', 'Friday': 'الجمعة', 'Saturday': 'السبت' };
+    const periodKeys = { 1: 'Period_1', 2: 'Period_2', 3: 'Period_3', 4: 'Period_4', 5: 'Period_5', 6: 'Period_6', 7: 'Period_7' };
     const dayNamesEn = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    
+    // Determine the maximum period number dynamically (defaulting to at least 5)
+    let maxPeriod = 5;
+    periods.forEach(p => {
+        if (p.period_number > maxPeriod) maxPeriod = p.period_number;
+    });
 %>
 
 <div class="timetable-container-wide">
@@ -77,15 +83,15 @@
     %>
         <div class="class-timetable mb-5" data-class="<%= cls.name_ar %>">
             <div class="class-header bg-dark text-white p-3 text-center rounded-top fw-bold fs-4">
-                صف: <%= cls.name_ar %>
+                <%= __('Class_Prefix') %> <%= __(cls.name_ar) %>
             </div>
             <div class="table-responsive">
                 <table class="table table-bordered align-middle text-center mb-0">
                     <thead class="bg-light">
                         <tr>
-                            <th style="width: 15%;">اليوم / الحصة</th>
-                            <% for(let i=1; i<=5; i++) { %>
-                                <th style="width: 17%;"><%= periodArabic[i] %></th>
+                            <th style="width: 15%;"><%= __('Day_Period') %></th>
+                            <% for(let i=1; i<=maxPeriod; i++) { %>
+                                <th style="width: <%= 85 / maxPeriod %>%;"><%= __(periodKeys[i] || 'Period_' + i) %></th>
                             <% } %>
                         </tr>
                     </thead>
@@ -95,9 +101,9 @@
                                 const dayPeriods = classPeriods.filter(p => p.day_of_week === day);
                                 if (day === 'Saturday' && dayPeriods.length === 0) return; 
                             %>
-                            <tr class="day-row" data-day="<%= dayArabicMap[day] %>">
-                                <td class="fw-bold bg-light text-primary"><%= dayArabicMap[day] %></td>
-                                <% for(let i=1; i<=5; i++) { 
+                            <tr class="day-row" data-day="<%= day %>">
+                                <td class="fw-bold bg-light text-primary"><%= __(day) %></td>
+                                <% for(let i=1; i<=maxPeriod; i++) { 
                                     const period = dayPeriods.find(p => p.period_number == i);
                                 %>
                                     <td class="p-0 position-relative cell-container" style="height: 90px;">

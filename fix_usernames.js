@@ -6,7 +6,7 @@ async function fix() {
     
     // 1. Rename ALL users with roles to TEMP to avoid ANY collision
     console.log('Clearing all role-based usernames...');
-    await db.execute('UPDATE users SET username = CONCAT("TEMP_", id, "_", RAND()) WHERE role IN ("طالب_علم", "أستاذ", "مسؤول_الصف")');
+    await db.execute('UPDATE users SET username = CONCAT("TEMP_", id, "_", RAND()) WHERE role IN ("طالب", "أستاذ", "عریب")');
 
     // 2. Fetch linked data
     const [students] = await db.execute('SELECT u.id, s.name FROM students s JOIN users u ON s.user_id = u.id');
@@ -16,7 +16,7 @@ async function fix() {
     const titles = ['مولانا', 'مفتی', 'حافظ', 'قاری', 'شیخ', 'سيد', 'سید'];
     
     const usedUsernames = new Set();
-    const [protected] = await db.execute('SELECT username FROM users WHERE role NOT IN ("طالب_علم", "أستاذ", "مسؤول_الصف")');
+    const [protected] = await db.execute('SELECT username FROM users WHERE role NOT IN ("طالب", "أستاذ", "عریب")');
     protected.forEach(p => usedUsernames.add(p.username));
 
     for (const person of allPeople) {

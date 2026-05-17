@@ -9,9 +9,9 @@ async function fix() {
     await db.execute('UPDATE users SET role = "أستاذ" WHERE role = "teacher"');
     
     // 2. Ensure all users have one of the 5 allowed roles
-    // (If any are missing, they default to طالب_علم)
+    // (If any are missing, they default to طالب)
     
-    console.log('Roles migrated to: مدير, ناظم, أستاذ, مسؤول_الصف, طالب_علم');
+    console.log('Roles migrated to: مدير, ناظم, أستاذ, عریب, طالب');
     process.exit(0);
 }
 fix();

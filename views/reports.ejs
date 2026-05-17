@@ -1,9 +1,45 @@
 <%- include('partials/header') %>
 
+<div class="row mb-4 align-items-center">
+    <div class="col-md-6">
+        <h1 class="fw-bold text-primary mb-0">التقارير والإحصائيات</h1>
+        <p class="text-muted"><%= __('Start_Date') %>: <span class="badge bg-light text-primary border"><%= startDate %></span> <%= __('End_Date') %>: <span class="badge bg-light text-primary border"><%= endDate %></span></p>
+    </div>
+</div>
+
+<!-- Time-Based Filter Control Panel -->
 <div class="row mb-5">
     <div class="col-md-12">
-        <h1 class="fw-bold text-primary">التقارير والإحصائيات</h1>
-        <p class="text-muted">متابعة إنجاز الكتب وحضور الطلاب</p>
+        <div class="card shadow-sm border-0 rounded-4" style="background: linear-gradient(135deg, #ffffff 0%, #fcfdfe 100%);">
+            <div class="card-body p-4">
+                <form id="dateFilterForm" method="GET" action="/reports">
+                    <div class="row align-items-end g-3">
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold text-secondary small"><%= __('Start_Date') %></label>
+                            <input type="date" name="startDate" id="startDateInput" class="form-control rounded-3 border-light shadow-sm" value="<%= startDate %>" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold text-secondary small"><%= __('End_Date') %></label>
+                            <input type="date" name="endDate" id="endDateInput" class="form-control rounded-3 border-light shadow-sm" value="<%= endDate %>" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-secondary small d-block"><%= __('Date_Filter_Header') %></label>
+                            <div class="btn-group w-100 shadow-sm rounded-3 overflow-hidden" role="group">
+                                <button type="button" class="btn btn-outline-primary py-2 border-light-subtle small" onclick="setPreset('1day')"><%= __('Preset_1Day') %></button>
+                                <button type="button" class="btn btn-outline-primary py-2 border-light-subtle small" onclick="setPreset('7day')"><%= __('Preset_7Day') %></button>
+                                <button type="button" class="btn btn-outline-primary py-2 border-light-subtle small" onclick="setPreset('1month')"><%= __('Preset_1Month') %></button>
+                                <button type="button" class="btn btn-outline-primary py-2 border-light-subtle small" onclick="setPreset('6month')"><%= __('Preset_6Month') %></button>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100 py-2 rounded-3 fw-bold shadow-sm">
+                                <i class="bi bi-filter me-1"></i><%= __('Apply') %>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -83,6 +119,56 @@
     </div>
 </div>
 
+<!-- Teacher Attendance and Period Variance Report (New Section) -->
+<div class="row mb-5">
+    <div class="col-md-12">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <h3 class="fw-bold mb-0 text-warning"><%= __('Teacher_Period_Report_Header') %></h3>
+                <p class="text-muted mb-0 small"><%= __('Teacher_Period_Report_Sub') %></p>
+            </div>
+            <div class="card-body p-4">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 text-end">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-4"><%= __('Teacher_Name') %></th>
+                                <th><%= __('Required_Periods') %></th>
+                                <th><%= __('Taken_Periods') %></th>
+                                <th class="px-4 text-center"><%= __('Status_Variance') %></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% teachersReport.forEach(tr => { %>
+                                <tr>
+                                    <td class="px-4 fw-bold text-dark"><%= tr.name %></td>
+                                    <td><span class="badge bg-light text-secondary border rounded-3 px-3 py-2"><%= tr.required %></span></td>
+                                    <td><span class="badge bg-light text-primary border rounded-3 px-3 py-2"><%= tr.taken %></span></td>
+                                    <td class="px-4 text-center">
+                                        <% if (tr.difference === 0) { %>
+                                            <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2 fw-bold">
+                                                <i class="bi bi-check-circle-fill me-1"></i><%= __('Ontime') %>
+                                            </span>
+                                        <% } else if (tr.difference > 0) { %>
+                                            <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2 fw-bold">
+                                                <i class="bi bi-plus-circle-fill me-1"></i><%= __('Extra_Makeup') %> (+<%= tr.difference %>)
+                                            </span>
+                                        <% } else { %>
+                                            <span class="badge bg-danger-subtle text-danger rounded-pill px-3 py-2 fw-bold">
+                                                <i class="bi bi-exclamation-triangle-fill me-1"></i><%= __('Shortage') %> (<%= tr.difference %>)
+                                            </span>
+                                        <% } %>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Teacher Book Progress Section -->
 <div class="row mb-5">
     <div class="col-md-12">
@@ -110,12 +196,21 @@
                                     <td><%= tp.book_title %></td>
                                     <td><span class="badge bg-primary-subtle text-primary rounded-pill"><%= tp.class_name %></span></td>
                                     <td>
-                                        <div class="d-flex align-items-center gap-2">
+                                        <div class="d-flex align-items-center gap-2 mb-1">
                                             <div class="progress flex-grow-1" style="height: 8px; width: 100px;">
                                                 <div class="progress-bar bg-success" role="progressbar" style="width: <%= tp.percentage %>%"></div>
                                             </div>
                                             <span class="small text-muted">ص <%= tp.current_page %> (<%= tp.percentage %>%)</span>
                                         </div>
+                                        <% if (tp.last_updated_at) { %>
+                                            <small class="text-muted d-block" style="font-size: 0.72rem;">
+                                                <i class="bi bi-clock-history me-1"></i><%= __('Last_Updated') %>: <%= tp.lastUpdatedStr %>
+                                            </small>
+                                        <% } else { %>
+                                            <small class="text-muted d-block" style="font-size: 0.72rem;">
+                                                لا توجد تحديثات بعد
+                                            </small>
+                                        <% } %>
                                     </td>
                                     <td class="px-4 text-center">
                                         <button class="btn btn-sm btn-success rounded-pill px-3" 
@@ -168,6 +263,34 @@
 </div>
 
 <script>
+function setPreset(preset) {
+    const today = new Date();
+    const formatDate = (date) => {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    };
+
+    let start, end = today;
+    
+    if (preset === '1day') {
+        start = today;
+    } else if (preset === '7day') {
+        start = new Date();
+        start.setDate(today.getDate() - 6);
+    } else if (preset === '1month') {
+        start = new Date(today.getFullYear(), today.getMonth(), 1);
+    } else if (preset === '6month') {
+        start = new Date();
+        start.setMonth(today.getMonth() - 6);
+    }
+    
+    document.getElementById('startDateInput').value = formatDate(start);
+    document.getElementById('endDateInput').value = formatDate(end);
+    document.getElementById('dateFilterForm').submit();
+}
+
 function viewTeacherReport() {
     const id = document.getElementById('teacherSelect').value;
     if (id) window.location.href = `/reports/teacher/${id}`;

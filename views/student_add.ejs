@@ -20,7 +20,7 @@
                         <select name="classId" class="form-select form-select-lg rounded-3" required>
                             <option value="">اختر الفصل...</option>
                             <% classes.forEach(cls => { %>
-                                <option value="<%= cls.id %>"><%= cls.name_ar %></option>
+                                <option value="<%= cls.id %>"><%= __(cls.name_ar) %></option>
                             <% }) %>
                         </select>
                     </div>

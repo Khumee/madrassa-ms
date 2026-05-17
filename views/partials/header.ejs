@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="<%= lang %>" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -46,8 +46,20 @@
             <img src="/logo.jpg" alt="Logo" style="height: 40px; border-radius: 5px;">
             <a href="/" class="logo text-decoration-none">كليّة العلوم الإسلامية</a>
         </div>
-        <div>
-            <a href="/logout" class="btn btn-outline-danger rounded-pill">خروج</a>
+        <div class="d-flex align-items-center gap-3">
+            <a href="/periods/full" class="btn btn-outline-primary rounded-pill px-3">
+                <i class="bi bi-calendar3 me-1"></i> <%= __('Timetable') %>
+            </a>
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="langDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-globe"></i> <%= __('Language') %>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="langDropdown">
+                    <li><a class="dropdown-item" href="/set-lang/ar">العربية</a></li>
+                    <li><a class="dropdown-item" href="/set-lang/ur">اردو</a></li>
+                </ul>
+            </div>
+            <a href="/logout" class="btn btn-outline-danger rounded-pill"><%= __('Logout') %></a>
         </div>
     </nav>
 

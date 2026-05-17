@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>كليّة العلوم الإسلامية - <%= classInfo.name_ar %></title>
+    <title>كليّة العلوم الإسلامية - <%= __(classInfo.name_ar) %></title>
     <link rel="icon" href="/logo.jpg">
     <link rel="stylesheet" href="/css/style.css">
     <style>
@@ -24,7 +24,7 @@
 
     <div class="container">
         <header style="margin-bottom: 20px;">
-            <h1>حضور فصل: <%= classInfo.name_ar %></h1>
+            <h1>حضور فصل: <%= __(classInfo.name_ar) %></h1>
             <input type="date" id="datePicker" value="<%= date %>" class="btn" style="background: white; border: 1px solid #ddd;">
         </header>
 

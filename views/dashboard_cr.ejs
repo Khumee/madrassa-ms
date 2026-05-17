@@ -1,60 +1,331 @@
 <%- include('partials/header') %>
 
-<div class="container mt-5">
-    <div class="row">
+    <div class="row mb-3">
         <div class="col-md-12">
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-body p-5">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <div>
-                            <h2 class="fw-bold mb-0">لوحة تحكم مسؤول الصف - <%= classInfo.name_ar %></h2>
-                            <p class="text-muted">عرض حضور الفصل اليوم</p>
-                        </div>
-                        <div class="d-flex gap-2 flex-wrap justify-content-end">
-                            <a href="/periods/manage" class="btn btn-warning rounded-pill">📅 جدول الحصص</a>
-                            <a href="/attendance/students/<%= classInfo.id %>" class="btn btn-primary rounded-pill">📝 تسجيل الحضور</a>
-                            <a href="/students/manage" class="btn btn-success rounded-pill">👥 إدارة طلاب فصلي</a>
-                            <a href="/books/manage" class="btn btn-dark rounded-pill">📚 الكتب</a>
-                            <a href="/profile/change-password" class="btn btn-outline-secondary rounded-pill">🔑 كلمة المرور</a>
-                        </div>
+            <div class="card shadow-sm border-0 rounded-4 p-4"
+                style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white;">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div>
+                        <h2 class="fw-bold mb-1">
+                            <%= __('Class_Rep_Dashboard') %>
+                                <%= __(classInfo.name_ar) %>
+                        </h2>
+                        <span class="text-white-50 small"><i class="bi bi-calendar-event me-1"></i>
+                            <%= new Date(todayDate + 'T00:00:00').toLocaleDateString('ar-EG', { weekday: 'long',
+                                year: 'numeric', month: 'long', day: 'numeric' }) %>
+                        </span>
                     </div>
+                    <div class="d-flex gap-2">
+                        <a href="/profile/change-password" class="btn btn-outline-light rounded-pill px-4 fw-bold">
+                            <i class="bi bi-key me-2"></i>
+                            <%= __('Change_Password') %>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                    <h4 class="mb-3">الحضور اليوم: <%= new Date().toLocaleDateString('ar-EG') %></h4>
+    <!-- Date Selector Row -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm border-0 rounded-3 p-3">
+                <form method="GET" action="/dashboard/cr" id="dateForm" class="d-flex align-items-center gap-3 flex-wrap">
+                    <label class="fw-bold text-secondary mb-0 text-nowrap">
+                        <i class="bi bi-calendar-check me-1 text-primary"></i> تغيير التاريخ:
+                    </label>
+                    <input type="date"
+                        name="date"
+                        id="crDatePicker"
+                        class="form-control rounded-pill border-primary fw-bold text-primary"
+                        value="<%= todayDate %>"
+                        style="width: 180px; cursor: pointer;"
+                        onchange="document.getElementById('dateForm').submit()">
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">
+                        <i class="bi bi-arrow-clockwise me-1"></i> تحديث
+                    </button>
+                    <a href="/dashboard/cr" class="btn btn-outline-secondary rounded-pill px-3">
+                        <i class="bi bi-house me-1"></i> اليوم
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Student Live Attendance Column (Left) -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-header bg-white p-4 border-0">
+                    <h4 class="fw-bold mb-0 text-primary"><i class="bi bi-people-fill me-2"></i>حضور الطلاب اليوم</h4>
+                    <small class="text-muted">انقر على الحالة لحفظها تلقائياً وبسرعة</small>
+                </div>
+                <div class="card-body p-4 pt-0">
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle">
+                        <table class="table table-hover align-middle text-end">
                             <thead class="table-light">
                                 <tr>
-                                    <th>الرقم</th>
-                                    <th>اسم الطالب</th>
-                                    <th>الحالة اليوم</th>
+                                    <th>الاسم</th>
+                                    <th class="text-center" style="width: 240px;">الحالة اليوم</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <% students.forEach(student => { %>
-                                    <tr>
-                                        <td><%= student.roll_number %></td>
-                                        <td><%= student.name %></td>
-                                        <td>
-                                            <span class="badge rounded-pill bg-<%= 
-                                                student.status === 'present' ? 'success' : 
-                                                student.status === 'absent' ? 'danger' : 
-                                                student.status === 'leave' ? 'warning' : 'info' 
-                                            %>">
-                                                <%= student.status === 'present' ? 'حاضر' : 
-                                                    student.status === 'absent' ? 'غائب' : 
-                                                    student.status === 'leave' ? 'إجازة' : 
-                                                    student.status === 'online' ? 'أونلاين' : 'غير محدد' %>
-                                            </span>
+                                <% students.forEach(student=> { %>
+                                    <tr data-student-id="<%= student.id %>">
+                                        <td class="fw-bold text-dark">
+                                            <%= student.name %>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="d-flex justify-content-center gap-2">
+                                                <button type="button"
+                                                    class="btn btn-outline-success status-btn rounded-circle d-flex align-items-center justify-content-center"
+                                                    data-status="present"
+                                                    onclick="markStudentStatus(<%= student.id %>, 'present', this)"
+                                                    title="حاضر"
+                                                    style="width:42px;height:42px;font-size:1.15rem;border-width:2px;">
+                                                    <i class="bi bi-check-circle-fill"></i>
+                                                </button>
+                                                <button type="button"
+                                                    class="btn btn-outline-danger status-btn rounded-circle d-flex align-items-center justify-content-center"
+                                                    data-status="absent"
+                                                    onclick="markStudentStatus(<%= student.id %>, 'absent', this)"
+                                                    title="غائب"
+                                                    style="width:42px;height:42px;font-size:1.15rem;border-width:2px;">
+                                                    <i class="bi bi-x-circle-fill"></i>
+                                                </button>
+                                                <button type="button"
+                                                    class="btn btn-outline-warning status-btn rounded-circle d-flex align-items-center justify-content-center"
+                                                    data-status="leave"
+                                                    onclick="markStudentStatus(<%= student.id %>, 'leave', this)"
+                                                    title="إجازة"
+                                                    style="width:42px;height:42px;font-size:1.15rem;border-width:2px;">
+                                                    <i class="bi bi-door-open-fill"></i>
+                                                </button>
+                                                <button type="button"
+                                                    class="btn btn-outline-info status-btn rounded-circle d-flex align-items-center justify-content-center"
+                                                    data-status="online"
+                                                    onclick="markStudentStatus(<%= student.id %>, 'online', this)"
+                                                    title="أونلاين"
+                                                    style="width:42px;height:42px;font-size:1.15rem;border-width:2px;">
+                                                    <i class="bi bi-wifi"></i>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
-                                <% }) %>
+                                    <% }) %>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
-<%- include('partials/footer') %>
+        <!-- Teacher Attendance & Book Progress Column (Right) -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-header bg-white p-4 border-0">
+                    <h4 class="fw-bold mb-0 text-success"><i class="bi bi-journal-bookmark-fill me-2"></i>حصص المعلمين
+                        والتقدم</h4>
+                </div>
+                <div class="card-body p-4 pt-0">
+                    <% if (todayPeriods.length===0) { %>
+                        <div class="text-center py-5">
+                            <i class="bi bi-calendar-x text-muted" style="font-size: 3rem;"></i>
+                            <p class="text-muted mt-3 fw-bold">لا توجد حصص مجدولة لهذا اليوم!</p>
+                        </div>
+                    <% } else { %>
+                        <div class="d-flex flex-column gap-3 mt-3">
+                            <% todayPeriods.forEach(period => {
+                                // Check if the teacher has attendance today
+                                const ta = teacherAttendance.find(a => a.teacher_id === period.teacher_id);
+                                const isPresent = ta && ta.classes_taken > 0;
+                                %>
+                                <div class="p-3 border rounded-4 bg-white shadow-sm d-flex justify-content-between align-items-center flex-wrap gap-3 teacher-period-card" 
+                                     data-teacher-id="<%= period.teacher_id %>"
+                                     data-assignment-id="<%= period.assignment_id %>"
+                                     style="border: 1px solid #e2e8f0 !important; transition: all 0.2s ease;">
+                                     
+                                    <!-- Checkbox & Period/Teacher/Book details -->
+                                    <div class="d-flex align-items-center gap-3">
+                                        <input class="form-check-input flex-shrink-0" type="checkbox" 
+                                               style="width: 26px; height: 26px; cursor: pointer; border-radius: 6px; border: 2px solid #059669;"
+                                               id="switch_<%= period.id %>" <%= isPresent ? 'checked' : '' %>
+                                               onchange="toggleTeacherAttendance(<%= period.teacher_id %>, this)">
+                                        <div>
+                                            <label class="form-check-label fw-bold text-dark mb-0" for="switch_<%= period.id %>" style="cursor: pointer; font-size: 1.05rem;">
+                                                الحصة <%= period.period_number %> - <%= period.teacher_name %> - <%= period.book_title %>
+                                            </label>
+                                            <div class="last-update-label mt-1 text-muted" id="up_label_<%= period.assignment_id %>" style="font-size: 0.72rem;">
+                                                <% if (period.lastUpdatedStr) { %>
+                                                    <i class="bi bi-clock-history me-1"></i><%= period.lastUpdatedStr %>
+                                                <% } else { %>
+                                                    <span class="text-muted small">لا يوجد تحديث</span>
+                                                <% } %>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                     <!-- Page Progress input box -->
+                                    <% if (period.assignment_id) { %>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="small text-muted text-nowrap">الصفحة الحالية:</span>
+                                            <div class="position-relative">
+                                                <input type="number"
+                                                       class="form-control text-center rounded-pill border-light text-success fw-bold p-2 bg-light-subtle"
+                                                       value="<%= period.current_page %>"
+                                                       min="<%= period.current_page %>"
+                                                       max="<%= period.end_page %>"
+                                                       data-current="<%= period.current_page %>"
+                                                       onchange="updateBookProgress(<%= period.assignment_id %>, this)"
+                                                       style="width: 90px; font-size: 1rem; border: 1.5px solid #059669 !important;">
+                                                <span class="position-absolute top-100 start-50 translate-middle-x badge bg-light text-muted mt-1 text-nowrap" style="font-size: 0.65rem;">
+                                                    <%= period.current_page %>–<%= period.end_page %>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    <% } %>
+                                </div><%/* close .teacher-period-card div */%>
+                            <% }) %>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const classId = <%= classId %>;
+        const todayDate = '<%= todayDate %>';
+
+        function changeDashboardDate(selectedDate) {
+            window.location.href = `/dashboard/cr?date=${selectedDate}`;
+        }
+
+        // Pre-fill active student attendance status buttons
+        document.addEventListener('DOMContentLoaded', () => {
+            // We will find each row, parse the student's status, and highlight the matching button
+    <% students.forEach(student => { %>
+        const studentRow = document.querySelector(`tr[data-student-id="<%= student.id %>"]`);
+            if (studentRow) {
+                const status = '<%= student.status %>';
+                if (status) {
+                    const btn = studentRow.querySelector(`.status-btn[data-status="${status}"]`);
+                    if (btn) {
+                        highlightBtn(btn, status);
+                    }
+                }
+            }
+    <% }) %>
+});
+
+        function highlightBtn(btn, status) {
+            const parent = btn.parentElement;
+            parent.querySelectorAll('.status-btn').forEach(b => {
+                b.className = b.className.replace(/btn-(success|danger|warning|info)/g, 'btn-outline-$1');
+                b.classList.remove('active', 'text-white');
+            });
+
+            // Highlight the selected button
+            btn.className = btn.className.replace(`btn-outline-${status}`, `btn-${status}`);
+            btn.classList.add('active', 'text-white');
+        }
+
+        async function markStudentStatus(studentId, status, btn) {
+            highlightBtn(btn, status);
+
+            try {
+                const res = await fetch('/attendance/students/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        date: todayDate,
+                        classId: classId,
+                        attendance: { [studentId]: status }
+                    })
+                });
+                const data = await res.json();
+                if (!data.success) {
+                    alert('فشل حفظ الحضور للرمز: ' + studentId);
+                }
+            } catch (err) {
+                console.error(err);
+                alert('حدث خطأ أثناء الاتصال بالسيرفر');
+            }
+        }
+
+        async function toggleTeacherAttendance(teacherId, switchInput) {
+            // Count how many periods are checked today for this teacher
+            const teacherCards = document.querySelectorAll(`.teacher-period-card[data-teacher-id="${teacherId}"]`);
+            let checkedCount = 0;
+            teacherCards.forEach(card => {
+                const checkbox = card.querySelector('input[type="checkbox"]');
+                if (checkbox && checkbox.checked) {
+                    checkedCount++;
+                }
+            });
+
+            try {
+                const res = await fetch('/attendance/teachers/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        date: todayDate,
+                        attendance: { [teacherId]: checkedCount }
+                    })
+                });
+                const data = await res.json();
+                if (!data.success) {
+                    alert('فشل تعديل حضور المعلم');
+                    switchInput.checked = !switchInput.checked; // Revert
+                }
+            } catch (err) {
+                console.error(err);
+                alert('حدث خطأ أثناء الحفظ');
+                switchInput.checked = !switchInput.checked; // Revert
+            }
+        }
+
+        async function updateBookProgress(assignmentId, inputField) {
+            const pageNumber = inputField.value;
+            const min = parseInt(inputField.min);
+            const max = parseInt(inputField.max);
+
+            if (pageNumber < min || pageNumber > max) {
+                alert(`خطأ: رقم الصفحة يجب أن يكون بين ${min} و ${max}`);
+                inputField.value = inputField.getAttribute('data-last-valid') || min;
+                return;
+            }
+
+            try {
+                const res = await fetch('/book/update-progress', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ assignmentId, pageNumber })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    inputField.setAttribute('data-last-valid', pageNumber);
+
+                    // Dynamically update the live label to show current time in Arabic
+                    const label = document.getElementById(`up_label_${assignmentId}`);
+                    if (label) {
+                        const nowStr = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+                        label.innerHTML = `<i class="bi bi-clock-history me-1"></i>الآن (${nowStr})`;
+                    }
+
+                    // Flash a green border temporarily to indicate success!
+                    inputField.style.borderColor = '#10b981';
+                    setTimeout(() => {
+                        inputField.style.borderColor = '#e2e8f0';
+                    }, 1000);
+                } else {
+                    alert('حدث خطأ: ' + (data.error || 'فشل التحديث'));
+                }
+            } catch (err) {
+                console.error(err);
+                alert('خطأ في الاتصال بالخادم');
+            }
+        }
+    </script>
+
+    <%- include('partials/footer') %>
