@@ -70,6 +70,41 @@
         </div>
     </div>
     <div class="col-md-8">
+        <!-- Interactive Filter Bar -->
+        <div class="card shadow-sm border-0 rounded-4 mb-4 bg-light-subtle">
+            <div class="card-body p-3">
+                <div class="row g-3 align-items-center">
+                    <div class="col-md-5">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0 text-success"><i class="bi bi-book"></i></span>
+                            <select id="filterBook" class="form-select border-start-0 fw-semibold" onchange="applyFilters()">
+                                <option value="">كل الكتب...</option>
+                                <% books.forEach(b => { %>
+                                    <option value="<%= b.id %>"><%= b.title %></option>
+                                <% }) %>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0 text-primary"><i class="bi bi-mortarboard"></i></span>
+                            <select id="filterClass" class="form-select border-start-0 fw-semibold" onchange="applyFilters()">
+                                <option value="">كل الصفوف...</option>
+                                <% classes.forEach(c => { %>
+                                    <option value="<%= c.id %>"><%= c.name %></option>
+                                <% }) %>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2 d-grid">
+                        <button class="btn btn-outline-secondary rounded-pill fw-bold" onclick="resetFilters()">
+                            <i class="bi bi-x-circle me-1"></i>إعادة تعيين
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <% 
             const grouped = {};
             assignments.forEach(a => {
@@ -79,7 +114,7 @@
         %>
 
         <% Object.keys(grouped).forEach(teacherName => { %>
-            <div class="card shadow-sm border-0 rounded-4 mb-4">
+            <div class="card shadow-sm border-0 rounded-4 mb-4 teacher-assignment-card">
                 <div class="card-header bg-white p-4 border-0">
                     <h5 class="fw-bold mb-0 text-success">
                         <i class="bi bi-person-workspace me-2"></i>المعلم: <%= teacherName %>
@@ -98,7 +133,7 @@
                             </thead>
                             <tbody>
                                 <% grouped[teacherName].forEach(a => { %>
-                                    <tr>
+                                    <tr class="assignment-row" data-book-id="<%= a.book_id %>" data-class-id="<%= a.class_id %>">
                                         <td class="px-4">
                                             <div class="fw-bold text-dark"><%= a.book_title %></div>
                                             <% 
@@ -290,6 +325,45 @@ async function deleteAssignment(id) {
     if (!confirm('هل أنت متأكد من إلغاء هذا الإسناد؟')) return;
     const res = await fetch(`/teacher-books/delete/${id}`, { method: 'POST' });
     if ((await res.json()).success) location.reload();
+}
+
+function applyFilters() {
+    const bookVal = document.getElementById('filterBook').value;
+    const classVal = document.getElementById('filterClass').value;
+
+    const cards = document.querySelectorAll('.teacher-assignment-card');
+    cards.forEach(card => {
+        const rows = card.querySelectorAll('.assignment-row');
+        let visibleRowsCount = 0;
+
+        rows.forEach(row => {
+            const rowBookId = row.getAttribute('data-book-id');
+            const rowClassId = row.getAttribute('data-class-id');
+
+            const matchesBook = !bookVal || rowBookId === bookVal;
+            const matchesClass = !classVal || rowClassId === classVal;
+
+            if (matchesBook && matchesClass) {
+                row.style.setProperty('display', '', 'important');
+                visibleRowsCount++;
+            } else {
+                row.style.setProperty('display', 'none', 'important');
+            }
+        });
+
+        // If no rows are visible in this teacher's card, hide the whole card!
+        if (visibleRowsCount > 0) {
+            card.style.setProperty('display', '', 'important');
+        } else {
+            card.style.setProperty('display', 'none', 'important');
+        }
+    });
+}
+
+function resetFilters() {
+    document.getElementById('filterBook').value = '';
+    document.getElementById('filterClass').value = '';
+    applyFilters();
 }
 </script>
 
