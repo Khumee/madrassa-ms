@@ -116,7 +116,8 @@ document.addEventListener('DOMContentLoaded', () => {
 function filterUsers(role, btn) {
     const rows = document.querySelectorAll('.user-row');
     rows.forEach(row => {
-        if (role === 'all' || row.getAttribute('data-role') === role) {
+        const userRole = row.getAttribute('data-role') || '';
+        if (role === 'all' || userRole.includes(role)) {
             row.style.display = '';
         } else {
             row.style.display = 'none';
