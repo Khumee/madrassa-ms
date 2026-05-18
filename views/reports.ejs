@@ -175,7 +175,18 @@
         <div class="card shadow-sm border-0 rounded-4">
             <div class="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <h3 class="fw-bold mb-0 text-success">تقرير إنجاز الكتب</h3>
-                <input type="text" id="teacherBookFilter" class="form-control form-control-sm border-success-subtle" placeholder="ابحث عن معلم أو كتاب..." style="width: 250px;" onkeyup="filterTeacherBooks()">
+                <div class="d-flex gap-2">
+                    <select id="bookClassFilterSelect" class="form-select form-select-sm border-success-subtle" style="width: 150px;" onchange="filterTeacherBooks()">
+                        <option value="all">كل الصفوف</option>
+                        <% 
+                        const uniqueBookClasses = [...new Set(teacherProgress.map(tp => tp.class_name).filter(Boolean))];
+                        uniqueBookClasses.forEach(className => { 
+                        %>
+                            <option value="<%= className %>"><%= className %></option>
+                        <% }) %>
+                    </select>
+                    <input type="text" id="teacherBookFilter" class="form-control form-control-sm border-success-subtle" placeholder="ابحث عن معلم أو كتاب..." style="width: 200px;" onkeyup="filterTeacherBooks()">
+                </div>
             </div>
             <div class="card-body p-4">
                 <div class="table-responsive">
@@ -191,8 +202,12 @@
                         </thead>
                         <tbody>
                             <% teacherProgress.forEach(tp => { %>
-                                <tr class="teacher-book-row" data-teacher="<%= tp.teacher_name.toLowerCase() %>" data-book="<%= tp.book_title.toLowerCase() %>">
-                                    <td class="px-4 fw-bold"><%= tp.teacher_name %></td>
+                                <tr class="teacher-book-row" data-teacher="<%= tp.teacher_name.toLowerCase() %>" data-book="<%= tp.book_title.toLowerCase() %>" data-class="<%= tp.class_name || '' %>">
+                                    <td class="px-4 fw-bold">
+                                        <a href="/reports/teacher/<%= tp.teacher_id %>" class="text-decoration-none text-success hover-underline">
+                                            <i class="bi bi-person-fill me-1"></i><%= tp.teacher_name %>
+                                        </a>
+                                    </td>
                                     <td><%= tp.book_title %></td>
                                     <td><span class="badge bg-primary-subtle text-primary rounded-pill"><%= tp.class_name %></span></td>
                                     <td>
@@ -213,10 +228,15 @@
                                         <% } %>
                                     </td>
                                     <td class="px-4 text-center">
-                                        <button class="btn btn-sm btn-success rounded-pill px-3" 
-                                                onclick="openProgressModal(<%= JSON.stringify(tp) %>)">
-                                            تحديث
-                                        </button>
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <a href="/reports/teacher/<%= tp.teacher_id %>" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                                                <i class="bi bi-graph-up me-1"></i>الرسم البياني
+                                            </a>
+                                            <button class="btn btn-sm btn-success rounded-pill px-3" 
+                                                    onclick="openProgressModal(<%= JSON.stringify(tp) %>)">
+                                                تحديث
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             <% }) %>
@@ -362,12 +382,23 @@ document.getElementById('updateProgressForm').addEventListener('submit', async (
 });
 
 function filterTeacherBooks() {
-    const filter = document.getElementById('teacherBookFilter').value.toLowerCase();
+    const filterText = document.getElementById('teacherBookFilter').value.toLowerCase();
+    const selectedClass = document.getElementById('bookClassFilterSelect').value;
     const rows = document.querySelectorAll('.teacher-book-row');
+    
     rows.forEach(row => {
         const teacher = row.getAttribute('data-teacher');
         const book = row.getAttribute('data-book');
-        row.style.display = (teacher.includes(filter) || book.includes(filter)) ? '' : 'none';
+        const className = row.getAttribute('data-class');
+        
+        const matchesText = teacher.includes(filterText) || book.includes(filterText);
+        const matchesClass = selectedClass === 'all' || className === selectedClass;
+        
+        if (matchesText && matchesClass) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
     });
 }
 </script>

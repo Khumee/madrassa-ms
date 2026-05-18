@@ -52,7 +52,7 @@
                                 const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
                             %>
                                 <tr>
-                                    <td class="px-4 text-muted"><%= row.date.toISOString().split('T')[0] %></td>
+                                    <td class="px-4 text-muted"><%= row.date instanceof Date ? row.date.toISOString().split('T')[0] : String(row.date).split('T')[0] %></td>
                                     <td class="fw-bold"><%= row.book_title %></td>
                                     <td><span class="badge bg-light text-primary border px-3"><%= row.page_number %></span></td>
                                     <td><small class="text-muted">من <%= row.start_page %> إلى <%= row.end_page %></small></td>
