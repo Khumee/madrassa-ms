@@ -121,53 +121,81 @@ exports.showWeeklyAttendance = async (req, res) => {
         dt = DateTime.now();
     }
     
+    // Get Saturday of the week containing selectedDate
     let offset = dt.weekday - 6; 
-    if (offset < 0) offset += 7; 
+    if (offset < 0) offset += 7; // Adjust for Sunday (7) -> offset is 1
     const startOfWeek = dt.minus({ days: offset });
 
+    // Construct 6 schooling days (Saturday to Thursday)
     const days = [];
     for (let i = 0; i < 6; i++) {
-        days.push(startOfWeek.plus({ days: i }));
+        const d = startOfWeek.plus({ days: i });
+        days.push({
+            dateStr: d.toISODate(),
+            dayNameEn: d.setLocale('en').toFormat('cccc'),
+            dayNameAr: d.setLocale('ar').toFormat('cccc'),
+            formattedDate: d.setLocale('ar').toFormat('dd MMM')
+        });
     }
 
+    const prevWeekDate = startOfWeek.minus({ days: 7 }).toISODate();
+    const nextWeekDate = startOfWeek.plus({ days: 7 }).toISODate();
+
     try {
-        const [teachers] = await db.execute('SELECT id, name, subject FROM teachers ORDER BY name');
-        
-        const dayStrings = days.map(d => d.toISODate());
-        const placeholders = dayStrings.map(() => '?').join(',');
-        
-        const [attendanceRows] = await db.execute(
-            `SELECT * FROM attendance_teachers WHERE date IN (${placeholders})`,
-            dayStrings
-        );
+        // Fetch all teachers sorted by name
+        const [teachers] = await db.execute('SELECT * FROM teachers ORDER BY name');
 
-        const attendanceMap = {};
-        teachers.forEach(t => {
-            attendanceMap[t.id] = {};
-            dayStrings.forEach(d => {
-                attendanceMap[t.id][d] = { status: '', period: '' };
-            });
-        });
+        // Fetch all periods count per teacher & day_of_week
+        const [periodsCount] = await db.execute(`
+            SELECT teacher_id, day_of_week, COUNT(*) as count 
+            FROM periods 
+            GROUP BY teacher_id, day_of_week
+        `);
 
-        attendanceRows.forEach(row => {
-            const dateStr = DateTime.fromJSDate(row.date).toISODate();
-            if (attendanceMap[row.teacher_id]) {
-                attendanceMap[row.teacher_id][dateStr] = {
-                    status: row.status,
-                    period: row.period_number
+        // Fetch all marked attendance for the dates of the week
+        const [attendanceList] = await db.execute(`
+            SELECT teacher_id, DATE_FORMAT(date, '%Y-%m-%d') as date_str, classes_taken 
+            FROM attendance_teachers 
+            WHERE date BETWEEN ? AND ?
+        `, [days[0].dateStr, days[5].dateStr]);
+
+        // Map it all together
+        const reportData = teachers.map(teacher => {
+            const teacherDays = days.map(day => {
+                const sched = periodsCount.find(p => p.teacher_id === teacher.id && p.day_of_week.toLowerCase() === day.dayNameEn.toLowerCase());
+                const att = attendanceList.find(a => a.teacher_id === teacher.id && a.date_str === day.dateStr);
+
+                const scheduledCount = sched ? sched.count : 0;
+                const takenCount = att ? att.classes_taken : null;
+
+                return {
+                    dateStr: day.dateStr,
+                    dayNameAr: day.dayNameAr,
+                    formattedDate: day.formattedDate,
+                    scheduled: scheduledCount,
+                    taken: takenCount
                 };
-            }
+            });
+
+            return {
+                id: teacher.id,
+                name: teacher.name,
+                days: teacherDays
+            };
         });
 
         res.render('attendance_teachers', {
-            teachers,
+            reportData,
             days,
-            attendanceMap,
-            date: selectedDate
+            selectedDate,
+            startOfWeek: startOfWeek.setLocale('ar').toFormat('dd MMMM yyyy'),
+            prevWeekDate,
+            nextWeekDate,
+            role: req.session.role
         });
     } catch (err) {
         console.error(err);
-        res.status(500).send('Error loading teacher attendance');
+        res.status(500).send('Error loading teacher weekly report');
     }
 };
 
