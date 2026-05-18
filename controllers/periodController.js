@@ -432,7 +432,7 @@ exports.swapPeriods = async (req, res) => {
         }
 
         // 4. Perform the Swap inside a transaction!
-        await db.execute('START TRANSACTION');
+        await db.query('START TRANSACTION');
         
         await db.execute(`
             UPDATE periods 
@@ -446,11 +446,11 @@ exports.swapPeriods = async (req, res) => {
             WHERE id = ?
         `, [dayOfWeekA, periodNumberA, startTimeA, endTimeA, B.id]);
 
-        await db.execute('COMMIT');
+        await db.query('COMMIT');
 
         res.json({ success: true });
     } catch (err) {
-        try { await db.execute('ROLLBACK'); } catch(e) {}
+        try { await db.query('ROLLBACK'); } catch(e) {}
         console.error(err);
         res.status(500).json({ success: false, error: err.message });
     }
