@@ -172,7 +172,7 @@
                             </div>
                         </div>
                         <% } %>
-                        <div>
+                        <div class="mb-3">
                             <small class="text-muted d-block mb-1 fw-bold"><%= __('Filter_By_Day') %></small>
                             <div class="d-flex flex-wrap gap-2" id="dayFilters">
                                 <button class="btn btn-sm btn-dark rounded-pill px-3 filter-chip active" data-filter="all" data-type="day"><%= __('All') %></button>
@@ -181,6 +181,20 @@
                                     uniqueDays.forEach(day => { 
                                 %>
                                     <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 filter-chip" data-filter="<%= day %>" data-type="day"><%= __(day) %></button>
+                                <% }) %>
+                            </div>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block mb-1 fw-bold"><%= __('Class') %></small>
+                            <div class="d-flex flex-wrap gap-2" id="classFilters">
+                                <button class="btn btn-sm btn-dark rounded-pill px-3 filter-chip active" data-filter="all" data-type="class"><%= __('All') %></button>
+                                <% 
+                                    const classColors = ['primary', 'success', 'danger', 'warning', 'info', 'indigo', 'orange', 'teal', 'purple'];
+                                    const uniqueClasses = [...new Set(periods.map(p => p.class_name))];
+                                    uniqueClasses.forEach((name, i) => { 
+                                        const color = classColors[i % classColors.length];
+                                %>
+                                    <button class="btn btn-sm btn-outline-<%= color %> rounded-pill px-3 filter-chip" data-filter="<%= name %>" data-type="class"><%= name %></button>
                                 <% }) %>
                             </div>
                         </div>
@@ -214,7 +228,7 @@
                                     </td>
                                 </tr>
                             <% } %>
-                                <tr class="period-row" data-teacher="<%= p.teacher_name %>" data-day="<%= p.day_of_week %>">
+                                <tr class="period-row" data-teacher="<%= p.teacher_name %>" data-day="<%= p.day_of_week %>" data-class="<%= p.class_name %>">
                                     <td class="px-4">
                                         <span class="badge bg-secondary-subtle text-secondary border rounded-pill">
                                             <%= __('Period_Label') %> <%= p.period_number || __('Not_Specified') %>
@@ -858,11 +872,17 @@ function filterEditTeachersAndClasses(selectedTeacherId = '', selectedClassId = 
         return;
     }
     
+    // Filter teachers who are assigned to this book in active assignments
+    const matchAssignments = assignments.filter(a => a.book_id == selectedBookId);
+    const assignedTeacherIds = [...new Set(matchAssignments.map(a => a.teacher_id))];
+    
     allTeachers.forEach(t => {
-        const option = document.createElement('option');
-        option.value = t.id;
-        option.textContent = t.name;
-        teacherSelect.appendChild(option);
+        if (assignedTeacherIds.includes(parseInt(t.id)) || assignedTeacherIds.includes(String(t.id))) {
+            const option = document.createElement('option');
+            option.value = t.id;
+            option.textContent = t.name;
+            teacherSelect.appendChild(option);
+        }
     });
     
     teacherSelect.disabled = false;
@@ -885,20 +905,27 @@ function filterEditClasses(selectedClassId = '') {
     const classSelect = document.getElementById('editClassSelect');
     
     const selectedTeacherId = teacherSelect.value;
+    const selectedBookId = bookSelect.value;
     
     classSelect.innerHTML = `<option value=""><%= __('Select_Class') %></option>`;
     
-    if (!selectedTeacherId) {
+    if (!selectedTeacherId || !selectedBookId) {
         classSelect.disabled = true;
         updateEditAssignmentId();
         return;
     }
     
+    // Get unique classes assigned to this teacher and book
+    const matchAssignments = assignments.filter(a => a.teacher_id == selectedTeacherId && a.book_id == selectedBookId);
+    const assignedClassIds = [...new Set(matchAssignments.map(a => a.class_id))];
+    
     allClasses.forEach(c => {
-        const option = document.createElement('option');
-        option.value = c.id;
-        option.textContent = c.name_ar || c.name;
-        classSelect.appendChild(option);
+        if (assignedClassIds.includes(parseInt(c.id)) || assignedClassIds.includes(String(c.id))) {
+            const option = document.createElement('option');
+            option.value = c.id;
+            option.textContent = c.name_ar || c.name;
+            classSelect.appendChild(option);
+        }
     });
     
     classSelect.disabled = false;
@@ -973,7 +1000,7 @@ async function deletePeriod(id) {
 }
 
 // Filtering Logic
-let activeFilters = { teacher: 'all', day: 'all' };
+let activeFilters = { teacher: 'all', day: 'all', class: 'all' };
 
 document.querySelectorAll('.filter-chip').forEach(chip => {
     chip.addEventListener('click', function() {
@@ -1011,8 +1038,9 @@ function applyFilters() {
     rows.forEach(row => {
         const matchTeacher = activeFilters.teacher === 'all' || row.dataset.teacher === activeFilters.teacher;
         const matchDay = activeFilters.day === 'all' || row.dataset.day === activeFilters.day;
+        const matchClass = activeFilters.class === 'all' || row.dataset.class === activeFilters.class;
         
-        if (matchTeacher && matchDay) {
+        if (matchTeacher && matchDay && matchClass) {
             row.style.display = '';
         } else {
             row.style.display = 'none';

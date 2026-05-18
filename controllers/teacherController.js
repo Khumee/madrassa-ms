@@ -270,6 +270,8 @@ exports.editAssignment = async (req, res) => {
 exports.deleteAssignment = async (req, res) => {
     const { id } = req.params;
     try {
+        // Explicitly clean up any periods associated with this assignment
+        await db.execute('DELETE FROM periods WHERE assignment_id = ?', [id]);
         await db.execute('DELETE FROM teacher_books WHERE id = ?', [id]);
         res.json({ success: true });
     } catch (err) {
