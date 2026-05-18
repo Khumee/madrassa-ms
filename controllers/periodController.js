@@ -307,3 +307,149 @@ exports.deletePeriod = async (req, res) => {
         res.status(500).json({ success: false });
     }
 };
+
+exports.swapPeriods = async (req, res) => {
+    const { periodIdA, periodIdB } = req.body;
+    
+    if (!periodIdA || !periodIdB || periodIdA === periodIdB) {
+        return res.status(400).json({ success: false, error: 'يرجى تحديد حصتين مختلفتين للتبادل.' });
+    }
+
+    try {
+        // 1. Fetch details of both periods
+        const [rowsA] = await db.execute(`
+            SELECT p.*, t.name as teacher_name, c.name_ar as class_name 
+            FROM periods p
+            JOIN teachers t ON p.teacher_id = t.id
+            JOIN classes c ON p.class_id = c.id
+            WHERE p.id = ?
+        `, [periodIdA]);
+        
+        const [rowsB] = await db.execute(`
+            SELECT p.*, t.name as teacher_name, c.name_ar as class_name 
+            FROM periods p
+            JOIN teachers t ON p.teacher_id = t.id
+            JOIN classes c ON p.class_id = c.id
+            WHERE p.id = ?
+        `, [periodIdB]);
+
+        if (rowsA.length === 0 || rowsB.length === 0) {
+            return res.status(404).json({ success: false, error: 'إحدى الحصتين المفتوحتين غير موجودة.' });
+        }
+
+        const A = rowsA[0];
+        const B = rowsB[0];
+
+        // Target slots
+        const dayOfWeekA = A.day_of_week;
+        const periodNumberA = A.period_number;
+        const startTimeA = A.start_time;
+        const endTimeA = A.end_time;
+
+        const dayOfWeekB = B.day_of_week;
+        const periodNumberB = B.period_number;
+        const startTimeB = B.start_time;
+        const endTimeB = B.end_time;
+
+        // Helper translation maps for days of the week in conflict messages
+        const dayLabels = {
+            'ur': { 'Monday': 'پیر', 'Tuesday': 'منگل', 'Wednesday': 'بدھ', 'Thursday': 'جمعرات', 'Friday': 'جمعہ', 'Saturday': 'ہفتہ', 'Sunday': 'اتوار' },
+            'ar': { 'Monday': 'الإثنين', 'Tuesday': 'الثلاثاء', 'Wednesday': 'الأربعاء', 'Thursday': 'الخميس', 'Friday': 'الجمعة', 'Saturday': 'السبت', 'Sunday': 'الأحد' }
+        };
+        const lang = req.session.lang || 'ar';
+        const getDayLabel = (d) => (dayLabels[lang] && dayLabels[lang][d]) ? dayLabels[lang][d] : d;
+
+        // 2. Validate conflicts for Period A moving to B's slot (dayOfWeekB, periodNumberB)
+        // Check Teacher A conflict
+        const [teacherAConflicts] = await db.execute(`
+            SELECT p.*, c.name_ar as class_name, t.name as teacher_name
+            FROM periods p 
+            JOIN classes c ON p.class_id = c.id
+            JOIN teachers t ON p.teacher_id = t.id
+            WHERE p.teacher_id = ? AND p.day_of_week = ? AND p.period_number = ? AND p.id NOT IN (?, ?)
+        `, [A.teacher_id, dayOfWeekB, periodNumberB, A.id, B.id]);
+
+        if (teacherAConflicts.length > 0) {
+            const label = getDayLabel(dayOfWeekB);
+            const errMsg = lang === 'ur' 
+                ? `تبادلہ ناممکن: استاد "${A.teacher_name}" پہلے ہی ${label} کو پیریڈ ${periodNumberB} میں کلاس "${teacherAConflicts[0].class_name}" کے لیے مقرر ہیں۔`
+                : `تعذر التبادل: الأستاذ "${A.teacher_name}" لديه بالفعل حصة يوم ${label} في الحصة ${periodNumberB} مع صف "${teacherAConflicts[0].class_name}".`;
+            return res.json({ success: false, error: errMsg });
+        }
+
+        // Check Class A conflict
+        const [classAConflicts] = await db.execute(`
+            SELECT p.*, c.name_ar as class_name, t.name as teacher_name
+            FROM periods p 
+            JOIN classes c ON p.class_id = c.id
+            JOIN teachers t ON p.teacher_id = t.id
+            WHERE p.class_id = ? AND p.day_of_week = ? AND p.period_number = ? AND p.id NOT IN (?, ?)
+        `, [A.class_id, dayOfWeekB, periodNumberB, A.id, B.id]);
+
+        if (classAConflicts.length > 0) {
+            const label = getDayLabel(dayOfWeekB);
+            const errMsg = lang === 'ur'
+                ? `تبادلہ ناممکن: کلاس "${A.class_name}" کے لیے پہلے ہی ${label} کو پیریڈ ${periodNumberB} میں استاد "${classAConflicts[0].teacher_name}" کے ساتھ پیریڈ مقرر ہو چکا ہے۔`
+                : `تعذر التبادل: الصف "${A.class_name}" لديه بالفعل حصة يوم ${label} في الحصة ${periodNumberB} مع الأستاذ "${classAConflicts[0].teacher_name}".`;
+            return res.json({ success: false, error: errMsg });
+        }
+
+        // 3. Validate conflicts for Period B moving to A's slot (dayOfWeekA, periodNumberA)
+        // Check Teacher B conflict
+        const [teacherBConflicts] = await db.execute(`
+            SELECT p.*, c.name_ar as class_name, t.name as teacher_name
+            FROM periods p 
+            JOIN classes c ON p.class_id = c.id
+            JOIN teachers t ON p.teacher_id = t.id
+            WHERE p.teacher_id = ? AND p.day_of_week = ? AND p.period_number = ? AND p.id NOT IN (?, ?)
+        `, [B.teacher_id, dayOfWeekA, periodNumberA, A.id, B.id]);
+
+        if (teacherBConflicts.length > 0) {
+            const label = getDayLabel(dayOfWeekA);
+            const errMsg = lang === 'ur'
+                ? `تبادلہ ناممکن: استاد "${B.teacher_name}" پہلے ہی ${label} کو پیریڈ ${periodNumberA} میں کلاس "${teacherBConflicts[0].class_name}" کے لیے مقرر ہیں۔`
+                : `تعذر التبادل: الأستاذ "${B.teacher_name}" لديه بالفعل حصة يوم ${label} في الحصة ${periodNumberA} مع صف "${teacherBConflicts[0].class_name}".`;
+            return res.json({ success: false, error: errMsg });
+        }
+
+        // Check Class B conflict
+        const [classBConflicts] = await db.execute(`
+            SELECT p.*, c.name_ar as class_name, t.name as teacher_name
+            FROM periods p 
+            JOIN classes c ON p.class_id = c.id
+            JOIN teachers t ON p.teacher_id = t.id
+            WHERE p.class_id = ? AND p.day_of_week = ? AND p.period_number = ? AND p.id NOT IN (?, ?)
+        `, [B.class_id, dayOfWeekA, periodNumberA, A.id, B.id]);
+
+        if (classBConflicts.length > 0) {
+            const label = getDayLabel(dayOfWeekA);
+            const errMsg = lang === 'ur'
+                ? `تبادلہ ناممکن: کلاس "${B.class_name}" کے لیے پہلے ہی ${label} کو پیریڈ ${periodNumberA} میں استاد "${classBConflicts[0].teacher_name}" کے ساتھ پیریڈ مقرر ہو چکا ہے۔`
+                : `تعذر التبادل: الصف "${B.class_name}" لديه بالفعل حصة يوم ${label} في الحصة ${periodNumberA} مع الأستاذ "${classBConflicts[0].teacher_name}".`;
+            return res.json({ success: false, error: errMsg });
+        }
+
+        // 4. Perform the Swap inside a transaction!
+        await db.execute('START TRANSACTION');
+        
+        await db.execute(`
+            UPDATE periods 
+            SET day_of_week = ?, period_number = ?, start_time = ?, end_time = ? 
+            WHERE id = ?
+        `, [dayOfWeekB, periodNumberB, startTimeB, endTimeB, A.id]);
+
+        await db.execute(`
+            UPDATE periods 
+            SET day_of_week = ?, period_number = ?, start_time = ?, end_time = ? 
+            WHERE id = ?
+        `, [dayOfWeekA, periodNumberA, startTimeA, endTimeA, B.id]);
+
+        await db.execute('COMMIT');
+
+        res.json({ success: true });
+    } catch (err) {
+        try { await db.execute('ROLLBACK'); } catch(e) {}
+        console.error(err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+};

@@ -9,5 +9,6 @@ router.get('/periods/full', isAuthenticated, periodController.showFullTimetable)
 router.post('/periods/add', hasRole(['ناظم', 'مدير', 'عريب']), periodController.addPeriod);
 router.post('/periods/edit/:id', hasRole(['ناظم', 'مدير', 'عريب']), periodController.editPeriod);
 router.post('/periods/delete/:id', hasRole(['ناظم', 'مدير', 'عريب']), periodController.deletePeriod);
+router.post('/periods/swap', hasRole(['ناظم', 'مدير', 'عريب']), periodController.swapPeriods);
 
 module.exports = router;

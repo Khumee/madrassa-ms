@@ -146,6 +146,9 @@
                         <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
                             <i class="bi bi-filter me-1"></i><%= __('Filter') %> <i class="bi bi-chevron-down small ms-1"></i>
                         </button>
+                        <button class="btn btn-outline-info btn-sm rounded-pill px-3" id="toggleSwapModeBtn" onclick="toggleSwapMode()">
+                            <i class="bi bi-arrow-left-right me-1"></i><%= locals.lang === 'ur' ? 'پیریڈز تبدیل کریں' : 'تبديل الحصص' %>
+                        </button>
                         <div class="btn-group rounded-pill overflow-hidden border">
                             <a href="/periods/manage?groupBy=day" class="btn btn-sm <%= groupBy === 'day' ? 'btn-primary' : 'btn-white text-muted' %> px-3"><%= __('Group_By_Day') %></a>
                             <a href="/periods/manage?groupBy=teacher" class="btn btn-sm <%= groupBy === 'teacher' ? 'btn-primary' : 'btn-white text-muted' %> px-3"><%= __('Group_By_Teacher') %></a>
@@ -202,6 +205,23 @@
                 </div>
             </div>
             <div class="card-body p-0">
+                <!-- Swap Mode Active Banner -->
+                <div id="swapModeBanner" class="d-none alert alert-info border-0 rounded-0 m-0 p-3 d-flex justify-content-between align-items-center" style="background: #e0f2fe; color: #0369a1;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-info-circle-fill fs-5"></i>
+                        <span class="fw-semibold small" id="swapBannerText">
+                            <%= locals.lang === 'ur' ? 'تبدیلی کا طریقہ فعال ہے: براہ کرم تبادلہ کرنے کے لیے دو پیریڈز منتخب کریں۔' : 'وضع التبادل نشط: يرجى تحديد حصتين للتبادل بينهما.' %>
+                        </span>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-primary rounded-pill px-3 py-1 fw-bold d-none" id="confirmSwapBtn" onclick="confirmSwap()">
+                            <i class="bi bi-arrow-left-right me-1"></i><%= locals.lang === 'ur' ? 'تبادلے کی تصدیق کریں' : 'تأكيد التبادل' %>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 fw-bold" onclick="cancelSwapMode()">
+                            <%= locals.lang === 'ur' ? 'منسوخ کریں' : 'إلغاء' %>
+                        </button>
+                    </div>
+                </div>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
                         <thead class="bg-light text-muted small text-uppercase">
@@ -228,7 +248,7 @@
                                     </td>
                                 </tr>
                             <% } %>
-                                <tr class="period-row" data-teacher="<%= p.teacher_name %>" data-day="<%= p.day_of_week %>" data-class="<%= p.class_name %>">
+                                <tr class="period-row" data-id="<%= p.id %>" data-teacher="<%= p.teacher_name %>" data-day="<%= p.day_of_week %>" data-class="<%= p.class_name %>" data-title="<%= p.book_title || p.subject || __('Not_Specified') %>">
                                     <td class="px-4">
                                         <span class="badge bg-secondary-subtle text-secondary border rounded-pill">
                                             <%= __('Period_Label') %> <%= p.period_number || __('Not_Specified') %>
@@ -1077,6 +1097,126 @@ function applyFilters() {
     });
 }
 
+// Swap Mode variables
+let isSwapModeActive = false;
+let selectedPeriodIds = [];
+
+function toggleSwapMode() {
+    isSwapModeActive = !isSwapModeActive;
+    const btn = document.getElementById('toggleSwapModeBtn');
+    const banner = document.getElementById('swapModeBanner');
+    
+    if (isSwapModeActive) {
+        btn.classList.remove('btn-outline-info');
+        btn.classList.add('btn-info', 'text-white');
+        banner.classList.remove('d-none');
+        
+        // Add special cursor pointer and hover styles to rows
+        document.querySelectorAll('.period-row').forEach(row => {
+            row.style.cursor = 'pointer';
+            row.classList.add('swap-hoverable');
+        });
+    } else {
+        cancelSwapMode();
+    }
+}
+
+function cancelSwapMode() {
+    isSwapModeActive = false;
+    selectedPeriodIds = [];
+    
+    const btn = document.getElementById('toggleSwapModeBtn');
+    if (btn) {
+        btn.classList.remove('btn-info', 'text-white');
+        btn.classList.add('btn-outline-info');
+    }
+    
+    const banner = document.getElementById('swapModeBanner');
+    if (banner) {
+        banner.classList.add('d-none');
+    }
+    
+    const confirmBtn = document.getElementById('confirmSwapBtn');
+    if (confirmBtn) {
+        confirmBtn.classList.add('d-none');
+    }
+    
+    // Reset row styling
+    document.querySelectorAll('.period-row').forEach(row => {
+        row.style.cursor = '';
+        row.style.background = '';
+        row.style.borderColor = '';
+        row.classList.remove('swap-hoverable', 'bg-info-subtle', 'border-info', 'border-start', 'border-4');
+    });
+}
+
+function toggleSelectPeriod(id, element) {
+    const index = selectedPeriodIds.indexOf(id);
+    if (index > -1) {
+        // Deselect
+        selectedPeriodIds.splice(index, 1);
+        element.classList.remove('bg-info-subtle', 'border-info', 'border-start', 'border-4');
+        element.style.background = '';
+    } else {
+        // Limit to 2 selections
+        if (selectedPeriodIds.length >= 2) {
+            alert("<%= locals.lang === 'ur' ? 'آپ صرف دو پیریڈز ہی منتخب کر سکتے ہیں۔' : 'يمكنك تحديد حصتين فقط للتبادل.' %>");
+            return;
+        }
+        
+        // Select
+        selectedPeriodIds.push(id);
+        element.classList.add('bg-info-subtle', 'border-info', 'border-start', 'border-4');
+        element.style.background = 'rgba(14, 165, 233, 0.08)';
+    }
+    
+    // Update Confirm Swap Button state
+    const confirmBtn = document.getElementById('confirmSwapBtn');
+    if (selectedPeriodIds.length === 2) {
+        confirmBtn.classList.remove('d-none');
+    } else {
+        confirmBtn.classList.add('d-none');
+    }
+}
+
+async function confirmSwap() {
+    if (selectedPeriodIds.length !== 2) return;
+    
+    const [idA, idB] = selectedPeriodIds;
+    
+    // Fetch titles and teachers of selected rows to show confirm alert
+    const rowA = document.querySelector(`.period-row[data-id="${idA}"]`);
+    const rowB = document.querySelector(`.period-row[data-id="${idB}"]`);
+    
+    const descA = `"${rowA.dataset.title}" (${rowA.dataset.teacher})`;
+    const descB = `"${rowB.dataset.title}" (${rowB.dataset.teacher})`;
+    
+    const confirmMsg = "<%= locals.lang === 'ur' ? 'کیا آپ واقعی ان پیریڈز کا تبادلہ کرنا چاہتے ہیں؟' : 'هل أنت متأكد من رغبتك في تبديل مكان الحصتين؟' %>\n\n" + descA + " 🔄 " + descB;
+    
+    if (!confirm(confirmMsg)) return;
+    
+    try {
+        const response = await fetch('/periods/swap', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ periodIdA: idA, periodIdB: idB })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.error || 'حدث خطأ أثناء التبادل');
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Server error occurred');
+    }
+}
+
 // Restore saved filters on load
 document.addEventListener('DOMContentLoaded', () => {
     Object.keys(activeFilters).forEach(type => {
@@ -1092,6 +1232,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     applyFilters();
+
+    // Register click listener on rows for swap mode
+    document.querySelectorAll('.period-row').forEach(row => {
+        row.addEventListener('click', function(e) {
+            if (!isSwapModeActive) return;
+            if (e.target.closest('button') || e.target.closest('a') || e.target.closest('input')) return;
+            toggleSelectPeriod(this.dataset.id, this);
+        });
+    });
+
+    // Dynamically inject active swap CSS styles
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .swap-hoverable {
+            transition: all 0.2s ease;
+        }
+        .swap-hoverable:hover {
+            background-color: rgba(14, 165, 233, 0.04) !important;
+            transform: scale(1.005);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        }
+    `;
+    document.head.appendChild(style);
 });
 </script>
 
