@@ -57,6 +57,18 @@ async function migrate() {
         }
     }
     
+    // Safe column check for book_progress updated_at
+    try {
+        const [columns] = await db.execute('SHOW COLUMNS FROM book_progress LIKE "updated_at"');
+        if (columns.length === 0) {
+            console.log('Adding missing column updated_at to book_progress...');
+            await db.execute('ALTER TABLE book_progress ADD COLUMN updated_at timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP');
+            console.log('Column updated_at added successfully.');
+        }
+    } catch (columnErr) {
+        console.error('Error checking/adding updated_at column:', columnErr.message);
+    }
+    
     console.log('Migrations completed.');
     process.exit(0);
 }
