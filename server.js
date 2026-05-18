@@ -102,16 +102,6 @@ const getCRClassId = async (userId) => {
 };
 
 // Routes
-app.get('/debug-db', async (req, res) => {
-    try {
-        const [tables] = await db.query('SHOW TABLES');
-        const [history] = await db.query('SELECT * FROM schema_history');
-        res.json({ success: true, tables, history });
-    } catch (err) {
-        res.json({ success: false, error: err.message, stack: err.stack });
-    }
-});
-
 app.get('/login', (req, res) => {
     res.render('login', { error: null });
 });
@@ -887,7 +877,7 @@ app.get('/attendance/students/:classId', hasRole(['ناظم', 'مدير', 'عر�
                     res.render('reports', { groupedReport, teachers, teacherProgress, startDate, endDate, teachersReport });
                 } catch (err) {
                     console.error(err);
-                    res.status(500).send('Error generating reports: ' + err.stack);
+                    res.status(500).send('Error generating reports');
                 }
             });
 
