@@ -100,7 +100,9 @@ exports.showCRDashboard = async (req, res) => {
             todayPeriods,
             teacherAttendance,
             date: selectedDate,
-            dayName
+            todayDate: selectedDate,
+            dayName,
+            classId
         });
     } catch (err) {
         console.error(err);
