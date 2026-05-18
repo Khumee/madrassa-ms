@@ -124,6 +124,7 @@ exports.generateAuto = async (req, res) => {
 
 exports.showFullTimetable = async (req, res) => {
     try {
+        const groupBy = req.query.groupBy || 'class';
         const [periods] = await db.execute(
             `SELECT p.*, t.name as teacher_name, c.name_ar as class_name, b.title as book_title
              FROM periods p 
@@ -133,7 +134,8 @@ exports.showFullTimetable = async (req, res) => {
              LEFT JOIN books b ON tb.book_id = b.id`
         );
         const [classes] = await db.execute('SELECT * FROM classes');
-        res.render('timetable_full', { periods, classes });
+        const [teachers] = await db.execute('SELECT * FROM teachers ORDER BY name');
+        res.render('timetable_full', { periods, classes, teachers, groupBy });
     } catch (err) {
         console.error(err);
         res.status(500).send('Error loading full timetable');

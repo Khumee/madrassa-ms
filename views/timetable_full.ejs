@@ -39,8 +39,8 @@
 
 <div class="row mb-4 align-items-center no-print">
     <div class="col-md-6">
-        <h1 class="fw-bold text-primary mb-0"><%= __('All_Classes_Timetable') %></h1>
-        <p class="text-muted"><%= __('Timetable_Overview') %></p>
+        <h1 class="fw-bold text-primary mb-0"><%= groupBy === 'teacher' ? (locals.lang === 'ur' ? 'اساتذہ کا ٹائم ٹیبل' : 'جدول المعلمين الكامل') : __('All_Classes_Timetable') %></h1>
+        <p class="text-muted"><%= groupBy === 'teacher' ? (locals.lang === 'ur' ? 'تمام اساتذہ کا ہفتہ وار شیڈول' : 'نظرة عامة على جدول جميع المعلمين') : __('Timetable_Overview') %></p>
     </div>
     <div class="col-md-6 text-start">
         <button class="btn btn-outline-primary rounded-pill px-4 me-2" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
@@ -49,6 +49,10 @@
         <button onclick="window.print()" class="btn btn-dark rounded-pill px-4 me-2">
             <i class="bi bi-printer me-2"></i><%= __('Print') %>
         </button>
+        <div class="btn-group rounded-pill overflow-hidden border me-2">
+            <a href="/periods/full?groupBy=class" class="btn btn-sm <%= groupBy === 'class' ? 'btn-primary' : 'btn-white text-muted' %> px-3"><%= locals.lang === 'ur' ? 'کلاسز' : 'الفصول' %></a>
+            <a href="/periods/full?groupBy=teacher" class="btn btn-sm <%= groupBy === 'teacher' ? 'btn-primary' : 'btn-white text-muted' %> px-3"><%= locals.lang === 'ur' ? 'اساتذہ' : 'المعلمون' %></a>
+        </div>
         <% if (session && ['ناظم', 'مدير', 'عريب'].includes(session.role)) { %>
             <a href="/periods/manage" class="btn btn-outline-secondary rounded-pill px-4">
                 <i class="bi bi-gear me-2"></i><%= __('Manage') %>
@@ -114,65 +118,128 @@
 %>
 
 <div class="timetable-container-wide">
-    <% classes.forEach(cls => { 
-        const classPeriods = periods.filter(p => p.class_id === cls.id);
-        if (classPeriods.length === 0) return; 
-    %>
-        <div class="class-timetable mb-5" data-class="<%= cls.name_ar %>">
-            <div class="class-header bg-dark text-white p-3 text-center rounded-top fw-bold fs-4 shadow-sm">
-                <i class="bi bi-mortarboard-fill me-2"></i><%= __('Class_Prefix') %> <%= __(cls.name_ar) %>
-            </div>
-            <div class="table-responsive">
-                <table class="table table-bordered align-middle text-center mb-0" style="border-collapse: separate; border-spacing: 0;">
-                    <thead class="bg-light">
-                        <tr>
-                            <th class="py-3 fw-bold text-muted border-bottom-0" style="width: 15%;"><%= __('Day_Period') %></th>
-                            <% for(let i=1; i<=maxPeriod; i++) { %>
-                                <th class="py-3 fw-bold text-muted border-bottom-0" style="width: <%= 85 / maxPeriod %>%;"><%= __(periodKeys[i] || 'Period_' + i) %></th>
-                            <% } %>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% dayNamesEn.forEach(day => { %>
-                            <% 
-                                const dayPeriods = classPeriods.filter(p => p.day_of_week === day);
-                                if (day === 'Saturday' && dayPeriods.length === 0) return; 
-                            %>
-                            <tr class="day-row" data-day="<%= day %>">
-                                <td class="fw-bold bg-light text-primary border-end-0 py-3"><%= __(day) %></td>
-                                <% for(let i=1; i<=maxPeriod; i++) { 
-                                    const period = dayPeriods.find(p => p.period_number == i);
-                                %>
-                                    <td class="p-1 position-relative cell-container" style="height: 105px;">
-                                        <% if (period) { %>
-                                            <% 
-                                                const palette = getTeacherPalette(period.teacher_name);
-                                            %>
-                                            <div class="period-box p-3 h-100 d-flex flex-column justify-content-center border-start border-4 shadow-sm" 
-                                                 style="background: <%= palette.bg %>; color: <%= palette.text %>; border-color: <%= palette.border %> !important;" 
-                                                 data-teacher="<%= period.teacher_name %>">
-                                                <div class="subject-name fw-bold mb-1" style="font-size: 0.95rem; line-height: 1.2;"><%= period.book_title || period.subject %></div>
-                                                <div class="teacher-name small fw-bold opacity-75" style="font-size: 0.8rem;"><%= period.teacher_name %></div>
-                                                <% if (period.start_time) { %>
-                                                    <div class="period-time mt-1 small opacity-50 fw-semibold" style="font-size: 0.72rem;">
-                                                        <i class="bi bi-clock me-1"></i><%= period.start_time.substring(0,5) %> - <%= period.end_time.substring(0,5) %>
-                                                    </div>
-                                                <% } %>
-                                            </div>
-                                        <% } else { %>
-                                            <div class="h-100 d-flex align-items-center justify-content-center text-muted empty-dash rounded-3">
-                                                <i class="bi bi-dash-lg opacity-25"></i>
-                                            </div>
-                                        <% } %>
-                                    </td>
+    <% if (groupBy === 'teacher') { %>
+        <% teachers.forEach(t => { 
+            const teacherPeriods = periods.filter(p => p.teacher_id === t.id);
+            if (teacherPeriods.length === 0) return; 
+        %>
+            <div class="class-timetable mb-5" data-teacher="<%= t.name %>">
+                <div class="class-header bg-dark text-white p-3 text-center rounded-top fw-bold fs-4 shadow-sm" style="background: linear-gradient(135deg, #1e3a8a, #0d9488) !important;">
+                    <i class="bi bi-person-workspace me-2"></i><%= t.name %>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle text-center mb-0" style="border-collapse: separate; border-spacing: 0;">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="py-3 fw-bold text-muted border-bottom-0" style="width: 15%;"><%= __('Day_Period') %></th>
+                                <% for(let i=1; i<=maxPeriod; i++) { %>
+                                    <th class="py-3 fw-bold text-muted border-bottom-0" style="width: <%= 85 / maxPeriod %>%;"><%= __(periodKeys[i] || 'Period_' + i) %></th>
                                 <% } %>
                             </tr>
-                        <% }) %>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            <% dayNamesEn.forEach(day => { %>
+                                <% 
+                                    const dayPeriods = teacherPeriods.filter(p => p.day_of_week === day);
+                                    if (dayPeriods.length === 0) return; 
+                                %>
+                                <tr class="day-row" data-day="<%= day %>">
+                                    <td class="fw-bold bg-light text-primary border-end-0 py-3"><%= __(day) %></td>
+                                    <% for(let i=1; i<=maxPeriod; i++) { 
+                                        const period = dayPeriods.find(p => p.period_number == i);
+                                    %>
+                                        <td class="p-1 position-relative cell-container" style="height: 105px;">
+                                            <% if (period) { %>
+                                                <% 
+                                                    const palette = getTeacherPalette(period.teacher_name);
+                                                %>
+                                                <div class="period-box p-3 h-100 d-flex flex-column justify-content-center border-start border-4 shadow-sm" 
+                                                     style="background: <%= palette.bg %>; color: <%= palette.text %>; border-color: <%= palette.border %> !important;"
+                                                     data-class="<%= period.class_name %>"
+                                                     data-teacher="<%= period.teacher_name %>">
+                                                    <div class="subject-name fw-bold mb-1" style="font-size: 0.95rem; line-height: 1.2;"><%= period.book_title || period.subject %></div>
+                                                    <div class="teacher-name small fw-bold opacity-75" style="font-size: 0.8rem;"><%= __('Class_Prefix') %> <%= __(period.class_name) %></div>
+                                                    <% if (period.start_time) { %>
+                                                        <div class="period-time mt-1 small opacity-50 fw-semibold" style="font-size: 0.72rem;">
+                                                            <i class="bi bi-clock me-1"></i><%= period.start_time.substring(0,5) %> - <%= period.end_time.substring(0,5) %>
+                                                        </div>
+                                                    <% } %>
+                                                </div>
+                                            <% } else { %>
+                                                <div class="h-100 d-flex align-items-center justify-content-center text-muted empty-dash rounded-3">
+                                                    <i class="bi bi-dash-lg opacity-25"></i>
+                                                </div>
+                                            <% } %>
+                                        </td>
+                                    <% } %>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
-    <% }) %>
+        <% }) %>
+    <% } else { %>
+        <% classes.forEach(cls => { 
+            const classPeriods = periods.filter(p => p.class_id === cls.id);
+            if (classPeriods.length === 0) return; 
+        %>
+            <div class="class-timetable mb-5" data-class="<%= cls.name_ar %>">
+                <div class="class-header bg-dark text-white p-3 text-center rounded-top fw-bold fs-4 shadow-sm">
+                    <i class="bi bi-mortarboard-fill me-2"></i><%= __('Class_Prefix') %> <%= __(cls.name_ar) %>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle text-center mb-0" style="border-collapse: separate; border-spacing: 0;">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="py-3 fw-bold text-muted border-bottom-0" style="width: 15%;"><%= __('Day_Period') %></th>
+                                <% for(let i=1; i<=maxPeriod; i++) { %>
+                                    <th class="py-3 fw-bold text-muted border-bottom-0" style="width: <%= 85 / maxPeriod %>%;"><%= __(periodKeys[i] || 'Period_' + i) %></th>
+                                <% } %>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% dayNamesEn.forEach(day => { %>
+                                <% 
+                                    const dayPeriods = classPeriods.filter(p => p.day_of_week === day);
+                                    if (dayPeriods.length === 0) return; 
+                                %>
+                                <tr class="day-row" data-day="<%= day %>">
+                                    <td class="fw-bold bg-light text-primary border-end-0 py-3"><%= __(day) %></td>
+                                    <% for(let i=1; i<=maxPeriod; i++) { 
+                                        const period = dayPeriods.find(p => p.period_number == i);
+                                    %>
+                                        <td class="p-1 position-relative cell-container" style="height: 105px;">
+                                            <% if (period) { %>
+                                                <% 
+                                                    const palette = getTeacherPalette(period.teacher_name);
+                                                %>
+                                                <div class="period-box p-3 h-100 d-flex flex-column justify-content-center border-start border-4 shadow-sm" 
+                                                     style="background: <%= palette.bg %>; color: <%= palette.text %>; border-color: <%= palette.border %> !important;" 
+                                                     data-teacher="<%= period.teacher_name %>">
+                                                    <div class="subject-name fw-bold mb-1" style="font-size: 0.95rem; line-height: 1.2;"><%= period.book_title || period.subject %></div>
+                                                    <div class="teacher-name small fw-bold opacity-75" style="font-size: 0.8rem;"><%= period.teacher_name %></div>
+                                                    <% if (period.start_time) { %>
+                                                        <div class="period-time mt-1 small opacity-50 fw-semibold" style="font-size: 0.72rem;">
+                                                            <i class="bi bi-clock me-1"></i><%= period.start_time.substring(0,5) %> - <%= period.end_time.substring(0,5) %>
+                                                        </div>
+                                                    <% } %>
+                                                </div>
+                                            <% } else { %>
+                                                <div class="h-100 d-flex align-items-center justify-content-center text-muted empty-dash rounded-3">
+                                                    <i class="bi bi-dash-lg opacity-25"></i>
+                                                </div>
+                                            <% } %>
+                                        </td>
+                                    <% } %>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        <% }) %>
+    <% } %>
 </div>
 
 <style>
@@ -293,14 +360,19 @@ document.querySelectorAll('.filter-chip').forEach(chip => {
 });
 
 function applyFilters() {
-    const classBlocks = document.querySelectorAll('.class-timetable');
+    const isTeacherView = <%= groupBy === 'teacher' ? 'true' : 'false' %>;
+    const blocks = document.querySelectorAll('.class-timetable');
 
-    classBlocks.forEach(block => {
-        const className = block.dataset.class;
-        const matchClass = activeFilters.class === 'all' || className === activeFilters.class;
+    blocks.forEach(block => {
+        let matchBlock = true;
+        if (isTeacherView) {
+            matchBlock = activeFilters.teacher === 'all' || block.dataset.teacher === activeFilters.teacher;
+        } else {
+            matchBlock = activeFilters.class === 'all' || block.dataset.class === activeFilters.class;
+        }
         
         const dayRows = block.querySelectorAll('.day-row');
-        let hasAnyVisibleRowInClass = false;
+        let hasAnyVisibleRow = false;
 
         dayRows.forEach(row => {
             const matchDay = activeFilters.day === 'all' || row.dataset.day === activeFilters.day;
@@ -309,8 +381,14 @@ function applyFilters() {
             
             let hasVisiblePeriodInRow = false;
             boxes.forEach((box, i) => {
-                const matchTeacher = activeFilters.teacher === 'all' || box.dataset.teacher === activeFilters.teacher;
-                if (matchTeacher) {
+                let matchBox = true;
+                if (isTeacherView) {
+                    matchBox = activeFilters.class === 'all' || box.dataset.class === activeFilters.class;
+                } else {
+                    matchBox = activeFilters.teacher === 'all' || box.dataset.teacher === activeFilters.teacher;
+                }
+                
+                if (matchBox) {
                     box.classList.remove('d-none');
                     dashes[i].classList.add('d-none');
                     hasVisiblePeriodInRow = true;
@@ -320,17 +398,18 @@ function applyFilters() {
                 }
             });
 
-            // Row is visible if it matches the day filter AND has a teacher match (if a teacher is selected)
-            if (matchDay && (activeFilters.teacher === 'all' || hasVisiblePeriodInRow)) {
+            // Row is visible if it matches the day filter AND has a valid period match (if filter is set)
+            const hasFilterActive = isTeacherView ? activeFilters.class !== 'all' : activeFilters.teacher !== 'all';
+            if (matchDay && (!hasFilterActive || hasVisiblePeriodInRow)) {
                 row.style.display = '';
-                hasAnyVisibleRowInClass = true;
+                hasAnyVisibleRow = true;
             } else {
                 row.style.display = 'none';
             }
         });
 
-        // Hide the whole class block if it doesn't match the class filter OR has no visible rows
-        if (matchClass && hasAnyVisibleRowInClass) {
+        // Hide the block if block filter doesn't match OR has no visible rows
+        if (matchBlock && hasAnyVisibleRow) {
             block.style.display = '';
         } else {
             block.style.display = 'none';
