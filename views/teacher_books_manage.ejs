@@ -70,36 +70,44 @@
         </div>
     </div>
     <div class="col-md-8">
-        <!-- Interactive Filter Bar -->
-        <div class="card shadow-sm border-0 rounded-4 mb-4 bg-light-subtle">
-            <div class="card-body p-3">
-                <div class="row g-3 align-items-center">
-                    <div class="col-md-5">
-                        <div class="input-group">
-                            <span class="input-group-text bg-white border-end-0 text-success"><i class="bi bi-book"></i></span>
-                            <select id="filterBook" class="form-select border-start-0 fw-semibold" onchange="applyFilters()">
-                                <option value="">كل الكتب...</option>
-                                <% books.forEach(b => { %>
-                                    <option value="<%= b.id %>"><%= b.title %></option>
-                                <% }) %>
-                            </select>
-                        </div>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-journal-text me-2 text-success"></i>قائمة التوزيعات الحالية</h5>
+            <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
+                <i class="bi bi-filter me-1"></i>تصفية <i class="bi bi-chevron-down small ms-1"></i>
+            </button>
+        </div>
+
+        <!-- Expandable Filter Chips Panel -->
+        <div class="collapse mb-4" id="filterCollapse">
+            <div class="p-3 bg-light rounded-4 border border-success-subtle border-dashed">
+                <!-- 1. Filter by Teacher -->
+                <div class="mb-3">
+                    <small class="text-muted d-block mb-1 fw-bold">تصفية حسب المعلم</small>
+                    <div class="d-flex flex-wrap gap-2" id="teacherFilters">
+                        <button class="btn btn-sm btn-success rounded-pill px-3 filter-chip active" data-filter="all" data-type="teacher">الكل</button>
+                        <% 
+                            const teacherColors = ['primary', 'success', 'danger', 'warning', 'info', 'indigo', 'orange', 'teal', 'purple'];
+                            const uniqueTeachers = [...new Set(assignments.map(a => a.teacher_name))];
+                            uniqueTeachers.forEach((name, i) => { 
+                                const color = teacherColors[i % teacherColors.length];
+                        %>
+                            <button class="btn btn-sm btn-outline-<%= color %> rounded-pill px-3 filter-chip" data-filter="<%= name %>" data-type="teacher"><%= name %></button>
+                        <% }) %>
                     </div>
-                    <div class="col-md-5">
-                        <div class="input-group">
-                            <span class="input-group-text bg-white border-end-0 text-primary"><i class="bi bi-mortarboard"></i></span>
-                            <select id="filterClass" class="form-select border-start-0 fw-semibold" onchange="applyFilters()">
-                                <option value="">كل الصفوف...</option>
-                                <% classes.forEach(c => { %>
-                                    <option value="<%= c.id %>"><%= c.name %></option>
-                                <% }) %>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-2 d-grid">
-                        <button class="btn btn-outline-secondary rounded-pill fw-bold" onclick="resetFilters()">
-                            <i class="bi bi-x-circle me-1"></i>إعادة تعيين
-                        </button>
+                </div>
+                <!-- 2. Filter by Class -->
+                <div>
+                    <small class="text-muted d-block mb-1 fw-bold">تصفية حسب الصف</small>
+                    <div class="d-flex flex-wrap gap-2" id="classFilters">
+                        <button class="btn btn-sm btn-success rounded-pill px-3 filter-chip active" data-filter="all" data-type="class">الكل</button>
+                        <% 
+                            const classColors = ['primary', 'success', 'danger', 'warning', 'info', 'indigo', 'orange', 'teal', 'purple'];
+                            const uniqueClasses = [...new Set(assignments.map(a => a.class_name || 'غير محدد'))];
+                            uniqueClasses.forEach((name, i) => { 
+                                const color = classColors[i % classColors.length];
+                        %>
+                            <button class="btn btn-sm btn-outline-<%= color %> rounded-pill px-3 filter-chip" data-filter="<%= name %>" data-type="class"><%= name %></button>
+                        <% }) %>
                     </div>
                 </div>
             </div>
@@ -114,7 +122,7 @@
         %>
 
         <% Object.keys(grouped).forEach(teacherName => { %>
-            <div class="card shadow-sm border-0 rounded-4 mb-4 teacher-assignment-card">
+            <div class="card shadow-sm border-0 rounded-4 mb-4 teacher-assignment-card" data-teacher="<%= teacherName %>">
                 <div class="card-header bg-white p-4 border-0">
                     <h5 class="fw-bold mb-0 text-success">
                         <i class="bi bi-person-workspace me-2"></i>المعلم: <%= teacherName %>
@@ -133,7 +141,7 @@
                             </thead>
                             <tbody>
                                 <% grouped[teacherName].forEach(a => { %>
-                                    <tr class="assignment-row" data-book-id="<%= a.book_id %>" data-class-id="<%= a.class_id %>">
+                                    <tr class="assignment-row" data-book-id="<%= a.book_id %>" data-class-id="<%= a.class_id %>" data-class="<%= a.class_name || 'غير محدد' %>">
                                         <td class="px-4">
                                             <div class="fw-bold text-dark"><%= a.book_title %></div>
                                             <% 
@@ -327,23 +335,52 @@ async function deleteAssignment(id) {
     if ((await res.json()).success) location.reload();
 }
 
-function applyFilters() {
-    const bookVal = document.getElementById('filterBook').value;
-    const classVal = document.getElementById('filterClass').value;
+// Filtering Logic
+let activeFilters = { teacher: 'all', class: 'all' };
 
+document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', function() {
+        const type = this.dataset.type;
+        const filter = this.dataset.filter;
+        
+        // Update active filters
+        activeFilters[type] = filter;
+        
+        // Update UI state
+        document.querySelectorAll(`.filter-chip[data-type="${type}"]`).forEach(c => {
+            c.classList.remove('active', 'btn-dark', 'btn-primary', 'btn-success', 'btn-danger', 'btn-warning', 'btn-info', 'btn-secondary');
+            // Restore original outline color
+            const originalColor = c.getAttribute('class').match(/btn-outline-(\w+)/);
+            if (!originalColor) {
+                const colorMatch = c.dataset.filter === 'all' ? 'success' : (c.classList.toString().match(/btn-(\w+)/) || [null, 'secondary'])[1];
+                c.classList.add(`btn-outline-${colorMatch}`);
+            }
+        });
+        
+        this.classList.add('active');
+        const colorMatch = this.classList.toString().match(/btn-outline-(\w+)/);
+        const color = colorMatch ? colorMatch[1] : 'success';
+        this.classList.remove(`btn-outline-${color}`);
+        this.classList.add(`btn-${color}`);
+
+        applyFilters();
+    });
+});
+
+function applyFilters() {
     const cards = document.querySelectorAll('.teacher-assignment-card');
     cards.forEach(card => {
+        const cardTeacher = card.getAttribute('data-teacher');
         const rows = card.querySelectorAll('.assignment-row');
         let visibleRowsCount = 0;
 
+        const matchTeacher = activeFilters.teacher === 'all' || cardTeacher === activeFilters.teacher;
+
         rows.forEach(row => {
-            const rowBookId = row.getAttribute('data-book-id');
-            const rowClassId = row.getAttribute('data-class-id');
+            const rowClass = row.getAttribute('data-class');
+            const matchClass = activeFilters.class === 'all' || rowClass === activeFilters.class;
 
-            const matchesBook = !bookVal || rowBookId === bookVal;
-            const matchesClass = !classVal || rowClassId === classVal;
-
-            if (matchesBook && matchesClass) {
+            if (matchTeacher && matchClass) {
                 row.style.setProperty('display', '', 'important');
                 visibleRowsCount++;
             } else {
@@ -351,19 +388,13 @@ function applyFilters() {
             }
         });
 
-        // If no rows are visible in this teacher's card, hide the whole card!
-        if (visibleRowsCount > 0) {
+        // Show card only if teacher matches and we have visible rows
+        if (matchTeacher && visibleRowsCount > 0) {
             card.style.setProperty('display', '', 'important');
         } else {
             card.style.setProperty('display', 'none', 'important');
         }
     });
-}
-
-function resetFilters() {
-    document.getElementById('filterBook').value = '';
-    document.getElementById('filterClass').value = '';
-    applyFilters();
 }
 </script>
 
