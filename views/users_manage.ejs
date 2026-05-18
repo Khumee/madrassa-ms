@@ -10,6 +10,7 @@
             <button class="btn btn-primary rounded-pill px-4 filter-btn active" onclick="filterUsers('all', this)">الكل</button>
             <button class="btn btn-outline-primary rounded-pill px-4 filter-btn" onclick="filterUsers('أستاذ', this)">المعلمون</button>
             <button class="btn btn-outline-primary rounded-pill px-4 filter-btn" onclick="filterUsers('طالب', this)">الطلاب</button>
+            <button class="btn btn-outline-primary rounded-pill px-4 filter-btn" onclick="filterUsers('عريب', this)">عريب</button>
             <button class="btn btn-outline-primary rounded-pill px-4 filter-btn" onclick="filterUsers('ناظم', this)">الإدارة</button>
         </div>
     </div>
@@ -32,7 +33,7 @@
                         </thead>
                         <tbody id="userTableBody">
                             <% users.forEach(user => { %>
-                                <tr class="user-row" data-role="<%= user.role %>">
+                                <tr class="user-row" data-role="<%= (user.role === 'مسؤول الصف' || user.role === 'عریب' || user.role === 'عريب') ? 'عريب' : user.role %>">
                                     <td class="px-4">
                                         <span class="badge bg-light text-muted border rounded-pill px-3">
                                             <%= user.teacher_id || user.student_id || 'ADMIN' %>
@@ -42,7 +43,15 @@
                                     <td><code class="bg-light px-2 py-1 rounded text-primary"><%= user.username %></code></td>
                                     <td>
                                         <span class="badge bg-light text-dark border rounded-pill px-3">
-                                            <%= (user.role || '').replace(/_/g, ' ') %>
+                                            <% 
+                                                let displayRole = user.role || '';
+                                                if (displayRole === 'مسؤول الصف' || displayRole === 'عریب' || displayRole === 'عريب') {
+                                                    displayRole = 'عريب';
+                                                } else {
+                                                    displayRole = displayRole.replace(/_/g, ' ');
+                                                }
+                                            %>
+                                            <%= displayRole %>
                                         </span>
                                     </td>
                                     <td class="px-4 text-center">
