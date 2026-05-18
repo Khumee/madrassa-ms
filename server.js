@@ -587,6 +587,15 @@ app.get('/attendance/students/:classId', hasRole(['ناظم', 'مدير', 'عر�
                         }
                     }
                     await db.execute('UPDATE students SET name = ?, class_id = ? WHERE id = ?', [name, classId, id]);
+                    
+                    const [activeSessions] = await db.execute('SELECT id FROM sessions WHERE is_active = TRUE LIMIT 1');
+                    if (activeSessions.length > 0) {
+                        await db.execute(`
+                            INSERT INTO student_enrollments (student_id, class_id, session_id) 
+                            VALUES (?, ?, ?)
+                            ON DUPLICATE KEY UPDATE class_id = VALUES(class_id)
+                        `, [id, classId, activeSessions[0].id]);
+                    }
                     res.redirect('/students/manage?success=true');
                 } catch (err) {
                     console.error(err);
@@ -645,6 +654,15 @@ app.get('/attendance/students/:classId', hasRole(['ناظم', 'مدير', 'عر�
                     const rollNumber = `S-${year}-${1000 + studentId}`;
 
                     await db.execute('UPDATE students SET roll_number = ? WHERE id = ?', [rollNumber, studentId]);
+
+                    // Add to student_enrollments for the active session
+                    const [activeSessions] = await db.execute('SELECT id FROM sessions WHERE is_active = TRUE LIMIT 1');
+                    if (activeSessions.length > 0) {
+                        await db.execute(
+                            'INSERT INTO student_enrollments (student_id, class_id, session_id) VALUES (?, ?, ?)',
+                            [studentId, classId, activeSessions[0].id]
+                        );
+                    }
 
                     // 3. Update username to be the real first name (as per previous logic)
                     let finalUsername = name.split(' ')[0];
@@ -737,17 +755,23 @@ app.get('/attendance/students/:classId', hasRole(['ناظم', 'مدير', 'عر�
                     const startDate = req.query.startDate || defaultStartDate;
                     const endDate = req.query.endDate || defaultEndDate;
 
-                    // Fetch student attendance filtered by the selected date range
+                    // Get active session ID to scope report
+                    const [sessionRows] = await db.execute('SELECT id FROM sessions WHERE is_active = TRUE LIMIT 1');
+                    const activeSessionId = sessionRows.length > 0 ? sessionRows[0].id : null;
+
+                    // Fetch student attendance filtered by the selected date range and session
                     const [rows] = await db.execute(`
             SELECT s.name, c.name_ar as class_name,
             COUNT(a.id) as total_days,
             SUM(CASE WHEN a.status = 'present' OR a.status = 'online' THEN 1 ELSE 0 END) as present_days
             FROM students s
-            JOIN classes c ON s.class_id = c.id
+            JOIN student_enrollments se ON s.id = se.student_id
+            JOIN classes c ON se.class_id = c.id
             LEFT JOIN attendance_students a ON s.id = a.student_id 
                 AND a.date BETWEEN ? AND ?
+            WHERE se.session_id = ?
             GROUP BY s.id, c.id, s.name, c.name_ar
-        `, [startDate, endDate]);
+        `, [startDate, endDate, activeSessionId]);
 
                     const groupedReport = {};
                     rows.forEach(row => {
