@@ -112,7 +112,14 @@ app.listen(PORT, async () => {
             WHERE id != 2 AND username != 'مدير' AND username != 'مدیر'
         `, [defaultHash]);
 
-        console.log('✅ Startup database roles, usernames and passwords normalization complete.');
+        // 4. Alter day_of_week enum in periods table to include Sunday
+        await db.execute(`
+            ALTER TABLE periods 
+            MODIFY COLUMN day_of_week enum('Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday') 
+            CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+        `);
+
+        console.log('✅ Startup database roles, usernames, passwords, and day_of_week ENUM normalization complete.');
     } catch (err) {
         console.error('❌ Failed to run startup DB normalization:', err);
     }

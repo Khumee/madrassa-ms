@@ -130,8 +130,7 @@ exports.showFullTimetable = async (req, res) => {
              JOIN teachers t ON p.teacher_id = t.id 
              JOIN classes c ON p.class_id = c.id
              LEFT JOIN teacher_books tb ON p.assignment_id = tb.id
-             LEFT JOIN books b ON tb.book_id = b.id
-             WHERE p.day_of_week NOT IN ('Sunday')`
+             LEFT JOIN books b ON tb.book_id = b.id`
         );
         const [classes] = await db.execute('SELECT * FROM classes');
         res.render('timetable_full', { periods, classes });

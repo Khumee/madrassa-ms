@@ -177,7 +177,7 @@
                             <div class="d-flex flex-wrap gap-2" id="dayFilters">
                                 <button class="btn btn-sm btn-dark rounded-pill px-3 filter-chip active" data-filter="all" data-type="day"><%= __('All') %></button>
                                 <% 
-                                    const uniqueDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                                    const uniqueDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
                                     uniqueDays.forEach(day => { 
                                 %>
                                     <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 filter-chip" data-filter="<%= day %>" data-type="day"><%= __(day) %></button>
