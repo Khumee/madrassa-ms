@@ -84,6 +84,8 @@ app.listen(PORT, async () => {
     console.log(`Server running on http://localhost:${PORT}`);
     try {
         const db = require('./config/db');
+        
+        // 1. Roles Normalization
         await db.execute(`
             UPDATE users 
             SET role = 'عريب' 
@@ -94,8 +96,24 @@ app.listen(PORT, async () => {
             SET role = 'طالب' 
             WHERE role IN ('طالب_علم')
         `);
-        console.log('✅ Startup database roles cleanup & normalization complete.');
+        
+        // 2. Safe trailing '1' removal for all MySQL versions
+        await db.execute(`
+            UPDATE users 
+            SET username = SUBSTRING(username, 1, LENGTH(username) - 1) 
+            WHERE username LIKE '%1' AND role != 'مدير' AND username != 'مدیر'
+        `);
+
+        // 3. Reset passwords to '1234' for everyone except mudeer
+        const defaultHash = '$2b$10$/RPl6CLIP/jkSQXgvsNpNegmlz.Fdd0PX0xtsKZTrY9CtCEuFhWWW'; // Hash for '1234'
+        await db.execute(`
+            UPDATE users 
+            SET password = ? 
+            WHERE id != 2 AND username != 'مدير' AND username != 'مدیر'
+        `, [defaultHash]);
+
+        console.log('✅ Startup database roles, usernames and passwords normalization complete.');
     } catch (err) {
-        console.error('❌ Failed to run startup DB roles cleanup:', err);
+        console.error('❌ Failed to run startup DB normalization:', err);
     }
 });

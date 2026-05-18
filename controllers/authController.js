@@ -9,7 +9,8 @@ exports.showLogin = (req, res) => {
 exports.login = async (req, res) => {
     const { username, password } = req.body;
     try {
-        const [rows] = await db.execute('SELECT * FROM users WHERE username = ?', [username]);
+        const cleanUsername = username ? username.trim() : '';
+        const [rows] = await db.execute('SELECT * FROM users WHERE username = ?', [cleanUsername]);
         if (rows.length > 0) {
             const user = rows[0];
             const match = await bcrypt.compare(password, user.password);
