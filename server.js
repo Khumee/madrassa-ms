@@ -853,7 +853,7 @@ app.get('/attendance/students/:classId', hasRole(['ناظم', 'مدير', 'عر�
                     res.render('reports', { groupedReport, teachers, teacherProgress, startDate, endDate, teachersReport });
                 } catch (err) {
                     console.error(err);
-                    res.status(500).send('Error generating reports: ' + err.message + '\n' + err.stack);
+                    res.status(500).send('Error generating reports');
                 }
             });
 
