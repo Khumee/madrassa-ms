@@ -102,6 +102,16 @@ const getCRClassId = async (userId) => {
 };
 
 // Routes
+app.get('/debug-db', async (req, res) => {
+    try {
+        const [tables] = await db.query('SHOW TABLES');
+        const [history] = await db.query('SELECT * FROM schema_history');
+        res.json({ success: true, tables, history });
+    } catch (err) {
+        res.json({ success: false, error: err.message, stack: err.stack });
+    }
+});
+
 app.get('/login', (req, res) => {
     res.render('login', { error: null });
 });
