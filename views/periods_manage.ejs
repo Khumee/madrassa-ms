@@ -150,8 +150,8 @@
                             <i class="bi bi-arrow-left-right me-1"></i><%= locals.lang === 'ur' ? 'پیریڈز تبدیل کریں' : 'تبديل الحصص' %>
                         </button>
                         <div class="btn-group rounded-pill overflow-hidden border">
-                            <a href="/periods/manage?groupBy=day" class="btn btn-sm <%= groupBy === 'day' ? 'btn-primary' : 'btn-white text-muted' %> px-3"><%= __('Group_By_Day') %></a>
-                            <a href="/periods/manage?groupBy=teacher" class="btn btn-sm <%= groupBy === 'teacher' ? 'btn-primary' : 'btn-white text-muted' %> px-3"><%= __('Group_By_Teacher') %></a>
+                            <a href="/periods/manage?groupBy=day" onclick="localStorage.removeItem('activeFilters_timetable')" class="btn btn-sm <%= groupBy === 'day' ? 'btn-primary' : 'btn-white text-muted' %> px-3"><%= __('Group_By_Day') %></a>
+                            <a href="/periods/manage?groupBy=teacher" onclick="localStorage.removeItem('activeFilters_timetable')" class="btn btn-sm <%= groupBy === 'teacher' ? 'btn-primary' : 'btn-white text-muted' %> px-3"><%= __('Group_By_Teacher') %></a>
                         </div>
                     </div>
                 </div>
