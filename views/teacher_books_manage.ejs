@@ -338,31 +338,46 @@ async function deleteAssignment(id) {
 // Filtering Logic
 let activeFilters = { teacher: 'all', class: 'all' };
 
+const storedFilters = localStorage.getItem('activeFilters_teacher_books');
+if (storedFilters) {
+    try {
+        activeFilters = JSON.parse(storedFilters);
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+function updateChipsUI(type, filter) {
+    const chips = document.querySelectorAll(`.filter-chip[data-type="${type}"]`);
+    chips.forEach(c => {
+        c.classList.remove('active', 'btn-dark', 'btn-primary', 'btn-success', 'btn-danger', 'btn-warning', 'btn-info', 'btn-secondary');
+        // Restore original outline color
+        const originalColor = c.getAttribute('class').match(/btn-outline-(\w+)/);
+        if (!originalColor) {
+            const colorMatch = c.dataset.filter === 'all' ? 'success' : (c.classList.toString().match(/btn-(\w+)/) || [null, 'secondary'])[1];
+            c.classList.add(`btn-outline-${colorMatch}`);
+        }
+    });
+    
+    const activeChip = Array.from(chips).find(c => c.dataset.filter === filter);
+    if (activeChip) {
+        activeChip.classList.add('active');
+        const colorMatch = activeChip.classList.toString().match(/btn-outline-(\w+)/);
+        const color = colorMatch ? colorMatch[1] : 'success';
+        activeChip.classList.remove(`btn-outline-${color}`);
+        activeChip.classList.add(`btn-${color}`);
+    }
+}
+
 document.querySelectorAll('.filter-chip').forEach(chip => {
     chip.addEventListener('click', function() {
         const type = this.dataset.type;
         const filter = this.dataset.filter;
         
-        // Update active filters
         activeFilters[type] = filter;
+        localStorage.setItem('activeFilters_teacher_books', JSON.stringify(activeFilters));
         
-        // Update UI state
-        document.querySelectorAll(`.filter-chip[data-type="${type}"]`).forEach(c => {
-            c.classList.remove('active', 'btn-dark', 'btn-primary', 'btn-success', 'btn-danger', 'btn-warning', 'btn-info', 'btn-secondary');
-            // Restore original outline color
-            const originalColor = c.getAttribute('class').match(/btn-outline-(\w+)/);
-            if (!originalColor) {
-                const colorMatch = c.dataset.filter === 'all' ? 'success' : (c.classList.toString().match(/btn-(\w+)/) || [null, 'secondary'])[1];
-                c.classList.add(`btn-outline-${colorMatch}`);
-            }
-        });
-        
-        this.classList.add('active');
-        const colorMatch = this.classList.toString().match(/btn-outline-(\w+)/);
-        const color = colorMatch ? colorMatch[1] : 'success';
-        this.classList.remove(`btn-outline-${color}`);
-        this.classList.add(`btn-${color}`);
-
+        updateChipsUI(type, filter);
         applyFilters();
     });
 });
@@ -396,6 +411,23 @@ function applyFilters() {
         }
     });
 }
+
+// Restore saved filters on load
+document.addEventListener('DOMContentLoaded', () => {
+    Object.keys(activeFilters).forEach(type => {
+        updateChipsUI(type, activeFilters[type]);
+    });
+    
+    const hasActiveFilter = Object.values(activeFilters).some(v => v !== 'all');
+    if (hasActiveFilter) {
+        const collapseEl = document.getElementById('filterCollapse');
+        if (collapseEl) {
+            collapseEl.classList.add('show');
+        }
+    }
+    
+    applyFilters();
+});
 </script>
 
 <%- include('partials/footer') %>
