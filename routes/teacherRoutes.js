@@ -18,6 +18,7 @@ router.get('/teacher-books/manage', hasRole(['ناظم', 'مدير', 'عريب']
 router.post('/teacher-books/assign', hasRole(['ناظم', 'مدير', 'عريب']), teacherController.assignBook);
 router.post('/teacher-books/edit/:id', hasRole(['ناظم', 'مدير', 'عريب']), teacherController.editAssignment);
 router.post('/teacher-books/delete/:id', hasRole(['ناظم', 'مدير', 'عريب']), teacherController.deleteAssignment);
+router.get('/teacher-books/check-periods/:id', hasRole(['ناظم', 'مدير', 'عريب']), teacherController.checkAssignmentPeriods);
 
 router.post('/book/update-progress', hasRole(['أستاذ', 'ناظم', 'مدير', 'عريب']), teacherController.updateBookProgress);
 

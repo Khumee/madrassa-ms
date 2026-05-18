@@ -191,6 +191,15 @@ exports.editBook = async (req, res) => {
 exports.deleteBook = async (req, res) => {
     const { id } = req.params;
     try {
+        // Enforce integrity check: cannot remove a book if it is assigned to teacher
+        const [assignments] = await db.execute('SELECT COUNT(*) as count FROM teacher_books WHERE book_id = ?', [id]);
+        if (assignments[0].count > 0) {
+            return res.json({ 
+                success: false, 
+                error: 'لا يمكن حذف هذا الكتاب لأنه مسند لمعلم بالفعل. يرجى إلغاء إسناد الكتاب من قائمة توزيع الكتب أولاً.' 
+            });
+        }
+
         await db.execute('DELETE FROM books WHERE id = ?', [id]);
         res.json({ success: true });
     } catch (err) {

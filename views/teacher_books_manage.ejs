@@ -330,9 +330,24 @@ document.getElementById('editAssignmentForm').addEventListener('submit', async (
 });
 
 async function deleteAssignment(id) {
-    if (!confirm('هل أنت متأكد من إلغاء هذا الإسناد؟')) return;
-    const res = await fetch(`/teacher-books/delete/${id}`, { method: 'POST' });
-    if ((await res.json()).success) location.reload();
+    try {
+        const checkRes = await fetch(`/teacher-books/check-periods/${id}`);
+        const checkData = await checkRes.json();
+        
+        if (checkData.success && checkData.count > 0) {
+            if (!confirm(`تنبيه: هناك عدد ${checkData.count} حصص مسندة في جدول الحصص لهذا الكتاب/المعلم. سيؤدي إلغاء هذا الإسناد إلى حذف تلك الحصص أيضاً من جدول الحصص نهائياً. هل تريد الاستمرار في الحذف؟`)) {
+                return;
+            }
+        } else {
+            if (!confirm('هل أنت متأكد من إلغاء هذا الإسناد؟')) return;
+        }
+        
+        const res = await fetch(`/teacher-books/delete/${id}`, { method: 'POST' });
+        if ((await res.json()).success) location.reload();
+    } catch (err) {
+        console.error(err);
+        alert('حدث خطأ أثناء محاولة الحذف.');
+    }
 }
 
 // Filtering Logic

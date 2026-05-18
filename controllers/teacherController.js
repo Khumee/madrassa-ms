@@ -267,6 +267,17 @@ exports.editAssignment = async (req, res) => {
     }
 };
 
+exports.checkAssignmentPeriods = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const [rows] = await db.execute('SELECT COUNT(*) as count FROM periods WHERE assignment_id = ?', [id]);
+        res.json({ success: true, count: rows[0].count });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+};
+
 exports.deleteAssignment = async (req, res) => {
     const { id } = req.params;
     try {
