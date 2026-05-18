@@ -15,16 +15,17 @@ exports.login = async (req, res) => {
             const match = await bcrypt.compare(password, user.password);
             if (match) {
                 req.session.userId = user.id;
-                req.session.role = user.role;
+                req.session.role = user.role ? user.role.replace(/\u06CC/g, '\u064A').trim() : '';
 
                 return req.session.save((err) => {
                     if (err) {
                         console.error('Session save error:', err);
                         return res.render('login', { error: 'Session Error' });
                     }
-                    if (user.role === 'طالب') return res.redirect('/dashboard/student');
-                    if (user.role === 'عريب' || user.role === 'عریب') return res.redirect('/dashboard/cr');
-                    if (user.role === 'أستاذ') return res.redirect('/dashboard/teacher');
+                    const normRole = req.session.role;
+                    if (normRole === 'طالب') return res.redirect('/dashboard/student');
+                    if (normRole === 'عريب') return res.redirect('/dashboard/cr');
+                    if (normRole === 'أستاذ') return res.redirect('/dashboard/teacher');
 
                     return res.redirect('/');
                 });

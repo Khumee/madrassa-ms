@@ -97,7 +97,7 @@
                         <label class="form-label fw-bold">الدور (Role)</label>
                         <select id="editRole" class="form-select" required>
                             <option value="طالب">طالب</option>
-                            <option value="عریب">عریب</option>
+                            <option value="عريب">عريب</option>
                             <option value="أستاذ">أستاذ</option>
                             <option value="ناظم">ناظم</option>
                             <option value="مدير">مدير</option>
@@ -123,10 +123,12 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function filterUsers(role, btn) {
+    const normSearch = role.replace(/\u06CC/g, '\u064A').trim();
     const rows = document.querySelectorAll('.user-row');
     rows.forEach(row => {
-        const userRole = row.getAttribute('data-role') || '';
-        if (role === 'all' || userRole.includes(role)) {
+        const rawRole = row.getAttribute('data-role') || '';
+        const userRole = rawRole.replace(/\u06CC/g, '\u064A').trim();
+        if (role === 'all' || userRole.includes(normSearch)) {
             row.style.display = '';
         } else {
             row.style.display = 'none';

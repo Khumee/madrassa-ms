@@ -211,6 +211,11 @@ exports.showUsersManage = async (req, res) => {
             LEFT JOIN teachers t ON u.id = t.user_id
             ORDER BY u.role, u.username
         `);
+        users.forEach(u => {
+            if (u.role) {
+                u.role = u.role.replace(/\u06CC/g, '\u064A').trim();
+            }
+        });
         res.render('users_manage', { users });
     } catch (err) {
         console.error(err);

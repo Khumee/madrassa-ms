@@ -6,21 +6,29 @@ const hasRole = (allowed) => {
             return res.redirect('/login');
         }
         
+        const normalize = (str) => {
+            if (!str) return '';
+            return str.replace(/\u06CC/g, '\u064A').trim();
+        };
+
+        const userRole = normalize(req.session.role);
+        const normalizedAllowed = allowed.map(normalize);
+
         // Areeb (عريب) has student (طالب) rights
-        if (allowed.includes('طالب')) {
-            if (req.session.role === 'طالب' || req.session.role === 'عريب' || req.session.role === 'عریب') {
+        if (normalizedAllowed.includes('طالب')) {
+            if (userRole === 'طالب' || userRole === 'عريب') {
                 return next();
             }
         }
         
         // Areeb (عريب) has teacher (أستاذ) rights
-        if (allowed.includes('أستاذ')) {
-            if (req.session.role === 'أستاذ' || req.session.role === 'عريب' || req.session.role === 'عریب') {
+        if (normalizedAllowed.includes('أستاذ')) {
+            if (userRole === 'أستاذ' || userRole === 'عريب') {
                 return next();
             }
         }
         
-        if (allowed.includes(req.session.role)) {
+        if (normalizedAllowed.includes(userRole)) {
             return next();
         }
         res.status(403).send('Unauthorized');
