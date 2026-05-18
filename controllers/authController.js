@@ -14,8 +14,20 @@ exports.login = async (req, res) => {
             const user = rows[0];
             const match = await bcrypt.compare(password, user.password);
             if (match) {
+                const normalizeRole = (role) => {
+                    if (!role) return '';
+                    let normalized = role.replace(/\u06CC/g, '\u064A').replace(/_/g, ' ').trim();
+                    if (normalized === 'مسؤول الصف' || normalized === 'عريب' || normalized === 'عریب') {
+                        return 'عريب';
+                    }
+                    if (normalized === 'طالب علم' || normalized === 'طالب') {
+                        return 'طالب';
+                    }
+                    return normalized;
+                };
+
                 req.session.userId = user.id;
-                req.session.role = user.role ? user.role.replace(/\u06CC/g, '\u064A').trim() : '';
+                req.session.role = normalizeRole(user.role);
 
                 return req.session.save((err) => {
                     if (err) {

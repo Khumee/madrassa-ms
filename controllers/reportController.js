@@ -211,9 +211,21 @@ exports.showUsersManage = async (req, res) => {
             LEFT JOIN teachers t ON u.id = t.user_id
             ORDER BY u.role, u.username
         `);
+        const normalizeRole = (role) => {
+            if (!role) return '';
+            let normalized = role.replace(/\u06CC/g, '\u064A').replace(/_/g, ' ').trim();
+            if (normalized === 'مسؤول الصف' || normalized === 'عريب' || normalized === 'عریب') {
+                return 'عريب';
+            }
+            if (normalized === 'طالب علم' || normalized === 'طالب') {
+                return 'طالب';
+            }
+            return normalized;
+        };
+
         users.forEach(u => {
             if (u.role) {
-                u.role = u.role.replace(/\u06CC/g, '\u064A').trim();
+                u.role = normalizeRole(u.role);
             }
         });
         res.render('users_manage', { users });

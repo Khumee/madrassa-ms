@@ -80,6 +80,22 @@ app.use(periodRoutes);
 app.use(reportRoutes);
 
 // Start Server
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
     console.log(`Server running on http://localhost:${PORT}`);
+    try {
+        const db = require('./config/db');
+        await db.execute(`
+            UPDATE users 
+            SET role = 'عريب' 
+            WHERE role IN ('مسؤول_الصف', 'مسؤول الصف', 'عریب')
+        `);
+        await db.execute(`
+            UPDATE users 
+            SET role = 'طالب' 
+            WHERE role IN ('طالب_علم')
+        `);
+        console.log('✅ Startup database roles cleanup & normalization complete.');
+    } catch (err) {
+        console.error('❌ Failed to run startup DB roles cleanup:', err);
+    }
 });
