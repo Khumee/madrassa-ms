@@ -200,17 +200,35 @@ exports.showWeeklyAttendance = async (req, res) => {
 };
 
 exports.saveWeeklyAttendance = async (req, res) => {
-    const { date, teacherId, status, period } = req.body;
+    const { date, teacherId, status, period, attendance } = req.body;
     try {
+        if (attendance) {
+            // Case 1: Toggling/saving teacher attendance from CR Dashboard
+            for (const [tId, checkedCount] of Object.entries(attendance)) {
+                const classesTaken = parseInt(checkedCount) || 0;
+                const teacherStatus = classesTaken > 0 ? 'present' : 'absent';
+                
+                await db.execute(
+                    `INSERT INTO attendance_teachers (teacher_id, date, classes_taken, status, marked_by) 
+                     VALUES (?, ?, ?, ?, ?) 
+                     ON DUPLICATE KEY UPDATE classes_taken = ?, status = ?, marked_by = ?`,
+                    [tId, date, classesTaken, teacherStatus, req.session.userId, classesTaken, teacherStatus, req.session.userId]
+                );
+            }
+            return res.json({ success: true });
+        }
+        
+        // Case 2: Saving from older legacy forms (if any)
+        const classesTaken = (status === 'present') ? 1 : 0;
         await db.execute(
-            `INSERT INTO attendance_teachers (teacher_id, date, status, period_number, marked_by) 
+            `INSERT INTO attendance_teachers (teacher_id, date, classes_taken, status, marked_by) 
              VALUES (?, ?, ?, ?, ?) 
-             ON DUPLICATE KEY UPDATE status = ?, period_number = ?`,
-            [teacherId, date, status, period || null, req.session.userId, status, period || null]
+             ON DUPLICATE KEY UPDATE classes_taken = ?, status = ?, marked_by = ?`,
+            [teacherId, date, classesTaken, status || 'present', req.session.userId, classesTaken, status || 'present', req.session.userId]
         );
         res.json({ success: true });
     } catch (err) {
-        console.error(err);
+        console.error('Error saving teacher attendance:', err);
         res.status(500).json({ success: false });
     }
 };
