@@ -122,5 +122,7 @@
   "Last_Updated": "آخر تحديث",
   "Select_Book": "اختر الكتاب",
   "Select_Teacher": "اختر الأستاذ",
-  "Select_Class": "اختر الصف"
+  "Select_Class": "اختر الصف",
+  "Permissions": "الصلاحيات",
+  "Manage_Permissions": "إدارة صلاحيات الفروع"
 }

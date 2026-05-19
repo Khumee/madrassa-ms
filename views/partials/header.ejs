@@ -55,7 +55,7 @@
             </a>
             <% if (locals.session && session.role === 'مدير') { %>
                 <a href="/permissions/manage" class="btn btn-outline-warning rounded-pill px-3 fw-semibold">
-                    <i class="bi bi-shield-lock me-1"></i> الصلاحيات
+                    <i class="bi bi-shield-lock me-1"></i> <%= __('Permissions') %>
                 </a>
             <% } %>
             <div class="dropdown">
