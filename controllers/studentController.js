@@ -226,56 +226,54 @@ exports.showCRDashboard = async (req, res) => {
         const [classInfo] = await db.execute('SELECT * FROM classes WHERE id = ?', [classId]);
 
         const [todayPeriods] = await db.execute(`
-            SELECT p.*, t.name as teacher_name, b.title as book_title, tb.id as assignment_id, tb.start_page, tb.end_page, tb.current_page,
-            (SELECT bp.updated_at FROM book_progress bp WHERE bp.assignment_id = tb.id ORDER BY bp.id DESC LIMIT 1) as last_updated_at
+            SELECT p.*, t.name as teacher_name
             FROM periods p
             JOIN teachers t ON p.teacher_id = t.id
             JOIN classes c ON p.class_id = c.id
-            LEFT JOIN teacher_books tb ON p.assignment_id = tb.id
-            LEFT JOIN books b ON tb.book_id = b.id
             WHERE p.class_id = ? AND p.day_of_week = ?
             ORDER BY p.period_number
         `, [classId, dayName]);
 
-        for (const p of todayPeriods) {
-            if (p.assignment_id) {
-                // Fetch the previous page number before selectedDate
-                const [prevProgress] = await db.execute(
-                    'SELECT page_number FROM book_progress WHERE assignment_id = ? AND date < ? ORDER BY date DESC, id DESC LIMIT 1',
-                    [p.assignment_id, selectedDate]
-                );
-                p.previous_page = prevProgress.length > 0 ? prevProgress[0].page_number : p.start_page;
+        const [classBooks] = await db.execute(`
+            SELECT tb.id as assignment_id, tb.start_page, tb.end_page, tb.current_page, 
+            b.title as book_title, t.name as teacher_name,
+            (SELECT bp.updated_at FROM book_progress bp WHERE bp.assignment_id = tb.id ORDER BY bp.id DESC LIMIT 1) as last_updated_at
+            FROM teacher_books tb
+            JOIN books b ON tb.book_id = b.id
+            JOIN teachers t ON tb.teacher_id = t.id
+            JOIN sessions s ON tb.session_id = s.id
+            WHERE tb.class_id = ? AND s.is_active = TRUE
+        `, [classId]);
 
-                // Fetch recent progress history for graph
-                const [progHistory] = await db.execute(
-                    'SELECT date, page_number FROM book_progress WHERE assignment_id = ? ORDER BY date ASC LIMIT 15',
-                    [p.assignment_id]
-                );
-                p.progress_history = progHistory.map(ph => ({
-                    date: ph.date instanceof Date ? ph.date.toISOString().split('T')[0] : String(ph.date).split('T')[0],
-                    page_number: ph.page_number
-                }));
-                
-                // Get the last progress date
-                const [lastProgress] = await db.execute(
-                    'SELECT date FROM book_progress WHERE assignment_id = ? ORDER BY date DESC, id DESC LIMIT 1',
-                    [p.assignment_id]
-                );
-                if (lastProgress.length > 0) {
-                    p.last_progress_date = DateTime.fromJSDate(new Date(lastProgress[0].date)).setLocale('ar').toFormat('dd MMMM yyyy');
-                } else {
-                    p.last_progress_date = 'لا يوجد سجل سابق';
-                }
+        for (const b of classBooks) {
+            // Fetch the last page number logged in book_progress (no date dependency)
+            const [lastProgress] = await db.execute(
+                'SELECT page_number, date FROM book_progress WHERE assignment_id = ? ORDER BY date DESC, id DESC LIMIT 1',
+                [b.assignment_id]
+            );
+            b.previous_page = lastProgress.length > 0 ? lastProgress[0].page_number : b.start_page;
+
+            // Fetch recent progress history for graph
+            const [progHistory] = await db.execute(
+                'SELECT date, page_number FROM book_progress WHERE assignment_id = ? ORDER BY date ASC LIMIT 15',
+                [b.assignment_id]
+            );
+            b.progress_history = progHistory.map(ph => ({
+                date: ph.date instanceof Date ? ph.date.toISOString().split('T')[0] : String(ph.date).split('T')[0],
+                page_number: ph.page_number
+            }));
+            
+            // Get the last progress date
+            if (lastProgress.length > 0) {
+                b.last_progress_date = DateTime.fromJSDate(new Date(lastProgress[0].date)).setLocale('ar').toFormat('dd MMMM yyyy');
             } else {
-                p.previous_page = p.start_page || 1;
-                p.progress_history = [];
-                p.last_progress_date = 'لا يوجد سجل سابق';
+                b.last_progress_date = 'لا يوجد سجل سابق';
             }
 
-            if (p.last_updated_at) {
-                p.lastUpdatedStr = DateTime.fromJSDate(new Date(p.last_updated_at)).setLocale('ar').toFormat('dd MMMM, hh:mm a');
+            if (b.last_updated_at) {
+                b.lastUpdatedStr = DateTime.fromJSDate(new Date(b.last_updated_at)).setLocale('ar').toFormat('dd MMMM, hh:mm a');
             } else {
-                p.lastUpdatedStr = null;
+                b.lastUpdatedStr = null;
             }
         }
 
@@ -392,6 +390,7 @@ exports.showCRDashboard = async (req, res) => {
             students,
             classInfo: classInfo[0],
             todayPeriods,
+            classBooks,
             teacherAttendance,
             date: selectedDate,
             todayDate: selectedDate,

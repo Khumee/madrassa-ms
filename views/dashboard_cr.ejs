@@ -397,12 +397,12 @@
                     </div>
                 </div>
 
-                <!-- Teacher Timeline & Book Progress (Right) -->
+                <!-- Teacher Timeline & Daily Attendance (Right) -->
                 <div class="col-lg-6 mb-4">
                     <div class="card shadow-sm border-0 rounded-4 h-100 bg-white">
                         <div class="card-header bg-white p-4 border-0 pb-2">
-                            <h4 class="fw-bold mb-0 text-success"><i class="bi bi-journal-bookmark-fill me-2"></i>حصص المعلمين والتقدم</h4>
-                            <p class="text-muted small mt-1 mb-0"><i class="bi bi-info-circle me-1"></i>فعّل حضور الأستاذ، ثم حدد رقم الصفحة المنجزة لحفظ تقدم المنهج بلمسة واحدة.</p>
+                            <h4 class="fw-bold mb-0 text-success"><i class="bi bi-person-check-fill me-2"></i>سجل المعلمين والحصص</h4>
+                            <p class="text-muted small mt-1 mb-0"><i class="bi bi-info-circle me-1"></i>فعّل أو عطّل حضور الأستاذ لتسجيل الحصص المنجزة لليوم المحدد.</p>
                         </div>
                         <div class="card-body p-4 pt-2">
                             <% if (todayPeriods.length === 0) { %>
@@ -411,7 +411,7 @@
                                     <p class="text-muted mt-3 fw-bold">لا توجد حصص مجدولة لهذا اليوم!</p>
                                 </div>
                             <% } else { %>
-                                <div class="timeline-container d-flex flex-column gap-4 mt-3">
+                                <div class="timeline-container d-flex flex-column gap-3 mt-3">
                                     <% todayPeriods.forEach(period => {
                                         const ta = teacherAttendance.find(a => a.teacher_id === period.teacher_id);
                                         const isPresent = ta && ta.classes_taken > 0;
@@ -422,8 +422,7 @@
                                             </div>
 
                                             <div class="p-3 d-flex justify-content-between align-items-center flex-wrap gap-3 teacher-period-card" 
-                                                 data-teacher-id="<%= period.teacher_id %>"
-                                                 data-assignment-id="<%= period.assignment_id %>">
+                                                 data-teacher-id="<%= period.teacher_id %>">
                                                  
                                                 <div class="d-flex align-items-center gap-3">
                                                     <div class="form-check form-switch ps-0">
@@ -435,68 +434,113 @@
                                                         <label class="form-check-label fw-bold text-dark mb-0 d-flex align-items-center flex-wrap gap-1" for="switch_<%= period.id %>" style="cursor: pointer; font-size: 1.05rem;">
                                                             <span>الحصة <%= period.period_number %>:</span>
                                                             <span class="text-primary fw-bold"><%= period.teacher_name %></span>
-                                                            <% if (period.book_title) { %>
-                                                                <span class="text-muted" style="font-size: 0.9rem;">(<%= period.book_title %>)</span>
-                                                            <% } %>
                                                         </label>
                                                         
-                                                        <div class="last-update-label mt-1 text-muted d-flex align-items-center gap-2" id="up_label_<%= period.assignment_id %>" style="font-size: 0.72rem;">
-                                                            <% if (period.lastUpdatedStr) { %>
-                                                                <span><i class="bi bi-clock-history me-1"></i>تحديث: <%= period.lastUpdatedStr %></span>
+                                                        <div class="last-update-label mt-1 text-muted d-flex align-items-center gap-2" style="font-size: 0.72rem;">
+                                                            <% if (isPresent) { %>
+                                                                <span class="text-success fw-semibold"><i class="bi bi-check-circle-fill me-1"></i> حاضر للحصة</span>
                                                             <% } else { %>
-                                                                <span class="text-muted small">لا يوجد تحديث للتقدم</span>
-                                                            <% } %>
-                                                            <% if (period.assignment_id) { %>
-                                                                <button type="button" class="btn p-0 border-0 text-success fw-bold text-decoration-underline" 
-                                                                        data-bs-toggle="collapse" data-bs-target="#collapseProgress_<%= period.id %>" 
-                                                                        style="font-size: 0.72rem; cursor: pointer;">
-                                                                     <i class="bi bi-chevron-down ms-1"></i>التاريخ والرسم البياني
-                                                                </button>
+                                                                <span class="text-danger fw-semibold"><i class="bi bi-x-circle-fill me-1"></i> غائب / لم يؤخذ الحصة</span>
                                                             <% } %>
                                                         </div>
                                                     </div>
                                                 </div>
-         
-                                                <% if (period.assignment_id) { %>
-                                                    <div class="d-flex align-items-center gap-2 bg-light rounded-pill p-1 pe-3 border" style="box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);">
-                                                        <span class="small text-secondary fw-bold text-nowrap d-none d-sm-inline" style="font-size: 0.78rem;">صفحة:</span>
-                                                        <div class="d-flex align-items-center gap-1 bg-white rounded-pill p-0.5 border shadow-sm" style="max-width: 145px;">
-                                                            <button type="button" class="adjust-btn btn-outline-danger bg-danger-subtle text-danger" 
-                                                                    onclick="adjustPage(<%= period.id %>, -1)">-</button>
-                                                            <input type="number" id="input_<%= period.id %>"
-                                                                   class="form-control text-center rounded-pill border-0 text-success fw-bold p-0 bg-transparent"
-                                                                   value="<%= period.current_page %>"
-                                                                   min="<%= period.previous_page %>"
-                                                                   max="<%= period.end_page %>"
-                                                                   data-current="<%= period.current_page %>"
-                                                                   onchange="updateBookProgress(<%= period.assignment_id %>, this)"
-                                                                   style="width: 48px; font-size: 1.05rem; box-shadow: none; pointer-events: none;">
-                                                            <button type="button" class="adjust-btn btn-success text-white bg-success" 
-                                                                    onclick="adjustPage(<%= period.id %>, 1)">+</button>
-                                                        </div>
-                                                        <span class="badge bg-success-subtle text-success rounded-pill d-block text-center ms-1 me-2" style="font-size: 0.65rem; white-space: nowrap;">
-                                                            <%= period.previous_page %>–<%= period.end_page %>
-                                                        </span>
-                                                    </div>
-                                                <% } %>
                                             </div>
-                                            
-                                            <% if (period.assignment_id) { %>
-                                                <div class="collapse border-top" id="collapseProgress_<%= period.id %>" style="background: #f8fafc;">
+                                        </div>
+                                    <% }) %>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Textbook Progress Panel (Full Width, Date-Independent) -->
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card shadow-sm border-0 rounded-4 bg-white overflow-hidden">
+                        <div class="card-header bg-white p-4 border-0 pb-2">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                <h4 class="fw-bold mb-0 text-indigo"><i class="bi bi-journal-bookmark-fill me-2"></i>📚 متابعة وتقدم المناهج والكتب</h4>
+                                <span class="badge bg-indigo bg-opacity-10 text-indigo rounded-pill px-3 py-2 fw-semibold" style="font-size: 0.8rem; color: #4f46e5; background: rgba(79, 70, 229, 0.1);">
+                                    مستقل عن التاريخ والجدول اليومي
+                                </span>
+                            </div>
+                            <p class="text-muted small mt-1 mb-0"><i class="bi bi-info-circle me-1"></i>حدد رقم الصفحة المنجزة حالياً للمقرر، واضغط على الأزرار لحفظ التقدم مباشرة في أي وقت.</p>
+                        </div>
+                        
+                        <div class="card-body p-4 pt-2">
+                            <% if (classBooks.length === 0) { %>
+                                <div class="text-center py-5 border rounded-4 bg-light my-3">
+                                    <i class="bi bi-journal-x text-muted opacity-50" style="font-size: 3rem;"></i>
+                                    <p class="text-muted mt-3 fw-bold">لا توجد كتب أو مناهج مسندة لهذا الصف!</p>
+                                </div>
+                            <% } else { %>
+                                <div class="row g-4 mt-1">
+                                    <% classBooks.forEach(book => { %>
+                                        <div class="col-md-6 col-xl-4">
+                                            <div class="card h-100 border rounded-4 bg-white p-3 hover-scale shadow-xs" style="border: 1px solid #f1f5f9 !important; transition: all 0.2s ease;">
+                                                <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                                    <div>
+                                                        <h5 class="fw-bold text-dark mb-1" style="font-size: 1.1rem;"><%= book.book_title %></h5>
+                                                        <span class="text-muted small"><i class="bi bi-person me-1"></i>أستاذ: <%= book.teacher_name %></span>
+                                                    </div>
+                                                    <span class="badge bg-success-subtle text-success rounded-pill px-2 py-1 fw-bold" style="font-size: 0.72rem;">
+                                                        صفحة <%= book.previous_page %>–<%= book.end_page %>
+                                                    </span>
+                                                </div>
+
+                                                <!-- Page Adjustment Stepper -->
+                                                <div class="d-flex justify-content-between align-items-center gap-2 bg-light rounded-pill p-2 border mb-3 mt-2" style="box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);">
+                                                    <span class="small text-secondary fw-bold text-nowrap ms-2" style="font-size: 0.82rem;">الصفحة المنجزة:</span>
+                                                    <div class="d-flex align-items-center gap-1 bg-white rounded-pill p-0.5 border shadow-sm" style="max-width: 145px; width: 145px;">
+                                                        <button type="button" class="adjust-btn btn-outline-danger bg-danger-subtle text-danger" 
+                                                                onclick="adjustPage(<%= book.assignment_id %>, -1)">-</button>
+                                                        <input type="number" id="input_<%= book.assignment_id %>"
+                                                               class="form-control text-center rounded-pill border-0 text-success fw-bold p-0 bg-transparent"
+                                                               value="<%= book.current_page %>"
+                                                               min="<%= book.previous_page %>"
+                                                               max="<%= book.end_page %>"
+                                                               data-current="<%= book.current_page %>"
+                                                               onchange="updateBookProgress(<%= book.assignment_id %>, this)"
+                                                               style="width: 48px; font-size: 1.05rem; box-shadow: none; pointer-events: none;">
+                                                        <button type="button" class="adjust-btn btn-success text-white bg-success" 
+                                                                onclick="adjustPage(<%= book.assignment_id %>, 1)">+</button>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Last Update and Collapse Trigger -->
+                                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 text-muted" style="font-size: 0.72rem;">
+                                                    <div id="up_label_<%= book.assignment_id %>">
+                                                        <% if (book.lastUpdatedStr) { %>
+                                                            <span><i class="bi bi-clock-history me-1"></i>تحديث: <%= book.lastUpdatedStr %></span>
+                                                        <% } else { %>
+                                                            <span>لا يوجد تحديث سابق</span>
+                                                        <% } %>
+                                                    </div>
+                                                    <button type="button" class="btn p-0 border-0 text-success fw-bold text-decoration-underline" 
+                                                            data-bs-toggle="collapse" data-bs-target="#collapseProgress_<%= book.assignment_id %>" 
+                                                            style="font-size: 0.72rem; cursor: pointer;">
+                                                         <i class="bi bi-chevron-down ms-1"></i>التاريخ والرسم البياني
+                                                    </button>
+                                                </div>
+
+                                                <!-- Collapsible History and Chart -->
+                                                <div class="collapse border-top mt-3 pt-3" id="collapseProgress_<%= book.assignment_id %>" style="background: #f8fafc; margin: -1rem -1rem -1rem -1rem; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;">
                                                     <div class="p-3">
                                                          <div class="row align-items-center text-end g-3">
                                                               <div class="col-md-5">
                                                                    <p class="mb-1 text-muted small"><i class="bi bi-calendar-check me-1"></i>تاريخ آخر تحديث:</p>
-                                                                   <p class="fw-bold text-primary mb-3" style="font-size: 0.95rem;"><%= period.last_progress_date %></p>
+                                                                   <p class="fw-bold text-primary mb-3" style="font-size: 0.85rem;"><%= book.last_progress_date %></p>
                                                                    
                                                                    <p class="mb-1 text-muted small"><i class="bi bi-journal-text me-1"></i>المدى الكلي للمقرر:</p>
-                                                                   <p class="fw-bold text-success mb-0" style="font-size: 0.95rem;">من <%= period.start_page %> إلى <%= period.end_page %></p>
+                                                                   <p class="fw-bold text-success mb-0" style="font-size: 0.85rem;">من <%= book.start_page %> إلى <%= book.end_page %></p>
                                                               </div>
                                                               <div class="col-md-7 text-center">
                                                                    <p class="mb-2 text-muted small fw-bold text-end"><i class="bi bi-graph-up-arrow me-1"></i>رسم بياني للمنهج:</p>
-                                                                   <% if (period.progress_history && period.progress_history.length > 0) { %>
+                                                                   <% if (book.progress_history && book.progress_history.length > 0) { %>
                                                                         <div style="height: 120px; width: 100%;">
-                                                                             <canvas id="miniChart_<%= period.id %>"></canvas>
+                                                                             <canvas id="miniChart_<%= book.assignment_id %>"></canvas>
                                                                         </div>
                                                                    <% } else { %>
                                                                         <div class="text-muted small py-3" style="border: 1px dashed #cbd5e1; border-radius: 8px; background: #fff;">
@@ -507,7 +551,7 @@
                                                          </div>
                                                     </div>
                                                 </div>
-                                            <% } %>
+                                            </div>
                                         </div>
                                     <% }) %>
                                 </div>
@@ -855,7 +899,7 @@
             input.value = val;
             input.dispatchEvent(new Event('change'));
         } else {
-            alert(`تنبيه: لا يمكن تخطي المدى المحدد المسموح به لهذه الحصة (${min} - ${max})`);
+            alert(`تنبيه: لا يمكن تخطي المدى المحدد المسموح به لهذا الكتاب (${min} - ${max})`);
         }
     }
 
@@ -906,19 +950,19 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    <% todayPeriods.forEach(period => { %>
-        <% if (period.assignment_id && period.progress_history && period.progress_history.length > 0) { %>
+    <% classBooks.forEach(book => { %>
+        <% if (book.progress_history && book.progress_history.length > 0) { %>
             try {
-                const ctx_<%= period.id %> = document.getElementById('miniChart_<%= period.id %>').getContext('2d');
-                new Chart(ctx_<%= period.id %>, {
+                const ctx_<%= book.assignment_id %> = document.getElementById('miniChart_<%= book.assignment_id %>').getContext('2d');
+                new Chart(ctx_<%= book.assignment_id %>, {
                     type: 'line',
                     data: {
-                        labels: <%- JSON.stringify(period.progress_history.map(h => h.date)) %>,
+                        labels: <%- JSON.stringify(book.progress_history.map(h => h.date)) %>,
                         datasets: [{
-                            label: '<%= period.book_title %>',
-                            data: <%- JSON.stringify(period.progress_history.map(h => h.page_number)) %>,
-                            borderColor: '#0d9488',
-                            backgroundColor: 'rgba(13, 148, 136, 0.08)',
+                            label: '<%= book.book_title %>',
+                            data: <%- JSON.stringify(book.progress_history.map(h => h.page_number)) %>,
+                            borderColor: '#4f46e5',
+                            backgroundColor: 'rgba(79, 70, 229, 0.08)',
                             tension: 0.25,
                             fill: true,
                             pointRadius: 3,
@@ -947,7 +991,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
             } catch (chartErr) {
-                console.error('Error initializing chart for period <%= period.id %>:', chartErr);
+                console.error('Error initializing chart for book <%= book.assignment_id %>:', chartErr);
             }
         <% } %>
     <% }) %>
