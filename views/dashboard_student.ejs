@@ -13,6 +13,124 @@
                         <a href="/profile/change-password" class="btn btn-outline-primary rounded-pill">تغيير كلمة المرور</a>
                     </div>
 
+                    <!-- Daily Engagement & Live Portal Bar -->
+                    <div class="row g-4 mb-4">
+                        <!-- Attendance Streak & Circular progress Ring -->
+                        <div class="col-lg-6 col-md-12">
+                            <div class="card border-0 rounded-4 shadow-sm h-100 text-white" style="background: linear-gradient(135deg, #1e3a8a, #0f172a);">
+                                <div class="card-body p-4 d-flex align-items-center justify-content-between">
+                                    <div class="text-end">
+                                        <h5 class="fw-bold mb-2">مستوى انضباطك الدراسي</h5>
+                                        <p class="mb-3 opacity-75 small">مواظبتك على الحضور تبني مستقبلك المشرق</p>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="fs-2">🔥</span>
+                                            <div>
+                                                <h4 class="fw-bold mb-0"><%= streak %> <%= locals.lang === 'ur' ? 'مسلسل دن' : 'أيام متتالية' %></h4>
+                                                <small class="opacity-75">سلسلة حضورك المستمر بدون غياب</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="position-relative d-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+                                        <!-- SVG Progress Circle -->
+                                        <svg width="100" height="100" viewBox="0 0 100 100" style="transform: rotate(-90deg);">
+                                            <circle cx="50" cy="50" r="40" stroke="rgba(255,255,255,0.15)" stroke-width="8" fill="transparent" />
+                                            <circle cx="50" cy="50" r="40" stroke="#34d399" stroke-width="8" fill="transparent"
+                                                    stroke-dasharray="251.2"
+                                                    stroke-dashoffset="<%= 251.2 - (251.2 * attendancePercentage) / 100 %>"
+                                                    stroke-linecap="round" />
+                                        </svg>
+                                        <div class="position-absolute fs-5 fw-bold" style="color: #34d399;"><%= attendancePercentage %>%</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Live / Next Class Tracking -->
+                        <div class="col-lg-6 col-md-12">
+                            <div class="card border-0 rounded-4 shadow-sm h-100 bg-white border border-light" style="border: 1px solid rgba(0,0,0,0.06) !important;">
+                                <div class="card-body p-4 d-flex flex-column justify-content-center">
+                                    <% if (activePeriod) { %>
+                                        <div class="d-flex align-items-center gap-3 mb-2">
+                                            <span class="pulse-dot"></span>
+                                            <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill fw-bold">مباشر الآن</span>
+                                        </div>
+                                        <h4 class="fw-bold mb-1 text-dark"><%= activePeriod.subject %></h4>
+                                        <p class="text-muted mb-0 small">
+                                            <i class="bi bi-person me-1"></i> مع أ. <%= activePeriod.teacher_name %> &bull; 
+                                            <i class="bi bi-clock me-1"></i> <%= activePeriod.start_time.substring(0,5) %> - <%= activePeriod.end_time.substring(0,5) %>
+                                        </p>
+                                    <% } else if (nextPeriod) { %>
+                                        <div class="d-flex align-items-center gap-2 mb-2">
+                                            <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill fw-bold">الحصة القادمة</span>
+                                        </div>
+                                        <h4 class="fw-bold mb-1 text-dark"><%= nextPeriod.subject %></h4>
+                                        <div class="d-flex justify-content-between align-items-center mt-2">
+                                            <span class="text-muted small">
+                                                <i class="bi bi-person me-1"></i> أ. <%= nextPeriod.teacher_name %>
+                                            </span>
+                                            <div class="d-flex align-items-center gap-2 bg-light px-3 py-2 rounded-pill">
+                                                <i class="bi bi-hourglass-split text-primary"></i>
+                                                <span class="fw-bold text-primary" id="nextClassCountdown" style="font-family: monospace; font-size: 1.05rem;">--:--</span>
+                                            </div>
+                                        </div>
+                                    <% } else { %>
+                                        <div class="text-center py-3">
+                                            <span class="fs-1">🌟</span>
+                                            <h5 class="fw-bold text-dark mt-2 mb-1">انتهت حصص اليوم!</h5>
+                                            <p class="text-muted mb-0 small">أحسنت صنعاً في طلب العلم اليوم.</p>
+                                        </div>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <style>
+                        .pulse-dot {
+                            width: 10px;
+                            height: 10px;
+                            background-color: #10b981;
+                            border-radius: 50%;
+                            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+                            animation: pulse 1.6s infinite;
+                        }
+                        @keyframes pulse {
+                            0% {
+                                transform: scale(0.95);
+                                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+                            }
+                            70% {
+                                transform: scale(1);
+                                box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+                            }
+                            100% {
+                                transform: scale(0.95);
+                                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+                            }
+                        }
+                    </style>
+
+                    <script>
+                        document.addEventListener("DOMContentLoaded", function() {
+                            let countdownSeconds = <%= nextPeriodCountdownSeconds || 0 %>;
+                            if (countdownSeconds > 0) {
+                                const timerElement = document.getElementById('nextClassCountdown');
+                                const interval = setInterval(() => {
+                                    countdownSeconds--;
+                                    if (countdownSeconds <= 0) {
+                                        clearInterval(interval);
+                                        timerElement.innerText = "00:00";
+                                        setTimeout(() => { location.reload(); }, 1500);
+                                    } else {
+                                        const minutes = Math.floor(countdownSeconds / 60);
+                                        const seconds = countdownSeconds % 60;
+                                        timerElement.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                                    }
+                                }, 1000);
+                            }
+                        });
+                    </script>
+
                     <div class="row g-4 mb-4">
                         <!-- Today's Schedule -->
                         <div class="col-md-6">

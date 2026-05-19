@@ -60,6 +60,73 @@ exports.showStudentDashboard = async (req, res) => {
             [student[0].id, startDate, endDate, limit, offset]
         );
 
+        // Calculate Attendance Stats (For Visual Progress Ring)
+        const [stats] = await db.execute(
+            `SELECT 
+                SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present,
+                SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent,
+                SUM(CASE WHEN status = 'leave' THEN 1 ELSE 0 END) as leave_count,
+                SUM(CASE WHEN status = 'online' THEN 1 ELSE 0 END) as online,
+                COUNT(*) as total
+             FROM attendance_students 
+             WHERE student_id = ?`,
+            [student[0].id]
+        );
+        const presentCount = stats[0] ? (stats[0].present || 0) : 0;
+        const onlineCount = stats[0] ? (stats[0].online || 0) : 0;
+        const totalAttendanceCount = stats[0] ? (stats[0].total || 0) : 0;
+        const attendancePercentage = totalAttendanceCount > 0 ? Math.round(((presentCount + onlineCount) / totalAttendanceCount) * 100) : 100;
+
+        // Calculate Present Streak (Consecutive Present/Online days)
+        const [allAttendance] = await db.execute(
+            'SELECT status FROM attendance_students WHERE student_id = ? ORDER BY date DESC',
+            [student[0].id]
+        );
+        let streak = 0;
+        for (const record of allAttendance) {
+            if (record.status === 'present' || record.status === 'online') {
+                streak++;
+            } else {
+                break;
+            }
+        }
+
+        // Live / Next Class Tracking for Today
+        const [periodsToday] = await db.execute(
+            `SELECT p.*, t.name as teacher_name 
+             FROM periods p 
+             JOIN teachers t ON p.teacher_id = t.id 
+             WHERE p.class_id = ? AND p.day_of_week = ?
+             ORDER BY p.period_number`,
+            [classId, dayName]
+        );
+
+        const now = DateTime.now();
+        let activePeriod = null;
+        let nextPeriod = null;
+        let nextPeriodCountdownSeconds = null;
+
+        for (const p of periodsToday) {
+            if (!p.start_time || !p.end_time) continue;
+            // Parse period start/end time today
+            const startTimeStr = p.start_time.substring(0, 5); 
+            const endTimeStr = p.end_time.substring(0, 5); 
+            const startTime = DateTime.fromFormat(startTimeStr, 'HH:mm');
+            const endTime = DateTime.fromFormat(endTimeStr, 'HH:mm');
+
+            const periodStart = now.set({ hour: startTime.hour, minute: startTime.minute, second: 0, millisecond: 0 });
+            const periodEnd = now.set({ hour: endTime.hour, minute: endTime.minute, second: 0, millisecond: 0 });
+
+            if (now >= periodStart && now <= periodEnd) {
+                activePeriod = p;
+                break;
+            } else if (now < periodStart) {
+                nextPeriod = p;
+                nextPeriodCountdownSeconds = Math.round(periodStart.diff(now, 'seconds').seconds);
+                break;
+            }
+        }
+
         res.render('dashboard_student', { 
             student: student[0], 
             attendance, 
@@ -69,6 +136,11 @@ exports.showStudentDashboard = async (req, res) => {
             endDate,
             currentPage,
             totalPages,
+            attendancePercentage,
+            streak,
+            activePeriod,
+            nextPeriod,
+            nextPeriodCountdownSeconds,
             today: DateTime.now().setLocale('ar').toFormat('cccc, dd MMMM yyyy')
         });
     } catch (err) {
