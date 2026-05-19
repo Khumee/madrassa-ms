@@ -254,11 +254,11 @@ exports.assignBook = async (req, res) => {
 
 exports.editAssignment = async (req, res) => {
     const { id } = req.params;
-    const { startPage, endPage, sessionId, classId } = req.body;
+    const { teacherId, bookId, startPage, endPage, sessionId, classId } = req.body;
     try {
         await db.execute(
-            'UPDATE teacher_books SET start_page = ?, end_page = ?, session_id = ?, class_id = ? WHERE id = ?',
-            [startPage, endPage, sessionId, classId, id]
+            'UPDATE teacher_books SET teacher_id = ?, book_id = ?, start_page = ?, end_page = ?, session_id = ?, class_id = ? WHERE id = ?',
+            [teacherId, bookId, startPage, endPage, sessionId, classId, id]
         );
         res.json({ success: true });
     } catch (err) {

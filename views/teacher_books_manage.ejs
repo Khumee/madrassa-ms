@@ -196,15 +196,31 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 rounded-4 shadow">
             <div class="modal-header bg-primary text-white rounded-top-4">
-                <h5 class="modal-title">تعديل مدى الصفحات</h5>
+                <h5 class="modal-title">تعديل بيانات التوزيع</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4">
                 <form id="editAssignmentForm">
                     <input type="hidden" id="editAssignmentId">
+                    
                     <div class="mb-3">
-                        <label class="form-label fw-bold">الكتاب: <span id="displayBookTitle" class="text-primary"></span></label>
+                        <label class="form-label fw-bold">المعلم</label>
+                        <select id="editTeacherId" class="form-select" required>
+                            <% teachers.forEach(t => { %>
+                                <option value="<%= t.id %>"><%= t.name %></option>
+                            <% }) %>
+                        </select>
                     </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">الكتاب</label>
+                        <select id="editBookId" class="form-select" required>
+                            <% books.forEach(b => { %>
+                                <option value="<%= b.id %>"><%= b.title %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+
                     <div class="row">
                         <div class="col-6 mb-3">
                             <label class="form-label fw-bold">من صفحة</label>
@@ -276,7 +292,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function openEditModal(a) {
     document.getElementById('editAssignmentId').value = a.id;
-    document.getElementById('displayBookTitle').innerText = a.book_title;
+    document.getElementById('editTeacherId').value = a.teacher_id;
+    document.getElementById('editBookId').value = a.book_id;
     document.getElementById('editStartPage').value = a.start_page;
     document.getElementById('editEndPage').value = a.end_page;
     document.getElementById('editClassId').value = a.class_id;
@@ -316,6 +333,8 @@ document.getElementById('updateProgressForm').addEventListener('submit', async (
 document.getElementById('editAssignmentForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const id = document.getElementById('editAssignmentId').value;
+    const teacherId = document.getElementById('editTeacherId').value;
+    const bookId = document.getElementById('editBookId').value;
     const startPage = document.getElementById('editStartPage').value;
     const endPage = document.getElementById('editEndPage').value;
     const classId = document.getElementById('editClassId').value;
@@ -324,7 +343,7 @@ document.getElementById('editAssignmentForm').addEventListener('submit', async (
     const res = await fetch(`/teacher-books/edit/${id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ startPage, endPage, classId, sessionId })
+        body: JSON.stringify({ teacherId, bookId, startPage, endPage, classId, sessionId })
     });
     if ((await res.json()).success) location.reload();
 });
