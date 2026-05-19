@@ -10,10 +10,20 @@ exports.login = async (req, res) => {
     const { username, password } = req.body;
     try {
         const cleanUsername = username ? username.trim() : '';
+        console.log('--- LOGIN ATTEMPT ---');
+        console.log('Submitted Username:', cleanUsername);
+        console.log('Username Code Points:');
+        for (let i = 0; i < cleanUsername.length; i++) {
+            console.log(`Char at ${i}: ${cleanUsername[i]} (U+0${cleanUsername.charCodeAt(i).toString(16).toUpperCase()})`);
+        }
+        
         const [rows] = await db.execute('SELECT * FROM users WHERE username = ?', [cleanUsername]);
+        console.log('User rows found:', rows.length);
+        
         if (rows.length > 0) {
             const user = rows[0];
             const match = await bcrypt.compare(password, user.password);
+            console.log('Bcrypt password match:', match);
             if (match) {
                 const normalizeRole = (role) => {
                     if (!role) return '';
