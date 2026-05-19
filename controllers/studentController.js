@@ -2,6 +2,7 @@ const db = require('../config/db');
 const bcrypt = require('bcryptjs');
 const { DateTime } = require('luxon');
 const { getCRClassId } = require('../middleware/auth');
+const { getDateFilterParams } = require('../utils/dateHelper');
 
 exports.showStudentDashboard = async (req, res) => {
     try {
@@ -34,15 +35,8 @@ exports.showStudentDashboard = async (req, res) => {
         const limit = 10;
         const offset = (currentPage - 1) * limit;
 
-        let startDate = req.query.startDate;
-        let endDate = req.query.endDate;
-
-        if (!startDate || !endDate) {
-            // Default: Sat of last week to Mon of this week
-            const today = DateTime.now();
-            startDate = today.startOf('week').minus({ days: 2 }).toISODate();
-            endDate = today.startOf('week').toISODate();
-        }
+        const dateParams = getDateFilterParams(req.query);
+        const { startDate, endDate } = dateParams;
 
         // Fetch total matching attendance records count for pagination calculations
         const [countRows] = await db.execute(
@@ -132,8 +126,7 @@ exports.showStudentDashboard = async (req, res) => {
             attendance, 
             periods, 
             books,
-            startDate,
-            endDate,
+            ...dateParams,
             currentPage,
             totalPages,
             attendancePercentage,
