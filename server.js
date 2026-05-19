@@ -75,18 +75,28 @@ const reportRoutes = require('./routes/reportRoutes');
 // TEMPORARY LOGS ROUTE
 app.get('/logs-debug', (req, res) => {
     try {
-        const execSync = require('child_process').execSync;
+        const fs = require('fs');
         let logs = '';
-        try {
-            logs += "=== PM2 STATUS ===\n" + execSync('pm2 status').toString() + "\n";
-        } catch (e) {
-            logs += "PM2 Status Error: " + e.message + "\n";
+        
+        const errPath = '/root/.pm2/logs/kui-ms-error.log';
+        const outPath = '/root/.pm2/logs/kui-ms-out.log';
+        
+        if (fs.existsSync(errPath)) {
+            logs += "=== FILE: PM2 ERROR LOGS ===\n";
+            const errContent = fs.readFileSync(errPath, 'utf8');
+            logs += errContent.slice(-5000) + "\n"; // last 5000 chars
+        } else {
+            logs += `ERROR LOG NOT FOUND AT ${errPath}\n`;
         }
-        try {
-            logs += "=== PM2 ALL LOGS ===\n" + execSync('pm2 logs "kui-ms" --lines 100 --raw --nostream').toString() + "\n";
-        } catch (e) {
-            logs += "PM2 Logs Error: " + e.message + "\n";
+        
+        if (fs.existsSync(outPath)) {
+            logs += "=== FILE: PM2 OUT LOGS ===\n";
+            const outContent = fs.readFileSync(outPath, 'utf8');
+            logs += outContent.slice(-5000) + "\n"; // last 5000 chars
+        } else {
+            logs += `OUT LOG NOT FOUND AT ${outPath}\n`;
         }
+        
         res.setHeader('Content-Type', 'text/plain');
         res.send(logs);
     } catch (err) {
