@@ -284,7 +284,111 @@ exports.showCRDashboard = async (req, res) => {
             [selectedDate]
         );
 
+        // --- Areeb Personal Student Queries ---
+        const [personalBooks] = await db.execute(`
+            SELECT tb.*, b.title as book_title, t.name as teacher_name
+            FROM teacher_books tb
+            JOIN books b ON tb.book_id = b.id
+            JOIN teachers t ON tb.teacher_id = t.id
+            JOIN sessions s ON tb.session_id = s.id
+            WHERE tb.class_id = ? AND s.is_active = TRUE
+        `, [classId]);
+
+        const dateParams = getDateFilterParams(req.query);
+        const { startDate, endDate } = dateParams;
+
+        for (let b of personalBooks) {
+            try {
+                // Fetch progress just before filtered startDate
+                const [beforeRange] = await db.execute(
+                    'SELECT page_number FROM book_progress WHERE assignment_id = ? AND date < ? ORDER BY date DESC, id DESC LIMIT 1',
+                    [b.id, startDate]
+                );
+                const startPageRange = beforeRange.length > 0 ? beforeRange[0].page_number : b.start_page;
+
+                // Fetch progress up to filtered endDate
+                const [endOfRange] = await db.execute(
+                    'SELECT page_number FROM book_progress WHERE assignment_id = ? AND date <= ? ORDER BY date DESC, id DESC LIMIT 1',
+                    [b.id, endDate]
+                );
+                const endPageRange = endOfRange.length > 0 ? endOfRange[0].page_number : b.start_page;
+
+                b.last_week_started = startPageRange;
+                b.last_week_ended = endPageRange;
+                b.last_week_completed = Math.max(0, endPageRange - startPageRange);
+
+                // Fetch progress history for this book assignment within selected date range
+                const [progHistory] = await db.execute(`
+                    SELECT bp.id, bp.date, bp.page_number, u.username as updater_name, u.role as updater_role
+                    FROM book_progress bp
+                    LEFT JOIN users u ON bp.marked_by = u.id
+                    WHERE bp.assignment_id = ? AND bp.date >= ? AND bp.date <= ?
+                    ORDER BY bp.date ASC, bp.id ASC
+                `, [b.id, startDate, endDate]);
+
+                let lastPage = startPageRange;
+                b.detailed_history = [];
+
+                progHistory.forEach(ph => {
+                    b.detailed_history.push({
+                        date: DateTime.fromJSDate(new Date(ph.date)).setLocale('ar').toFormat('dd MMMM yyyy'),
+                        startedAt: lastPage,
+                        endedAt: ph.page_number,
+                        pagesCompleted: ph.page_number - lastPage,
+                        updaterName: ph.updater_name || 'غير معروف',
+                        updaterRole: ph.updater_role || 'مستخدم'
+                    });
+                    lastPage = ph.page_number;
+                });
+                b.detailed_history.reverse();
+            } catch (err) {
+                console.error('Error fetching student book logs for CR:', err);
+                b.detailed_history = [];
+                b.last_week_completed = 0;
+            }
+        }
+
+        // Calculate Attendance Stats for Areeb himself
+        const [personalStats] = await db.execute(
+            `SELECT 
+                SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present,
+                SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent,
+                SUM(CASE WHEN status = 'leave' THEN 1 ELSE 0 END) as leave_count,
+                SUM(CASE WHEN status = 'online' THEN 1 ELSE 0 END) as online,
+                COUNT(*) as total
+             FROM attendance_students 
+             WHERE student_id = ?`,
+            [student[0].id]
+        );
+        const presentCount = personalStats[0] ? Number(personalStats[0].present || 0) : 0;
+        const onlineCount = personalStats[0] ? Number(personalStats[0].online || 0) : 0;
+        const totalAttendanceCount = personalStats[0] ? Number(personalStats[0].total || 0) : 0;
+        const attendancePercentage = totalAttendanceCount > 0 ? Math.round(((presentCount + onlineCount) / totalAttendanceCount) * 100) : 100;
+
+        // Calculate present streak
+        const [personalAllAttendance] = await db.execute(
+            'SELECT status FROM attendance_students WHERE student_id = ? ORDER BY date DESC',
+            [student[0].id]
+        );
+        let streak = 0;
+        for (const record of personalAllAttendance) {
+            if (record.status === 'present' || record.status === 'online') {
+                streak++;
+            } else {
+                break;
+            }
+        }
+
+        // Paginated attendance list
+        const [personalAttendanceList] = await db.execute(
+            `SELECT * FROM attendance_students 
+             WHERE student_id = ? AND date >= ? AND date <= ? 
+             ORDER BY date DESC LIMIT 10`,
+            [student[0].id, startDate, endDate]
+        );
+
         res.render('dashboard_cr', {
+            // CR management data
             students,
             classInfo: classInfo[0],
             todayPeriods,
@@ -292,7 +396,16 @@ exports.showCRDashboard = async (req, res) => {
             date: selectedDate,
             todayDate: selectedDate,
             dayName,
-            classId
+            classId,
+
+            // CR personal student data
+            personalStudent: student[0],
+            personalBooks,
+            personalAttendanceList,
+            attendancePercentage,
+            streak,
+            ...dateParams,
+            today: DateTime.now().setLocale('ar').toFormat('cccc, dd MMMM yyyy')
         });
     } catch (err) {
         console.error(err);

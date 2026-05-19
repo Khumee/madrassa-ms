@@ -28,6 +28,26 @@
         }
     }
 
+    /* Tab Controller Styling */
+    .cr-nav-pills {
+        background-color: #f1f5f9;
+        border-radius: 50px;
+        padding: 6px;
+    }
+    .cr-nav-pills .nav-link {
+        border-radius: 50px;
+        color: #64748b;
+        font-weight: bold;
+        transition: all 0.2s ease;
+        padding: 10px 24px;
+        border: none !important;
+    }
+    .cr-nav-pills .nav-link.active {
+        background-color: #1e3a8a !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 10px rgba(30, 58, 138, 0.2);
+    }
+
     /* Mobile Finger-Friendly Tactile Attendance Buttons */
     .status-btn {
         width: 46px;
@@ -105,6 +125,25 @@
         background-color: #ecfeff;
     }
 
+    /* Greyed Out Lock State for Attendance Card */
+    .attendance-submitted {
+        opacity: 0.9;
+    }
+    .attendance-submitted .status-btn:not(.active) {
+        opacity: 0.15 !important;
+        background-color: #f1f5f9 !important;
+        border-color: #cbd5e1 !important;
+        color: #94a3b8 !important;
+        cursor: not-allowed;
+    }
+    .attendance-submitted .status-btn.active {
+        opacity: 0.8 !important;
+        cursor: not-allowed;
+    }
+    .attendance-submitted .hover-scale:hover {
+        transform: none !important;
+    }
+
     /* Chronological Daily Timeline */
     .timeline-container {
         position: relative;
@@ -122,7 +161,7 @@
         border-color: #cbd5e1 !important;
     }
     
-    /* Timeline Connective Line (for Laptop Screen) */
+    /* Timeline Connective Line */
     @media (min-width: 992px) {
         .timeline-container::before {
             content: '';
@@ -220,10 +259,10 @@
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 position-relative" style="z-index: 5;">
                     <div>
                         <div class="badge bg-white-50 text-white rounded-pill px-3 py-1 mb-2 fw-semibold" style="font-size: 0.8rem; background: rgba(255,255,255,0.15);">
-                            <i class="bi bi-shield-check me-1"></i> لوحة ممثل الصف (عريب)
+                            <i class="bi bi-person-badge-fill me-1"></i> لوحة تحكم عريب المزدوجة
                         </div>
                         <h2 class="fw-bold mb-1">
-                            <%= __('Class_Rep_Dashboard') %>: <%= __(classInfo.name_ar) %>
+                            <%= classInfo.name_ar %> (مسؤول + طالب)
                         </h2>
                         <span class="opacity-90 small"><i class="bi bi-calendar-event me-1"></i>
                             <%= new Date(todayDate + 'T00:00:00').toLocaleDateString('ar-EG', { weekday: 'long',
@@ -232,7 +271,7 @@
                     </div>
                     <div class="d-flex gap-2">
                         <a href="/profile/change-password" class="btn btn-white text-dark rounded-pill px-4 fw-bold shadow-sm bg-white border-0 hover-scale">
-                            <i class="bi bi-key me-2 text-warning"></i>
+                            <i class="bi bi-key text-warning me-1"></i>
                             <%= __('Change_Password') %>
                         </a>
                     </div>
@@ -241,220 +280,406 @@
         </div>
     </div>
 
-    <!-- Quick Dynamic Date Filter -->
+    <!-- Dual Role Premium Tab Controller -->
     <div class="row mb-4">
         <div class="col-md-12">
-            <div class="card shadow-sm border-0 rounded-4 p-3 bg-white">
-                <form method="GET" action="/dashboard/cr" id="dateForm" class="d-flex align-items-center gap-3 flex-wrap">
-                    <label class="fw-bold text-secondary mb-0 text-nowrap">
-                        <i class="bi bi-calendar-check me-1 text-primary"></i> الانتقال إلى تاريخ محدد:
-                    </label>
-                    <input type="date"
-                        name="date"
-                        id="crDatePicker"
-                        class="form-control rounded-pill border-primary fw-bold text-primary cr-date-picker"
-                        value="<%= todayDate %>"
-                        onchange="document.getElementById('dateForm').submit()">
-                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold hover-scale">
-                        <i class="bi bi-arrow-clockwise me-1"></i> تحديث
+            <ul class="nav nav-pills cr-nav-pills d-flex align-items-stretch" id="crTab" role="tablist" style="border: none;">
+                <li class="nav-item flex-fill text-center" role="presentation">
+                    <button class="nav-link w-100 active fs-5" id="cr-manage-tab" data-bs-toggle="pill" data-bs-target="#cr-manage-pane" type="button" role="tab" aria-controls="cr-manage-pane" aria-selected="true">
+                        <i class="bi bi-clipboard-check me-2"></i> 📋 كشف وإدارة الصف
                     </button>
-                    <a href="/dashboard/cr" class="btn btn-outline-secondary rounded-pill px-3 hover-scale">
-                        <i class="bi bi-calendar-date me-1"></i> اليوم الحالي
-                    </a>
-                </form>
-            </div>
+                </li>
+                <li class="nav-item flex-fill text-center" role="presentation">
+                    <button class="nav-link w-100 fs-5" id="cr-student-tab" data-bs-toggle="pill" data-bs-target="#cr-student-pane" type="button" role="tab" aria-controls="cr-student-pane" aria-selected="false">
+                        <i class="bi bi-mortarboard-fill me-2"></i> 🎓 مستواي الدراسي كطالب
+                    </button>
+                </li>
+            </ul>
         </div>
     </div>
 
-    <!-- 2-Column Core CR Operations Grid -->
-    <div class="row">
-        <!-- Student Attendance Section (Left) - Optimized for Mobile Thumb Taps -->
-        <div class="col-lg-6 mb-4">
-            <div class="card shadow-sm border-0 rounded-4 h-100 bg-white">
-                <div class="card-header bg-white p-4 border-0 pb-2">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h4 class="fw-bold mb-0 text-primary"><i class="bi bi-people-fill me-2"></i>حضور طلاب الصف</h4>
-                        <span class="badge bg-primary-subtle text-primary rounded-pill px-3"><%= students.length %> طلاب</span>
+    <!-- Tab Pane Workspace -->
+    <div class="tab-content" id="crTabContent">
+        
+        <!-- Tab 1: Class Rep Management Dashboard -->
+        <div class="tab-pane fade show active" id="cr-manage-pane" role="tabpanel" aria-labelledby="cr-manage-tab">
+            <!-- Dynamic Date Picker -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card shadow-sm border-0 rounded-4 p-3 bg-white">
+                        <form method="GET" action="/dashboard/cr" id="dateForm" class="d-flex align-items-center gap-3 flex-wrap">
+                            <label class="fw-bold text-secondary mb-0 text-nowrap">
+                                <i class="bi bi-calendar-check me-1 text-primary"></i> تحضير الطلاب وتوقيع الحصص ليوم:
+                            </label>
+                            <input type="date"
+                                name="date"
+                                id="crDatePicker"
+                                class="form-control rounded-pill border-primary fw-bold text-primary cr-date-picker"
+                                value="<%= todayDate %>"
+                                onchange="document.getElementById('dateForm').submit()">
+                            <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold hover-scale">
+                                <i class="bi bi-arrow-clockwise me-1"></i> تحديث
+                            </button>
+                            <a href="/dashboard/cr" class="btn btn-outline-secondary rounded-pill px-3 hover-scale">
+                                <i class="bi bi-calendar-date me-1"></i> اليوم الحالي
+                            </a>
+                        </form>
                     </div>
-                    <p class="text-muted small mt-1 mb-0"><i class="bi bi-info-circle me-1"></i>انقر مباشرة على رمز الحالة للتسجيل السريع والتلقائي دون أي قلق.</p>
                 </div>
-                
-                <div class="card-body p-4 pt-2">
-                    <!-- Fully Responsive List Card Layout for Mobile Thumb Targets -->
-                    <div class="d-flex flex-column gap-3">
-                        <% students.forEach(student=> { %>
-                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 p-3 rounded-4 border bg-light-subtle hover-scale" 
-                                 data-student-id="<%= student.id %>" 
-                                 style="border: 1px solid #f1f5f9 !important; background-color: #fafbfc;">
-                                <div class="fw-bold text-dark" style="font-size: 1.05rem; min-width: 140px;">
-                                    <%= student.name %>
-                                </div>
-                                <div class="d-flex gap-2 status-btn-group <%= student.status ? 'btn-row-active' : '' %>">
-                                    <button type="button"
-                                        class="status-btn"
-                                        data-status="present"
-                                        onclick="markStudentStatus(<%= student.id %>, 'present', this)"
-                                        title="حاضر">
-                                        <i class="bi bi-check-lg"></i>
-                                    </button>
-                                    <button type="button"
-                                        class="status-btn"
-                                        data-status="absent"
-                                        onclick="markStudentStatus(<%= student.id %>, 'absent', this)"
-                                        title="غائب">
-                                        <i class="bi bi-x-lg"></i>
-                                    </button>
-                                    <button type="button"
-                                        class="status-btn"
-                                        data-status="leave"
-                                        onclick="markStudentStatus(<%= student.id %>, 'leave', this)"
-                                        title="إجازة">
-                                        <i class="bi bi-door-open"></i>
-                                    </button>
-                                    <button type="button"
-                                        class="status-btn"
-                                        data-status="online"
-                                        onclick="markStudentStatus(<%= student.id %>, 'online', this)"
-                                        title="أونلاين">
-                                        <i class="bi bi-wifi"></i>
-                                    </button>
+            </div>
+
+            <!-- Two Column CR Operations Layout -->
+            <div class="row">
+                <!-- Student Attendance (Left) -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow-sm border-0 rounded-4 h-100 bg-white overflow-hidden">
+                        <div class="card-header bg-white p-4 border-0 pb-2">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                <h4 class="fw-bold mb-0 text-primary"><i class="bi bi-people-fill me-2"></i>حضور طلاب الصف</h4>
+                                <div id="attendanceStatusBadge">
+                                    <!-- Dynamic lock badge loaded in js -->
                                 </div>
                             </div>
-                        <% }) %>
+                            <p class="text-muted small mt-1 mb-0"><i class="bi bi-info-circle me-1"></i>حدد حالة حضور الطلاب كاملة ثم انقر على حفظ في الأسفل لتأكيد الكشف نهائياً.</p>
+                        </div>
+                        
+                        <div class="card-body p-4 pt-2">
+                            <!-- Student List Container -->
+                            <div class="d-flex flex-column gap-3" id="studentAttendanceList">
+                                <% students.forEach(student=> { %>
+                                    <div class="student-card d-flex justify-content-between align-items-center flex-wrap gap-3 p-3 rounded-4 border hover-scale" 
+                                         data-student-id="<%= student.id %>" 
+                                         style="border: 1px solid #f1f5f9 !important; background-color: #fafbfc; transition: all 0.2s ease;">
+                                        <div class="fw-bold text-dark" style="font-size: 1.05rem; min-width: 140px;">
+                                            <%= student.name %>
+                                        </div>
+                                        <div class="d-flex gap-2 status-btn-group">
+                                            <button type="button"
+                                                class="status-btn"
+                                                data-status="present"
+                                                onclick="markLocalStatus(<%= student.id %>, 'present', this)"
+                                                title="حاضر">
+                                                <i class="bi bi-check-lg"></i>
+                                            </button>
+                                            <button type="button"
+                                                class="status-btn"
+                                                data-status="absent"
+                                                onclick="markLocalStatus(<%= student.id %>, 'absent', this)"
+                                                title="غائب">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                            <button type="button"
+                                                class="status-btn"
+                                                data-status="leave"
+                                                onclick="markLocalStatus(<%= student.id %>, 'leave', this)"
+                                                title="إجازة">
+                                                <i class="bi bi-door-open"></i>
+                                            </button>
+                                            <button type="button"
+                                                class="status-btn"
+                                                data-status="online"
+                                                onclick="markLocalStatus(<%= student.id %>, 'online', this)"
+                                                title="أونلاين">
+                                                <i class="bi bi-wifi"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        </div>
+
+                        <!-- Footer Actions Lock/Save Panel -->
+                        <div class="card-footer bg-light p-4 border-0 d-flex justify-content-center">
+                            <button type="button" id="submitAttendanceBtn" class="btn btn-success btn-lg rounded-pill px-5 fw-bold shadow-sm hover-scale w-100" onclick="submitAllAttendance()">
+                                <i class="bi bi-cloud-arrow-up-fill me-2"></i> حفظ وإرسال كشف حضور الطلاب
+                            </button>
+                            <button type="button" id="editAttendanceBtn" class="btn btn-outline-primary btn-lg rounded-pill px-5 fw-bold hover-scale w-100 d-none" onclick="enableAttendanceEditing()">
+                                <i class="bi bi-pencil-square me-2"></i> تعديل كشف حضور الطلاب
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Teacher Timeline & Book Progress (Right) -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow-sm border-0 rounded-4 h-100 bg-white">
+                        <div class="card-header bg-white p-4 border-0 pb-2">
+                            <h4 class="fw-bold mb-0 text-success"><i class="bi bi-journal-bookmark-fill me-2"></i>حصص المعلمين والتقدم</h4>
+                            <p class="text-muted small mt-1 mb-0"><i class="bi bi-info-circle me-1"></i>فعّل حضور الأستاذ، ثم حدد رقم الصفحة المنجزة لحفظ تقدم المنهج بلمسة واحدة.</p>
+                        </div>
+                        <div class="card-body p-4 pt-2">
+                            <% if (todayPeriods.length === 0) { %>
+                                <div class="text-center py-5 border rounded-4 bg-light my-3">
+                                    <i class="bi bi-calendar-x text-muted opacity-50" style="font-size: 3rem;"></i>
+                                    <p class="text-muted mt-3 fw-bold">لا توجد حصص مجدولة لهذا اليوم!</p>
+                                </div>
+                            <% } else { %>
+                                <div class="timeline-container d-flex flex-column gap-4 mt-3">
+                                    <% todayPeriods.forEach(period => {
+                                        const ta = teacherAttendance.find(a => a.teacher_id === period.teacher_id);
+                                        const isPresent = ta && ta.classes_taken > 0;
+                                        %>
+                                        <div class="timeline-card border rounded-4 bg-white shadow-xs overflow-hidden <%= isPresent ? 'timeline-card-active' : '' %>" id="tcard_<%= period.id %>">
+                                            <div class="timeline-badge-node d-none d-lg-flex">
+                                                <%= period.period_number %>
+                                            </div>
+
+                                            <div class="p-3 d-flex justify-content-between align-items-center flex-wrap gap-3 teacher-period-card" 
+                                                 data-teacher-id="<%= period.teacher_id %>"
+                                                 data-assignment-id="<%= period.assignment_id %>">
+                                                 
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <div class="form-check form-switch ps-0">
+                                                        <input class="form-check-input ms-0 me-2" type="checkbox" role="switch"
+                                                               id="switch_<%= period.id %>" <%= isPresent ? 'checked' : '' %>
+                                                               onchange="toggleTeacherAttendance(<%= period.teacher_id %>, this, <%= period.id %>)">
+                                                    </div>
+                                                    <div>
+                                                        <label class="form-check-label fw-bold text-dark mb-0 d-flex align-items-center flex-wrap gap-1" for="switch_<%= period.id %>" style="cursor: pointer; font-size: 1.05rem;">
+                                                            <span>الحصة <%= period.period_number %>:</span>
+                                                            <span class="text-primary fw-bold"><%= period.teacher_name %></span>
+                                                            <% if (period.book_title) { %>
+                                                                <span class="text-muted" style="font-size: 0.9rem;">(<%= period.book_title %>)</span>
+                                                            <% } %>
+                                                        </label>
+                                                        
+                                                        <div class="last-update-label mt-1 text-muted d-flex align-items-center gap-2" id="up_label_<%= period.assignment_id %>" style="font-size: 0.72rem;">
+                                                            <% if (period.lastUpdatedStr) { %>
+                                                                <span><i class="bi bi-clock-history me-1"></i>تحديث: <%= period.lastUpdatedStr %></span>
+                                                            <% } else { %>
+                                                                <span class="text-muted small">لا يوجد تحديث للتقدم</span>
+                                                            <% } %>
+                                                            <% if (period.assignment_id) { %>
+                                                                <button type="button" class="btn p-0 border-0 text-success fw-bold text-decoration-underline" 
+                                                                        data-bs-toggle="collapse" data-bs-target="#collapseProgress_<%= period.id %>" 
+                                                                        style="font-size: 0.72rem; cursor: pointer;">
+                                                                     <i class="bi bi-chevron-down ms-1"></i>التاريخ والرسم البياني
+                                                                </button>
+                                                            <% } %>
+                                                        </div>
+                                                    </div>
+                                                </div>
+         
+                                                <% if (period.assignment_id) { %>
+                                                    <div class="d-flex align-items-center gap-2 bg-light rounded-pill p-1 pe-3 border" style="box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);">
+                                                        <span class="small text-secondary fw-bold text-nowrap d-none d-sm-inline" style="font-size: 0.78rem;">صفحة:</span>
+                                                        <div class="d-flex align-items-center gap-1 bg-white rounded-pill p-0.5 border shadow-sm" style="max-width: 145px;">
+                                                            <button type="button" class="adjust-btn btn-outline-danger bg-danger-subtle text-danger" 
+                                                                    onclick="adjustPage(<%= period.id %>, -1)">-</button>
+                                                            <input type="number" id="input_<%= period.id %>"
+                                                                   class="form-control text-center rounded-pill border-0 text-success fw-bold p-0 bg-transparent"
+                                                                   value="<%= period.current_page %>"
+                                                                   min="<%= period.previous_page %>"
+                                                                   max="<%= period.end_page %>"
+                                                                   data-current="<%= period.current_page %>"
+                                                                   onchange="updateBookProgress(<%= period.assignment_id %>, this)"
+                                                                   style="width: 48px; font-size: 1.05rem; box-shadow: none; pointer-events: none;">
+                                                            <button type="button" class="adjust-btn btn-success text-white bg-success" 
+                                                                    onclick="adjustPage(<%= period.id %>, 1)">+</button>
+                                                        </div>
+                                                        <span class="badge bg-success-subtle text-success rounded-pill d-block text-center ms-1 me-2" style="font-size: 0.65rem; white-space: nowrap;">
+                                                            <%= period.previous_page %>–<%= period.end_page %>
+                                                        </span>
+                                                    </div>
+                                                <% } %>
+                                            </div>
+                                            
+                                            <% if (period.assignment_id) { %>
+                                                <div class="collapse border-top" id="collapseProgress_<%= period.id %>" style="background: #f8fafc;">
+                                                    <div class="p-3">
+                                                         <div class="row align-items-center text-end g-3">
+                                                              <div class="col-md-5">
+                                                                   <p class="mb-1 text-muted small"><i class="bi bi-calendar-check me-1"></i>تاريخ آخر تحديث:</p>
+                                                                   <p class="fw-bold text-primary mb-3" style="font-size: 0.95rem;"><%= period.last_progress_date %></p>
+                                                                   
+                                                                   <p class="mb-1 text-muted small"><i class="bi bi-journal-text me-1"></i>المدى الكلي للمقرر:</p>
+                                                                   <p class="fw-bold text-success mb-0" style="font-size: 0.95rem;">من <%= period.start_page %> إلى <%= period.end_page %></p>
+                                                              </div>
+                                                              <div class="col-md-7 text-center">
+                                                                   <p class="mb-2 text-muted small fw-bold text-end"><i class="bi bi-graph-up-arrow me-1"></i>رسم بياني للمنهج:</p>
+                                                                   <% if (period.progress_history && period.progress_history.length > 0) { %>
+                                                                        <div style="height: 120px; width: 100%;">
+                                                                             <canvas id="miniChart_<%= period.id %>"></canvas>
+                                                                        </div>
+                                                                   <% } else { %>
+                                                                        <div class="text-muted small py-3" style="border: 1px dashed #cbd5e1; border-radius: 8px; background: #fff;">
+                                                                             لا توجد بيانات تاريخية رسم بياني
+                                                                        </div>
+                                                                   <% } %>
+                                                              </div>
+                                                         </div>
+                                                    </div>
+                                                </div>
+                                            <% } %>
+                                        </div>
+                                    <% }) %>
+                                </div>
+                            <% } %>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Teacher Lessons & Book Progress Timeline Section (Right) - Finger Friendly with Plus/Minus Tappers -->
-        <div class="col-lg-6 mb-4">
-            <div class="card shadow-sm border-0 rounded-4 h-100 bg-white">
-                <div class="card-header bg-white p-4 border-0 pb-2">
-                    <h4 class="fw-bold mb-0 text-success"><i class="bi bi-journal-bookmark-fill me-2"></i>حصص المعلمين والتقدم</h4>
-                    <p class="text-muted small mt-1 mb-0"><i class="bi bi-info-circle me-1"></i>انقر على زر التشغيل لتأكيد حضور المعلم، واستخدم <strong class="text-success">+</strong> أو <strong class="text-danger">-</strong> لتحديث المنهج بلمسة واحدة.</p>
-                </div>
-                <div class="card-body p-4 pt-2">
-                    <% if (todayPeriods.length === 0) { %>
-                        <div class="text-center py-5 border rounded-4 bg-light my-3">
-                            <i class="bi bi-calendar-x text-muted opacity-50" style="font-size: 3rem;"></i>
-                            <p class="text-muted mt-3 fw-bold">لا توجد حصص مجدولة لهذا اليوم!</p>
+        <!-- Tab 2: Areeb Personal Student Profile Progress Dashboard -->
+        <div class="tab-pane fade" id="cr-student-pane" role="tabpanel" aria-labelledby="cr-student-tab">
+            <div class="row g-4">
+                
+                <!-- Student Left Column: My Stats & Personal Attendance Records -->
+                <div class="col-md-6 d-flex flex-column gap-4">
+                    <!-- Attendance Analytics Metric Ring Card -->
+                    <div class="card shadow-sm border-0 rounded-4 bg-white">
+                        <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+                            <div>
+                                <h5 class="fw-bold text-secondary mb-1">نسبة حضورك الكلية</h5>
+                                <h2 class="display-5 fw-bold text-primary mb-0"><%= attendancePercentage %>%</h2>
+                                <p class="text-muted small mt-2 mb-0">
+                                    <i class="bi bi-lightning-fill text-warning me-1"></i> أطول سلسلة حضور متتالية: <strong class="text-dark"><%= streak %> أيام</strong>
+                                </p>
+                            </div>
+                            <!-- Styled SVG Radial Progress Ring -->
+                            <div class="position-relative d-flex align-items-center justify-content-center" style="width: 90px; height: 90px;">
+                                <svg width="90" height="90" viewBox="0 0 36 36" class="circular-chart">
+                                    <path class="circle-bg" stroke="#f1f5f9" stroke-width="3" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                    <path class="circle" stroke="<%= attendancePercentage >= 90 ? '#10b981' : attendancePercentage >= 75 ? '#3b82f6' : '#f59e0b' %>" stroke-width="3" stroke-dasharray="<%= attendancePercentage %>, 100" fill="none" stroke-linecap="round" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831"/>
+                                </svg>
+                                <span class="position-absolute fw-bold text-dark" style="font-size: 0.95rem;"><%= attendancePercentage %>%</span>
+                            </div>
                         </div>
-                    <% } else { %>
-                        <div class="timeline-container d-flex flex-column gap-4 mt-3">
-                            <% todayPeriods.forEach(period => {
-                                const ta = teacherAttendance.find(a => a.teacher_id === period.teacher_id);
-                                const isPresent = ta && ta.classes_taken > 0;
-                                %>
-                                <div class="timeline-card border rounded-4 bg-white shadow-xs overflow-hidden <%= isPresent ? 'timeline-card-active' : '' %>" id="tcard_<%= period.id %>">
-                                    
-                                    <!-- Laptop Screen Connector Badge Node -->
-                                    <div class="timeline-badge-node d-none d-lg-flex">
-                                        <%= period.period_number %>
-                                    </div>
+                    </div>
 
-                                    <div class="p-3 d-flex justify-content-between align-items-center flex-wrap gap-3 teacher-period-card" 
-                                         data-teacher-id="<%= period.teacher_id %>"
-                                         data-assignment-id="<%= period.assignment_id %>">
-                                         
-                                        <div class="d-flex align-items-center gap-3">
-                                            <!-- Modern Chronological Checkbox Switch -->
-                                            <div class="form-check form-switch ps-0">
-                                                <input class="form-check-input ms-0 me-2" type="checkbox" role="switch"
-                                                       id="switch_<%= period.id %>" <%= isPresent ? 'checked' : '' %>
-                                                       onchange="toggleTeacherAttendance(<%= period.teacher_id %>, this, <%= period.id %>)">
-                                            </div>
-                                            <div>
-                                                <label class="form-check-label fw-bold text-dark mb-0 d-flex align-items-center flex-wrap gap-1" for="switch_<%= period.id %>" style="cursor: pointer; font-size: 1.05rem;">
-                                                    <span>الحصة <%= period.period_number %>:</span>
-                                                    <span class="text-primary fw-bold"><%= period.teacher_name %></span>
-                                                    <% if (period.book_title) { %>
-                                                        <span class="text-muted" style="font-size: 0.9rem;">(<%= period.book_title %>)</span>
-                                                    <% } %>
-                                                    
-                                                    <% if (!period.assignment_id) { %>
-                                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill" style="font-size: 0.65rem; font-weight: normal;">
-                                                            <i class="bi bi-exclamation-triangle-fill me-1"></i>لم يتم ربط كتاب
+                    <!-- Paginated Attendance Logs List Card -->
+                    <div class="card shadow-sm border-0 rounded-4 bg-white">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-clock-history me-2 text-primary"></i>سجل حضورك كطالب</h5>
+                                <button class="btn btn-outline-primary rounded-pill btn-sm px-3 fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#personalFilterCollapse" aria-expanded="false" aria-controls="personalFilterCollapse">
+                                    <i class="bi bi-funnel me-1"></i> تصفية التاريخ
+                                </button>
+                            </div>
+
+                            <!-- Date Filter Panel -->
+                            <div class="collapse mb-3" id="personalFilterCollapse">
+                                <%- include('partials/date_filter') %>
+                            </div>
+
+                            <% if (personalAttendanceList.length > 0) { %>
+                                <div class="table-responsive rounded-4 overflow-hidden border">
+                                    <table class="table table-hover align-middle mb-0 text-end">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th class="px-4 py-3 text-secondary border-0">التاريخ</th>
+                                                <th class="px-4 py-3 text-secondary border-0 text-center">الحالة</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% personalAttendanceList.forEach(row => { %>
+                                                <tr>
+                                                    <td class="px-4 py-3 fw-bold text-dark border-0" style="font-size: 0.88rem;">
+                                                        <%= row.date instanceof Date ? row.date.toISOString().split('T')[0] : String(row.date).split('T')[0] %>
+                                                    </td>
+                                                    <td class="px-4 py-3 text-center border-0">
+                                                        <span class="badge rounded-pill px-3 py-1.5 bg-<%= 
+                                                            row.status === 'present' ? 'success' : 
+                                                            row.status === 'absent' ? 'danger' : 
+                                                            row.status === 'leave' ? 'warning' : 'info' 
+                                                        %>" style="font-size: 0.78rem;">
+                                                            <%= row.status === 'present' ? 'حاضر' : 
+                                                                row.status === 'absent' ? 'غائب' : 
+                                                                row.status === 'leave' ? 'إجازة' : 'أونلاين' %>
                                                         </span>
-                                                    <% } %>
-                                                </label>
-                                                
-                                                <div class="last-update-label mt-1 text-muted d-flex align-items-center gap-2" id="up_label_<%= period.assignment_id %>" style="font-size: 0.72rem;">
-                                                    <% if (period.lastUpdatedStr) { %>
-                                                        <span><i class="bi bi-clock-history me-1"></i>تحديث: <%= period.lastUpdatedStr %></span>
-                                                    <% } else { %>
-                                                        <span class="text-muted small">لا يوجد تحديث للتقدم</span>
-                                                    <% } %>
-                                                    <% if (period.assignment_id) { %>
-                                                        <button type="button" class="btn p-0 border-0 text-success fw-bold text-decoration-underline" 
-                                                                data-bs-toggle="collapse" data-bs-target="#collapseProgress_<%= period.id %>" 
-                                                                style="font-size: 0.72rem; cursor: pointer;">
-                                                             <i class="bi bi-chevron-down ms-1"></i>التاريخ والرسم البياني
-                                                        </button>
-                                                    <% } %>
-                                                </div>
-                                            </div>
-                                        </div>
- 
-                                        <% if (period.assignment_id) { %>
-                                            <!-- Touch-Friendly Numeric Adjuster with Plus/Minus buttons -->
-                                            <div class="d-flex align-items-center gap-2 bg-light rounded-pill p-1 pe-3 border" style="box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);">
-                                                <span class="small text-secondary fw-bold text-nowrap d-none d-sm-inline" style="font-size: 0.78rem;">وصلنا صفحة:</span>
-                                                <div class="d-flex align-items-center gap-1 bg-white rounded-pill p-0.5 border shadow-sm" style="max-width: 145px;">
-                                                    <button type="button" class="adjust-btn btn-outline-danger bg-danger-subtle text-danger" 
-                                                            onclick="adjustPage(<%= period.id %>, -1)">-</button>
-                                                    <input type="number" id="input_<%= period.id %>"
-                                                           class="form-control text-center rounded-pill border-0 text-success fw-bold p-0 bg-transparent"
-                                                           value="<%= period.current_page %>"
-                                                           min="<%= period.previous_page %>"
-                                                           max="<%= period.end_page %>"
-                                                           data-current="<%= period.current_page %>"
-                                                           onchange="updateBookProgress(<%= period.assignment_id %>, this)"
-                                                           style="width: 48px; font-size: 1.05rem; box-shadow: none; pointer-events: none;">
-                                                    <button type="button" class="adjust-btn btn-success text-white bg-success" 
-                                                            onclick="adjustPage(<%= period.id %>, 1)">+</button>
-                                                </div>
-                                                <!-- Absolute Boundary Label inside the capsule container -->
-                                                <span class="badge bg-success-subtle text-success rounded-pill d-block text-center ms-1 me-2" style="font-size: 0.65rem; white-space: nowrap;">
-                                                    <%= period.previous_page %>–<%= period.end_page %>
-                                                </span>
-                                            </div>
-                                        <% } %>
-                                    </div>
-                                    
-                                    <% if (period.assignment_id) { %>
-                                        <div class="collapse border-top" id="collapseProgress_<%= period.id %>" style="background: #f8fafc;">
-                                            <div class="p-3">
-                                                 <div class="row align-items-center text-end g-3">
-                                                      <div class="col-md-5">
-                                                           <p class="mb-1 text-muted small"><i class="bi bi-calendar-check me-1"></i>تاريخ آخر تحديث للتقدم:</p>
-                                                           <p class="fw-bold text-primary mb-3" style="font-size: 0.95rem;"><%= period.last_progress_date %></p>
-                                                           
-                                                           <p class="mb-1 text-muted small"><i class="bi bi-journal-text me-1"></i>المدى الكلي للمقرر:</p>
-                                                           <p class="fw-bold text-success mb-0" style="font-size: 0.95rem;">من <%= period.start_page %> إلى <%= period.end_page %></p>
-                                                      </div>
-                                                      <div class="col-md-7 text-center">
-                                                           <p class="mb-2 text-muted small fw-bold text-end"><i class="bi bi-graph-up-arrow me-1"></i>رسم بياني للمنهج:</p>
-                                                           <% if (period.progress_history && period.progress_history.length > 0) { %>
-                                                                <div style="height: 120px; width: 100%;">
-                                                                     <canvas id="miniChart_<%= period.id %>"></canvas>
-                                                                </div>
-                                                           <% } else { %>
-                                                                <div class="text-muted small py-3" style="border: 1px dashed #cbd5e1; border-radius: 8px; background: #fff;">
-                                                                     لا توجد بيانات تاريخية كافية لرسم الرسم البياني
-                                                                </div>
-                                                           <% } %>
-                                                      </div>
-                                                 </div>
-                                            </div>
-                                        </div>
-                                    <% } %>
+                                                    </td>
+                                                </tr>
+                                            <% }) %>
+                                        </tbody>
+                                    </table>
                                 </div>
-                            <% }) %>
+                            <% } else { %>
+                                <div class="text-center py-5 text-muted border rounded-4 bg-light">
+                                    <i class="bi bi-calendar-x fs-2 d-block mb-2 text-secondary opacity-50"></i>
+                                    لا توجد سجلات حضور مسجلة في هذا النطاق.
+                                </div>
+                            <% } %>
                         </div>
-                    <% } %>
+                    </div>
+                </div>
+
+                <!-- Student Right Column: Assigned Textbook Lesson Metrics -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0 rounded-4 bg-white h-100">
+                        <div class="card-header bg-white p-4 border-0 pb-2">
+                            <h5 class="fw-bold mb-0 text-success"><i class="bi bi-book-half me-2"></i>كتبي ومقرراتي الحالية</h5>
+                        </div>
+                        <div class="card-body p-4 pt-2">
+                            <% if (personalBooks.length > 0) { %>
+                                <div class="d-flex flex-column gap-4">
+                                    <% personalBooks.forEach(b => { 
+                                        const total = b.end_page - b.start_page;
+                                        const completed = b.current_page - b.start_page;
+                                        const percentage = total > 0 ? Math.min(100, Math.max(0, Math.round((completed / total) * 100))) : 0;
+                                    %>
+                                        <div class="border-bottom pb-4 last-no-border">
+                                            <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
+                                                <div>
+                                                    <h6 class="fw-bold mb-1 text-success" style="font-size: 1.15rem;"><%= b.book_title %></h6>
+                                                    <div class="badge bg-success-subtle text-success rounded-pill px-3 py-1 fw-bold mt-1">
+                                                        <i class="bi bi-person me-1"></i> الأستاذ: <%= b.teacher_name %>
+                                                    </div>
+                                                </div>
+                                                <span class="badge bg-success text-white rounded-pill px-3 py-1.5 fw-bold fs-6"><%= percentage %>%</span>
+                                            </div>
+
+                                            <!-- Prominent Unified Recent Lesson Card -->
+                                            <% if (b.detailed_history && b.detailed_history.length > 0) { 
+                                                const latest = b.detailed_history[0];
+                                            %>
+                                                <div class="bg-success text-white rounded-4 p-3 mb-3 shadow-xs text-end" style="background: linear-gradient(135deg, #059669, #10b981) !important; border: 1px solid rgba(0,0,0,0.05);">
+                                                    <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-1">
+                                                        <span class="badge bg-white text-success rounded-pill px-2 py-1 fw-bold" style="font-size: 0.7rem;">📖 الدرس الأخير (مؤخراً)</span>
+                                                        <span class="small opacity-90 text-white" style="font-size: 0.72rem;"><%= latest.date %></span>
+                                                    </div>
+                                                    
+                                                    <div class="fw-bold mb-2 text-center" dir="ltr" style="font-size: 1.1rem; display: block; width: 100%;">
+                                                        <span>صفحة</span> <span class="bg-white text-dark rounded px-2 py-0.5"><%= latest.startedAt %></span> &rarr; <span>صفحة</span> <span class="bg-white text-dark rounded px-2 py-0.5"><%= latest.endedAt %></span>
+                                                    </div>
+                                                    
+                                                    <div class="d-flex justify-content-between align-items-center mt-1 opacity-95 pt-2 border-top border-white-50 flex-wrap gap-2" style="font-size: 0.78rem;">
+                                                        <div>
+                                                            المسجِّل: <strong><%= latest.updaterName %></strong>
+                                                        </div>
+                                                        <div>
+                                                            منجز: <span class="badge bg-white text-success rounded-pill px-2 fw-bold">+<%= latest.pagesCompleted %> ص</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            <% } else { %>
+                                                <div class="alert bg-success-subtle border-0 text-success rounded-3 p-2 mb-3 text-end" style="font-size: 0.78rem;">
+                                                    <i class="bi bi-info-circle me-1"></i> لم يتم تسجيل دروس أو حصص بعد.
+                                                </div>
+                                            <% } %>
+
+                                            <div class="progress mb-2" style="height: 6px; border-radius: 3px;">
+                                                <div class="progress-bar bg-success" style="width: <%= percentage %>%"></div>
+                                            </div>
+                                            <div class="d-flex justify-content-between text-muted" style="font-size: 0.72rem;">
+                                                <span>نسبة الإنجاز الكلية (<%= percentage %>%)</span>
+                                                <span class="text-success fw-bold">صفحة <%= b.current_page %> الحالية</span>
+                                            </div>
+                                        </div>
+                                    <% }) %>
+                                </div>
+                            <% } else { %>
+                                <div class="text-center py-5 text-muted border rounded-4 bg-light">
+                                    <i class="bi bi-journal-x fs-2 d-block mb-2"></i>
+                                    لم يتم تعيين كتب أو مقررات دراسية لك بعد.
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+
     </div>
 </div>
 
@@ -462,36 +687,100 @@
     const classId = <%= classId %>;
     const todayDate = '<%= todayDate %>';
 
-    function changeDashboardDate(selectedDate) {
-        window.location.href = `/dashboard/cr?date=${selectedDate}`;
-    }
+    // Local Two-Stage Attendance Object
+    let localAttendance = {};
+    let isSubmitted = <%= students.some(s => s.status) ? 'true' : 'false' %>;
 
     document.addEventListener('DOMContentLoaded', () => {
+        // 1. Populate local attendance object with initial loaded database values
         <% students.forEach(student => { %>
-            const studentCard = document.querySelector(`div[data-student-id="<%= student.id %>"]`);
-            if (studentCard) {
-                const status = '<%= student.status %>';
-                if (status) {
-                    const btn = studentCard.querySelector(`.status-btn[data-status="${status}"]`);
-                    if (btn) {
-                        highlightBtn(btn, status);
-                    }
-                }
+            if ('<%= student.status %>') {
+                localAttendance[<%= student.id %>] = '<%= student.status %>';
             }
         <% }) %>
+        
+        // 2. Render localized status classes for tactile buttons
+        refreshLocalStatusHighlights();
+        
+        // 3. Initialize dynamic submitted lock UI state
+        updateAttendanceUIState();
     });
 
-    function highlightBtn(btn, status) {
-        const parent = btn.parentElement;
-        parent.classList.add('btn-row-active');
-        parent.querySelectorAll('.status-btn').forEach(b => {
-            b.classList.remove('active');
+    function refreshLocalStatusHighlights() {
+        document.querySelectorAll('.student-card').forEach(card => {
+            const studentId = card.getAttribute('data-student-id');
+            const status = localAttendance[studentId];
+            const group = card.querySelector('.status-btn-group');
+            
+            group.querySelectorAll('.status-btn').forEach(b => {
+                b.classList.remove('active');
+            });
+            
+            if (status) {
+                group.classList.add('btn-row-active');
+                const activeBtn = group.querySelector(`.status-btn[data-status="${status}"]`);
+                if (activeBtn) activeBtn.classList.add('active');
+            } else {
+                group.classList.remove('btn-row-active');
+            }
         });
-        btn.classList.add('active');
     }
 
-    async function markStudentStatus(studentId, status, btn) {
-        highlightBtn(btn, status);
+    function markLocalStatus(studentId, status, btn) {
+        if (isSubmitted) return; // Prevent clicking when locked
+        
+        // Update local object
+        localAttendance[studentId] = status;
+        
+        // Refresh CSS transitions
+        refreshLocalStatusHighlights();
+    }
+
+    function updateAttendanceUIState() {
+        const listContainer = document.getElementById('studentAttendanceList');
+        const submitBtn = document.getElementById('submitAttendanceBtn');
+        const editBtn = document.getElementById('editAttendanceBtn');
+        const badgeContainer = document.getElementById('attendanceStatusBadge');
+        
+        if (isSubmitted) {
+            // Apply greyed out locked state
+            listContainer.classList.add('attendance-submitted');
+            submitBtn.classList.add('d-none');
+            editBtn.classList.remove('d-none');
+            badgeContainer.innerHTML = `<span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1.5"><i class="bi bi-shield-fill-check me-1"></i>✓ تم تسليم الحضور للأعلى</span>`;
+            
+            // Block mouse clicking
+            document.querySelectorAll('.status-btn').forEach(btn => {
+                btn.style.pointerEvents = 'none';
+            });
+        } else {
+            // Unlocked active state
+            listContainer.classList.remove('attendance-submitted');
+            submitBtn.classList.remove('d-none');
+            editBtn.classList.add('d-none');
+            badgeContainer.innerHTML = `<span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-3 py-1.5"><i class="bi bi-exclamation-circle-fill me-1"></i>كشف غير مسلّم</span>`;
+            
+            // Enable mouse clicking
+            document.querySelectorAll('.status-btn').forEach(btn => {
+                btn.style.pointerEvents = 'auto';
+            });
+        }
+    }
+
+    function enableAttendanceEditing() {
+        isSubmitted = false;
+        updateAttendanceUIState();
+    }
+
+    async function submitAllAttendance() {
+        // Validate if all students are marked before posting
+        const studentIds = [<%- students.map(s => s.id).join(',') %>];
+        const unmarked = studentIds.filter(id => !localAttendance[id]);
+        
+        if (unmarked.length > 0) {
+            const confirmSave = confirm('تنبيه: لم يتم تحديد حضور لبعض الطلاب. هل تريد تقديم حضور الصف وإرساله على أي حال؟');
+            if (!confirmSave) return;
+        }
 
         try {
             const res = await fetch('/attendance/students/save', {
@@ -500,16 +789,20 @@
                 body: JSON.stringify({
                     date: todayDate,
                     classId: classId,
-                    attendance: { [studentId]: status }
+                    attendance: localAttendance
                 })
             });
             const data = await res.json();
-            if (!data.success) {
-                alert('فشل حفظ الحضور للرمز: ' + studentId);
+            if (data.success) {
+                isSubmitted = true;
+                updateAttendanceUIState();
+                alert('✅ تم حفظ وإرسال كشف حضور الطلاب بنجاح!');
+            } else {
+                alert('❌ فشل حفظ كشف حضور الطلاب');
             }
         } catch (err) {
             console.error(err);
-            alert('حدث خطأ أثناء الاتصال بالسيرفر');
+            alert('❌ حدث خطأ أثناء الاتصال بالسيرفر');
         }
     }
 
@@ -555,7 +848,6 @@
         }
     }
 
-    /* Quick Plus/Minus Page Adjuster Trigger */
     function adjustPage(periodId, delta) {
         const input = document.getElementById(`input_${periodId}`);
         if (!input) return;
@@ -597,7 +889,6 @@
                     label.innerHTML = `<span><i class="bi bi-clock-history me-1"></i>تحديث التقدم: الآن (${nowStr})</span>`;
                 }
 
-                // Temporary highlight
                 const container = inputField.parentElement;
                 container.style.borderColor = '#10b981';
                 container.style.backgroundColor = '#ecfdf5';
