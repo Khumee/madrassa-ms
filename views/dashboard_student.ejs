@@ -191,8 +191,14 @@
                                             const percentage = total > 0 ? Math.min(100, Math.max(0, Math.round((completed / total) * 100))) : 0;
                                         %>
                                             <div class="mb-3 border-bottom pb-3 last-no-border">
-                                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                                    <h6 class="fw-bold mb-0 text-truncate" style="max-width: 70%;"><%= b.book_title %></h6>
+                                                <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
+                                                    <div>
+                                                        <h6 class="fw-bold mb-1 text-success text-truncate" style="max-width: 100%; font-size: 1.15rem;"><%= b.book_title %></h6>
+                                                        <div class="badge bg-success-subtle text-success fs-6 rounded-pill px-3 py-1.5 fw-bold mt-1">
+                                                            <i class="bi bi-person-workspace me-1"></i> الأستاذ: <%= b.teacher_name %>
+                                                        </div>
+                                                    </div>
+                                                    <span class="badge bg-success text-white rounded-pill px-3 py-1.5 fw-bold fs-6"><%= percentage %>%</span>
                                                 </div>
 
                                                 <!-- Prominent Unified Recent Lesson & Teacher Progress Card (On Top) -->
@@ -209,10 +215,10 @@
                                                              <span>صفحة</span> <span class="bg-white text-dark rounded px-2 py-0.5"><%= latest.startedAt %></span> &rarr; <span>صفحة</span> <span class="bg-white text-dark rounded px-2 py-0.5"><%= latest.endedAt %></span>
                                                          </div>
                                                          
-                                                         <!-- Progress Increment & Teacher Details Row -->
+                                                         <!-- Progress Increment Details Row -->
                                                          <div class="d-flex justify-content-between align-items-center mt-1 opacity-95 pt-2 border-top border-white-50 flex-wrap gap-2" style="font-size: 0.78rem;">
                                                              <div>
-                                                                 <i class="bi bi-person-badge me-1"></i> الأستاذ: <strong><%= b.teacher_name %></strong>
+                                                                 المسجِّل: <strong><%= latest.updaterName %></strong>
                                                              </div>
                                                              <div>
                                                                  منجز: <span class="badge bg-white text-success rounded-pill px-2 fw-bold">+<%= latest.pagesCompleted %> ص</span>
@@ -220,9 +226,8 @@
                                                          </div>
 
                                                          <!-- Secondary Update Info -->
-                                                         <div class="d-flex justify-content-between align-items-center mt-1 opacity-75" style="font-size: 0.72rem;">
-                                                             <span>المسجِّل: <%= latest.updaterName %></span>
-                                                             <span>المدى الكلي: <%= b.start_page %> - <%= b.end_page %></span>
+                                                         <div class="d-flex justify-content-end align-items-center mt-1 opacity-75" style="font-size: 0.72rem;">
+                                                             <span>المدى الكلي للترقية: <%= b.start_page %> - <%= b.end_page %></span>
                                                          </div>
                                                      </div>
                                                  <% } else { %>
@@ -239,38 +244,7 @@
                                                      <span class="text-success fw-bold">صفحة <%= b.current_page %> الحالية</span>
                                                  </div>
                                                 
-                                                <!-- Collapsible Detailed Updates Log -->
-                                                <% if (b.detailed_history && b.detailed_history.length > 0) { %>
-                                                    <div class="mt-2 text-end">
-                                                        <button class="btn btn-sm btn-link text-success p-0 text-decoration-none fw-bold" style="font-size: 0.75rem;" type="button" data-bs-toggle="collapse" data-bs-target="#bookHistoryCollapse-<%= b.id %>" aria-expanded="false">
-                                                            <i class="bi bi-clock-history me-1"></i> سجل تحديثات الحصص التفصيلي &raquo;
-                                                        </button>
-                                                        <div class="collapse mt-2" id="bookHistoryCollapse-<%= b.id %>">
-                                                            <div class="card card-body bg-white border-0 shadow-sm p-2 rounded-3 text-end" style="font-size: 0.8rem;">
-                                                                <div class="timeline-small">
-                                                                    <% b.detailed_history.forEach(h => { %>
-                                                                        <div class="pb-2 border-bottom mb-2 last-no-border">
-                                                                            <div class="d-flex justify-content-between align-items-center mb-1 flex-wrap gap-1">
-                                                                                <span class="badge bg-success-subtle text-success rounded-pill px-2">منجز: +<%= h.pagesCompleted %> صفحات</span>
-                                                                                <span class="text-muted" style="font-size: 0.7rem;"><%= h.date %></span>
-                                                                            </div>
-                                                                            <div class="text-dark small mb-1">
-                                                                                البدء: <strong class="text-secondary">صفحة <%= h.startedAt %></strong> &larr; الانتهاء: <strong class="text-success">صفحة <%= h.endedAt %></strong>
-                                                                            </div>
-                                                                            <div class="text-muted" style="font-size: 0.7rem;">
-                                                                                <i class="bi bi-person-check me-1"></i> بواسطة: <strong class="text-dark"><%= h.updaterName %></strong> (<%= h.updaterRole %>)
-                                                                            </div>
-                                                                        </div>
-                                                                    <% }) %>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                <% } else { %>
-                                                    <div class="mt-2 text-end small text-muted" style="font-size: 0.7rem;">
-                                                        <i class="bi bi-info-circle me-1"></i> لا توجد حصص مسجلة بعد لهذا الكتاب.
-                                                    </div>
-                                                <% } %>
+                                                
                                             </div>
                                         <% }) %>
                                     <% } else { %>

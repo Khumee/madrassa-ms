@@ -37,11 +37,11 @@
     <form method="GET" action="" class="row g-3 align-items-end mt-1 border-top pt-3">
         <div class="col-md-4">
             <label class="form-label fw-bold text-secondary" style="font-size: 0.85rem;"><%= locals.lang === 'ur' ? 'تاریخ شروع:' : 'من تاريخ (البدء):' %></label>
-            <input type="date" name="startDate" value="<%= startDate %>" class="form-control rounded-3 border-0 shadow-sm px-3" required>
+            <input type="date" name="startDate" value="<%= startDate %>" class="form-control rounded-3 border-0 shadow-sm px-3" onchange="this.form.submit()" required>
         </div>
         <div class="col-md-4">
             <label class="form-label fw-bold text-secondary" style="font-size: 0.85rem;"><%= locals.lang === 'ur' ? 'تاریخ اختتام:' : 'إلى تاريخ (الانتهاء):' %></label>
-            <input type="date" name="endDate" value="<%= endDate %>" class="form-control rounded-3 border-0 shadow-sm px-3" required>
+            <input type="date" name="endDate" value="<%= endDate %>" class="form-control rounded-3 border-0 shadow-sm px-3" onchange="this.form.submit()" required>
         </div>
         <div class="col-md-4 d-flex gap-2">
             <button type="submit" class="btn btn-primary rounded-pill w-100 py-2 fw-semibold shadow-sm">

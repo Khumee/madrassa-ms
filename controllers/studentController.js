@@ -30,40 +30,40 @@ exports.showStudentDashboard = async (req, res) => {
             WHERE tb.class_id = ? AND s.is_active = TRUE
         `, [classId]);
 
-        const lastWeekStart = DateTime.now().startOf('week').minus({ weeks: 1 }).toISODate();
-        const lastWeekEnd = DateTime.now().startOf('week').minus({ weeks: 1 }).plus({ days: 5 }).toISODate();
+        const dateParams = getDateFilterParams(req.query);
+        const { startDate, endDate } = dateParams;
 
         for (let b of books) {
             try {
-                // Fetch progress just before last week started
-                const [beforeLastWeek] = await db.execute(
+                // Fetch progress just before filtered startDate
+                const [beforeRange] = await db.execute(
                     'SELECT page_number FROM book_progress WHERE assignment_id = ? AND date < ? ORDER BY date DESC, id DESC LIMIT 1',
-                    [b.id, lastWeekStart]
+                    [b.id, startDate]
                 );
-                const startPageLastWeek = beforeLastWeek.length > 0 ? beforeLastWeek[0].page_number : b.start_page;
+                const startPageRange = beforeRange.length > 0 ? beforeRange[0].page_number : b.start_page;
 
-                // Fetch progress up to last week's end
-                const [endOfLastWeek] = await db.execute(
+                // Fetch progress up to filtered endDate
+                const [endOfRange] = await db.execute(
                     'SELECT page_number FROM book_progress WHERE assignment_id = ? AND date <= ? ORDER BY date DESC, id DESC LIMIT 1',
-                    [b.id, lastWeekEnd]
+                    [b.id, endDate]
                 );
-                const endPageLastWeek = endOfLastWeek.length > 0 ? endOfLastWeek[0].page_number : b.start_page;
+                const endPageRange = endOfRange.length > 0 ? endOfRange[0].page_number : b.start_page;
 
-                b.last_week_started = startPageLastWeek;
-                b.last_week_ended = endPageLastWeek;
-                b.last_week_completed = Math.max(0, endPageLastWeek - startPageLastWeek);
+                b.last_week_started = startPageRange;
+                b.last_week_ended = endPageRange;
+                b.last_week_completed = Math.max(0, endPageRange - startPageRange);
 
-                // Fetch ALL progress history for this book assignment, ordered chronologically with updater details
+                // Fetch progress history for this book assignment within selected date range
                 const [progHistory] = await db.execute(`
                     SELECT bp.id, bp.date, bp.page_number, u.username as updater_name, u.role as updater_role
                     FROM book_progress bp
                     LEFT JOIN users u ON bp.marked_by = u.id
-                    WHERE bp.assignment_id = ? 
+                    WHERE bp.assignment_id = ? AND bp.date >= ? AND bp.date <= ?
                     ORDER BY bp.date ASC, bp.id ASC
-                `, [b.id]);
+                `, [b.id, startDate, endDate]);
 
                 // Build detailed step-by-step update records showing where it started and ended!
-                let lastPage = b.start_page;
+                let lastPage = startPageRange;
                 b.detailed_history = [];
 
                 progHistory.forEach(ph => {
@@ -93,13 +93,10 @@ exports.showStudentDashboard = async (req, res) => {
             }
         }
 
-        // Pagination and Date range setup
+        // Pagination setup
         const currentPage = parseInt(req.query.page) || 1;
         const limit = 10;
         const offset = (currentPage - 1) * limit;
-
-        const dateParams = getDateFilterParams(req.query);
-        const { startDate, endDate } = dateParams;
 
         // Fetch total matching attendance records count for pagination calculations
         const [countRows] = await db.execute(
