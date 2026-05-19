@@ -56,8 +56,8 @@ exports.showStudentDashboard = async (req, res) => {
         const [attendance] = await db.execute(
             `SELECT * FROM attendance_students 
              WHERE student_id = ? AND date >= ? AND date <= ? 
-             ORDER BY date DESC LIMIT ? OFFSET ?`,
-            [student[0].id, startDate, endDate, limit, offset]
+             ORDER BY date DESC LIMIT ${limit} OFFSET ${offset}`,
+            [student[0].id, startDate, endDate]
         );
 
         // Calculate Attendance Stats (For Visual Progress Ring)
@@ -109,8 +109,8 @@ exports.showStudentDashboard = async (req, res) => {
         for (const p of periodsToday) {
             if (!p.start_time || !p.end_time) continue;
             // Parse period start/end time today
-            const startTimeStr = p.start_time.substring(0, 5); 
-            const endTimeStr = p.end_time.substring(0, 5); 
+            const startTimeStr = String(p.start_time).substring(0, 5); 
+            const endTimeStr = String(p.end_time).substring(0, 5); 
             const startTime = DateTime.fromFormat(startTimeStr, 'HH:mm');
             const endTime = DateTime.fromFormat(endTimeStr, 'HH:mm');
 
