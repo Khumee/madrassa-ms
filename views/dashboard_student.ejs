@@ -18,19 +18,19 @@
                         <!-- Attendance Streak & Circular progress Ring -->
                         <div class="col-lg-6 col-md-12">
                             <div class="card border-0 rounded-4 shadow-sm h-100 text-white" style="background: linear-gradient(135deg, #1e3a8a, #0f172a);">
-                                <div class="card-body p-4 d-flex align-items-center justify-content-between">
-                                    <div class="text-end">
+                                <div class="card-body p-4 d-flex flex-column flex-sm-row align-items-center justify-content-between gap-3">
+                                    <div class="text-center text-sm-end mb-3 mb-sm-0">
                                         <h5 class="fw-bold mb-2">مستوى انضباطك الدراسي</h5>
                                         <p class="mb-3 opacity-75 small">مواظبتك على الحضور تبني مستقبلك المشرق</p>
-                                        <div class="d-flex align-items-center gap-2">
+                                        <div class="d-flex align-items-center justify-content-center justify-content-sm-start gap-2">
                                             <span class="fs-2">🔥</span>
-                                            <div>
+                                            <div class="text-end">
                                                 <h4 class="fw-bold mb-0"><%= streak %> <%= locals.lang === 'ur' ? 'مسلسل دن' : 'أيام متتالية' %></h4>
                                                 <small class="opacity-75">سلسلة حضورك المستمر بدون غياب</small>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="position-relative d-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+                                    <div class="position-relative d-flex align-items-center justify-content-center" style="width: 100px; height: 100px; flex-shrink: 0;">
                                         <!-- SVG Progress Circle -->
                                         <svg width="100" height="100" viewBox="0 0 100 100" style="transform: rotate(-90deg);">
                                             <circle cx="50" cy="50" r="40" stroke="rgba(255,255,255,0.15)" stroke-width="8" fill="transparent" />
@@ -39,7 +39,9 @@
                                                     stroke-dashoffset="<%= 251.2 - (251.2 * attendancePercentage) / 100 %>"
                                                     stroke-linecap="round" />
                                         </svg>
-                                        <div class="position-absolute fs-5 fw-bold" style="color: #34d399;"><%= attendancePercentage %>%</div>
+                                        <div class="position-absolute d-flex align-items-center justify-content-center w-100 h-100 fs-5 fw-bold" style="color: #34d399; top: 0; left: 0;">
+                                            <%= attendancePercentage %>%
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -64,7 +66,7 @@
                                             <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill fw-bold">الحصة القادمة</span>
                                         </div>
                                         <h4 class="fw-bold mb-1 text-dark"><%= nextPeriod.subject %></h4>
-                                        <div class="d-flex justify-content-between align-items-center mt-2">
+                                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-2">
                                             <span class="text-muted small">
                                                 <i class="bi bi-person me-1"></i> أ. <%= nextPeriod.teacher_name %>
                                             </span>
