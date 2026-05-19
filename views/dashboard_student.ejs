@@ -143,10 +143,12 @@
                         });
                     </script>
 
-                    <div class="row g-4 mb-4">
-                        <!-- Today's Schedule -->
-                        <div class="col-md-6">
-                            <div class="card shadow-sm border-0 rounded-4 h-100 bg-light">
+                    <!-- 2-Column Responsive Dashboard Grid (Laptop: Side-by-Side, Mobile: Stacked) -->
+                    <div class="row g-4">
+                        <!-- Left Column: Timetable & Attendance -->
+                        <div class="col-md-6 d-flex flex-column gap-4">
+                            <!-- Today's Timetable Card -->
+                            <div class="card shadow-sm border-0 rounded-4">
                                 <div class="card-header bg-white p-3 border-0 d-flex justify-content-between align-items-center">
                                     <h5 class="fw-bold mb-0 text-primary"><i class="bi bi-calendar-check me-2"></i>جدول اليوم</h5>
                                     <a href="/periods/full" class="btn btn-sm btn-outline-primary rounded-pill">الجدول الكامل</a>
@@ -175,11 +177,85 @@
                                     <% } %>
                                 </div>
                             </div>
+
+                            <!-- Attendance Record Card -->
+                            <div class="card shadow-sm border-0 rounded-4 bg-white">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-clock-history me-2"></i>سجل الحضور</h5>
+                                        <button class="btn btn-outline-primary rounded-pill btn-sm px-3 fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#dateFilterCollapse" aria-expanded="false" aria-controls="dateFilterCollapse">
+                                            <i class="bi bi-funnel me-1"></i> تصفية التاريخ
+                                        </button>
+                                    </div>
+
+                                    <!-- Collapsible Date Filter Panel -->
+                                    <div class="collapse mb-3" id="dateFilterCollapse">
+                                        <%- include('partials/date_filter') %>
+                                    </div>
+
+                                    <% if (attendance.length > 0) { %>
+                                        <div class="table-responsive rounded-4 overflow-hidden shadow-xs border">
+                                            <table class="table table-hover align-middle mb-0 text-end">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th class="px-4 py-3 text-secondary">التاريخ</th>
+                                                        <th class="px-4 py-3 text-secondary">الحالة</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <% attendance.forEach(row => { %>
+                                                        <tr>
+                                                            <td class="px-4 py-3 fw-bold text-dark" style="font-size: 0.88rem;">
+                                                                <%= row.date instanceof Date ? row.date.toISOString().split('T')[0] : String(row.date).split('T')[0] %>
+                                                            </td>
+                                                            <td class="px-4 py-3">
+                                                                <span class="badge rounded-pill px-3 py-1.5 bg-<%= 
+                                                                    row.status === 'present' ? 'success' : 
+                                                                    row.status === 'absent' ? 'danger' : 
+                                                                    row.status === 'leave' ? 'warning' : 'info' 
+                                                                %>" style="font-size: 0.78rem;">
+                                                                    <%= row.status === 'present' ? 'حاضر' : 
+                                                                        row.status === 'absent' ? 'غائب' : 
+                                                                        row.status === 'leave' ? 'إجازة' : 'أونلاين' %>
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    <% }) %>
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <!-- Pagination Controls -->
+                                        <% if (totalPages > 1) { %>
+                                            <nav aria-label="Page navigation" class="mt-3">
+                                                <ul class="pagination justify-content-center gap-1 mb-0">
+                                                    <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                                                        <a class="page-link rounded-pill px-3 text-secondary border shadow-xs" style="font-size: 0.8rem;" href="/dashboard/student?page=<%= currentPage - 1 %>&startDate=<%= startDate %>&endDate=<%= endDate %>">السابق</a>
+                                                    </li>
+                                                    <% for (let i = 1; i <= totalPages; i++) { %>
+                                                        <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                                                            <a class="page-link rounded-circle d-flex align-items-center justify-content-center border shadow-xs" style="width: 32px; height: 32px; font-size: 0.8rem;" href="/dashboard/student?page=<%= i %>&startDate=<%= startDate %>&endDate=<%= endDate %>"><%= i %></a>
+                                                        </li>
+                                                    <% } %>
+                                                    <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                                                        <a class="page-link rounded-pill px-3 text-secondary border shadow-xs" style="font-size: 0.8rem;" href="/dashboard/student?page=<%= currentPage + 1 %>&startDate=<%= startDate %>&endDate=<%= endDate %>">التالي</a>
+                                                    </li>
+                                                </ul>
+                                            </nav>
+                                        <% } %>
+                                    <% } else { %>
+                                        <div class="text-center py-4 text-muted border rounded-4 bg-light">
+                                            <i class="bi bi-clock-history fs-2 d-block mb-2 text-secondary opacity-50"></i>
+                                            لا توجد سجلات حضور مسجلة.
+                                        </div>
+                                    <% } %>
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- Book Progress -->
+                        <!-- Right Column: Book Progress -->
                         <div class="col-md-6">
-                            <div class="card shadow-sm border-0 rounded-4 h-100 bg-light">
+                            <div class="card shadow-sm border-0 rounded-4 bg-light">
                                 <div class="card-header bg-white p-3 border-0">
                                     <h5 class="fw-bold mb-0 text-success"><i class="bi bi-book-half me-2"></i>تقدم الكتب</h5>
                                 </div>
@@ -243,8 +319,6 @@
                                                      <span>نسبة الإنجاز الكلية (<%= percentage %>%)</span>
                                                      <span class="text-success fw-bold">صفحة <%= b.current_page %> الحالية</span>
                                                  </div>
-                                                
-                                                
                                             </div>
                                         <% }) %>
                                     <% } else { %>
@@ -257,75 +331,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="d-flex justify-content-between align-items-center mb-3 mt-4">
-                        <h4 class="fw-bold mb-0"><i class="bi bi-clock-history me-2"></i>سجل الحضور</h4>
-                        <button class="btn btn-outline-primary rounded-pill btn-sm px-3 fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#dateFilterCollapse" aria-expanded="false" aria-controls="dateFilterCollapse">
-                            <i class="bi bi-funnel me-1"></i> تصفية التاريخ
-                        </button>
-                    </div>
-
-                    <!-- Collapsible Date Filter Panel -->
-                    <div class="collapse mb-4" id="dateFilterCollapse">
-                        <%- include('partials/date_filter') %>
-                    </div>
-
-                    <% if (attendance.length > 0) { %>
-                        <div class="table-responsive rounded-4 overflow-hidden shadow-xs border">
-                            <table class="table table-hover align-middle mb-0 text-end">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th class="px-4 py-3 text-secondary">التاريخ</th>
-                                        <th class="px-4 py-3 text-secondary">الحالة</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <% attendance.forEach(row => { %>
-                                        <tr>
-                                            <td class="px-4 py-3 fw-bold text-dark">
-                                                <%= row.date instanceof Date ? row.date.toISOString().split('T')[0] : String(row.date).split('T')[0] %>
-                                            </td>
-                                            <td class="px-4 py-3">
-                                                <span class="badge rounded-pill px-3 py-2 bg-<%= 
-                                                    row.status === 'present' ? 'success' : 
-                                                    row.status === 'absent' ? 'danger' : 
-                                                    row.status === 'leave' ? 'warning' : 'info' 
-                                                %>">
-                                                    <%= row.status === 'present' ? 'حاضر' : 
-                                                        row.status === 'absent' ? 'غائب' : 
-                                                        row.status === 'leave' ? 'إجازة' : 'أونلاين' %>
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    <% }) %>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Pagination Controls -->
-                        <% if (totalPages > 1) { %>
-                            <nav aria-label="Page navigation" class="mt-4">
-                                <ul class="pagination justify-content-center gap-1 mb-0">
-                                    <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
-                                        <a class="page-link rounded-pill px-3 text-secondary border shadow-xs" href="/dashboard/student?page=<%= currentPage - 1 %>&startDate=<%= startDate %>&endDate=<%= endDate %>">السابق</a>
-                                    </li>
-                                    <% for (let i = 1; i <= totalPages; i++) { %>
-                                        <li class="page-item <%= currentPage === i ? 'active' : '' %>">
-                                            <a class="page-link rounded-circle d-flex align-items-center justify-content-center border shadow-xs" style="width: 38px; height: 38px;" href="/dashboard/student?page=<%= i %>&startDate=<%= startDate %>&endDate=<%= endDate %>"><%= i %></a>
-                                        </li>
-                                    <% } %>
-                                    <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
-                                        <a class="page-link rounded-pill px-3 text-secondary border shadow-xs" href="/dashboard/student?page=<%= currentPage + 1 %>&startDate=<%= startDate %>&endDate=<%= endDate %>">التالي</a>
-                                    </li>
-                                </ul>
-                            </nav>
-                        <% } %>
-                    <% } else { %>
-                        <div class="text-center py-5 text-muted border rounded-4 bg-light">
-                            <i class="bi bi-clock-history fs-1 d-block mb-3 text-secondary opacity-50"></i>
-                            لا توجد سجلات حضور مسجلة في هذا النطاق الزمني المحدد.
-                        </div>
-                    <% } %>
                 </div>
             </div>
         </div>
