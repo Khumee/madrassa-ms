@@ -72,6 +72,28 @@ const teacherRoutes = require('./routes/teacherRoutes');
 const periodRoutes = require('./routes/periodRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 
+// TEMPORARY LOGS ROUTE
+app.get('/logs-debug', (req, res) => {
+    try {
+        const execSync = require('child_process').execSync;
+        let logs = '';
+        try {
+            logs += "=== PM2 STATUS ===\n" + execSync('pm2 status').toString() + "\n";
+        } catch (e) {
+            logs += "PM2 Status Error: " + e.message + "\n";
+        }
+        try {
+            logs += "=== PM2 ERROR LOGS ===\n" + execSync('pm2 logs "kui-ms" --lines 100 --err --raw --nostream').toString() + "\n";
+        } catch (e) {
+            logs += "PM2 Error Logs Error: " + e.message + "\n";
+        }
+        res.setHeader('Content-Type', 'text/plain');
+        res.send(logs);
+    } catch (err) {
+        res.status(500).send(err.stack);
+    }
+});
+
 // Register Routers
 app.use(authRoutes);
 app.use(studentRoutes);
