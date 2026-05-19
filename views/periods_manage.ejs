@@ -1301,9 +1301,12 @@ async function executeModalSwap() {
         });
         
         let data;
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-            data = await response.json();
+        let responseText = '';
+        try {
+            responseText = await response.text();
+            data = JSON.parse(responseText);
+        } catch (e) {
+            console.error('Response is not JSON:', responseText);
         }
         
         if (response.status === 403) {

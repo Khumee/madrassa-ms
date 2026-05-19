@@ -72,38 +72,6 @@ const teacherRoutes = require('./routes/teacherRoutes');
 const periodRoutes = require('./routes/periodRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 
-// TEMPORARY LOGS ROUTE
-app.get('/logs-debug', (req, res) => {
-    try {
-        const fs = require('fs');
-        let logs = '';
-        
-        const errPath = '/root/.pm2/logs/kui-ms-error.log';
-        const outPath = '/root/.pm2/logs/kui-ms-out.log';
-        
-        if (fs.existsSync(errPath)) {
-            logs += "=== FILE: PM2 ERROR LOGS ===\n";
-            const errContent = fs.readFileSync(errPath, 'utf8');
-            logs += errContent.slice(-5000) + "\n"; // last 5000 chars
-        } else {
-            logs += `ERROR LOG NOT FOUND AT ${errPath}\n`;
-        }
-        
-        if (fs.existsSync(outPath)) {
-            logs += "=== FILE: PM2 OUT LOGS ===\n";
-            const outContent = fs.readFileSync(outPath, 'utf8');
-            logs += outContent.slice(-5000) + "\n"; // last 5000 chars
-        } else {
-            logs += `OUT LOG NOT FOUND AT ${outPath}\n`;
-        }
-        
-        res.setHeader('Content-Type', 'text/plain');
-        res.send(logs);
-    } catch (err) {
-        res.status(500).send(err.stack);
-    }
-});
-
 // Register Routers
 app.use(authRoutes);
 app.use(studentRoutes);
