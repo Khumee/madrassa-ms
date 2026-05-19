@@ -152,6 +152,9 @@
                         </thead>
                         <tbody>
                             <% dayNamesEn.forEach(day => { %>
+                                <%
+                                    if (locals.selectedDay && locals.selectedDay !== day) return;
+                                %>
                                 <% 
                                     const dayPeriods = teacherPeriods.filter(p => p.day_of_week === day);
                                     if (dayPeriods.length === 0) return; 
@@ -159,7 +162,10 @@
                                 <tr class="day-row" data-day="<%= day %>">
                                     <td class="fw-bold bg-light text-primary border-end-0 py-3"><%= __(day) %></td>
                                     <% for(let i=1; i<=maxPeriod; i++) { 
-                                        const period = dayPeriods.find(p => p.period_number == i);
+                                        let period = dayPeriods.find(p => p.period_number == i);
+                                         if (period && locals.selectedTeacherId && period.teacher_id != locals.selectedTeacherId) {
+                                             period = null;
+                                         }
                                     %>
                                         <td class="p-1 position-relative cell-container" style="height: 105px;">
                                             <% if (period) { %>
@@ -197,7 +203,8 @@
         </div>
         <% }) %>
     <% } else { %>
-        <% classes.forEach(cls => { 
+        <% classes.forEach(cls => {
+            if (locals.selectedClassId && locals.selectedClassId != cls.id) return; 
             const classPeriods = periods.filter(p => p.class_id === cls.id);
             if (classPeriods.length === 0) return; 
         %>
@@ -231,6 +238,9 @@
                         </thead>
                         <tbody>
                             <% dayNamesEn.forEach(day => { %>
+                                <%
+                                    if (locals.selectedDay && locals.selectedDay !== day) return;
+                                %>
                                 <% 
                                     const dayPeriods = classPeriods.filter(p => p.day_of_week === day);
                                     if (dayPeriods.length === 0) return; 
@@ -238,7 +248,10 @@
                                 <tr class="day-row" data-day="<%= day %>">
                                     <td class="fw-bold bg-light text-primary border-end-0 py-3"><%= __(day) %></td>
                                     <% for(let i=1; i<=maxPeriod; i++) { 
-                                        const period = dayPeriods.find(p => p.period_number == i);
+                                        let period = dayPeriods.find(p => p.period_number == i);
+                                         if (period && locals.selectedTeacherId && period.teacher_id != locals.selectedTeacherId) {
+                                             period = null;
+                                         }
                                     %>
                                         <td class="p-1 position-relative cell-container" style="height: 105px;">
                                             <% if (period) { %>
