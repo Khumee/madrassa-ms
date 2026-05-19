@@ -29,15 +29,46 @@ exports.showStudentDashboard = async (req, res) => {
             WHERE tb.class_id = ? AND s.is_active = TRUE
         `, [classId]);
 
-        const [attendance] = await db.execute(
-            'SELECT * FROM attendance_students WHERE student_id = ? ORDER BY date DESC LIMIT 30',
-            [student[0].id]
+        // Pagination and Date range setup
+        const currentPage = parseInt(req.query.page) || 1;
+        const limit = 10;
+        const offset = (currentPage - 1) * limit;
+
+        let startDate = req.query.startDate;
+        let endDate = req.query.endDate;
+
+        if (!startDate || !endDate) {
+            // Default: Sat of last week to Mon of this week
+            const today = DateTime.now();
+            startDate = today.startOf('week').minus({ days: 2 }).toISODate();
+            endDate = today.startOf('week').toISODate();
+        }
+
+        // Fetch total matching attendance records count for pagination calculations
+        const [countRows] = await db.execute(
+            'SELECT COUNT(*) as count FROM attendance_students WHERE student_id = ? AND date >= ? AND date <= ?',
+            [student[0].id, startDate, endDate]
         );
+        const totalRecords = countRows[0].count;
+        const totalPages = Math.ceil(totalRecords / limit) || 1;
+
+        // Fetch the paginated attendance records
+        const [attendance] = await db.execute(
+            `SELECT * FROM attendance_students 
+             WHERE student_id = ? AND date >= ? AND date <= ? 
+             ORDER BY date DESC LIMIT ? OFFSET ?`,
+            [student[0].id, startDate, endDate, limit, offset]
+        );
+
         res.render('dashboard_student', { 
             student: student[0], 
             attendance, 
             periods, 
             books,
+            startDate,
+            endDate,
+            currentPage,
+            totalPages,
             today: DateTime.now().setLocale('ar').toFormat('cccc, dd MMMM yyyy')
         });
     } catch (err) {

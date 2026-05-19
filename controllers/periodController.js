@@ -125,7 +125,15 @@ exports.generateAuto = async (req, res) => {
 exports.showFullTimetable = async (req, res) => {
     try {
         const groupBy = 'class'; // Forced to class layout as per user request to simplify navigation
-        const { teacherId, classId, day } = req.query;
+        let { teacherId, classId, day } = req.query;
+
+        // Force student to view only their own class's timetable
+        if (req.session.role === 'طالب') {
+            const [student] = await db.execute('SELECT class_id FROM students WHERE user_id = ?', [req.session.userId]);
+            if (student.length > 0) {
+                classId = student[0].class_id;
+            }
+        }
 
         let query = `
              SELECT p.*, t.name as teacher_name, c.name_ar as class_name, b.title as book_title
