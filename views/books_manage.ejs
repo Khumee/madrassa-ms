@@ -148,21 +148,36 @@ document.addEventListener('DOMContentLoaded', () => {
             this.classList.add('btn-primary', 'active');
             
             const selectedClassId = this.dataset.classId;
-            const rows = document.querySelectorAll('.book-row');
-            let visibleIndex = 1;
-            
-            rows.forEach(row => {
-                const rowClassId = row.dataset.classId;
-                if (selectedClassId === 'all' || rowClassId === selectedClassId) {
-                    row.style.display = '';
-                    row.querySelector('.row-index').textContent = visibleIndex++;
-                } else {
-                    row.style.display = 'none';
-                }
-            });
+            localStorage.setItem('activeBookClassFilter', selectedClassId);
+            filterRowsByClass(selectedClassId);
         });
     });
+
+    // Restore saved filter if present to retain it on page refresh/action reloads
+    const savedClassId = localStorage.getItem('activeBookClassFilter') || 'all';
+    const activeTile = document.querySelector(`.class-filter-tile[data-class-id="${savedClassId}"]`);
+    if (activeTile) {
+        activeTile.click();
+    } else {
+        const allTile = document.querySelector('.class-filter-tile[data-class-id="all"]');
+        if (allTile) allTile.click();
+    }
 });
+
+function filterRowsByClass(selectedClassId) {
+    const rows = document.querySelectorAll('.book-row');
+    let visibleIndex = 1;
+    
+    rows.forEach(row => {
+        const rowClassId = row.dataset.classId;
+        if (selectedClassId === 'all' || rowClassId === selectedClassId) {
+            row.style.display = '';
+            row.querySelector('.row-index').textContent = visibleIndex++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
 
 function openEditModal(book) {
     document.getElementById('editBookId').value = book.id;
