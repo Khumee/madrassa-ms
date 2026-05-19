@@ -280,6 +280,28 @@
                     <%= locals.lang === 'ur' ? 'تبادلہ کرنے کے لیے نیچے سے دو مختلف پیریڈز منتخب کریں۔ سسٹم خود بخود اس بات کو یقینی بنائے گا کہ کوئی تنازعہ نہ ہو۔' : 'يرجى تحديد حصتين مختلفتين للتبادل بينهما. سيتحقق النظام تلقائياً من عدم وجود أي تعارض في الجدول.' %>
                 </p>
 
+                <!-- Filters for Periods A and B -->
+                <div class="row g-3 mb-4 p-3 bg-light rounded-3 border">
+                    <div class="col-md-6 text-end">
+                        <label class="form-label small fw-bold text-muted"><%= locals.lang === 'ur' ? 'استاد کے مطابق فلٹر کریں' : 'تصفية حسب المعلم' %></label>
+                        <select id="swapTeacherFilter" class="form-select rounded-3" onchange="filterSwapPeriodOptions()">
+                            <option value=""><%= locals.lang === 'ur' ? '-- تمام اساتذہ --' : '-- جميع المعلمين --' %></option>
+                            <% teachers.forEach(t => { %>
+                                <option value="<%= t.name %>"><%= t.name %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <label class="form-label small fw-bold text-muted"><%= locals.lang === 'ur' ? 'کلاس کے مطابق فلٹر کریں' : 'تصفية حسب الصف' %></label>
+                        <select id="swapClassFilter" class="form-select rounded-3" onchange="filterSwapPeriodOptions()">
+                            <option value=""><%= locals.lang === 'ur' ? '-- تمام کلاسز --' : '-- جميع الفصول --' %></option>
+                            <% classes.forEach(c => { %>
+                                <option value="<%= c.name_ar %>"><%= c.name_ar %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                </div>
+
                 <!-- Conflict Alert Box -->
                 <div id="swapModalErrorBox" class="alert alert-danger d-none border-0 rounded-3 mb-4" role="alert">
                     <i class="bi bi-exclamation-triangle-fill me-2"></i>
@@ -1273,6 +1295,39 @@ async function executeModalSwap() {
     }
 }
 
+function filterSwapPeriodOptions() {
+    const teacherFilter = document.getElementById('swapTeacherFilter').value;
+    const classFilter = document.getElementById('swapClassFilter').value;
+
+    const filterSelect = (selectId) => {
+        const select = document.getElementById(selectId);
+        const currentValue = select.value;
+        const options = select.querySelectorAll('option');
+
+        options.forEach(opt => {
+            if (!opt.value) return; // Skip placeholder
+            
+            const info = JSON.parse(opt.getAttribute('data-info'));
+            const matchesTeacher = !teacherFilter || info.teacher_name === teacherFilter;
+            const matchesClass = !classFilter || info.class_name === classFilter;
+
+            if (matchesTeacher && matchesClass) {
+                opt.style.display = '';
+            } else {
+                opt.style.display = 'none';
+                if (opt.value === currentValue) {
+                    select.value = ''; // Deselect if now hidden
+                }
+            }
+        });
+        
+        onSwapPeriodSelectChange();
+    };
+
+    filterSelect('swapPeriodSelectA');
+    filterSelect('swapPeriodSelectB');
+}
+
 // Restore saved filters on load
 document.addEventListener('DOMContentLoaded', () => {
     Object.keys(activeFilters).forEach(type => {
@@ -1293,6 +1348,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const swapModalEl = document.getElementById('swapPeriodsModal');
     if (swapModalEl) {
         swapModalEl.addEventListener('hidden.bs.modal', function () {
+            document.getElementById('swapTeacherFilter').value = '';
+            document.getElementById('swapClassFilter').value = '';
+            
+            // Unhide all options on close so next open is clean
+            document.querySelectorAll('#swapPeriodSelectA option, #swapPeriodSelectB option').forEach(opt => {
+                opt.style.display = '';
+            });
+            
             document.getElementById('swapPeriodSelectA').value = '';
             document.getElementById('swapPeriodSelectB').value = '';
             document.getElementById('swapModalErrorBox').classList.add('d-none');

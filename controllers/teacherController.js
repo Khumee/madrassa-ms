@@ -308,8 +308,15 @@ exports.updateBookProgress = async (req, res) => {
         const { start_page, end_page, current_page } = assignment[0];
         const numPage = parseInt(pageNumber);
 
-        if (numPage < current_page) {
-            return res.json({ success: false, error: `لا يمكن تعيين صفحة أقل من الصفحة الحالية (${current_page})` });
+        // Fetch the previous page number before today's date to allow today's edits/corrections backwards
+        const [prevProgress] = await db.execute(
+            'SELECT page_number FROM book_progress WHERE assignment_id = ? AND date < ? ORDER BY date DESC, id DESC LIMIT 1',
+            [assignmentId, date]
+        );
+        const previous_page = prevProgress.length > 0 ? prevProgress[0].page_number : start_page;
+
+        if (numPage < previous_page) {
+            return res.json({ success: false, error: `لا يمكن الرجوع إلى صفحة أقل من إنجاز الحصة السابق وهو (${previous_page})` });
         }
 
         if (numPage < start_page || numPage > end_page) {

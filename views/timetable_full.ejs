@@ -49,6 +49,9 @@
         <button onclick="window.print()" class="btn btn-dark rounded-pill px-4 me-2">
             <i class="bi bi-printer me-2"></i><%= __('Print') %>
         </button>
+        <button onclick="printToPdfDisk(this)" class="btn btn-primary rounded-pill px-4 me-2">
+            <i class="bi bi-file-pdf me-2"></i><%= locals.lang === 'ur' ? 'پی ڈی ایف محفوظ کریں (D:\\timetable.pdf)' : 'حفظ كـ PDF (D:\\timetable.pdf)' %>
+        </button>
         <div class="btn-group rounded-pill overflow-hidden border me-2">
             <a href="/periods/full?groupBy=class" class="btn btn-sm <%= groupBy === 'class' ? 'btn-primary' : 'btn-white text-muted' %> px-3"><%= locals.lang === 'ur' ? 'کلاسز' : 'الفصول' %></a>
             <a href="/periods/full?groupBy=teacher" class="btn btn-sm <%= groupBy === 'teacher' ? 'btn-primary' : 'btn-white text-muted' %> px-3"><%= locals.lang === 'ur' ? 'اساتذہ' : 'المعلمون' %></a>
@@ -302,26 +305,22 @@
     /* Print Styles */
     @media print {
         .no-print { display: none !important; }
+        body { 
+            background: white !important; 
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
         .class-timetable { 
             break-inside: avoid; 
             margin-bottom: 2cm !important; 
-            border: 2px solid #333 !important; 
+            border: 1px solid #cbd5e1 !important; 
             box-shadow: none !important; 
-            border-radius: 0 !important; 
+            border-radius: 12px !important; 
             transform: none !important;
         }
-        .class-header {
-            background: #333 !important;
-            color: #fff !important;
-            border-radius: 0 !important;
-        }
-        body { background: white !important; }
-        .timetable-container-wide { padding: 0 !important; }
         .period-box {
-            border: 1px solid #ccc !important;
-            background: #fff !important;
-            color: #000 !important;
-            border-left: 5px solid #000 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
             box-shadow: none !important;
             transform: none !important;
         }
@@ -415,6 +414,29 @@ function applyFilters() {
             block.style.display = 'none';
         }
     });
+}
+
+async function printToPdfDisk(btn) {
+    const groupBy = '<%= groupBy %>';
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span><%= locals.lang === 'ur' ? 'محفوظ ہو رہا ہے...' : 'جاري الحفظ...' %>`;
+    
+    try {
+        const res = await fetch(`/periods/print-pdf?groupBy=${groupBy}`, { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+            alert('<%= locals.lang === "ur" ? "ٹائم ٹیبل کامیابی کے ساتھ D:\\\\timetable.pdf پر محفوظ کر دیا گیا ہے!" : "تم حفظ الجدول بنجاح في D:\\\\timetable.pdf!" %>');
+        } else {
+            alert('Error printing PDF: ' + data.error);
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Server error occurred during PDF generation');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
 }
 </script>
 

@@ -4,9 +4,11 @@ const { DateTime } = require('luxon');
 
 exports.showReports = async (req, res) => {
     try {
-        const now = DateTime.now();
-        const defaultStartDate = '2026-05-01'; // Tracking started on May 1, 2026
-        const defaultEndDate = now.toISODate(); // today
+        const now = DateTime.now().setZone('Asia/Karachi');
+        const lastMonday = now.startOf('week').minus({ weeks: 1 });
+        const lastSaturday = lastMonday.plus({ days: 5 });
+        const defaultStartDate = lastMonday.toISODate();
+        const defaultEndDate = lastSaturday.toISODate();
 
         const startDate = req.query.startDate || defaultStartDate;
         const endDate = req.query.endDate || defaultEndDate;
@@ -157,8 +159,14 @@ exports.showTeacherProgressReport = async (req, res) => {
 
 exports.showBooksManage = async (req, res) => {
     try {
-        const [books] = await db.execute('SELECT * FROM books ORDER BY title');
-        res.render('books_manage', { books });
+        const [books] = await db.execute(`
+            SELECT b.*, c.name_ar as class_name 
+            FROM books b 
+            LEFT JOIN classes c ON b.class_id = c.id 
+            ORDER BY b.title
+        `);
+        const [classes] = await db.execute('SELECT * FROM classes ORDER BY name_ar ASC');
+        res.render('books_manage', { books, classes });
     } catch (err) {
         console.error(err);
         res.status(500).send('Error loading books');
@@ -166,9 +174,9 @@ exports.showBooksManage = async (req, res) => {
 };
 
 exports.addBook = async (req, res) => {
-    const { title } = req.body;
+    const { title, classId } = req.body;
     try {
-        await db.execute('INSERT INTO books (title) VALUES (?)', [title]);
+        await db.execute('INSERT INTO books (title, class_id) VALUES (?, ?)', [title, classId || null]);
         res.redirect('/books/manage');
     } catch (err) {
         console.error(err);
@@ -178,9 +186,9 @@ exports.addBook = async (req, res) => {
 
 exports.editBook = async (req, res) => {
     const { id } = req.params;
-    const { title } = req.body;
+    const { title, classId } = req.body;
     try {
-        await db.execute('UPDATE books SET title = ? WHERE id = ?', [title, id]);
+        await db.execute('UPDATE books SET title = ?, class_id = ? WHERE id = ?', [title, classId || null, id]);
         res.json({ success: true });
     } catch (err) {
         console.error(err);

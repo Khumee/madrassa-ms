@@ -455,3 +455,28 @@ exports.swapPeriods = async (req, res) => {
         res.status(500).json({ success: false, error: err.message });
     }
 };
+
+exports.printTimetablePDF = async (req, res) => {
+    const { exec } = require('child_process');
+    try {
+        const edgePath = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe";
+        const targetPdf = "D:\\timetable.pdf";
+        const groupBy = req.query.groupBy || 'class';
+
+        // Edge headless print to PDF command
+        const localUrl = `http://localhost:3000/periods/full?bypass=true&groupBy=${groupBy}`;
+        const cmd = `"${edgePath}" --headless --disable-gpu --print-to-pdf="${targetPdf}" --no-sandbox "${localUrl}"`;
+        
+        exec(cmd, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`Edge print error: ${error.message}`);
+                return res.status(500).json({ success: false, error: error.message });
+            }
+            console.log('PDF generated successfully at D:\\timetable.pdf');
+            return res.json({ success: true, path: targetPdf });
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+};

@@ -81,13 +81,47 @@ exports.showCRDashboard = async (req, res) => {
             ORDER BY p.period_number
         `, [classId, dayName]);
 
-        todayPeriods.forEach(p => {
+        for (const p of todayPeriods) {
+            if (p.assignment_id) {
+                // Fetch the previous page number before selectedDate
+                const [prevProgress] = await db.execute(
+                    'SELECT page_number FROM book_progress WHERE assignment_id = ? AND date < ? ORDER BY date DESC, id DESC LIMIT 1',
+                    [p.assignment_id, selectedDate]
+                );
+                p.previous_page = prevProgress.length > 0 ? prevProgress[0].page_number : p.start_page;
+
+                // Fetch recent progress history for graph
+                const [progHistory] = await db.execute(
+                    'SELECT date, page_number FROM book_progress WHERE assignment_id = ? ORDER BY date ASC LIMIT 15',
+                    [p.assignment_id]
+                );
+                p.progress_history = progHistory.map(ph => ({
+                    date: ph.date instanceof Date ? ph.date.toISOString().split('T')[0] : String(ph.date).split('T')[0],
+                    page_number: ph.page_number
+                }));
+                
+                // Get the last progress date
+                const [lastProgress] = await db.execute(
+                    'SELECT date FROM book_progress WHERE assignment_id = ? ORDER BY date DESC, id DESC LIMIT 1',
+                    [p.assignment_id]
+                );
+                if (lastProgress.length > 0) {
+                    p.last_progress_date = DateTime.fromJSDate(new Date(lastProgress[0].date)).setLocale('ar').toFormat('dd MMMM yyyy');
+                } else {
+                    p.last_progress_date = 'لا يوجد سجل سابق';
+                }
+            } else {
+                p.previous_page = p.start_page || 1;
+                p.progress_history = [];
+                p.last_progress_date = 'لا يوجد سجل سابق';
+            }
+
             if (p.last_updated_at) {
                 p.lastUpdatedStr = DateTime.fromJSDate(new Date(p.last_updated_at)).setLocale('ar').toFormat('dd MMMM, hh:mm a');
             } else {
                 p.lastUpdatedStr = null;
             }
-        });
+        }
 
         const [teacherAttendance] = await db.execute(
             'SELECT * FROM attendance_teachers WHERE date = ?',
