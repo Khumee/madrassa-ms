@@ -188,7 +188,31 @@ exports.editBook = async (req, res) => {
     const { id } = req.params;
     const { title, classId } = req.body;
     try {
+        // 1. Retrieve the old title of the book before editing
+        const [oldBookRows] = await db.execute('SELECT title FROM books WHERE id = ?', [id]);
+        const oldTitle = oldBookRows.length > 0 ? oldBookRows[0].title : null;
+
+        // 2. Perform the update on the books table
         await db.execute('UPDATE books SET title = ?, class_id = ? WHERE id = ?', [title, classId || null, id]);
+
+        // 3. Instantly synchronize all timetable periods matching this book or its old name
+        if (oldTitle && oldTitle !== title) {
+            // Sync periods linked via assignments
+            await db.execute(`
+                UPDATE periods p
+                JOIN teacher_books tb ON p.assignment_id = tb.id
+                SET p.subject = ?
+                WHERE tb.book_id = ?
+            `, [title, id]);
+
+            // Sync static/unlinked periods that matched the old title exactly
+            await db.execute(`
+                UPDATE periods
+                SET subject = ?
+                WHERE subject = ?
+            `, [title, oldTitle]);
+        }
+
         res.json({ success: true });
     } catch (err) {
         console.error(err);

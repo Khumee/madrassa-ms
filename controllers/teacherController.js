@@ -260,6 +260,13 @@ exports.editAssignment = async (req, res) => {
             'UPDATE teacher_books SET teacher_id = ?, book_id = ?, start_page = ?, end_page = ?, session_id = ?, class_id = ? WHERE id = ?',
             [teacherId, bookId, startPage, endPage, sessionId, classId, id]
         );
+
+        // Instantly synchronize the static subject column for any timetable periods linked to this assignment
+        const [bookRows] = await db.execute('SELECT title FROM books WHERE id = ?', [bookId]);
+        if (bookRows.length > 0) {
+            await db.execute('UPDATE periods SET subject = ? WHERE assignment_id = ?', [bookRows[0].title, id]);
+        }
+
         res.json({ success: true });
     } catch (err) {
         console.error(err);

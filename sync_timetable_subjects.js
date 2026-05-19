@@ -16,14 +16,14 @@ async function syncTimetable() {
         `);
         console.log(`Successfully updated ${syncResult.affectedRows} linked timetable periods to match their active book titles.`);
 
-        // 2. Fix unlinked old static names (e.g., 'صحيح مسلم وجامع الترمذي' -> 'صحيح مسلم')
-        console.log("\nStep 2: Syncing unlinked static names ('صحيح مسلم وجامع الترمذي' -> 'صحيح مسلم')...");
+        // 2. Fix unlinked static names from 'صحيح مسلم' back to 'صحيح مسلم وجامع الترمذي'
+        console.log("\nStep 2: Syncing unlinked static names ('صحيح مسلم' -> 'صحيح مسلم وجامع الترمذي')...");
         const [staticResult] = await db.execute(`
             UPDATE periods
-            SET subject = 'صحيح مسلم'
-            WHERE subject = 'صحيح مسلم وجامع الترمذي'
+            SET subject = 'صحيح مسلم وجامع الترمذي'
+            WHERE subject = 'صحيح مسلم'
         `);
-        console.log(`Successfully updated ${staticResult.affectedRows} unlinked periods from the old name to 'صحيح مسلم'.`);
+        console.log(`Successfully updated ${staticResult.affectedRows} unlinked periods from the old name to 'صحيح مسلم وجامع الترمذي'.`);
 
         console.log("\nTimetable Synchronization Completed Successfully!");
     } catch (err) {
