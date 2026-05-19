@@ -35,6 +35,71 @@ const hasRole = (allowed) => {
     };
 };
 
+const hasPermission = (functionName) => {
+    return async (req, res, next) => {
+        if (!req.session.userId) {
+            return res.redirect('/login');
+        }
+        if (!req.session.role) {
+            return res.status(403).send('Unauthorized: Role not specified in session');
+        }
+
+        const normalize = (str) => {
+            if (!str) return '';
+            return str.replace(/\u06CC/g, '\u064A').trim();
+        };
+
+        const userRole = normalize(req.session.role);
+
+        try {
+            // Mudeer (مدير) can always access everything
+            if (userRole === 'مدير') {
+                return next();
+            }
+
+            // We check the role_permissions table in the database
+            const [rows] = await db.execute(
+                'SELECT allowed FROM role_permissions WHERE role = ? AND function_name = ?',
+                [userRole, functionName]
+            );
+
+            if (rows.length > 0) {
+                if (rows[0].allowed === 1 || rows[0].allowed === true) {
+                    return next();
+                }
+            } else {
+                // Fallback to hardcoded defaults if database entry does not exist
+                const defaultPermissions = {
+                    'reports': ['مدير', 'ناظم', 'عريب'],
+                    'books_manage': ['مدير', 'ناظم', 'عريب'],
+                    'users_manage': ['مدير', 'ناظم'],
+                    'students_manage': ['مدير', 'ناظم', 'عريب'],
+                    'student_attendance': ['مدير', 'ناظم', 'عريب'],
+                    'teachers_manage': ['مدير', 'ناظم', 'عريب'],
+                    'teacher_attendance': ['مدير', 'ناظم', 'عريب'],
+                    'teacher_books_manage': ['مدير', 'ناظم', 'عريب'],
+                    'periods_manage': ['مدير', 'ناظم']
+                };
+
+                const allowedRoles = defaultPermissions[functionName] || [];
+                const normalizedAllowed = allowedRoles.map(normalize);
+                if (normalizedAllowed.includes(userRole)) {
+                    return next();
+                }
+            }
+
+            // Render custom unauthorized page
+            res.status(403).render('error_unauthorized', { 
+                message: 'عذراً، ليس لديك الصلاحية الكافية للوصول إلى هذه الصفحة أو الميزة. يرجى مراجعة إدارة المدرسة (المدير).',
+                lang: req.session.lang || 'ar'
+            });
+        } catch (err) {
+            console.error('Error checking permission:', err);
+            res.status(503).send('Error checking permission in database');
+        }
+    };
+};
+
 const isAuthenticated = (req, res, next) => {
     if (req.session.userId) return next();
     res.redirect('/login');
@@ -48,5 +113,6 @@ const getCRClassId = async (userId) => {
 module.exports = {
     isAuthenticated,
     hasRole,
+    hasPermission,
     getCRClassId
 };

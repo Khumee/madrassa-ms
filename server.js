@@ -85,6 +85,85 @@ app.listen(PORT, async () => {
     try {
         const db = require('./config/db');
         
+        // 0. Permissions Schema & Initial Seeding
+        await db.execute(`
+            CREATE TABLE IF NOT EXISTS role_permissions (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                role VARCHAR(50) NOT NULL,
+                function_name VARCHAR(100) NOT NULL,
+                allowed BOOLEAN DEFAULT FALSE,
+                UNIQUE KEY role_function (role, function_name)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        `);
+
+        const [permCount] = await db.execute('SELECT COUNT(*) as count FROM role_permissions');
+        if (permCount[0].count === 0) {
+            console.log('Seeding default role permissions...');
+            const defaultPermissions = [
+                { function_name: 'reports', role: 'مدير', allowed: true },
+                { function_name: 'reports', role: 'ناظم', allowed: true },
+                { function_name: 'reports', role: 'عريب', allowed: true },
+                { function_name: 'reports', role: 'أستاذ', allowed: false },
+                { function_name: 'reports', role: 'طالب', allowed: false },
+
+                { function_name: 'books_manage', role: 'مدير', allowed: true },
+                { function_name: 'books_manage', role: 'ناظم', allowed: true },
+                { function_name: 'books_manage', role: 'عريب', allowed: true },
+                { function_name: 'books_manage', role: 'أستاذ', allowed: false },
+                { function_name: 'books_manage', role: 'طالب', allowed: false },
+
+                { function_name: 'users_manage', role: 'مدير', allowed: true },
+                { function_name: 'users_manage', role: 'ناظم', allowed: true },
+                { function_name: 'users_manage', role: 'عريب', allowed: false },
+                { function_name: 'users_manage', role: 'أستاذ', allowed: false },
+                { function_name: 'users_manage', role: 'طالب', allowed: false },
+
+                { function_name: 'students_manage', role: 'مدير', allowed: true },
+                { function_name: 'students_manage', role: 'ناظم', allowed: true },
+                { function_name: 'students_manage', role: 'عريب', allowed: true },
+                { function_name: 'students_manage', role: 'أستاذ', allowed: false },
+                { function_name: 'students_manage', role: 'طالب', allowed: false },
+
+                { function_name: 'student_attendance', role: 'مدير', allowed: true },
+                { function_name: 'student_attendance', role: 'ناظم', allowed: true },
+                { function_name: 'student_attendance', role: 'عريب', allowed: true },
+                { function_name: 'student_attendance', role: 'أستاذ', allowed: false },
+                { function_name: 'student_attendance', role: 'طالب', allowed: false },
+
+                { function_name: 'teachers_manage', role: 'مدير', allowed: true },
+                { function_name: 'teachers_manage', role: 'ناظم', allowed: true },
+                { function_name: 'teachers_manage', role: 'عريب', allowed: true },
+                { function_name: 'teachers_manage', role: 'أستاذ', allowed: false },
+                { function_name: 'teachers_manage', role: 'طالب', allowed: false },
+
+                { function_name: 'teacher_attendance', role: 'مدير', allowed: true },
+                { function_name: 'teacher_attendance', role: 'ناظم', allowed: true },
+                { function_name: 'teacher_attendance', role: 'عريب', allowed: true },
+                { function_name: 'teacher_attendance', role: 'أستاذ', allowed: false },
+                { function_name: 'teacher_attendance', role: 'طالب', allowed: false },
+
+                { function_name: 'teacher_books_manage', role: 'مدير', allowed: true },
+                { function_name: 'teacher_books_manage', role: 'ناظم', allowed: true },
+                { function_name: 'teacher_books_manage', role: 'عريب', allowed: true },
+                { function_name: 'teacher_books_manage', role: 'أستاذ', allowed: false },
+                { function_name: 'teacher_books_manage', role: 'طالب', allowed: false },
+
+                { function_name: 'periods_manage', role: 'مدير', allowed: true },
+                { function_name: 'periods_manage', role: 'ناظم', allowed: true },
+                { function_name: 'periods_manage', role: 'عريب', allowed: false },
+                { function_name: 'periods_manage', role: 'أستاذ', allowed: false },
+                { function_name: 'periods_manage', role: 'طالب', allowed: false }
+            ];
+
+            for (const perm of defaultPermissions) {
+                await db.execute(
+                    'INSERT IGNORE INTO role_permissions (role, function_name, allowed) VALUES (?, ?, ?)',
+                    [perm.role, perm.function_name, perm.allowed]
+                );
+            }
+            console.log('✅ Default role permissions seeded.');
+        }
+
         // 1. Roles Normalization
         await db.execute(`
             UPDATE users 

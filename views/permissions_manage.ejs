@@ -1,0 +1,174 @@
+<%- include('partials/header') %>
+
+<div class="row mb-5 align-items-center">
+    <div class="col-md-6">
+        <h1 class="fw-bold text-primary">إدارة صلاحيات الوصول</h1>
+        <p class="text-muted text-lg">تحكم في الصلاحيات والأدوار لمختلف أقسام النظام</p>
+    </div>
+    <div class="col-md-6 text-start">
+        <a href="/" class="btn btn-outline-secondary rounded-pill px-4">
+            <i class="bi bi-arrow-right-short me-1"></i> العودة للرئيسية
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+            <div class="card-header bg-gradient-primary py-3 px-4" style="background: linear-gradient(135deg, #2c3e50, #34495e);">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0 text-white fw-bold">
+                        <i class="bi bi-shield-lock me-2"></i> جدول توزيع الصلاحيات
+                    </h5>
+                    <span class="badge bg-light text-primary border rounded-pill px-3 py-2 fw-semibold">
+                        خاص بالمدير فقط
+                    </span>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 text-end">
+                        <thead class="table-light">
+                            <tr style="border-bottom: 2px solid #dee2e6;">
+                                <th class="px-4 py-3 text-secondary" style="width: 35%;">الميزة / القسم</th>
+                                <% rolesList.forEach(role => { %>
+                                    <th class="text-center py-3 text-secondary fw-bold" style="width: 13%;">
+                                        <span class="badge bg-soft-primary text-primary px-3 py-2 rounded-pill shadow-xs" style="background-color: rgba(44, 62, 80, 0.08); font-size: 0.85rem;">
+                                            <%= role %>
+                                        </span>
+                                    </th>
+                                <% }) %>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% functions.forEach(f => { %>
+                                <tr class="permission-row transition-all">
+                                    <td class="px-4 py-3 fw-bold text-dark">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <% 
+                                                let icon = 'bi-gear';
+                                                if (f.id === 'reports') icon = 'bi-bar-chart-line';
+                                                if (f.id === 'books_manage') icon = 'bi-book';
+                                                if (f.id === 'users_manage') icon = 'bi-people';
+                                                if (f.id === 'students_manage') icon = 'bi-mortarboard';
+                                                if (f.id === 'student_attendance') icon = 'bi-calendar2-check';
+                                                if (f.id === 'teachers_manage') icon = 'bi-person-badge';
+                                                if (f.id === 'teacher_attendance') icon = 'bi-check2-square';
+                                                if (f.id === 'teacher_books_manage') icon = 'bi-journals';
+                                                if (f.id === 'periods_manage') icon = 'bi-clock-history';
+                                            %>
+                                            <span class="bg-light text-primary rounded-circle p-2 d-inline-flex justify-content-center align-items-center shadow-xs" style="width: 35px; height: 35px;">
+                                                <i class="bi <%= icon %>"></i>
+                                            </span>
+                                            <span><%= f.name %></span>
+                                        </div>
+                                    </td>
+                                    <% rolesList.forEach(role => { %>
+                                        <td class="text-center py-3">
+                                            <% const isAllowed = grid[f.id][role]; %>
+                                            <div class="d-flex justify-content-center">
+                                                <button class="btn-toggle-permission border-0 bg-transparent" 
+                                                        data-role="<%= role %>" 
+                                                        data-function="<%= f.id %>" 
+                                                        data-allowed="<%= isAllowed %>"
+                                                        onclick="togglePermission(this)"
+                                                        title="انقر لتعديل صلاحية '<%= role %>' لقسم '<%= f.name %>'">
+                                                    <% if (isAllowed) { %>
+                                                        <span class="badge bg-success-soft text-success rounded-pill px-3 py-2 d-flex align-items-center gap-1 shadow-sm transition-all hover-scale" style="background-color: rgba(25, 135, 84, 0.12); cursor: pointer; border: 1px solid rgba(25, 135, 84, 0.2);">
+                                                            <i class="bi bi-check-circle-fill text-success fs-6"></i>
+                                                            <span style="font-size: 0.8rem; font-weight: 700;">مسموح</span>
+                                                        </span>
+                                                    <% } else { %>
+                                                        <span class="badge bg-danger-soft text-danger rounded-pill px-3 py-2 d-flex align-items-center gap-1 shadow-sm transition-all hover-scale" style="background-color: rgba(220, 53, 69, 0.12); cursor: pointer; border: 1px solid rgba(220, 53, 69, 0.2);">
+                                                            <i class="bi bi-x-circle-fill text-danger fs-6"></i>
+                                                            <span style="font-size: 0.8rem; font-weight: 700;">ممنوع</span>
+                                                        </span>
+                                                    <% } %>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    <% }) %>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .transition-all {
+        transition: all 0.25s ease-in-out;
+    }
+    .hover-scale:hover {
+        transform: scale(1.08);
+    }
+    .permission-row:hover {
+        background-color: rgba(44, 62, 80, 0.02);
+    }
+    .shadow-xs {
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+</style>
+
+<script>
+async function togglePermission(button) {
+    const role = button.getAttribute('data-role');
+    const functionName = button.getAttribute('data-function');
+    const currentAllowed = button.getAttribute('data-allowed') === 'true';
+    const newAllowed = !currentAllowed;
+
+    // Optional confirmation dialog for high importance actions
+    if (functionName === 'users_manage' && role !== 'مدير' && role !== 'ناظم' && newAllowed) {
+        const confirm = await window.showConfirm(`تحذير أمني: هل أنت متأكد من منح صلاحية إدارة المستخدمين لدور "${role}"؟ هذا سيسمح لهم بتعديل صلاحيات وحسابات المستخدمين الآخرين.`);
+        if (!confirm) return;
+    }
+
+    try {
+        button.style.pointerEvents = 'none';
+        button.style.opacity = '0.5';
+
+        const res = await fetch('/permissions/toggle', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role, functionName, allowed: newAllowed })
+        });
+        
+        const data = await res.json();
+        if (data.success) {
+            // Update button attributes and inner HTML dynamically without reloading
+            button.setAttribute('data-allowed', newAllowed.toString());
+            
+            if (newAllowed) {
+                button.innerHTML = `
+                    <span class="badge bg-success-soft text-success rounded-pill px-3 py-2 d-flex align-items-center gap-1 shadow-sm transition-all hover-scale" style="background-color: rgba(25, 135, 84, 0.12); cursor: pointer; border: 1px solid rgba(25, 135, 84, 0.2);">
+                        <i class="bi bi-check-circle-fill text-success fs-6"></i>
+                        <span style="font-size: 0.8rem; font-weight: 700;">مسموح</span>
+                    </span>
+                `;
+                window.showToast("تم تحديث الصلاحية بنجاح: مسموح بها الآن.", "success");
+            } else {
+                button.innerHTML = `
+                    <span class="badge bg-danger-soft text-danger rounded-pill px-3 py-2 d-flex align-items-center gap-1 shadow-sm transition-all hover-scale" style="background-color: rgba(220, 53, 69, 0.12); cursor: pointer; border: 1px solid rgba(220, 53, 69, 0.2);">
+                        <i class="bi bi-x-circle-fill text-danger fs-6"></i>
+                        <span style="font-size: 0.8rem; font-weight: 700;">ممنوع</span>
+                    </span>
+                `;
+                window.showToast("تم إلغاء الصلاحية بنجاح: ممنوعة الآن.", "success");
+            }
+        } else {
+            window.showToast("فشل في تحديث الصلاحية: " + (data.error || 'خطأ غير معروف'), "danger");
+        }
+    } catch (err) {
+        console.error(err);
+        window.showToast("حدث خطأ أثناء محاولة الاتصال بالخادم", "danger");
+    } finally {
+        button.style.pointerEvents = 'auto';
+        button.style.opacity = '1';
+    }
+}
+</script>
+
+<%- include('partials/footer') %>

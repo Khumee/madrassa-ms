@@ -496,3 +496,57 @@ exports.adminImportData = async (req, res) => {
         res.status(500).send('Error importing data');
     }
 };
+
+exports.showPermissionsManage = async (req, res) => {
+    try {
+        // Fetch all permissions from database
+        const [permissions] = await db.execute('SELECT * FROM role_permissions');
+
+        // Grid functions and list of roles
+        const functions = [
+            { id: 'reports', name: 'التقارير العامة وتقارير الحضور' },
+            { id: 'books_manage', name: 'إدارة الكتب والمناهج' },
+            { id: 'users_manage', name: 'إدارة حسابات المستخدمين والأدوار' },
+            { id: 'students_manage', name: 'إدارة بيانات الطلاب' },
+            { id: 'student_attendance', name: 'تسجيل حضور الطلاب' },
+            { id: 'teachers_manage', name: 'إدارة بيانات المعلمين' },
+            { id: 'teacher_attendance', name: 'تسجيل حضور المعلمين' },
+            { id: 'teacher_books_manage', name: 'توزيع وإسناد الكتب للمعلمين' },
+            { id: 'periods_manage', name: 'إدارة الحصص وجدول التوقيت' }
+        ];
+
+        const rolesList = ['مدير', 'ناظم', 'أستاذ', 'عريب', 'طالب'];
+
+        // Build a grid structure: function_name -> { role -> allowed }
+        const grid = {};
+        functions.forEach(f => {
+            grid[f.id] = {};
+            rolesList.forEach(r => {
+                const match = permissions.find(p => p.function_name === f.id && p.role === r);
+                grid[f.id][r] = match ? !!match.allowed : false;
+            });
+        });
+
+        res.render('permissions_manage', { functions, rolesList, grid });
+    } catch (err) {
+        console.error('Error showing permissions:', err);
+        res.status(500).send('Error loading permissions page');
+    }
+};
+
+exports.togglePermission = async (req, res) => {
+    const { role, functionName, allowed } = req.body;
+    try {
+        // Upsert permission
+        await db.execute(`
+            INSERT INTO role_permissions (role, function_name, allowed) 
+            VALUES (?, ?, ?)
+            ON DUPLICATE KEY UPDATE allowed = VALUES(allowed)
+        `, [role, functionName, allowed ? 1 : 0]);
+
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Error toggling permission:', err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+};

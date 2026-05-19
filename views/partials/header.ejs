@@ -53,6 +53,11 @@
             <a href="/periods/full" class="btn btn-outline-primary rounded-pill px-3">
                 <i class="bi bi-calendar3 me-1"></i> <%= __('Timetable') %>
             </a>
+            <% if (locals.session && session.role === 'مدير') { %>
+                <a href="/permissions/manage" class="btn btn-outline-warning rounded-pill px-3 fw-semibold">
+                    <i class="bi bi-shield-lock me-1"></i> الصلاحيات
+                </a>
+            <% } %>
             <div class="dropdown">
                 <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="langDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="bi bi-globe"></i> <%= __('Language') %>
