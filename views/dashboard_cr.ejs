@@ -93,7 +93,7 @@
                                                     data-status="present"
                                                     onclick="markStudentStatus(<%= student.id %>, 'present', this)"
                                                     title="حاضر"
-                                                    style="width:42px;height:42px;font-size:1.15rem;border-width:2px;">
+                                                    style="width:44px;height:44px;font-size:1.45rem;border-width:2px;">
                                                     <i class="bi bi-check-lg"></i>
                                                 </button>
                                                 <button type="button"
@@ -101,7 +101,7 @@
                                                     data-status="absent"
                                                     onclick="markStudentStatus(<%= student.id %>, 'absent', this)"
                                                     title="غائب"
-                                                    style="width:42px;height:42px;font-size:1.15rem;border-width:2px;">
+                                                    style="width:44px;height:44px;font-size:1.45rem;border-width:2px;">
                                                     <i class="bi bi-x-lg"></i>
                                                 </button>
                                                 <button type="button"
@@ -109,7 +109,7 @@
                                                     data-status="leave"
                                                     onclick="markStudentStatus(<%= student.id %>, 'leave', this)"
                                                     title="إجازة"
-                                                    style="width:42px;height:42px;font-size:1.15rem;border-width:2px;">
+                                                    style="width:44px;height:44px;font-size:1.45rem;border-width:2px;">
                                                     <i class="bi bi-door-open"></i>
                                                 </button>
                                                 <button type="button"
@@ -117,7 +117,7 @@
                                                     data-status="online"
                                                     onclick="markStudentStatus(<%= student.id %>, 'online', this)"
                                                     title="أونلاين"
-                                                    style="width:42px;height:42px;font-size:1.15rem;border-width:2px;">
+                                                    style="width:44px;height:44px;font-size:1.45rem;border-width:2px;">
                                                     <i class="bi bi-wifi"></i>
                                                 </button>
                                             </div>
@@ -163,7 +163,12 @@
                                                    onchange="toggleTeacherAttendance(<%= period.teacher_id %>, this)">
                                             <div>
                                                 <label class="form-check-label fw-bold text-dark mb-0" for="switch_<%= period.id %>" style="cursor: pointer; font-size: 1.05rem;">
-                                                    الحصة <%= period.period_number %> - <%= period.teacher_name %> - <%= period.book_title %>
+                                                    الحصة <%= period.period_number %> - <%= period.teacher_name %><%= period.book_title ? ' - ' + period.book_title : '' %>
+                                                    <% if (!period.assignment_id) { %>
+                                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill ms-2" style="font-size: 0.68rem; font-weight: normal; vertical-align: middle;">
+                                                            <i class="bi bi-exclamation-triangle-fill me-1"></i>يرجى ربط كتاب للتوزيع أولاً لتحديث المنهج
+                                                        </span>
+                                                    <% } %>
                                                 </label>
                                                 <div class="last-update-label mt-1 text-muted d-flex align-items-center gap-2" id="up_label_<%= period.assignment_id %>" style="font-size: 0.72rem;">
                                                     <% if (period.lastUpdatedStr) { %>
@@ -181,11 +186,11 @@
                                                 </div>
                                             </div>
                                         </div>
-
+ 
                                         <% if (period.assignment_id) { %>
                                             <div class="d-flex align-items-center gap-2">
                                                 <span class="small text-muted text-nowrap">الصفحة الحالية:</span>
-                                                <div class="position-relative">
+                                                <div class="position-relative pb-2">
                                                     <input type="number"
                                                            class="form-control text-center rounded-pill border-light text-success fw-bold p-2 bg-light-subtle"
                                                            value="<%= period.current_page %>"
@@ -194,7 +199,7 @@
                                                            data-current="<%= period.current_page %>"
                                                            onchange="updateBookProgress(<%= period.assignment_id %>, this)"
                                                            style="width: 90px; font-size: 1rem; border: 1.5px solid #059669 !important;">
-                                                    <span class="position-absolute top-100 start-50 translate-middle-x badge bg-light text-muted mt-1 text-nowrap" style="font-size: 0.65rem;">
+                                                    <span class="position-absolute start-50 translate-middle-x badge bg-light text-muted mt-1 text-nowrap" style="font-size: 0.65rem; bottom: -6px;">
                                                         <%= period.previous_page %>–<%= period.end_page %>
                                                     </span>
                                                 </div>
