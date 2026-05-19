@@ -90,5 +90,96 @@
                 setTimeout(() => toast.remove(), 500);
             }, 3000);
         }
+
+        const originalAlert = window.alert;
+
+        function showAlert(message, type = 'danger', title = null) {
+            const modalEl = document.getElementById('globalAlertDialog');
+            if (!modalEl || typeof bootstrap === 'undefined') {
+                originalAlert(message);
+                return;
+            }
+            
+            const accent = document.getElementById('globalAlertAccent');
+            const iconContainer = document.getElementById('globalAlertIconContainer');
+            const icon = document.getElementById('globalAlertIcon');
+            const titleEl = document.getElementById('globalAlertTitle');
+            const messageEl = document.getElementById('globalAlertMessage');
+            const confirmBtn = document.getElementById('globalAlertConfirmBtn');
+            
+            const lang = '<%= lang %>';
+            const defaultTitles = {
+                danger: lang === 'ur' ? 'غلطی!' : 'تنبيه!',
+                success: lang === 'ur' ? 'کامیابی!' : 'نجاح!',
+                warning: lang === 'ur' ? 'خبردار!' : 'تحذير!',
+                info: lang === 'ur' ? 'معلومات!' : 'معلومات!'
+            };
+            
+            titleEl.textContent = title || defaultTitles[type] || defaultTitles['info'];
+            messageEl.textContent = message;
+            
+            if (type === 'success') {
+                accent.style.backgroundColor = '#10b981';
+                iconContainer.style.backgroundColor = '#ecfdf5';
+                iconContainer.style.color = '#10b981';
+                icon.className = 'bi bi-check-circle-fill';
+                confirmBtn.className = 'btn btn-success rounded-pill px-5 py-2 fw-bold shadow-sm';
+                confirmBtn.style.backgroundColor = '#10b981';
+            } else if (type === 'warning') {
+                accent.style.backgroundColor = '#f59e0b';
+                iconContainer.style.backgroundColor = '#fffbeb';
+                iconContainer.style.color = '#f59e0b';
+                icon.className = 'bi bi-exclamation-triangle-fill';
+                confirmBtn.className = 'btn btn-warning rounded-pill px-5 py-2 fw-bold text-white shadow-sm';
+                confirmBtn.style.backgroundColor = '#f59e0b';
+            } else if (type === 'info') {
+                accent.style.backgroundColor = '#3b82f6';
+                iconContainer.style.backgroundColor = '#eff6ff';
+                iconContainer.style.color = '#3b82f6';
+                icon.className = 'bi bi-info-circle-fill';
+                confirmBtn.className = 'btn btn-info rounded-pill px-5 py-2 fw-bold text-white shadow-sm';
+                confirmBtn.style.backgroundColor = '#3b82f6';
+            } else { // default 'danger'
+                accent.style.backgroundColor = '#ef4444';
+                iconContainer.style.backgroundColor = '#fef2f2';
+                iconContainer.style.color = '#ef4444';
+                icon.className = 'bi bi-exclamation-octagon-fill';
+                confirmBtn.className = 'btn btn-danger rounded-pill px-5 py-2 fw-bold shadow-sm';
+                confirmBtn.style.backgroundColor = '#ef4444';
+            }
+            
+            const modal = new bootstrap.Modal(modalEl);
+            modal.show();
+        }
+
+        window.alert = function(msg) {
+            showAlert(msg, 'danger');
+        };
     </script>
+
+    <!-- Global Custom Premium Alert Dialog Modal -->
+    <div class="modal fade" id="globalAlertDialog" tabindex="-1" aria-hidden="true" style="z-index: 10000;">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 450px;">
+            <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);">
+                <!-- Colored accent bar at the top -->
+                <div id="globalAlertAccent" class="accent-bar" style="height: 6px; width: 100%;"></div>
+                
+                <div class="modal-body p-4 text-center">
+                    <!-- Premium Dynamic Icon Circle -->
+                    <div id="globalAlertIconContainer" class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3 shadow-sm" style="width: 65px; height: 65px; font-size: 1.8rem;">
+                        <i id="globalAlertIcon" class="bi"></i>
+                    </div>
+                    
+                    <h5 id="globalAlertTitle" class="fw-bold text-dark mb-2"></h5>
+                    <p id="globalAlertMessage" class="text-muted mb-4 px-2" style="font-size: 0.95rem; line-height: 1.5;"></p>
+                    
+                    <!-- Action Button -->
+                    <button type="button" class="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow-sm" data-bs-dismiss="modal" id="globalAlertConfirmBtn">
+                        <%= locals.lang === 'ur' ? 'ٹھیک ہے' : 'حسناً' %>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container pb-5">
