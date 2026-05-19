@@ -42,6 +42,18 @@
     </div>
     <div class="col-md-8">
         <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold text-dark">قائمة الكتب المتاحة</h5>
+                <div class="d-flex align-items-center gap-2" style="width: 280px;">
+                    <label class="text-nowrap text-muted small fw-bold mb-0">تصفية بالصف:</label>
+                    <select id="classFilterSelect" class="form-select form-select-sm rounded-3">
+                        <option value="all">جميع الصفوف</option>
+                        <% classes.forEach(cls => { %>
+                            <option value="<%= cls.id %>"><%= cls.name_ar %></option>
+                        <% }) %>
+                    </select>
+                </div>
+            </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0 text-end">
@@ -55,8 +67,8 @@
                         </thead>
                         <tbody>
                             <% books.forEach((book, index) => { %>
-                                <tr>
-                                    <td class="px-4 text-muted"><%= index + 1 %></td>
+                                <tr class="book-row" data-class-id="<%= book.class_id || '' %>">
+                                    <td class="px-4 text-muted row-index"><%= index + 1 %></td>
                                     <td class="fw-bold"><%= book.title %></td>
                                     <td class="text-muted"><%= book.class_name || 'غير محدد' %></td>
                                     <td class="px-4 text-center">
@@ -116,6 +128,26 @@
 let editBookModal;
 document.addEventListener('DOMContentLoaded', () => {
     editBookModal = new bootstrap.Modal(document.getElementById('editBookModal'));
+    
+    // Wire up Class Filter Select
+    const filterSelect = document.getElementById('classFilterSelect');
+    if (filterSelect) {
+        filterSelect.addEventListener('change', function() {
+            const selectedClassId = this.value;
+            const rows = document.querySelectorAll('.book-row');
+            let visibleIndex = 1;
+            
+            rows.forEach(row => {
+                const rowClassId = row.dataset.classId;
+                if (selectedClassId === 'all' || rowClassId === selectedClassId) {
+                    row.style.display = '';
+                    row.querySelector('.row-index').textContent = visibleIndex++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    }
 });
 
 function openEditModal(book) {
