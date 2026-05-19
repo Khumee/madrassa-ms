@@ -195,6 +195,17 @@
                                                     <h6 class="fw-bold mb-0 text-truncate" style="max-width: 70%;"><%= b.book_title %></h6>
                                                     <span class="text-success fw-bold small"><%= percentage %>%</span>
                                                 </div>
+
+                                                <!-- Prominent Last Week Highlight (on top) -->
+                                                <div class="alert bg-success-subtle border-0 text-success rounded-3 p-2 mb-2 text-end" style="font-size: 0.78rem;">
+                                                    <i class="bi bi-journal-check me-1"></i>
+                                                    <% if (b.last_week_completed > 0) { %>
+                                                        <strong>دراسة الأسبوع الماضي:</strong> من صفحة <%= b.last_week_started %> إلى <%= b.last_week_ended %> <span class="badge bg-success text-white rounded-pill px-2 ms-1" style="direction: ltr; display: inline-block;">+<%= b.last_week_completed %> ص</span>
+                                                    <% } else { %>
+                                                        <strong>الأسبوع الماضي:</strong> لم يتم تسجيل صفحات جديدة
+                                                    <% } %>
+                                                </div>
+
                                                 <div class="progress mb-2" style="height: 6px; border-radius: 3px;">
                                                     <div class="progress-bar bg-success" style="width: <%= percentage %>%"></div>
                                                 </div>

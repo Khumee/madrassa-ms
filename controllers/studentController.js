@@ -30,8 +30,29 @@ exports.showStudentDashboard = async (req, res) => {
             WHERE tb.class_id = ? AND s.is_active = TRUE
         `, [classId]);
 
+        const lastWeekStart = DateTime.now().startOf('week').minus({ weeks: 1 }).toISODate();
+        const lastWeekEnd = DateTime.now().startOf('week').minus({ weeks: 1 }).plus({ days: 5 }).toISODate();
+
         for (let b of books) {
             try {
+                // Fetch progress just before last week started
+                const [beforeLastWeek] = await db.execute(
+                    'SELECT page_number FROM book_progress WHERE assignment_id = ? AND date < ? ORDER BY date DESC, id DESC LIMIT 1',
+                    [b.id, lastWeekStart]
+                );
+                const startPageLastWeek = beforeLastWeek.length > 0 ? beforeLastWeek[0].page_number : b.start_page;
+
+                // Fetch progress up to last week's end
+                const [endOfLastWeek] = await db.execute(
+                    'SELECT page_number FROM book_progress WHERE assignment_id = ? AND date <= ? ORDER BY date DESC, id DESC LIMIT 1',
+                    [b.id, lastWeekEnd]
+                );
+                const endPageLastWeek = endOfLastWeek.length > 0 ? endOfLastWeek[0].page_number : b.start_page;
+
+                b.last_week_started = startPageLastWeek;
+                b.last_week_ended = endPageLastWeek;
+                b.last_week_completed = Math.max(0, endPageLastWeek - startPageLastWeek);
+
                 // Fetch ALL progress history for this book assignment, ordered chronologically with updater details
                 const [progHistory] = await db.execute(`
                     SELECT bp.id, bp.date, bp.page_number, u.username as updater_name, u.role as updater_role
@@ -68,6 +89,7 @@ exports.showStudentDashboard = async (req, res) => {
             } catch (err) {
                 console.error('Error fetching progress history for assignment ' + b.id, err);
                 b.detailed_history = [];
+                b.last_week_completed = 0;
             }
         }
 
