@@ -175,6 +175,9 @@
                                                         </div>
                                                     <% } %>
                                                 </div>
+                                                <div class="h-100 d-flex align-items-center justify-content-center text-muted empty-dash rounded-3 d-none">
+                                                    <i class="bi bi-dash-lg opacity-25"></i>
+                                                </div>
                                             <% } else { %>
                                                 <div class="h-100 d-flex align-items-center justify-content-center text-muted empty-dash rounded-3">
                                                     <i class="bi bi-dash-lg opacity-25"></i>
@@ -249,6 +252,9 @@
                                                             <i class="bi bi-clock me-1"></i><%= period.start_time.substring(0,5) %> - <%= period.end_time.substring(0,5) %>
                                                         </div>
                                                     <% } %>
+                                                </div>
+                                                <div class="h-100 d-flex align-items-center justify-content-center text-muted empty-dash rounded-3 d-none">
+                                                    <i class="bi bi-dash-lg opacity-25"></i>
                                                 </div>
                                             <% } else { %>
                                                 <div class="h-100 d-flex align-items-center justify-content-center text-muted empty-dash rounded-3">
@@ -453,25 +459,29 @@ function applyFilters() {
 
         dayRows.forEach(row => {
             const matchDay = activeFilters.day === 'all' || row.dataset.day === activeFilters.day;
-            const boxes = row.querySelectorAll('.period-box');
-            const dashes = row.querySelectorAll('.empty-dash');
+            const cells = row.querySelectorAll('.cell-container');
             
             let hasVisiblePeriodInRow = false;
-            boxes.forEach((box, i) => {
-                let matchBox = true;
-                if (isTeacherView) {
-                    matchBox = activeFilters.class === 'all' || clean(box.dataset.class) === clean(activeFilters.class);
-                } else {
-                    matchBox = activeFilters.teacher === 'all' || clean(box.dataset.teacher) === clean(activeFilters.teacher);
-                }
+            cells.forEach(cell => {
+                const box = cell.querySelector('.period-box');
+                const dash = cell.querySelector('.empty-dash');
                 
-                if (matchBox) {
-                    box.classList.remove('d-none');
-                    dashes[i].classList.add('d-none');
-                    hasVisiblePeriodInRow = true;
-                } else {
-                    box.classList.add('d-none');
-                    dashes[i].classList.remove('d-none');
+                if (box) {
+                    let matchBox = true;
+                    if (isTeacherView) {
+                        matchBox = activeFilters.class === 'all' || clean(box.dataset.class) === clean(activeFilters.class);
+                    } else {
+                        matchBox = activeFilters.teacher === 'all' || clean(box.dataset.teacher) === clean(activeFilters.teacher);
+                    }
+                    
+                    if (matchBox) {
+                        box.classList.remove('d-none');
+                        if (dash) dash.classList.add('d-none');
+                        hasVisiblePeriodInRow = true;
+                    } else {
+                        box.classList.add('d-none');
+                        if (dash) dash.classList.remove('d-none');
+                    }
                 }
             });
 
