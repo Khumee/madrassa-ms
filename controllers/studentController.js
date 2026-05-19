@@ -72,9 +72,9 @@ exports.showStudentDashboard = async (req, res) => {
              WHERE student_id = ?`,
             [student[0].id]
         );
-        const presentCount = stats[0] ? (stats[0].present || 0) : 0;
-        const onlineCount = stats[0] ? (stats[0].online || 0) : 0;
-        const totalAttendanceCount = stats[0] ? (stats[0].total || 0) : 0;
+        const presentCount = stats[0] ? Number(stats[0].present || 0) : 0;
+        const onlineCount = stats[0] ? Number(stats[0].online || 0) : 0;
+        const totalAttendanceCount = stats[0] ? Number(stats[0].total || 0) : 0;
         const attendancePercentage = totalAttendanceCount > 0 ? Math.round(((presentCount + onlineCount) / totalAttendanceCount) * 100) : 100;
 
         // Calculate Present Streak (Consecutive Present/Online days)

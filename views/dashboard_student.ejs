@@ -122,9 +122,14 @@
                                         timerElement.innerText = "00:00";
                                         setTimeout(() => { location.reload(); }, 1500);
                                     } else {
-                                        const minutes = Math.floor(countdownSeconds / 60);
+                                        const hours = Math.floor(countdownSeconds / 3600);
+                                        const minutes = Math.floor((countdownSeconds % 3600) / 60);
                                         const seconds = countdownSeconds % 60;
-                                        timerElement.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                                        if (hours > 0) {
+                                            timerElement.innerText = `${hours}:${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                                        } else {
+                                            timerElement.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                                        }
                                     }
                                 }, 1000);
                             }
