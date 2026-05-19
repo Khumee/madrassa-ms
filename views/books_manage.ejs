@@ -206,7 +206,8 @@ document.getElementById('editBookForm').addEventListener('submit', async (e) => 
 });
 
 async function deleteBook(id) {
-    if (!confirm('هل أنت متأكد من حذف هذا الكتاب؟ سيؤدي ذلك لحذفه من جميع التوزيعات.')) return;
+    const isConfirmed = await showConfirm('هل أنت متأكد من حذف هذا الكتاب؟ سيؤدي ذلك لحذفه من جميع التوزيعات.');
+    if (!isConfirmed) return;
     const res = await fetch(`/books/delete/${id}`, { method: 'POST' });
     const data = await res.json();
     if (data.success) {

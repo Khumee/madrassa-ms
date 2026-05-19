@@ -155,6 +155,55 @@
         window.alert = function(msg) {
             showAlert(msg, 'danger');
         };
+
+        let confirmPromiseResolve = null;
+
+        window.showConfirm = function(message, title = null) {
+            const modalEl = document.getElementById('globalConfirmDialog');
+            if (!modalEl || typeof bootstrap === 'undefined') {
+                return Promise.resolve(confirm(message));
+            }
+            
+            document.getElementById('globalConfirmMessage').textContent = message;
+            
+            const lang = '<%= lang %>';
+            if (title) {
+                document.getElementById('globalConfirmTitle').textContent = title;
+            } else {
+                document.getElementById('globalConfirmTitle').textContent = lang === 'ur' ? 'تصدیق کریں!' : 'تأكيد!';
+            }
+            
+            const modal = new bootstrap.Modal(modalEl);
+            modal.show();
+            
+            return new Promise((resolve) => {
+                confirmPromiseResolve = resolve;
+                
+                const confirmBtn = document.getElementById('globalConfirmBtn');
+                const cancelBtn = document.getElementById('globalConfirmCancelBtn');
+                
+                const handleConfirm = () => {
+                    modal.hide();
+                    resolve(true);
+                    cleanup();
+                };
+                
+                const handleCancel = () => {
+                    resolve(false);
+                    cleanup();
+                };
+                
+                confirmBtn.addEventListener('click', handleConfirm);
+                cancelBtn.addEventListener('click', handleCancel);
+                modalEl.addEventListener('hidden.bs.modal', handleCancel);
+                
+                function cleanup() {
+                    confirmBtn.removeEventListener('click', handleConfirm);
+                    cancelBtn.removeEventListener('click', handleCancel);
+                    modalEl.removeEventListener('hidden.bs.modal', handleCancel);
+                }
+            });
+        };
     </script>
 
     <!-- Global Custom Premium Alert Dialog Modal -->
@@ -177,6 +226,39 @@
                     <button type="button" class="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow-sm" data-bs-dismiss="modal" id="globalAlertConfirmBtn">
                         <%= locals.lang === 'ur' ? 'ٹھیک ہے' : 'حسناً' %>
                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Custom Premium Confirm Dialog Modal -->
+    <div class="modal fade" id="globalConfirmDialog" tabindex="-1" aria-hidden="true" style="z-index: 10001;">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 450px;">
+            <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);">
+                <!-- Orange/Amber accent bar for warnings -->
+                <div class="accent-bar" style="height: 6px; width: 100%; background-color: #f59e0b;"></div>
+                
+                <div class="modal-body p-4 text-center">
+                    <!-- Premium Dynamic Icon Circle -->
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3 shadow-sm" style="width: 65px; height: 65px; font-size: 1.8rem; background-color: #fffbeb; color: #f59e0b;">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                    </div>
+                    
+                    <h5 class="fw-bold text-dark mb-2" id="globalConfirmTitle">
+                        <%= locals.lang === 'ur' ? 'تصدیق کریں!' : 'تأكيد!' %>
+                    </h5>
+                    <p id="globalConfirmMessage" class="text-muted mb-4 px-2" style="font-size: 0.95rem; line-height: 1.5;"></p>
+                    
+                    <div class="d-flex justify-content-center gap-3">
+                        <!-- Cancel Button -->
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4 py-2 fw-bold" data-bs-dismiss="modal" id="globalConfirmCancelBtn">
+                            <%= locals.lang === 'ur' ? 'منسوخ کریں' : 'إلغاء' %>
+                        </button>
+                        <!-- Confirm Button -->
+                        <button type="button" class="btn btn-warning rounded-pill px-4 py-2 fw-bold text-white shadow-sm" style="background-color: #f59e0b;" id="globalConfirmBtn">
+                            <%= locals.lang === 'ur' ? 'تصدیق' : 'تأكيد' %>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

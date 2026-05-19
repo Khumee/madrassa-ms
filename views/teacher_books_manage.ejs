@@ -335,11 +335,11 @@ async function deleteAssignment(id) {
         const checkData = await checkRes.json();
         
         if (checkData.success && checkData.count > 0) {
-            if (!confirm(`تنبيه: هناك عدد ${checkData.count} حصص مسندة في جدول الحصص لهذا الكتاب/المعلم. سيؤدي إلغاء هذا الإسناد إلى حذف تلك الحصص أيضاً من جدول الحصص نهائياً. هل تريد الاستمرار في الحذف؟`)) {
-                return;
-            }
+            const isConfirmed = await showConfirm(`تنبيه: هناك عدد ${checkData.count} حصص مسندة في جدول الحصص لهذا الكتاب/المعلم. سيؤدي إلغاء هذا الإسناد إلى حذف تلك الحصص أيضاً من جدول الحصص نهائياً. هل تريد الاستمرار في الحذف؟`);
+            if (!isConfirmed) return;
         } else {
-            if (!confirm('هل أنت متأكد من إلغاء هذا الإسناد؟')) return;
+            const isConfirmed = await showConfirm('هل أنت متأكد من إلغاء هذا الإسناد؟');
+            if (!isConfirmed) return;
         }
         
         const res = await fetch(`/teacher-books/delete/${id}`, { method: 'POST' });
