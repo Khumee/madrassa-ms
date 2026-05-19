@@ -30,6 +30,47 @@ exports.showStudentDashboard = async (req, res) => {
             WHERE tb.class_id = ? AND s.is_active = TRUE
         `, [classId]);
 
+        for (let b of books) {
+            try {
+                // Fetch ALL progress history for this book assignment, ordered chronologically with updater details
+                const [progHistory] = await db.execute(`
+                    SELECT bp.id, bp.date, bp.page_number, u.username as updater_name, u.role as updater_role
+                    FROM book_progress bp
+                    LEFT JOIN users u ON bp.marked_by = u.id
+                    WHERE bp.assignment_id = ? 
+                    ORDER BY bp.date ASC, bp.id ASC
+                `, [b.id]);
+
+                // Build detailed step-by-step update records showing where it started and ended!
+                let lastPage = b.start_page;
+                b.detailed_history = [];
+
+                progHistory.forEach(ph => {
+                    const startedAt = lastPage;
+                    const endedAt = ph.page_number;
+                    const pagesCompleted = endedAt - startedAt;
+
+                    b.detailed_history.push({
+                        date: DateTime.fromJSDate(new Date(ph.date)).setLocale('ar').toFormat('dd MMMM yyyy'),
+                        startedAt,
+                        endedAt,
+                        pagesCompleted,
+                        updaterName: ph.updater_name || 'غير معروف',
+                        updaterRole: ph.updater_role || 'مستخدم'
+                    });
+
+                    // Update lastPage for the next iteration
+                    lastPage = ph.page_number;
+                });
+
+                // Reverse the detailed history for display so the most recent updates are at the top!
+                b.detailed_history.reverse();
+            } catch (err) {
+                console.error('Error fetching progress history for assignment ' + b.id, err);
+                b.detailed_history = [];
+            }
+        }
+
         // Pagination and Date range setup
         const currentPage = parseInt(req.query.page) || 1;
         const limit = 10;
