@@ -5,8 +5,8 @@
             <a href="?startDate=<%= prevStartDate %>&endDate=<%= prevEndDate %>" class="btn btn-white rounded-pill shadow-xs border px-3 py-2 text-dark d-flex align-items-center gap-1 hover-primary transition-all">
                 <i class="bi bi-chevron-right fs-6"></i> <%= locals.lang === 'ur' ? 'پچھلا ہفتہ' : 'الأسبوع السابق' %>
             </a>
-            <span class="fw-bold text-secondary px-2" style="font-family: monospace; font-size: 0.95rem;">
-                <%= startDate %> &larr; <%= endDate %>
+            <span class="fw-bold text-secondary px-2" style="font-family: monospace; font-size: 0.95rem; direction: ltr; display: inline-block;">
+                <%= startDate %> &rarr; <%= endDate %>
             </span>
             <a href="?startDate=<%= nextStartDate %>&endDate=<%= nextEndDate %>" class="btn btn-white rounded-pill shadow-xs border px-3 py-2 text-dark d-flex align-items-center gap-1 hover-primary transition-all">
                 <%= locals.lang === 'ur' ? 'اگلا ہفتہ' : 'الأسبوع التالي' %> <i class="bi bi-chevron-left fs-6"></i>
@@ -19,7 +19,7 @@
                 <%= locals.lang === 'ur' ? 'آج' : 'اليوم' %>
             </a>
             <a href="?startDate=<%= defaultStart %>&endDate=<%= defaultEnd %>" class="btn btn-sm rounded-pill px-3 py-2 <%= startDate === defaultStart && endDate === defaultEnd ? 'btn-primary' : 'btn-white border text-secondary shadow-xs' %>">
-                <%= locals.lang === 'ur' ? 'ہفتہ وار (افتراضى)' : 'الافتراضي (السبت - الإثنين)' %>
+                <%= locals.lang === 'ur' ? 'ہفتہ وار (افتراضى)' : 'الافتراضي (الإثنين - السبت)' %>
             </a>
             <a href="?startDate=<%= dateLastMonth %>&endDate=<%= dateToday %>" class="btn btn-sm rounded-pill px-3 py-2 <%= startDate === dateLastMonth && endDate === dateToday ? 'btn-primary' : 'btn-white border text-secondary shadow-xs' %>">
                 <%= locals.lang === 'ur' ? 'پچھلا مہینہ' : 'الشهر الماضي' %>

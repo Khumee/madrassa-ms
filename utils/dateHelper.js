@@ -6,9 +6,9 @@ exports.getDateFilterParams = (query) => {
     let startDate = query.startDate;
     let endDate = query.endDate;
 
-    // Default range: Sat of last week to Mon of this week
-    const defaultStart = today.startOf('week').minus({ days: 2 }).toISODate();
-    const defaultEnd = today.startOf('week').toISODate();
+    // Default range: Mon of this week to Sat of this week
+    const defaultStart = today.startOf('week').toISODate();
+    const defaultEnd = today.startOf('week').plus({ days: 5 }).toISODate();
 
     if (!startDate || !endDate) {
         startDate = defaultStart;
