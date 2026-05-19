@@ -1300,17 +1300,29 @@ async function executeModalSwap() {
             body: JSON.stringify({ periodIdA: valA, periodIdB: valB })
         });
         
-        const data = await response.json();
+        let data;
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            data = await response.json();
+        }
         
-        if (data.success) {
+        if (response.status === 403) {
+            showSwapError("<%= locals.lang === 'ur' ? 'تبادلے کے لیے آپ کے پاس کافی اجازت نہیں ہے۔' : 'ليس لديك الصلاحية الكافية لإجراء عملية التبادل.' %>");
+            executeBtn.disabled = false;
+            return;
+        }
+        
+        if (response.ok && data && data.success) {
             location.reload();
         } else {
-            showSwapError(data.error || 'حدث خطأ أثناء عملية التبادل');
+            const errorMsg = (data && data.error) ? data.error : 
+                ("<%= locals.lang === 'ur' ? 'تبادلے کے دوران ایک سرور خرابی پیش آئی۔' : 'حدث خطأ في السيرفر أثناء عملية التبادل.' %>");
+            showSwapError(errorMsg);
             executeBtn.disabled = false;
         }
     } catch (err) {
-        console.error(err);
-        showSwapError('A server error occurred during swap execution');
+        console.error('Swap Error Caught:', err);
+        showSwapError("<%= locals.lang === 'ur' ? 'کنکشن کی خرابی یا سرور کی خرابی پیش آئی۔' : 'حدث خطأ في الاتصال أو السيرفر أثناء عملية التبادل.' %>");
         executeBtn.disabled = false;
     }
 }

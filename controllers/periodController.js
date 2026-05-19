@@ -466,26 +466,32 @@ exports.swapPeriods = async (req, res) => {
             return res.json({ success: false, error: errMsg });
         }
 
-        // 4. Perform the Swap inside a transaction!
-        await db.query('START TRANSACTION');
-        
-        await db.execute(`
-            UPDATE periods 
-            SET day_of_week = ?, period_number = ?, start_time = ?, end_time = ? 
-            WHERE id = ?
-        `, [dayOfWeekB, periodNumberB, startTimeB, endTimeB, A.id]);
+        // 4. Perform the Swap inside a transaction on a single dedicated connection!
+        const conn = await db.getConnection();
+        try {
+            await conn.query('START TRANSACTION');
+            
+            await conn.execute(`
+                UPDATE periods 
+                SET day_of_week = ?, period_number = ?, start_time = ?, end_time = ? 
+                WHERE id = ?
+            `, [dayOfWeekB, periodNumberB, startTimeB, endTimeB, A.id]);
 
-        await db.execute(`
-            UPDATE periods 
-            SET day_of_week = ?, period_number = ?, start_time = ?, end_time = ? 
-            WHERE id = ?
-        `, [dayOfWeekA, periodNumberA, startTimeA, endTimeA, B.id]);
+            await conn.execute(`
+                UPDATE periods 
+                SET day_of_week = ?, period_number = ?, start_time = ?, end_time = ? 
+                WHERE id = ?
+            `, [dayOfWeekA, periodNumberA, startTimeA, endTimeA, B.id]);
 
-        await db.query('COMMIT');
-
-        res.json({ success: true });
+            await conn.query('COMMIT');
+            res.json({ success: true });
+        } catch (err) {
+            try { await conn.query('ROLLBACK'); } catch(e) {}
+            throw err;
+        } finally {
+            conn.release();
+        }
     } catch (err) {
-        try { await db.query('ROLLBACK'); } catch(e) {}
         console.error(err);
         res.status(500).json({ success: false, error: err.message });
     }
