@@ -46,11 +46,8 @@
         <button class="btn btn-outline-primary rounded-pill px-4 me-2" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
             <i class="bi bi-filter me-2"></i><%= __('Filter') %>
         </button>
-        <button onclick="window.print()" class="btn btn-outline-primary rounded-pill px-4 me-2">
+        <button onclick="window.print()" class="btn btn-primary rounded-pill px-4 me-2">
             <i class="bi bi-printer-fill me-2"></i><%= locals.lang === 'ur' ? 'پرنٹ' : 'طباعة' %>
-        </button>
-        <button onclick="triggerDownload()" class="btn btn-primary rounded-pill px-4 me-2">
-            <i class="bi bi-download me-2"></i><%= locals.lang === 'ur' ? 'ڈاؤن لوڈ' : 'تحميل' %>
         </button>
         <div class="btn-group rounded-pill overflow-hidden border me-2">
             <a href="/periods/full?groupBy=class" class="btn btn-sm <%= groupBy === 'class' ? 'btn-primary' : 'btn-white text-muted' %> px-3"><%= locals.lang === 'ur' ? 'کلاسز' : 'الفصول' %></a>
@@ -307,7 +304,7 @@
         .no-print, nav, #toastContainer { display: none !important; }
         @page {
             size: landscape;
-            margin: 5mm;
+            margin: 0mm;
         }
         * {
             -webkit-print-color-adjust: exact !important;
@@ -315,7 +312,7 @@
         }
         body { 
             background: white !important; 
-            margin: 0 !important;
+            margin: 1.5cm !important;
             padding: 0 !important;
         }
         .timetable-container-wide {
@@ -461,15 +458,6 @@ function applyFilters() {
             block.style.display = 'none';
         }
     });
-}
-
-function triggerDownload() {
-    const originalTitle = document.title;
-    document.title = "timetable";
-    window.print();
-    setTimeout(() => {
-        document.title = originalTitle;
-    }, 100);
 }
 </script>
 
