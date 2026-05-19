@@ -1,35 +1,238 @@
 <%- include('partials/header') %>
 
 <style>
+    /* Theme Variables & Tactile Utility Styles */
+    :root {
+        --kui-emerald: #059669;
+        --kui-emerald-glow: rgba(5, 150, 105, 0.15);
+        --kui-rose: #dc2626;
+        --kui-rose-glow: rgba(220, 38, 38, 0.15);
+        --kui-amber: #d97706;
+        --kui-amber-glow: rgba(217, 119, 6, 0.15);
+        --kui-cyan: #0891b2;
+        --kui-cyan-glow: rgba(8, 145, 178, 0.15);
+    }
+
     .cr-date-picker {
-        width: 180px;
+        width: 190px;
         cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .cr-date-picker:focus {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15) !important;
     }
     @media (max-width: 576px) {
         .cr-date-picker {
             width: 100% !important;
         }
     }
+
+    /* Mobile Finger-Friendly Tactile Attendance Buttons */
+    .status-btn {
+        width: 46px;
+        height: 46px;
+        font-size: 1.35rem;
+        border-radius: 50% !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 2px solid #e2e8f0;
+        background-color: #ffffff;
+        color: #64748b;
+        cursor: pointer;
+    }
+    
+    /* Muted states for non-active buttons when a status is active */
+    .btn-row-active .status-btn:not(.active) {
+        opacity: 0.4;
+        transform: scale(0.9);
+        border-color: #f1f5f9;
+        background-color: #f8fafc;
+    }
+
+    /* Active Highlight States */
+    .status-btn[data-status="present"].active {
+        background-color: var(--kui-emerald) !important;
+        border-color: var(--kui-emerald) !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 14px var(--kui-emerald-glow) !important;
+        transform: scale(1.1);
+    }
+    .status-btn[data-status="present"]:hover:not(.active) {
+        border-color: var(--kui-emerald);
+        color: var(--kui-emerald);
+        background-color: #ecfdf5;
+    }
+
+    .status-btn[data-status="absent"].active {
+        background-color: var(--kui-rose) !important;
+        border-color: var(--kui-rose) !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 14px var(--kui-rose-glow) !important;
+        transform: scale(1.1);
+    }
+    .status-btn[data-status="absent"]:hover:not(.active) {
+        border-color: var(--kui-rose);
+        color: var(--kui-rose);
+        background-color: #fff1f2;
+    }
+
+    .status-btn[data-status="leave"].active {
+        background-color: var(--kui-amber) !important;
+        border-color: var(--kui-amber) !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 14px var(--kui-amber-glow) !important;
+        transform: scale(1.1);
+    }
+    .status-btn[data-status="leave"]:hover:not(.active) {
+        border-color: var(--kui-amber);
+        color: var(--kui-amber);
+        background-color: #fffbeb;
+    }
+
+    .status-btn[data-status="online"].active {
+        background-color: var(--kui-cyan) !important;
+        border-color: var(--kui-cyan) !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 14px var(--kui-cyan-glow) !important;
+        transform: scale(1.1);
+    }
+    .status-btn[data-status="online"]:hover:not(.active) {
+        border-color: var(--kui-cyan);
+        color: var(--kui-cyan);
+        background-color: #ecfeff;
+    }
+
+    /* Chronological Daily Timeline */
+    .timeline-container {
+        position: relative;
+        padding-left: 0;
+    }
+    .timeline-card {
+        position: relative;
+        border: 1px solid #e2e8f0 !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 2;
+    }
+    .timeline-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.04) !important;
+        border-color: #cbd5e1 !important;
+    }
+    
+    /* Timeline Connective Line (for Laptop Screen) */
+    @media (min-width: 992px) {
+        .timeline-container::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            bottom: 20px;
+            right: 32px;
+            width: 3px;
+            background: linear-gradient(to bottom, #3b82f6, #10b981);
+            z-index: 1;
+            opacity: 0.3;
+        }
+        .timeline-card {
+            margin-right: 50px;
+        }
+        .timeline-badge-node {
+            position: absolute;
+            right: -63px;
+            top: 22px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background-color: #ffffff;
+            border: 3px solid #3b82f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.72rem;
+            font-weight: bold;
+            color: #3b82f6;
+            z-index: 3;
+            box-shadow: 0 0 0 4px #fff;
+        }
+        .timeline-card-active .timeline-badge-node {
+            background-color: #10b981;
+            border-color: #10b981;
+            color: white;
+            box-shadow: 0 0 0 4px #fff, 0 0 12px rgba(16, 185, 129, 0.4);
+        }
+    }
+
+    /* Form Switch Accent */
+    .form-switch .form-check-input {
+        width: 3.25em !important;
+        height: 1.75em !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -2 16 16'%3e%3cpath fill='%2394a3b8' d='M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z'/%3e%3c/svg%3e") !important;
+        background-color: #e2e8f0;
+        border-color: #cbd5e1;
+        cursor: pointer;
+        transition: background-position 0.2s ease-in-out, background-color 0.2s ease-in-out;
+    }
+    .form-switch .form-check-input:checked {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -2 16 16'%3e%3cpath fill='%23fff' d='M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z'/%3e%3c/svg%3e") !important;
+        background-color: var(--kui-emerald) !important;
+        border-color: var(--kui-emerald) !important;
+    }
+
+    /* Page Adjuster Buttons */
+    .adjust-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 50% !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        font-weight: bold;
+        font-size: 1.1rem;
+        border: none;
+        transition: all 0.15s ease;
+    }
+    .adjust-btn:active {
+        transform: scale(0.9);
+    }
+
+    .shadow-xs {
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .hover-scale {
+        transition: transform 0.2s ease;
+    }
+    .hover-scale:hover {
+        transform: scale(1.02);
+    }
 </style>
 
-    <div class="row mb-3">
+<div class="mt-2">
+    <!-- Premium Accent Header Card -->
+    <div class="row mb-4">
         <div class="col-md-12">
-            <div class="card shadow-sm border-0 rounded-4 p-4"
-                style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white;">
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div class="card border-0 rounded-4 p-4 shadow-sm"
+                style="background: linear-gradient(135deg, #1e3a8a 0%, #0d9488 100%); color: white; position: relative; overflow: hidden;">
+                <div style="position: absolute; top: -50px; left: -50px; width: 200px; height: 200px; border-radius: 50%; background: rgba(255,255,255,0.05); pointer-events: none;"></div>
+                
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 position-relative" style="z-index: 5;">
                     <div>
+                        <div class="badge bg-white-50 text-white rounded-pill px-3 py-1 mb-2 fw-semibold" style="font-size: 0.8rem; background: rgba(255,255,255,0.15);">
+                            <i class="bi bi-shield-check me-1"></i> لوحة ممثل الصف (عريب)
+                        </div>
                         <h2 class="fw-bold mb-1">
-                            <%= __('Class_Rep_Dashboard') %>
-                                <%= __(classInfo.name_ar) %>
+                            <%= __('Class_Rep_Dashboard') %>: <%= __(classInfo.name_ar) %>
                         </h2>
-                        <span class="text-white-50 small"><i class="bi bi-calendar-event me-1"></i>
+                        <span class="opacity-90 small"><i class="bi bi-calendar-event me-1"></i>
                             <%= new Date(todayDate + 'T00:00:00').toLocaleDateString('ar-EG', { weekday: 'long',
                                 year: 'numeric', month: 'long', day: 'numeric' }) %>
                         </span>
                     </div>
                     <div class="d-flex gap-2">
-                        <a href="/profile/change-password" class="btn btn-outline-light rounded-pill px-4 fw-bold">
-                            <i class="bi bi-key me-2"></i>
+                        <a href="/profile/change-password" class="btn btn-white text-dark rounded-pill px-4 fw-bold shadow-sm bg-white border-0 hover-scale">
+                            <i class="bi bi-key me-2 text-warning"></i>
                             <%= __('Change_Password') %>
                         </a>
                     </div>
@@ -38,13 +241,13 @@
         </div>
     </div>
 
-    <!-- Date Selector Row -->
+    <!-- Quick Dynamic Date Filter -->
     <div class="row mb-4">
         <div class="col-md-12">
-            <div class="card shadow-sm border-0 rounded-3 p-3">
+            <div class="card shadow-sm border-0 rounded-4 p-3 bg-white">
                 <form method="GET" action="/dashboard/cr" id="dateForm" class="d-flex align-items-center gap-3 flex-wrap">
                     <label class="fw-bold text-secondary mb-0 text-nowrap">
-                        <i class="bi bi-calendar-check me-1 text-primary"></i> تغيير التاريخ:
+                        <i class="bi bi-calendar-check me-1 text-primary"></i> الانتقال إلى تاريخ محدد:
                     </label>
                     <input type="date"
                         name="date"
@@ -52,134 +255,140 @@
                         class="form-control rounded-pill border-primary fw-bold text-primary cr-date-picker"
                         value="<%= todayDate %>"
                         onchange="document.getElementById('dateForm').submit()">
-                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold hover-scale">
                         <i class="bi bi-arrow-clockwise me-1"></i> تحديث
                     </button>
-                    <a href="/dashboard/cr" class="btn btn-outline-secondary rounded-pill px-3">
-                        <i class="bi bi-house me-1"></i> اليوم
+                    <a href="/dashboard/cr" class="btn btn-outline-secondary rounded-pill px-3 hover-scale">
+                        <i class="bi bi-calendar-date me-1"></i> اليوم الحالي
                     </a>
                 </form>
             </div>
         </div>
     </div>
 
+    <!-- 2-Column Core CR Operations Grid -->
     <div class="row">
-        <!-- Student Live Attendance Column (Left) -->
+        <!-- Student Attendance Section (Left) - Optimized for Mobile Thumb Taps -->
         <div class="col-lg-6 mb-4">
-            <div class="card shadow-sm border-0 rounded-4 h-100">
-                <div class="card-header bg-white p-4 border-0">
-                    <h4 class="fw-bold mb-0 text-primary"><i class="bi bi-people-fill me-2"></i>حضور الطلاب اليوم</h4>
-                    <small class="text-muted">انقر على الحالة لحفظها تلقائياً وبسرعة</small>
+            <div class="card shadow-sm border-0 rounded-4 h-100 bg-white">
+                <div class="card-header bg-white p-4 border-0 pb-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="fw-bold mb-0 text-primary"><i class="bi bi-people-fill me-2"></i>حضور طلاب الصف</h4>
+                        <span class="badge bg-primary-subtle text-primary rounded-pill px-3"><%= students.length %> طلاب</span>
+                    </div>
+                    <p class="text-muted small mt-1 mb-0"><i class="bi bi-info-circle me-1"></i>انقر مباشرة على رمز الحالة للتسجيل السريع والتلقائي دون أي قلق.</p>
                 </div>
-                <div class="card-body p-4 pt-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle text-end">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>الاسم</th>
-                                    <th class="text-center" style="width: 240px;">الحالة اليوم</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <% students.forEach(student=> { %>
-                                    <tr data-student-id="<%= student.id %>">
-                                        <td class="fw-bold text-dark">
-                                            <%= student.name %>
-                                        </td>
-                                        <td class="text-center">
-                                            <div class="d-flex justify-content-center gap-2">
-                                                <button type="button"
-                                                    class="btn btn-outline-success status-btn rounded-circle d-flex align-items-center justify-content-center"
-                                                    data-status="present"
-                                                    onclick="markStudentStatus(<%= student.id %>, 'present', this)"
-                                                    title="حاضر"
-                                                    style="width:44px;height:44px;font-size:1.45rem;border-width:2px;">
-                                                    <i class="bi bi-check-lg"></i>
-                                                </button>
-                                                <button type="button"
-                                                    class="btn btn-outline-danger status-btn rounded-circle d-flex align-items-center justify-content-center"
-                                                    data-status="absent"
-                                                    onclick="markStudentStatus(<%= student.id %>, 'absent', this)"
-                                                    title="غائب"
-                                                    style="width:44px;height:44px;font-size:1.45rem;border-width:2px;">
-                                                    <i class="bi bi-x-lg"></i>
-                                                </button>
-                                                <button type="button"
-                                                    class="btn btn-outline-warning status-btn rounded-circle d-flex align-items-center justify-content-center"
-                                                    data-status="leave"
-                                                    onclick="markStudentStatus(<%= student.id %>, 'leave', this)"
-                                                    title="إجازة"
-                                                    style="width:44px;height:44px;font-size:1.45rem;border-width:2px;">
-                                                    <i class="bi bi-door-open"></i>
-                                                </button>
-                                                <button type="button"
-                                                    class="btn btn-outline-info status-btn rounded-circle d-flex align-items-center justify-content-center"
-                                                    data-status="online"
-                                                    onclick="markStudentStatus(<%= student.id %>, 'online', this)"
-                                                    title="أونلاين"
-                                                    style="width:44px;height:44px;font-size:1.45rem;border-width:2px;">
-                                                    <i class="bi bi-wifi"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <% }) %>
-                            </tbody>
-                        </table>
+                
+                <div class="card-body p-4 pt-2">
+                    <!-- Fully Responsive List Card Layout for Mobile Thumb Targets -->
+                    <div class="d-flex flex-column gap-3">
+                        <% students.forEach(student=> { %>
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 p-3 rounded-4 border bg-light-subtle hover-scale" 
+                                 data-student-id="<%= student.id %>" 
+                                 style="border: 1px solid #f1f5f9 !important; background-color: #fafbfc;">
+                                <div class="fw-bold text-dark" style="font-size: 1.05rem; min-width: 140px;">
+                                    <%= student.name %>
+                                </div>
+                                <div class="d-flex gap-2 status-btn-group <%= student.status ? 'btn-row-active' : '' %>">
+                                    <button type="button"
+                                        class="status-btn"
+                                        data-status="present"
+                                        onclick="markStudentStatus(<%= student.id %>, 'present', this)"
+                                        title="حاضر">
+                                        <i class="bi bi-check-lg"></i>
+                                    </button>
+                                    <button type="button"
+                                        class="status-btn"
+                                        data-status="absent"
+                                        onclick="markStudentStatus(<%= student.id %>, 'absent', this)"
+                                        title="غائب">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                    <button type="button"
+                                        class="status-btn"
+                                        data-status="leave"
+                                        onclick="markStudentStatus(<%= student.id %>, 'leave', this)"
+                                        title="إجازة">
+                                        <i class="bi bi-door-open"></i>
+                                    </button>
+                                    <button type="button"
+                                        class="status-btn"
+                                        data-status="online"
+                                        onclick="markStudentStatus(<%= student.id %>, 'online', this)"
+                                        title="أونلاين">
+                                        <i class="bi bi-wifi"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        <% }) %>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Teacher Attendance & Book Progress Column (Right) -->
+        <!-- Teacher Lessons & Book Progress Timeline Section (Right) - Finger Friendly with Plus/Minus Tappers -->
         <div class="col-lg-6 mb-4">
-            <div class="card shadow-sm border-0 rounded-4 h-100">
-                <div class="card-header bg-white p-4 border-0">
+            <div class="card shadow-sm border-0 rounded-4 h-100 bg-white">
+                <div class="card-header bg-white p-4 border-0 pb-2">
                     <h4 class="fw-bold mb-0 text-success"><i class="bi bi-journal-bookmark-fill me-2"></i>حصص المعلمين والتقدم</h4>
+                    <p class="text-muted small mt-1 mb-0"><i class="bi bi-info-circle me-1"></i>انقر على زر التشغيل لتأكيد حضور المعلم، واستخدم <strong class="text-success">+</strong> أو <strong class="text-danger">-</strong> لتحديث المنهج بلمسة واحدة.</p>
                 </div>
-                <div class="card-body p-4 pt-0">
-                    <% if (todayPeriods.length===0) { %>
-                        <div class="text-center py-5">
-                            <i class="bi bi-calendar-x text-muted" style="font-size: 3rem;"></i>
+                <div class="card-body p-4 pt-2">
+                    <% if (todayPeriods.length === 0) { %>
+                        <div class="text-center py-5 border rounded-4 bg-light my-3">
+                            <i class="bi bi-calendar-x text-muted opacity-50" style="font-size: 3rem;"></i>
                             <p class="text-muted mt-3 fw-bold">لا توجد حصص مجدولة لهذا اليوم!</p>
                         </div>
                     <% } else { %>
-                        <div class="d-flex flex-column gap-3 mt-3">
+                        <div class="timeline-container d-flex flex-column gap-4 mt-3">
                             <% todayPeriods.forEach(period => {
                                 const ta = teacherAttendance.find(a => a.teacher_id === period.teacher_id);
                                 const isPresent = ta && ta.classes_taken > 0;
                                 %>
-                                <div class="border rounded-4 bg-white shadow-sm overflow-hidden" style="border: 1px solid #e2e8f0 !important; transition: all 0.2s ease;">
+                                <div class="timeline-card border rounded-4 bg-white shadow-xs overflow-hidden <%= isPresent ? 'timeline-card-active' : '' %>" id="tcard_<%= period.id %>">
+                                    
+                                    <!-- Laptop Screen Connector Badge Node -->
+                                    <div class="timeline-badge-node d-none d-lg-flex">
+                                        <%= period.period_number %>
+                                    </div>
+
                                     <div class="p-3 d-flex justify-content-between align-items-center flex-wrap gap-3 teacher-period-card" 
                                          data-teacher-id="<%= period.teacher_id %>"
-                                         data-assignment-id="<%= period.assignment_id %>"
-                                         style="transition: all 0.2s ease;">
+                                         data-assignment-id="<%= period.assignment_id %>">
                                          
                                         <div class="d-flex align-items-center gap-3">
-                                            <input class="form-check-input flex-shrink-0" type="checkbox" 
-                                                   style="width: 26px; height: 26px; cursor: pointer; border-radius: 6px; border: 2px solid #059669;"
-                                                   id="switch_<%= period.id %>" <%= isPresent ? 'checked' : '' %>
-                                                   onchange="toggleTeacherAttendance(<%= period.teacher_id %>, this)">
+                                            <!-- Modern Chronological Checkbox Switch -->
+                                            <div class="form-check form-switch ps-0">
+                                                <input class="form-check-input ms-0 me-2" type="checkbox" role="switch"
+                                                       id="switch_<%= period.id %>" <%= isPresent ? 'checked' : '' %>
+                                                       onchange="toggleTeacherAttendance(<%= period.teacher_id %>, this, <%= period.id %>)">
+                                            </div>
                                             <div>
-                                                <label class="form-check-label fw-bold text-dark mb-0" for="switch_<%= period.id %>" style="cursor: pointer; font-size: 1.05rem;">
-                                                    الحصة <%= period.period_number %> - <%= period.teacher_name %><%= period.book_title ? ' - ' + period.book_title : '' %>
+                                                <label class="form-check-label fw-bold text-dark mb-0 d-flex align-items-center flex-wrap gap-1" for="switch_<%= period.id %>" style="cursor: pointer; font-size: 1.05rem;">
+                                                    <span>الحصة <%= period.period_number %>:</span>
+                                                    <span class="text-primary fw-bold"><%= period.teacher_name %></span>
+                                                    <% if (period.book_title) { %>
+                                                        <span class="text-muted" style="font-size: 0.9rem;">(<%= period.book_title %>)</span>
+                                                    <% } %>
+                                                    
                                                     <% if (!period.assignment_id) { %>
-                                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill ms-2" style="font-size: 0.68rem; font-weight: normal; vertical-align: middle;">
-                                                            <i class="bi bi-exclamation-triangle-fill me-1"></i>يرجى ربط كتاب للتوزيع أولاً لتحديث المنهج
+                                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill" style="font-size: 0.65rem; font-weight: normal;">
+                                                            <i class="bi bi-exclamation-triangle-fill me-1"></i>لم يتم ربط كتاب
                                                         </span>
                                                     <% } %>
                                                 </label>
+                                                
                                                 <div class="last-update-label mt-1 text-muted d-flex align-items-center gap-2" id="up_label_<%= period.assignment_id %>" style="font-size: 0.72rem;">
                                                     <% if (period.lastUpdatedStr) { %>
-                                                        <span><i class="bi bi-clock-history me-1"></i><%= period.lastUpdatedStr %></span>
+                                                        <span><i class="bi bi-clock-history me-1"></i>تحديث: <%= period.lastUpdatedStr %></span>
                                                     <% } else { %>
-                                                        <span class="text-muted small">لا يوجد تحديث</span>
+                                                        <span class="text-muted small">لا يوجد تحديث للتقدم</span>
                                                     <% } %>
                                                     <% if (period.assignment_id) { %>
                                                         <button type="button" class="btn p-0 border-0 text-success fw-bold text-decoration-underline" 
                                                                 data-bs-toggle="collapse" data-bs-target="#collapseProgress_<%= period.id %>" 
                                                                 style="font-size: 0.72rem; cursor: pointer;">
-                                                             <i class="bi bi-chevron-down ms-1"></i>التفاصيل والرسم البياني
+                                                             <i class="bi bi-chevron-down ms-1"></i>التاريخ والرسم البياني
                                                         </button>
                                                     <% } %>
                                                 </div>
@@ -187,21 +396,27 @@
                                         </div>
  
                                         <% if (period.assignment_id) { %>
-                                            <div class="d-flex align-items-center gap-2">
-                                                <span class="small text-muted text-nowrap">الصفحة الحالية:</span>
-                                                <div class="position-relative pb-2">
-                                                    <input type="number"
-                                                           class="form-control text-center rounded-pill border-light text-success fw-bold p-2 bg-light-subtle"
+                                            <!-- Touch-Friendly Numeric Adjuster with Plus/Minus buttons -->
+                                            <div class="d-flex align-items-center gap-2 bg-light rounded-pill p-1 pe-3 border" style="box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);">
+                                                <span class="small text-secondary fw-bold text-nowrap d-none d-sm-inline" style="font-size: 0.78rem;">وصلنا صفحة:</span>
+                                                <div class="d-flex align-items-center gap-1 bg-white rounded-pill p-0.5 border shadow-sm" style="max-width: 145px;">
+                                                    <button type="button" class="adjust-btn btn-outline-danger bg-danger-subtle text-danger" 
+                                                            onclick="adjustPage(<%= period.id %>, -1)">-</button>
+                                                    <input type="number" id="input_<%= period.id %>"
+                                                           class="form-control text-center rounded-pill border-0 text-success fw-bold p-0 bg-transparent"
                                                            value="<%= period.current_page %>"
                                                            min="<%= period.previous_page %>"
                                                            max="<%= period.end_page %>"
                                                            data-current="<%= period.current_page %>"
                                                            onchange="updateBookProgress(<%= period.assignment_id %>, this)"
-                                                           style="width: 90px; font-size: 1rem; border: 1.5px solid #059669 !important;">
-                                                    <span class="position-absolute start-50 translate-middle-x badge bg-light text-muted mt-1 text-nowrap" style="font-size: 0.65rem; bottom: -6px;">
-                                                        <%= period.previous_page %>–<%= period.end_page %>
-                                                    </span>
+                                                           style="width: 48px; font-size: 1.05rem; box-shadow: none; pointer-events: none;">
+                                                    <button type="button" class="adjust-btn btn-success text-white bg-success" 
+                                                            onclick="adjustPage(<%= period.id %>, 1)">+</button>
                                                 </div>
+                                                <!-- Absolute Boundary Label inside the capsule container -->
+                                                <span class="badge bg-success-subtle text-success rounded-pill d-block text-center ms-1 me-2" style="font-size: 0.65rem; white-space: nowrap;">
+                                                    <%= period.previous_page %>–<%= period.end_page %>
+                                                </span>
                                             </div>
                                         <% } %>
                                     </div>
@@ -214,11 +429,11 @@
                                                            <p class="mb-1 text-muted small"><i class="bi bi-calendar-check me-1"></i>تاريخ آخر تحديث للتقدم:</p>
                                                            <p class="fw-bold text-primary mb-3" style="font-size: 0.95rem;"><%= period.last_progress_date %></p>
                                                            
-                                                           <p class="mb-1 text-muted small"><i class="bi bi-journal-text me-1"></i>المدى المقرر:</p>
+                                                           <p class="mb-1 text-muted small"><i class="bi bi-journal-text me-1"></i>المدى الكلي للمقرر:</p>
                                                            <p class="fw-bold text-success mb-0" style="font-size: 0.95rem;">من <%= period.start_page %> إلى <%= period.end_page %></p>
                                                       </div>
                                                       <div class="col-md-7 text-center">
-                                                           <p class="mb-2 text-muted small fw-bold text-end"><i class="bi bi-graph-up-arrow me-1"></i>رسم بياني للتقدم:</p>
+                                                           <p class="mb-2 text-muted small fw-bold text-end"><i class="bi bi-graph-up-arrow me-1"></i>رسم بياني للمنهج:</p>
                                                            <% if (period.progress_history && period.progress_history.length > 0) { %>
                                                                 <div style="height: 120px; width: 100%;">
                                                                      <canvas id="miniChart_<%= period.id %>"></canvas>
@@ -241,185 +456,214 @@
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-        const classId = <%= classId %>;
-        const todayDate = '<%= todayDate %>';
+<script>
+    const classId = <%= classId %>;
+    const todayDate = '<%= todayDate %>';
 
-        function changeDashboardDate(selectedDate) {
-            window.location.href = `/dashboard/cr?date=${selectedDate}`;
-        }
+    function changeDashboardDate(selectedDate) {
+        window.location.href = `/dashboard/cr?date=${selectedDate}`;
+    }
 
-        document.addEventListener('DOMContentLoaded', () => {
-    <% students.forEach(student => { %>
-        const studentRow = document.querySelector(`tr[data-student-id="<%= student.id %>"]`);
-            if (studentRow) {
+    document.addEventListener('DOMContentLoaded', () => {
+        <% students.forEach(student => { %>
+            const studentCard = document.querySelector(`div[data-student-id="<%= student.id %>"]`);
+            if (studentCard) {
                 const status = '<%= student.status %>';
                 if (status) {
-                    const btn = studentRow.querySelector(`.status-btn[data-status="${status}"]`);
+                    const btn = studentCard.querySelector(`.status-btn[data-status="${status}"]`);
                     if (btn) {
                         highlightBtn(btn, status);
                     }
                 }
             }
-    <% }) %>
-});
-
-        function highlightBtn(btn, status) {
-            const parent = btn.parentElement;
-            parent.querySelectorAll('.status-btn').forEach(b => {
-                b.className = b.className.replace(/btn-(success|danger|warning|info)/g, 'btn-outline-$1');
-                b.classList.remove('active', 'text-white');
-            });
-
-            btn.className = btn.className.replace(`btn-outline-${status}`, `btn-${status}`);
-            btn.classList.add('active', 'text-white');
-        }
-
-        async function markStudentStatus(studentId, status, btn) {
-            highlightBtn(btn, status);
-
-            try {
-                const res = await fetch('/attendance/students/save', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        date: todayDate,
-                        classId: classId,
-                        attendance: { [studentId]: status }
-                    })
-                });
-                const data = await res.json();
-                if (!data.success) {
-                    alert('فشل حفظ الحضور للرمز: ' + studentId);
-                }
-            } catch (err) {
-                console.error(err);
-                alert('حدث خطأ أثناء الاتصال بالسيرفر');
-            }
-        }
-
-        async function toggleTeacherAttendance(teacherId, switchInput) {
-            const teacherCards = document.querySelectorAll(`.teacher-period-card[data-teacher-id="${teacherId}"]`);
-            let checkedCount = 0;
-            teacherCards.forEach(card => {
-                const checkbox = card.querySelector('input[type="checkbox"]');
-                if (checkbox && checkbox.checked) {
-                    checkedCount++;
-                }
-            });
-
-            try {
-                const res = await fetch('/attendance/teachers/save', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        date: todayDate,
-                        attendance: { [teacherId]: checkedCount }
-                    })
-                });
-                const data = await res.json();
-                if (!data.success) {
-                    alert('فشل تعديل حضور المعلم');
-                    switchInput.checked = !switchInput.checked;
-                }
-            } catch (err) {
-                console.error(err);
-                alert('حدث خطأ أثناء الحفظ');
-                switchInput.checked = !switchInput.checked;
-            }
-        }
-
-        async function updateBookProgress(assignmentId, inputField) {
-            const pageNumber = inputField.value;
-            const min = parseInt(inputField.min);
-            const max = parseInt(inputField.max);
-
-            if (pageNumber < min || pageNumber > max) {
-                alert(`خطأ: رقم الصفحة يجب أن يكون بين ${min} و ${max}`);
-                inputField.value = inputField.getAttribute('data-last-valid') || min;
-                return;
-            }
-
-            try {
-                const res = await fetch('/book/update-progress', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ assignmentId, pageNumber })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    inputField.setAttribute('data-last-valid', pageNumber);
-
-                    const label = document.getElementById(`up_label_${assignmentId}`);
-                    if (label) {
-                        const nowStr = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
-                        label.innerHTML = `<span><i class="bi bi-clock-history me-1"></i>الآن (${nowStr})</span>`;
-                    }
-
-                    inputField.style.borderColor = '#10b981';
-                    setTimeout(() => {
-                        inputField.style.borderColor = '#e2e8f0';
-                    }, 1000);
-                } else {
-                    alert('حدث خطأ: ' + (data.error || 'فشل التحديث'));
-                }
-            } catch (err) {
-                console.error(err);
-                alert('حدث خطأ أثناء حفظ تقدم الكتاب');
-            }
-        }
-    </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        <% todayPeriods.forEach(period => { %>
-            <% if (period.assignment_id && period.progress_history && period.progress_history.length > 0) { %>
-                try {
-                    const ctx_<%= period.id %> = document.getElementById('miniChart_<%= period.id %>').getContext('2d');
-                    new Chart(ctx_<%= period.id %>, {
-                        type: 'line',
-                        data: {
-                            labels: <%- JSON.stringify(period.progress_history.map(h => h.date)) %>,
-                            datasets: [{
-                                label: '<%= period.book_title %>',
-                                data: <%- JSON.stringify(period.progress_history.map(h => h.page_number)) %>,
-                                borderColor: '#059669',
-                                backgroundColor: 'rgba(5, 150, 105, 0.1)',
-                                tension: 0.25,
-                                fill: true,
-                                pointRadius: 4,
-                                pointHoverRadius: 6,
-                                borderWidth: 2
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: { display: false },
-                                tooltip: { rtl: true }
-                            },
-                            scales: {
-                                x: { 
-                                    grid: { display: false },
-                                    ticks: { font: { size: 9 } }
-                                },
-                                y: { 
-                                    beginAtZero: false,
-                                    grid: { color: '#f1f5f9' },
-                                    ticks: { font: { size: 9 } }
-                                }
-                            }
-                        }
-                    });
-                } catch (chartErr) {
-                    console.error('Error initializing chart for period <%= period.id %>:', chartErr);
-                }
-            <% } %>
         <% }) %>
     });
-    </script>
 
-    <%- include('partials/footer') %>
+    function highlightBtn(btn, status) {
+        const parent = btn.parentElement;
+        parent.classList.add('btn-row-active');
+        parent.querySelectorAll('.status-btn').forEach(b => {
+            b.classList.remove('active');
+        });
+        btn.classList.add('active');
+    }
+
+    async function markStudentStatus(studentId, status, btn) {
+        highlightBtn(btn, status);
+
+        try {
+            const res = await fetch('/attendance/students/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    date: todayDate,
+                    classId: classId,
+                    attendance: { [studentId]: status }
+                })
+            });
+            const data = await res.json();
+            if (!data.success) {
+                alert('فشل حفظ الحضور للرمز: ' + studentId);
+            }
+        } catch (err) {
+            console.error(err);
+            alert('حدث خطأ أثناء الاتصال بالسيرفر');
+        }
+    }
+
+    async function toggleTeacherAttendance(teacherId, switchInput, periodId) {
+        const teacherCards = document.querySelectorAll(`.teacher-period-card[data-teacher-id="${teacherId}"]`);
+        let checkedCount = 0;
+        teacherCards.forEach(card => {
+            const checkbox = card.querySelector('input[type="checkbox"]');
+            if (checkbox && checkbox.checked) {
+                checkedCount++;
+            }
+        });
+
+        const tcard = document.getElementById(`tcard_${periodId}`);
+        if (tcard) {
+            if (switchInput.checked) {
+                tcard.classList.add('timeline-card-active');
+            } else {
+                tcard.classList.remove('timeline-card-active');
+            }
+        }
+
+        try {
+            const res = await fetch('/attendance/teachers/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    date: todayDate,
+                    attendance: { [teacherId]: checkedCount }
+                })
+            });
+            const data = await res.json();
+            if (!data.success) {
+                alert('فشل تعديل حضور المعلم');
+                switchInput.checked = !switchInput.checked;
+                if (tcard) tcard.classList.toggle('timeline-card-active');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('حدث خطأ أثناء الحفظ');
+            switchInput.checked = !switchInput.checked;
+            if (tcard) tcard.classList.toggle('timeline-card-active');
+        }
+    }
+
+    /* Quick Plus/Minus Page Adjuster Trigger */
+    function adjustPage(periodId, delta) {
+        const input = document.getElementById(`input_${periodId}`);
+        if (!input) return;
+        const val = parseInt(input.value) + delta;
+        const min = parseInt(input.min);
+        const max = parseInt(input.max);
+        if (val >= min && val <= max) {
+            input.value = val;
+            input.dispatchEvent(new Event('change'));
+        } else {
+            alert(`تنبيه: لا يمكن تخطي المدى المحدد المسموح به لهذه الحصة (${min} - ${max})`);
+        }
+    }
+
+    async function updateBookProgress(assignmentId, inputField) {
+        const pageNumber = inputField.value;
+        const min = parseInt(inputField.min);
+        const max = parseInt(inputField.max);
+
+        if (pageNumber < min || pageNumber > max) {
+            alert(`خطأ: رقم الصفحة يجب أن يكون بين ${min} و ${max}`);
+            inputField.value = inputField.getAttribute('data-last-valid') || min;
+            return;
+        }
+
+        try {
+            const res = await fetch('/book/update-progress', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ assignmentId, pageNumber })
+            });
+            const data = await res.json();
+            if (data.success) {
+                inputField.setAttribute('data-last-valid', pageNumber);
+
+                const label = document.getElementById(`up_label_${assignmentId}`);
+                if (label) {
+                    const nowStr = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+                    label.innerHTML = `<span><i class="bi bi-clock-history me-1"></i>تحديث التقدم: الآن (${nowStr})</span>`;
+                }
+
+                // Temporary highlight
+                const container = inputField.parentElement;
+                container.style.borderColor = '#10b981';
+                container.style.backgroundColor = '#ecfdf5';
+                setTimeout(() => {
+                    container.style.borderColor = '#e2e8f0';
+                    container.style.backgroundColor = '#ffffff';
+                }, 1000);
+            } else {
+                alert('حدث خطأ: ' + (data.error || 'فشل التحديث'));
+            }
+        } catch (err) {
+            console.error(err);
+            alert('حدث خطأ أثناء حفظ تقدم الكتاب');
+        }
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    <% todayPeriods.forEach(period => { %>
+        <% if (period.assignment_id && period.progress_history && period.progress_history.length > 0) { %>
+            try {
+                const ctx_<%= period.id %> = document.getElementById('miniChart_<%= period.id %>').getContext('2d');
+                new Chart(ctx_<%= period.id %>, {
+                    type: 'line',
+                    data: {
+                        labels: <%- JSON.stringify(period.progress_history.map(h => h.date)) %>,
+                        datasets: [{
+                            label: '<%= period.book_title %>',
+                            data: <%- JSON.stringify(period.progress_history.map(h => h.page_number)) %>,
+                            borderColor: '#0d9488',
+                            backgroundColor: 'rgba(13, 148, 136, 0.08)',
+                            tension: 0.25,
+                            fill: true,
+                            pointRadius: 3,
+                            pointHoverRadius: 5,
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { rtl: true }
+                        },
+                        scales: {
+                            x: { 
+                                grid: { display: false },
+                                ticks: { font: { size: 9 }, display: false }
+                            },
+                            y: { 
+                                beginAtZero: false,
+                                grid: { color: '#f1f5f9' },
+                                ticks: { font: { size: 9 } }
+                            }
+                        }
+                    }
+                });
+            } catch (chartErr) {
+                console.error('Error initializing chart for period <%= period.id %>:', chartErr);
+            }
+        <% } %>
+    <% }) %>
+});
+</script>
+
+<%- include('partials/footer') %>

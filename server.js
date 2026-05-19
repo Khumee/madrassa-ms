@@ -102,13 +102,13 @@ app.listen(PORT, async () => {
             const defaultPermissions = [
                 { function_name: 'reports', role: 'مدير', allowed: true },
                 { function_name: 'reports', role: 'ناظم', allowed: true },
-                { function_name: 'reports', role: 'عريب', allowed: true },
+                { function_name: 'reports', role: 'عريب', allowed: false },
                 { function_name: 'reports', role: 'أستاذ', allowed: false },
                 { function_name: 'reports', role: 'طالب', allowed: false },
 
                 { function_name: 'books_manage', role: 'مدير', allowed: true },
                 { function_name: 'books_manage', role: 'ناظم', allowed: true },
-                { function_name: 'books_manage', role: 'عريب', allowed: true },
+                { function_name: 'books_manage', role: 'عريب', allowed: false },
                 { function_name: 'books_manage', role: 'أستاذ', allowed: false },
                 { function_name: 'books_manage', role: 'طالب', allowed: false },
 
@@ -120,7 +120,7 @@ app.listen(PORT, async () => {
 
                 { function_name: 'students_manage', role: 'مدير', allowed: true },
                 { function_name: 'students_manage', role: 'ناظم', allowed: true },
-                { function_name: 'students_manage', role: 'عريب', allowed: true },
+                { function_name: 'students_manage', role: 'عريب', allowed: false },
                 { function_name: 'students_manage', role: 'أستاذ', allowed: false },
                 { function_name: 'students_manage', role: 'طالب', allowed: false },
 
@@ -132,7 +132,7 @@ app.listen(PORT, async () => {
 
                 { function_name: 'teachers_manage', role: 'مدير', allowed: true },
                 { function_name: 'teachers_manage', role: 'ناظم', allowed: true },
-                { function_name: 'teachers_manage', role: 'عريب', allowed: true },
+                { function_name: 'teachers_manage', role: 'عريب', allowed: false },
                 { function_name: 'teachers_manage', role: 'أستاذ', allowed: false },
                 { function_name: 'teachers_manage', role: 'طالب', allowed: false },
 
@@ -144,7 +144,7 @@ app.listen(PORT, async () => {
 
                 { function_name: 'teacher_books_manage', role: 'مدير', allowed: true },
                 { function_name: 'teacher_books_manage', role: 'ناظم', allowed: true },
-                { function_name: 'teacher_books_manage', role: 'عريب', allowed: true },
+                { function_name: 'teacher_books_manage', role: 'عريب', allowed: false },
                 { function_name: 'teacher_books_manage', role: 'أستاذ', allowed: false },
                 { function_name: 'teacher_books_manage', role: 'طالب', allowed: false },
 

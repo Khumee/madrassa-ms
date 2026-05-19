@@ -70,14 +70,14 @@ const hasPermission = (functionName) => {
             } else {
                 // Fallback to hardcoded defaults if database entry does not exist
                 const defaultPermissions = {
-                    'reports': ['مدير', 'ناظم', 'عريب'],
-                    'books_manage': ['مدير', 'ناظم', 'عريب'],
+                    'reports': ['مدير', 'ناظم'],
+                    'books_manage': ['مدير', 'ناظم'],
                     'users_manage': ['مدير', 'ناظم'],
-                    'students_manage': ['مدير', 'ناظم', 'عريب'],
+                    'students_manage': ['مدير', 'ناظم'],
                     'student_attendance': ['مدير', 'ناظم', 'عريب'],
-                    'teachers_manage': ['مدير', 'ناظم', 'عريب'],
+                    'teachers_manage': ['مدير', 'ناظم'],
                     'teacher_attendance': ['مدير', 'ناظم', 'عريب'],
-                    'teacher_books_manage': ['مدير', 'ناظم', 'عريب'],
+                    'teacher_books_manage': ['مدير', 'ناظم'],
                     'periods_manage': ['مدير', 'ناظم']
                 };
 
