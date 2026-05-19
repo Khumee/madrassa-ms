@@ -58,42 +58,45 @@
 </div>
 
 <!-- Expandable Filter Chips -->
-<div class="collapse no-print" id="filterCollapse">
+<div class="collapse no-print <%= (locals.selectedTeacherId || locals.selectedDay || locals.selectedClassId) ? 'show' : '' %>" id="filterCollapse">
     <div class="card shadow-sm border-0 rounded-4 mb-4" style="background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px);">
         <div class="card-body p-3">
             <div class="row g-4">
                 <div class="col-md-4 border-end">
                     <small class="text-muted d-block mb-2 fw-bold"><%= __('Filter_By_Teacher') %></small>
                     <div class="d-flex flex-wrap gap-2" id="teacherFilters">
-                        <button class="btn btn-sm btn-dark rounded-pill px-3 filter-chip active" data-filter="all" data-type="teacher"><%= __('All') %></button>
+                        <button class="btn btn-sm <%= !locals.selectedTeacherId ? 'btn-dark' : 'btn-outline-dark' %> rounded-pill px-3" onclick="filterTimetable('teacherId', '')"><%= __('All') %></button>
                         <% 
                             const colors = ['primary', 'success', 'danger', 'warning', 'info', 'indigo', 'orange', 'teal', 'purple'];
-                            const uniqueTeachers = [...new Set(periods.map(p => p.teacher_name))];
-                            uniqueTeachers.forEach((name, i) => { 
+                            teachers.forEach((t, i) => { 
                                 const color = colors[i % colors.length];
+                                const isSelected = locals.selectedTeacherId == t.id;
                         %>
-                            <button class="btn btn-sm btn-outline-<%= color %> rounded-pill px-3 filter-chip" data-filter="<%= name %>" data-type="teacher"><%= name %></button>
+                            <button class="btn btn-sm <%= isSelected ? 'btn-' + color + ' active' : 'btn-outline-' + color %> rounded-pill px-3" onclick="filterTimetable('teacherId', '<%= t.id %>')"><%= t.name %></button>
                         <% }) %>
                     </div>
                 </div>
                 <div class="col-md-4 border-end">
                     <small class="text-muted d-block mb-2 fw-bold"><%= __('Filter_By_Day') %></small>
                     <div class="d-flex flex-wrap gap-2" id="dayFilters">
-                        <button class="btn btn-sm btn-dark rounded-pill px-3 filter-chip active" data-filter="all" data-type="day"><%= __('All') %></button>
+                        <button class="btn btn-sm <%= !locals.selectedDay ? 'btn-dark' : 'btn-outline-dark' %> rounded-pill px-3" onclick="filterTimetable('day', '')"><%= __('All') %></button>
                         <% 
                             const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
                             days.forEach(day => { 
+                                const isSelected = locals.selectedDay === day;
                         %>
-                            <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 filter-chip" data-filter="<%= day %>" data-type="day"><%= __(day) %></button>
+                            <button class="btn btn-sm <%= isSelected ? 'btn-secondary active' : 'btn-outline-secondary' %> rounded-pill px-3" onclick="filterTimetable('day', '<%= day %>')"><%= __(day) %></button>
                         <% }) %>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <small class="text-muted d-block mb-2 fw-bold"><%= __('Filter_By_Class') %></small>
                     <div class="d-flex flex-wrap gap-2" id="classFilters">
-                        <button class="btn btn-sm btn-dark rounded-pill px-3 filter-chip active" data-filter="all" data-type="class"><%= __('All') %></button>
-                        <% classes.forEach(cls => { %>
-                            <button class="btn btn-sm btn-outline-primary rounded-pill px-3 filter-chip" data-filter="<%= cls.name_ar %>" data-type="class"><%= __(cls.name_ar) %></button>
+                        <button class="btn btn-sm <%= !locals.selectedClassId ? 'btn-dark' : 'btn-outline-dark' %> rounded-pill px-3" onclick="filterTimetable('classId', '')"><%= __('All') %></button>
+                        <% classes.forEach(cls => { 
+                            const isSelected = locals.selectedClassId == cls.id;
+                        %>
+                            <button class="btn btn-sm <%= isSelected ? 'btn-primary active' : 'btn-outline-primary' %> rounded-pill px-3" onclick="filterTimetable('classId', '<%= cls.id %>')"><%= __(cls.name_ar) %></button>
                         <% }) %>
                     </div>
                 </div>
@@ -411,97 +414,14 @@
 </style>
 
 <script>
-let activeFilters = { teacher: 'all', day: 'all', class: 'all' };
-
-document.querySelectorAll('.filter-chip').forEach(chip => {
-    chip.addEventListener('click', function() {
-        const type = this.dataset.type;
-        const filter = this.dataset.filter;
-        activeFilters[type] = filter;
-
-        // UI state
-        document.querySelectorAll(`.filter-chip[data-type="${type}"]`).forEach(c => {
-            c.classList.remove('active', 'btn-dark', 'btn-primary', 'btn-success', 'btn-danger', 'btn-warning', 'btn-info', 'btn-secondary', 'btn-indigo', 'btn-orange', 'btn-teal', 'btn-purple');
-            
-            // Restore outline color
-            const match = c.getAttribute('class').match(/btn-outline-(\w+)/);
-            if (!match) {
-                const color = c.dataset.filter === 'all' ? 'dark' : (type === 'class' ? 'primary' : 'secondary');
-                c.classList.add(`btn-outline-${color}`);
-            }
-        });
-        
-        this.classList.add('active');
-        const colorMatch = this.classList.toString().match(/btn-outline-(\w+)/);
-        const color = colorMatch ? colorMatch[1] : 'dark';
-        this.classList.remove(`btn-outline-${color}`);
-        this.classList.add(`btn-${color}`);
-
-        applyFilters();
-    });
-});
-
-function applyFilters() {
-    const isTeacherView = <%= groupBy === 'teacher' ? 'true' : 'false' %>;
-    const blocks = document.querySelectorAll('.print-page-block');
-    const clean = (str) => str ? str.trim().replace(/\s+/g, ' ').replace(/ی/g, 'ي').replace(/ک/g, 'ك') : '';
-
-    blocks.forEach(block => {
-        let matchBlock = true;
-        if (isTeacherView) {
-            matchBlock = activeFilters.teacher === 'all' || clean(block.dataset.teacher) === clean(activeFilters.teacher);
-        } else {
-            matchBlock = activeFilters.class === 'all' || clean(block.dataset.class) === clean(activeFilters.class);
-        }
-        
-        const dayRows = block.querySelectorAll('.day-row');
-        let hasAnyVisibleRow = false;
-
-        dayRows.forEach(row => {
-            const matchDay = activeFilters.day === 'all' || row.dataset.day === activeFilters.day;
-            const cells = row.querySelectorAll('.cell-container');
-            
-            let hasVisiblePeriodInRow = false;
-            cells.forEach(cell => {
-                const box = cell.querySelector('.period-box');
-                const dash = cell.querySelector('.empty-dash');
-                
-                if (box) {
-                    let matchBox = true;
-                    if (isTeacherView) {
-                        matchBox = activeFilters.class === 'all' || clean(box.dataset.class) === clean(activeFilters.class);
-                    } else {
-                        matchBox = activeFilters.teacher === 'all' || clean(box.dataset.teacher) === clean(activeFilters.teacher);
-                    }
-                    
-                    if (matchBox) {
-                        box.classList.remove('d-none');
-                        if (dash) dash.classList.add('d-none');
-                        hasVisiblePeriodInRow = true;
-                    } else {
-                        box.classList.add('d-none');
-                        if (dash) dash.classList.remove('d-none');
-                    }
-                }
-            });
-
-            // Row is visible if it matches the day filter AND has a valid period match (if filter is set)
-            const hasFilterActive = isTeacherView ? activeFilters.class !== 'all' : activeFilters.teacher !== 'all';
-            if (matchDay && (!hasFilterActive || hasVisiblePeriodInRow)) {
-                row.style.display = '';
-                hasAnyVisibleRow = true;
-            } else {
-                row.style.display = 'none';
-            }
-        });
-
-        // Hide the block if block filter doesn't match OR has no visible rows
-        if (matchBlock && hasAnyVisibleRow) {
-            block.style.display = '';
-        } else {
-            block.style.display = 'none';
-        }
-    });
+function filterTimetable(type, value) {
+    const url = new URL(window.location.href);
+    if (!value) {
+        url.searchParams.delete(type);
+    } else {
+        url.searchParams.set(type, value);
+    }
+    window.location.href = url.pathname + url.search;
 }
 </script>
 

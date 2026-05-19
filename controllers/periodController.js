@@ -125,17 +125,44 @@ exports.generateAuto = async (req, res) => {
 exports.showFullTimetable = async (req, res) => {
     try {
         const groupBy = 'class'; // Forced to class layout as per user request to simplify navigation
-        const [periods] = await db.execute(
-            `SELECT p.*, t.name as teacher_name, c.name_ar as class_name, b.title as book_title
+        const { teacherId, classId, day } = req.query;
+
+        let query = `
+             SELECT p.*, t.name as teacher_name, c.name_ar as class_name, b.title as book_title
              FROM periods p 
              JOIN teachers t ON p.teacher_id = t.id 
              JOIN classes c ON p.class_id = c.id
              LEFT JOIN teacher_books tb ON p.assignment_id = tb.id
-             LEFT JOIN books b ON tb.book_id = b.id`
-        );
+             LEFT JOIN books b ON tb.book_id = b.id
+             WHERE 1=1
+        `;
+        const params = [];
+        if (teacherId) {
+            query += ` AND p.teacher_id = ?`;
+            params.push(teacherId);
+        }
+        if (classId) {
+            query += ` AND p.class_id = ?`;
+            params.push(classId);
+        }
+        if (day) {
+            query += ` AND p.day_of_week = ?`;
+            params.push(day);
+        }
+
+        const [periods] = await db.execute(query, params);
         const [classes] = await db.execute('SELECT * FROM classes');
         const [teachers] = await db.execute('SELECT * FROM teachers ORDER BY name');
-        res.render('timetable_full', { periods, classes, teachers, groupBy });
+
+        res.render('timetable_full', { 
+            periods, 
+            classes, 
+            teachers, 
+            groupBy,
+            selectedTeacherId: teacherId || '',
+            selectedClassId: classId || '',
+            selectedDay: day || ''
+        });
     } catch (err) {
         console.error(err);
         res.status(500).send('Error loading full timetable');
