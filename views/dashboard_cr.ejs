@@ -486,7 +486,7 @@
                                                         <span class="text-muted small"><i class="bi bi-person me-1"></i>أستاذ: <%= book.teacher_name %></span>
                                                     </div>
                                                     <span class="badge bg-success-subtle text-success rounded-pill px-2 py-1 fw-bold" style="font-size: 0.72rem;">
-                                                        صفحة <%= book.previous_page %>–<%= book.end_page %>
+                                                        صفحة <%= book.start_page %>–<%= book.end_page %>
                                                     </span>
                                                 </div>
 
@@ -498,10 +498,10 @@
                                                                 onclick="adjustPage(<%= book.assignment_id %>, -1)">-</button>
                                                         <input type="number" id="input_<%= book.assignment_id %>"
                                                                class="form-control text-center rounded-pill border-0 text-success fw-bold p-0 bg-transparent"
-                                                               value="<%= Math.max(book.current_page, book.previous_page) %>"
-                                                               min="<%= book.previous_page %>"
+                                                               value="<%= Math.max(book.current_page, book.start_page) %>"
+                                                               min="<%= book.start_page %>"
                                                                max="<%= book.end_page %>"
-                                                               data-current="<%= Math.max(book.current_page, book.previous_page) %>"
+                                                               data-current="<%= Math.max(book.current_page, book.start_page) %>"
                                                                onchange="updateBookProgress(<%= book.assignment_id %>, this)"
                                                                style="width: 55px; font-size: 1.05rem; box-shadow: none;">
                                                         <button type="button" class="adjust-btn btn-success text-white bg-success" 
