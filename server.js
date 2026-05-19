@@ -83,9 +83,9 @@ app.get('/logs-debug', (req, res) => {
             logs += "PM2 Status Error: " + e.message + "\n";
         }
         try {
-            logs += "=== PM2 ERROR LOGS ===\n" + execSync('pm2 logs "kui-ms" --lines 100 --err --raw --nostream').toString() + "\n";
+            logs += "=== PM2 ALL LOGS ===\n" + execSync('pm2 logs "kui-ms" --lines 100 --raw --nostream').toString() + "\n";
         } catch (e) {
-            logs += "PM2 Error Logs Error: " + e.message + "\n";
+            logs += "PM2 Logs Error: " + e.message + "\n";
         }
         res.setHeader('Content-Type', 'text/plain');
         res.send(logs);
