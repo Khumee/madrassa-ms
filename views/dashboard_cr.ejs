@@ -436,7 +436,7 @@
                                                             <span class="text-primary fw-bold"><%= period.teacher_name %></span>
                                                         </label>
                                                         
-                                                        <div class="last-update-label mt-1 text-muted d-flex align-items-center gap-2" style="font-size: 0.72rem;">
+                                                        <div class="last-update-label mt-1 text-muted d-flex align-items-center gap-2" id="tstatus_<%= period.id %>" style="font-size: 0.72rem;">
                                                             <% if (isPresent) { %>
                                                                 <span class="text-success fw-semibold"><i class="bi bi-check-circle-fill me-1"></i> حاضر للحصة</span>
                                                             <% } else { %>
@@ -866,6 +866,19 @@
             }
         }
 
+        const updateStatusText = (checked) => {
+            const tstatus = document.getElementById(`tstatus_${periodId}`);
+            if (tstatus) {
+                if (checked) {
+                    tstatus.innerHTML = `<span class="text-success fw-semibold"><i class="bi bi-check-circle-fill me-1"></i> حاضر للحصة</span>`;
+                } else {
+                    tstatus.innerHTML = `<span class="text-danger fw-semibold"><i class="bi bi-x-circle-fill me-1"></i> غائب / لم يؤخذ الحصة</span>`;
+                }
+            }
+        };
+
+        updateStatusText(switchInput.checked);
+
         try {
             const res = await fetch('/attendance/teachers/save', {
                 method: 'POST',
@@ -880,12 +893,14 @@
                 alert('فشل تعديل حضور المعلم');
                 switchInput.checked = !switchInput.checked;
                 if (tcard) tcard.classList.toggle('timeline-card-active');
+                updateStatusText(switchInput.checked);
             }
         } catch (err) {
             console.error(err);
             alert('حدث خطأ أثناء الحفظ');
             switchInput.checked = !switchInput.checked;
             if (tcard) tcard.classList.toggle('timeline-card-active');
+            updateStatusText(switchInput.checked);
         }
     }
 
