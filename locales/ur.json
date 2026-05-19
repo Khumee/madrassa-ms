@@ -122,7 +122,9 @@
   "Last_Updated": "آخری اپ ڈیٹ",
   "Select_Book": "کتاب منتخب کریں",
   "Select_Teacher": "استاد منتخب کریں",
-  "Select_Class": "کلاس منتخب کریں",
   "Permissions": "الصلاحيات",
-  "Manage_Permissions": "إدارة صلاحيات الفروع"
+  "Manage_Permissions": "إدارة صلاحيات الفروع",
+  "Invalid_Credentials": "صارف کا نام یا پاس ورڈ غلط ہے",
+  "Session_Error": "سیشن کی خرابی، دوبارہ کوشش کریں",
+  "Internal_Server_Error": "سرور کی اندرونی خرابی"
 }

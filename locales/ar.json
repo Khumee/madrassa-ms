@@ -122,7 +122,9 @@
   "Last_Updated": "آخر تحديث",
   "Select_Book": "اختر الكتاب",
   "Select_Teacher": "اختر الأستاذ",
-  "Select_Class": "اختر الصف",
   "Permissions": "الصلاحيات",
-  "Manage_Permissions": "إدارة صلاحيات الفروع"
+  "Manage_Permissions": "إدارة صلاحيات الفروع",
+  "Invalid_Credentials": "اسم المستخدم أو كلمة المرور غير صحيحة",
+  "Session_Error": "خطأ في الجلسة، يرجى المحاولة مرة أخرى",
+  "Internal_Server_Error": "خطأ داخلي في الخادم"
 }

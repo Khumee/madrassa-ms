@@ -12,16 +12,27 @@ exports.login = async (req, res) => {
         const cleanUsername = username ? username.trim() : '';
         console.log('--- LOGIN ATTEMPT ---');
         console.log('Submitted Username:', cleanUsername);
-        console.log('Username Code Points:');
-        for (let i = 0; i < cleanUsername.length; i++) {
-            console.log(`Char at ${i}: ${cleanUsername[i]} (U+0${cleanUsername.charCodeAt(i).toString(16).toUpperCase()})`);
-        }
         
-        const [rows] = await db.execute('SELECT * FROM users WHERE username = ?', [cleanUsername]);
-        console.log('User rows found:', rows.length);
+        // Define robust Arabic/Urdu/Persian username normalization
+        const normalizeUsername = (str) => {
+            if (!str) return '';
+            return str
+                .trim()
+                // Strip all Arabic/Urdu diacritics (harakat, tashkeel, shaddah, fatha, damma, kasra, sukoon, etc.)
+                .replace(/[\u064B-\u065F\u0670\u0656-\u065C]/g, '')
+                // Normalize Persian/Urdu Yeh (ی / U+06CC) to Arabic Yeh (ي / U+064A)
+                .replace(/\u06CC/g, '\u064A')
+                // Normalize Persian/Urdu Keheh (ک / U+06A9) to Arabic Kaf (ك / U+0643)
+                .replace(/\u06A9/g, '\u0643')
+                // Normalize Heh Goal (ہ / U+06C1) and Te Marbuta (ة / U+0629)
+                .replace(/\u06C1/g, '\u0647')
+                .replace(/\u0629/g, '\u0647');
+        };
+
+        const [rows] = await db.execute('SELECT * FROM users');
+        const user = rows.find(u => normalizeUsername(u.username) === normalizeUsername(cleanUsername));
         
-        if (rows.length > 0) {
-            const user = rows[0];
+        if (user) {
             const match = await bcrypt.compare(password, user.password);
             console.log('Bcrypt password match:', match);
             if (match) {
@@ -43,7 +54,7 @@ exports.login = async (req, res) => {
                 return req.session.save((err) => {
                     if (err) {
                         console.error('Session save error:', err);
-                        return res.render('login', { error: 'Session Error' });
+                        return res.render('login', { error: req.__('Session_Error') });
                     }
                     const normRole = req.session.role;
                     if (normRole === 'طالب') return res.redirect('/dashboard/student');
@@ -54,10 +65,10 @@ exports.login = async (req, res) => {
                 });
             }
         }
-        res.render('login', { error: 'Invalid username or password' });
+        res.render('login', { error: req.__('Invalid_Credentials') });
     } catch (err) {
         console.error(err);
-        res.render('login', { error: 'Internal Server Error' });
+        res.render('login', { error: req.__('Internal_Server_Error') });
     }
 };
 
