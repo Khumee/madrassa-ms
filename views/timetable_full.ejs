@@ -46,11 +46,8 @@
         <button class="btn btn-outline-primary rounded-pill px-4 me-2" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
             <i class="bi bi-filter me-2"></i><%= __('Filter') %>
         </button>
-        <button onclick="window.print()" class="btn btn-dark rounded-pill px-4 me-2">
-            <i class="bi bi-printer me-2"></i><%= __('Print') %>
-        </button>
-        <button onclick="printToPdfDisk(this)" class="btn btn-primary rounded-pill px-4 me-2">
-            <i class="bi bi-file-pdf me-2"></i><%= locals.lang === 'ur' ? 'پی ڈی ایف محفوظ کریں (D:\\timetable.pdf)' : 'حفظ كـ PDF (D:\\timetable.pdf)' %>
+        <button onclick="window.print()" class="btn btn-primary rounded-pill px-4 me-2">
+            <i class="bi bi-printer me-1"></i><i class="bi bi-download me-2"></i><%= locals.lang === 'ur' ? 'پرنٹ / ڈاؤن لوڈ PDF' : 'طباعة / تحميل PDF' %>
         </button>
         <div class="btn-group rounded-pill overflow-hidden border me-2">
             <a href="/periods/full?groupBy=class" class="btn btn-sm <%= groupBy === 'class' ? 'btn-primary' : 'btn-white text-muted' %> px-3"><%= locals.lang === 'ur' ? 'کلاسز' : 'الفصول' %></a>
@@ -416,28 +413,7 @@ function applyFilters() {
     });
 }
 
-async function printToPdfDisk(btn) {
-    const groupBy = '<%= groupBy %>';
-    const originalText = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span><%= locals.lang === 'ur' ? 'محفوظ ہو رہا ہے...' : 'جاري الحفظ...' %>`;
-    
-    try {
-        const res = await fetch(`/periods/print-pdf?groupBy=${groupBy}`, { method: 'POST' });
-        const data = await res.json();
-        if (data.success) {
-            alert('<%= locals.lang === "ur" ? "ٹائم ٹیبل کامیابی کے ساتھ D:\\\\timetable.pdf پر محفوظ کر دیا گیا ہے!" : "تم حفظ الجدول بنجاح في D:\\\\timetable.pdf!" %>');
-        } else {
-            alert('Error printing PDF: ' + data.error);
-        }
-    } catch (err) {
-        console.error(err);
-        alert('Server error occurred during PDF generation');
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = originalText;
-    }
-}
+
 </script>
 
 <%- include('partials/footer') %>
