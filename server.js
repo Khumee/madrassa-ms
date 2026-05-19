@@ -176,6 +176,23 @@ app.listen(PORT, async () => {
             WHERE role IN ('طالب_علم')
         `);
         
+        // Force critical permissions for Areeb (عريب) to be allowed on every startup
+        const criticalAreebPerms = ['student_attendance', 'teacher_attendance'];
+        for (const func of criticalAreebPerms) {
+            await db.execute(
+                `INSERT INTO role_permissions (role, function_name, allowed) 
+                 VALUES ('عريب', ?, 1) 
+                 ON DUPLICATE KEY UPDATE allowed = 1`,
+                [func]
+            );
+            await db.execute(
+                `INSERT INTO role_permissions (role, function_name, allowed) 
+                 VALUES ('عریب', ?, 1) 
+                 ON DUPLICATE KEY UPDATE allowed = 1`,
+                [func]
+            );
+        }
+        
         // 2. Safe trailing '1' removal for all MySQL versions
         await db.execute(`
             UPDATE users 
