@@ -124,7 +124,7 @@ exports.generateAuto = async (req, res) => {
 
 exports.showFullTimetable = async (req, res) => {
     try {
-        const groupBy = req.query.groupBy || 'class';
+        const groupBy = 'class'; // Forced to class layout as per user request to simplify navigation
         const [periods] = await db.execute(
             `SELECT p.*, t.name as teacher_name, c.name_ar as class_name, b.title as book_title
              FROM periods p 
