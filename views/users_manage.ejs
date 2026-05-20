@@ -10,7 +10,7 @@
             <button class="btn btn-primary rounded-pill px-4 filter-btn active" onclick="filterUsers('all', this)">الكل</button>
             <button class="btn btn-outline-primary rounded-pill px-4 filter-btn" onclick="filterUsers('أستاذ', this)">المعلمون</button>
             <button class="btn btn-outline-primary rounded-pill px-4 filter-btn" onclick="filterUsers('طالب', this)">الطلاب</button>
-            <button class="btn btn-outline-primary rounded-pill px-4 filter-btn" onclick="filterUsers('عريب', this)">عريب</button>
+            <button class="btn btn-outline-primary rounded-pill px-4 filter-btn" onclick="filterUsers('عريف', this)">عريف</button>
             <button class="btn btn-outline-primary rounded-pill px-4 filter-btn" onclick="filterUsers('ناظم', this)">الإدارة</button>
         </div>
     </div>
@@ -33,7 +33,7 @@
                         </thead>
                         <tbody id="userTableBody">
                             <% users.forEach(user => { %>
-                                <tr class="user-row" data-role="<%= (user.role === 'مسؤول الصف' || user.role === 'عریب' || user.role === 'عريب') ? 'عريب' : user.role %>">
+                                <tr class="user-row" data-role="<%= (user.role === 'عریف' || user.role === 'عريف') ? 'عريف' : user.role %>">
                                     <td class="px-4">
                                         <span class="badge bg-light text-muted border rounded-pill px-3">
                                             <%= user.teacher_id || user.student_id || 'ADMIN' %>
@@ -45,8 +45,8 @@
                                         <span class="badge bg-light text-dark border rounded-pill px-3">
                                             <% 
                                                 let displayRole = user.role || '';
-                                                if (displayRole === 'مسؤول الصف' || displayRole === 'عریب' || displayRole === 'عريب') {
-                                                    displayRole = 'عريب';
+                                                if (displayRole === 'عریف' || displayRole === 'عريف') {
+                                                    displayRole = 'عريف';
                                                 } else {
                                                     displayRole = displayRole.replace(/_/g, ' ');
                                                 }
@@ -97,7 +97,7 @@
                         <label class="form-label fw-bold">الدور (Role)</label>
                         <select id="editRole" class="form-select" required>
                             <option value="طالب">طالب</option>
-                            <option value="عريب">عريب</option>
+                            <option value="عريف">عريف</option>
                             <option value="أستاذ">أستاذ</option>
                             <option value="ناظم">ناظم</option>
                             <option value="مدير">مدير</option>

@@ -20,6 +20,6 @@ router.post('/teacher-books/edit/:id', hasPermission('teacher_books_manage'), te
 router.post('/teacher-books/delete/:id', hasPermission('teacher_books_manage'), teacherController.deleteAssignment);
 router.get('/teacher-books/check-periods/:id', hasPermission('teacher_books_manage'), teacherController.checkAssignmentPeriods);
 
-router.post('/book/update-progress', hasRole(['أستاذ', 'ناظم', 'مدير', 'عريب']), teacherController.updateBookProgress);
+router.post('/book/update-progress', hasRole(['أستاذ', 'ناظم', 'مدير', 'عريف']), teacherController.updateBookProgress);
 
 module.exports = router;

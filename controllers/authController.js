@@ -39,8 +39,8 @@ exports.login = async (req, res) => {
                 const normalizeRole = (role) => {
                     if (!role) return '';
                     let normalized = role.replace(/\u06CC/g, '\u064A').replace(/_/g, ' ').trim();
-                    if (normalized === 'مسؤول الصف' || normalized === 'عريب' || normalized === 'عریب') {
-                        return 'عريب';
+                    if (normalized === 'عريف' || normalized === 'عریف') {
+                        return 'عريف';
                     }
                     if (normalized === 'طالب علم' || normalized === 'طالب') {
                         return 'طالب';
@@ -58,7 +58,7 @@ exports.login = async (req, res) => {
                     }
                     const normRole = req.session.role;
                     if (normRole === 'طالب') return res.redirect('/dashboard/student');
-                    if (normRole === 'عريب') return res.redirect('/dashboard/cr');
+                    if (normRole === 'عريف') return res.redirect('/dashboard/cr');
                     if (normRole === 'أستاذ') return res.redirect('/dashboard/teacher');
 
                     return res.redirect('/');
@@ -104,7 +104,7 @@ exports.showDashboard = async (req, res) => {
 
         if (role === 'طالب') {
             return res.redirect('/dashboard/student');
-        } else if (role === 'عريب' || role === 'عریب') {
+        } else if (role === 'عريف' || role === 'عریف') {
             return res.redirect('/dashboard/cr');
         } else if (role === 'أستاذ') {
             return res.redirect('/dashboard/teacher');

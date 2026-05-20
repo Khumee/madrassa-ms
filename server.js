@@ -102,55 +102,55 @@ app.listen(PORT, async () => {
             const defaultPermissions = [
                 { function_name: 'reports', role: 'مدير', allowed: true },
                 { function_name: 'reports', role: 'ناظم', allowed: true },
-                { function_name: 'reports', role: 'عريب', allowed: false },
+                { function_name: 'reports', role: 'عريف', allowed: false },
                 { function_name: 'reports', role: 'أستاذ', allowed: false },
                 { function_name: 'reports', role: 'طالب', allowed: false },
 
                 { function_name: 'books_manage', role: 'مدير', allowed: true },
                 { function_name: 'books_manage', role: 'ناظم', allowed: true },
-                { function_name: 'books_manage', role: 'عريب', allowed: false },
+                { function_name: 'books_manage', role: 'عريف', allowed: false },
                 { function_name: 'books_manage', role: 'أستاذ', allowed: false },
                 { function_name: 'books_manage', role: 'طالب', allowed: false },
 
                 { function_name: 'users_manage', role: 'مدير', allowed: true },
                 { function_name: 'users_manage', role: 'ناظم', allowed: true },
-                { function_name: 'users_manage', role: 'عريب', allowed: false },
+                { function_name: 'users_manage', role: 'عريف', allowed: false },
                 { function_name: 'users_manage', role: 'أستاذ', allowed: false },
                 { function_name: 'users_manage', role: 'طالب', allowed: false },
 
                 { function_name: 'students_manage', role: 'مدير', allowed: true },
                 { function_name: 'students_manage', role: 'ناظم', allowed: true },
-                { function_name: 'students_manage', role: 'عريب', allowed: false },
+                { function_name: 'students_manage', role: 'عريف', allowed: false },
                 { function_name: 'students_manage', role: 'أستاذ', allowed: false },
                 { function_name: 'students_manage', role: 'طالب', allowed: false },
 
                 { function_name: 'student_attendance', role: 'مدير', allowed: true },
                 { function_name: 'student_attendance', role: 'ناظم', allowed: true },
-                { function_name: 'student_attendance', role: 'عريب', allowed: true },
+                { function_name: 'student_attendance', role: 'عريف', allowed: true },
                 { function_name: 'student_attendance', role: 'أستاذ', allowed: false },
                 { function_name: 'student_attendance', role: 'طالب', allowed: false },
 
                 { function_name: 'teachers_manage', role: 'مدير', allowed: true },
                 { function_name: 'teachers_manage', role: 'ناظم', allowed: true },
-                { function_name: 'teachers_manage', role: 'عريب', allowed: false },
+                { function_name: 'teachers_manage', role: 'عريف', allowed: false },
                 { function_name: 'teachers_manage', role: 'أستاذ', allowed: false },
                 { function_name: 'teachers_manage', role: 'طالب', allowed: false },
 
                 { function_name: 'teacher_attendance', role: 'مدير', allowed: true },
                 { function_name: 'teacher_attendance', role: 'ناظم', allowed: true },
-                { function_name: 'teacher_attendance', role: 'عريب', allowed: true },
+                { function_name: 'teacher_attendance', role: 'عريف', allowed: true },
                 { function_name: 'teacher_attendance', role: 'أستاذ', allowed: false },
                 { function_name: 'teacher_attendance', role: 'طالب', allowed: false },
 
                 { function_name: 'teacher_books_manage', role: 'مدير', allowed: true },
                 { function_name: 'teacher_books_manage', role: 'ناظم', allowed: true },
-                { function_name: 'teacher_books_manage', role: 'عريب', allowed: false },
+                { function_name: 'teacher_books_manage', role: 'عريف', allowed: false },
                 { function_name: 'teacher_books_manage', role: 'أستاذ', allowed: false },
                 { function_name: 'teacher_books_manage', role: 'طالب', allowed: false },
 
                 { function_name: 'periods_manage', role: 'مدير', allowed: true },
                 { function_name: 'periods_manage', role: 'ناظم', allowed: true },
-                { function_name: 'periods_manage', role: 'عريب', allowed: false },
+                { function_name: 'periods_manage', role: 'عريف', allowed: false },
                 { function_name: 'periods_manage', role: 'أستاذ', allowed: false },
                 { function_name: 'periods_manage', role: 'طالب', allowed: false }
             ];
@@ -167,8 +167,31 @@ app.listen(PORT, async () => {
         // 1. Roles Normalization
         await db.execute(`
             UPDATE users 
-            SET role = 'عريب' 
-            WHERE role IN ('مسؤول_الصف', 'مسؤول الصف', 'عریب')
+            SET role = 'عريف' 
+            WHERE role IN ('مسؤول_الصف', 'مسؤول الصف', 'عریب', 'عريب', 'عریف')
+        `);
+        await db.execute(`
+            DELETE FROM role_permissions 
+            WHERE role = 'عریب' 
+              AND function_name IN (
+                  SELECT function_name FROM (
+                      SELECT function_name FROM role_permissions WHERE role = 'عريب'
+                  ) as tmp
+              )
+        `);
+        await db.execute(`
+            DELETE FROM role_permissions 
+            WHERE role IN ('عریب', 'عريب', 'عریف')
+              AND function_name IN (
+                  SELECT function_name FROM (
+                      SELECT function_name FROM role_permissions WHERE role = 'عريف'
+                  ) as tmp
+              )
+        `);
+        await db.execute(`
+            UPDATE role_permissions 
+            SET role = 'عريف' 
+            WHERE role IN ('عریب', 'عريب', 'عریف')
         `);
         await db.execute(`
             UPDATE users 
@@ -176,18 +199,18 @@ app.listen(PORT, async () => {
             WHERE role IN ('طالب_علم')
         `);
         
-        // Force critical permissions for Areeb (عريب) to be allowed on every startup
-        const criticalAreebPerms = ['student_attendance', 'teacher_attendance'];
-        for (const func of criticalAreebPerms) {
+        // Force critical permissions for Areef (عريف) to be allowed on every startup
+        const criticalAreefPerms = ['student_attendance', 'teacher_attendance'];
+        for (const func of criticalAreefPerms) {
             await db.execute(
                 `INSERT INTO role_permissions (role, function_name, allowed) 
-                 VALUES ('عريب', ?, 1) 
+                 VALUES ('عريف', ?, 1) 
                  ON DUPLICATE KEY UPDATE allowed = 1`,
                 [func]
             );
             await db.execute(
                 `INSERT INTO role_permissions (role, function_name, allowed) 
-                 VALUES ('عریب', ?, 1) 
+                 VALUES ('عریف', ?, 1) 
                  ON DUPLICATE KEY UPDATE allowed = 1`,
                 [func]
             );

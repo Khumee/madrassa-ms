@@ -56,7 +56,7 @@
         <button onclick="window.print()" class="btn btn-primary rounded-pill px-4 me-2">
             <i class="bi bi-printer-fill me-2"></i><%= locals.lang === 'ur' ? 'پرنٹ' : 'طباعة' %>
         </button>
-        <% if (locals.session && ['ناظم', 'مدير', 'عريب'].includes(session.role)) { %>
+        <% if (locals.session && ['ناظم', 'مدير', 'عريف'].includes(session.role)) { %>
             <a href="/periods/manage" class="btn btn-outline-secondary rounded-pill px-4">
                 <i class="bi bi-gear me-2"></i><%= __('Manage') %>
             </a>

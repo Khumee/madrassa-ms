@@ -418,7 +418,7 @@ exports.showStudentsManage = async (req, res) => {
         let queryParams = [];
         let crClassId = null;
 
-        if (req.session.role === 'عريب' || req.session.role === 'عریب') {
+        if (['عريف', 'عریف'].includes(req.session.role)) {
             crClassId = await getCRClassId(req.session.userId);
             if (!crClassId) return res.status(403).send('CR class not found');
             studentsQuery += ' WHERE s.class_id = ?';
@@ -448,7 +448,7 @@ exports.showStudentsManage = async (req, res) => {
 exports.showStudentsAdd = async (req, res) => {
     let classesQuery = 'SELECT * FROM classes';
     let params = [];
-    if (req.session.role === 'عريب' || req.session.role === 'عریب') {
+    if (['عريف', 'عریف'].includes(req.session.role)) {
         const crClassId = await getCRClassId(req.session.userId);
         classesQuery += ' WHERE id = ?';
         params.push(crClassId);
@@ -460,7 +460,7 @@ exports.showStudentsAdd = async (req, res) => {
 exports.addStudent = async (req, res) => {
     const { name, classId } = req.body;
     try {
-        if (req.session.role === 'عريب' || req.session.role === 'عریب') {
+        if (['عريف', 'عریف'].includes(req.session.role)) {
             const crClassId = await getCRClassId(req.session.userId);
             if (crClassId != classId) return res.status(403).send('Unauthorized to add to this class');
         }
@@ -501,7 +501,7 @@ exports.editStudent = async (req, res) => {
     const { id } = req.params;
     const { name, classId } = req.body;
     try {
-        if (req.session.role === 'عريب' || req.session.role === 'عریب') {
+        if (['عريف', 'عریف'].includes(req.session.role)) {
             const crClassId = await getCRClassId(req.session.userId);
             const [student] = await db.execute('SELECT class_id FROM students WHERE id = ?', [id]);
             if (!student.length || student[0].class_id !== crClassId || crClassId != classId) {
@@ -528,7 +528,7 @@ exports.editStudent = async (req, res) => {
 exports.deleteStudent = async (req, res) => {
     const { id } = req.params;
     try {
-        if (req.session.role === 'عريب' || req.session.role === 'عریب') {
+        if (['عريف', 'عریف'].includes(req.session.role)) {
             const crClassId = await getCRClassId(req.session.userId);
             const [student] = await db.execute('SELECT class_id FROM students WHERE id = ?', [id]);
             if (!student.length || student[0].class_id !== crClassId) {
@@ -545,7 +545,7 @@ exports.deleteStudent = async (req, res) => {
 
 exports.showAttendance = async (req, res) => {
     const { classId } = req.params;
-    if (req.session.role === 'عريب' || req.session.role === 'عریب') {
+    if (['عريف', 'عریف'].includes(req.session.role)) {
         const crClassId = await getCRClassId(req.session.userId);
         if (crClassId != classId) return res.status(403).send('Unauthorized');
     }
@@ -585,7 +585,7 @@ exports.showAttendance = async (req, res) => {
 
 exports.saveAttendance = async (req, res) => {
     const { date, attendance, classId } = req.body;
-    if (req.session.role === 'عريب' || req.session.role === 'عریب') {
+    if (['عريف', 'عریف'].includes(req.session.role)) {
         const crClassId = await getCRClassId(req.session.userId);
         if (crClassId != classId) return res.status(403).send('Unauthorized');
     }

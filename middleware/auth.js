@@ -14,16 +14,16 @@ const hasRole = (allowed) => {
         const userRole = normalize(req.session.role);
         const normalizedAllowed = allowed.map(normalize);
 
-        // Areeb (عريب) has student (طالب) rights
+        // Areef (عريف) has student (طالب) rights
         if (normalizedAllowed.includes('طالب')) {
-            if (userRole === 'طالب' || userRole === 'عريب') {
+            if (userRole === 'طالب' || userRole === 'عريف') {
                 return next();
             }
         }
         
-        // Areeb (عريب) has teacher (أستاذ) rights
+        // Areef (عريف) has teacher (أستاذ) rights
         if (normalizedAllowed.includes('أستاذ')) {
-            if (userRole === 'أستاذ' || userRole === 'عريب') {
+            if (userRole === 'أستاذ' || userRole === 'عريف') {
                 return next();
             }
         }
@@ -32,7 +32,7 @@ const hasRole = (allowed) => {
             return next();
         }
         res.status(403).send('Unauthorized');
-    };
+     };
 };
 
 const hasPermission = (functionName) => {
@@ -74,9 +74,9 @@ const hasPermission = (functionName) => {
                     'books_manage': ['مدير', 'ناظم'],
                     'users_manage': ['مدير', 'ناظم'],
                     'students_manage': ['مدير', 'ناظم'],
-                    'student_attendance': ['مدير', 'ناظم', 'عريب'],
+                    'student_attendance': ['مدير', 'ناظم', 'عريف'],
                     'teachers_manage': ['مدير', 'ناظم'],
-                    'teacher_attendance': ['مدير', 'ناظم', 'عريب'],
+                    'teacher_attendance': ['مدير', 'ناظم', 'عريف'],
                     'teacher_books_manage': ['مدير', 'ناظم'],
                     'periods_manage': ['مدير', 'ناظم']
                 };

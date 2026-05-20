@@ -555,7 +555,7 @@ CREATE TABLE `users`  (
 -- Records of users
 -- ----------------------------
 INSERT INTO `users` VALUES (2, 'مدیر', '$2b$10$xf1usCdzdExhc0JhRsTvzO3Sd5Yop3sBVKlGirTnKxfGfNyiVpb2m', 'مدير', '2026-04-30 11:46:41', NULL);
-INSERT INTO `users` VALUES (22, 'خرم', '$2b$10$7jZ3ljLaMUZRUbAG00flHO1DSQKTBhUGln18nFLzFBBRK35YfJ2xi', 'عریب', '2026-05-05 14:30:22', 'خرم شہزاد');
+INSERT INTO `users` VALUES (22, 'خرم', '$2b$10$7jZ3ljLaMUZRUbAG00flHO1DSQKTBhUGln18nFLzFBBRK35YfJ2xi', 'عریف', '2026-05-05 14:30:22', 'خرم شہزاد');
 INSERT INTO `users` VALUES (23, 'کمال', '$2b$10$7jZ3ljLaMUZRUbAG00flHO1DSQKTBhUGln18nFLzFBBRK35YfJ2xi', 'طالب', '2026-05-05 14:30:22', 'کمال محمر');
 INSERT INTO `users` VALUES (24, 'محمد2', '$2b$10$7jZ3ljLaMUZRUbAG00flHO1DSQKTBhUGln18nFLzFBBRK35YfJ2xi', 'طالب', '2026-05-05 14:30:22', 'محمد عبداللہ');
 INSERT INTO `users` VALUES (25, 'بسام', '$2b$10$7jZ3ljLaMUZRUbAG00flHO1DSQKTBhUGln18nFLzFBBRK35YfJ2xi', 'طالب', '2026-05-05 14:30:22', 'بسام ارشاد');

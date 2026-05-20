@@ -4,7 +4,7 @@ const studentController = require('../controllers/studentController');
 const { hasRole, hasPermission } = require('../middleware/auth');
 
 router.get('/dashboard/student', hasRole(['طالب']), studentController.showStudentDashboard);
-router.get('/dashboard/cr', hasRole(['عريب']), studentController.showCRDashboard);
+router.get('/dashboard/cr', hasRole(['عريف']), studentController.showCRDashboard);
 
 router.get('/students/manage', hasPermission('students_manage'), studentController.showStudentsManage);
 router.get('/students/add', hasPermission('students_manage'), studentController.showStudentsAdd);

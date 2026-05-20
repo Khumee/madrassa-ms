@@ -255,8 +255,8 @@ exports.showUsersManage = async (req, res) => {
         const normalizeRole = (role) => {
             if (!role) return '';
             let normalized = role.replace(/\u06CC/g, '\u064A').replace(/_/g, ' ').trim();
-            if (normalized === 'مسؤول الصف' || normalized === 'عريب' || normalized === 'عریب') {
-                return 'عريب';
+            if (normalized === 'عريف' || normalized === 'عریف') {
+                return 'عريف';
             }
             if (normalized === 'طالب علم' || normalized === 'طالب') {
                 return 'طالب';
@@ -515,7 +515,7 @@ exports.showPermissionsManage = async (req, res) => {
             { id: 'periods_manage', name: 'إدارة الحصص وجدول التوقيت' }
         ];
 
-        const rolesList = ['مدير', 'ناظم', 'أستاذ', 'عريب', 'طالب'];
+        const rolesList = ['مدير', 'ناظم', 'أستاذ', 'عريف', 'طالب'];
 
         // Build a grid structure: function_name -> { role -> allowed }
         const grid = {};
