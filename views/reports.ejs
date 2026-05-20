@@ -7,37 +7,81 @@
     </div>
 </div>
 
-<!-- Time-Based Filter Control Panel -->
+<style>
+    /* smooth arrow rotation */
+    [aria-expanded="true"] .transition-icon {
+        transform: rotate(180deg);
+    }
+    .transition-icon {
+        transition: transform 0.3s ease;
+    }
+    .filter-trigger-btn:hover {
+        background-color: #f8f9fa !important;
+        border-color: var(--bs-primary) !important;
+    }
+</style>
+
+<!-- Time-Based Filter Control Panel (Collapsed by default) -->
 <div class="row mb-5">
     <div class="col-md-12">
-        <div class="card shadow-sm border-0 rounded-4" style="background: linear-gradient(135deg, #ffffff 0%, #fcfdfe 100%);">
-            <div class="card-body p-4">
-                <form id="dateFilterForm" method="GET" action="/reports">
-                    <div class="row align-items-end g-3">
-                        <div class="col-md-3">
-                            <label class="form-label fw-bold text-secondary small"><%= __('Start_Date') %></label>
-                            <input type="date" name="startDate" id="startDateInput" class="form-control rounded-3 border-light shadow-sm" value="<%= startDate %>" required>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label fw-bold text-secondary small"><%= __('End_Date') %></label>
-                            <input type="date" name="endDate" id="endDateInput" class="form-control rounded-3 border-light shadow-sm" value="<%= endDate %>" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold text-secondary small d-block"><%= __('Date_Filter_Header') %></label>
-                            <div class="btn-group w-100 shadow-sm rounded-3 overflow-hidden" role="group">
-                                <button type="button" class="btn btn-outline-primary py-2 border-light-subtle small" onclick="setPreset('1day')"><%= __('Preset_1Day') %></button>
-                                <button type="button" class="btn btn-outline-primary py-2 border-light-subtle small" onclick="setPreset('7day')"><%= __('Preset_7Day') %></button>
-                                <button type="button" class="btn btn-outline-primary py-2 border-light-subtle small" onclick="setPreset('1month')"><%= __('Preset_1Month') %></button>
-                                <button type="button" class="btn btn-outline-primary py-2 border-light-subtle small" onclick="setPreset('6month')"><%= __('Preset_6Month') %></button>
+        <!-- Gorgeous Toggle Button/Bar -->
+        <button class="btn btn-white w-100 border shadow-sm rounded-4 p-3 d-flex justify-content-between align-items-center text-decoration-none filter-trigger-btn" 
+                type="button" 
+                data-bs-toggle="collapse" 
+                data-bs-target="#filterCollapsePanel" 
+                aria-expanded="false" 
+                aria-controls="filterCollapsePanel"
+                style="background: #ffffff; transition: all 0.3s ease;">
+            <div class="d-flex align-items-center gap-3">
+                <div class="bg-primary-subtle text-primary rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                    <i class="bi bi-funnel-fill fs-5"></i>
+                </div>
+                <div class="text-end">
+                    <span class="fw-bold text-dark d-block"><%= locals.lang === 'ur' ? 'فلٹر کے اختیارات' : 'خيارات تصفية التقارير' %></span>
+                    <span class="text-muted small">
+                        <%= locals.lang === 'ur' ? 'تاریخ کی حد منتخب کریں اور لاگو کریں' : 'حدد نطاق التواريخ المخصص لتحديث جميع الأقسام' %>
+                    </span>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-light text-primary border rounded-pill px-3 py-2">
+                    <i class="bi bi-calendar3 me-1"></i><%= startDate %> ⇄ <%= endDate %>
+                </span>
+                <i class="bi bi-chevron-down text-muted fs-5 transition-icon"></i>
+            </div>
+        </button>
+
+        <!-- Collapsible Content -->
+        <div class="collapse mt-3" id="filterCollapsePanel">
+            <div class="card shadow-sm border-0 rounded-4" style="background: linear-gradient(135deg, #ffffff 0%, #fcfdfe 100%);">
+                <div class="card-body p-4">
+                    <form id="dateFilterForm" method="GET" action="/reports">
+                        <div class="row align-items-end g-3">
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-secondary small"><%= __('Start_Date') %></label>
+                                <input type="date" name="startDate" id="startDateInput" class="form-control rounded-3 border-light shadow-sm" value="<%= startDate %>" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-secondary small"><%= __('End_Date') %></label>
+                                <input type="date" name="endDate" id="endDateInput" class="form-control rounded-3 border-light shadow-sm" value="<%= endDate %>" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold text-secondary small d-block"><%= __('Date_Filter_Header') %></label>
+                                <div class="btn-group w-100 shadow-sm rounded-3 overflow-hidden" role="group">
+                                    <button type="button" class="btn btn-outline-primary py-2 border-light-subtle small" onclick="setPreset('1day')"><%= __('Preset_1Day') %></button>
+                                    <button type="button" class="btn btn-outline-primary py-2 border-light-subtle small" onclick="setPreset('7day')"><%= __('Preset_7Day') %></button>
+                                    <button type="button" class="btn btn-outline-primary py-2 border-light-subtle small" onclick="setPreset('1month')"><%= __('Preset_1Month') %></button>
+                                    <button type="button" class="btn btn-outline-primary py-2 border-light-subtle small" onclick="setPreset('6month')"><%= __('Preset_6Month') %></button>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary w-100 py-2 rounded-3 fw-bold shadow-sm">
+                                    <i class="bi bi-filter me-1"></i><%= __('Apply') %>
+                                </button>
                             </div>
                         </div>
-                        <div class="col-md-2">
-                            <button type="submit" class="btn btn-primary w-100 py-2 rounded-3 fw-bold shadow-sm">
-                                <i class="bi bi-filter me-1"></i><%= __('Apply') %>
-                            </button>
-                        </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
