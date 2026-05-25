@@ -1,4 +1,5 @@
 {
+  "College_Name": "كليّة العلوم الإسلامية",
   "Dashboard": "لوحة القيادة",
   "Students": "الطلاب",
   "Teachers": "المعلمون",
@@ -57,6 +58,8 @@
   "Period_3": "الثالثة",
   "Period_4": "الرابعة",
   "Period_5": "الخامسة",
+  "Period_6": "السادسة",
+  "Period_7": "السابعة",
   "Manage_Timetable_Header": "إدارة الجدول الدراسي",
   "Timetable_Header_Sub": "توزيع الحصص والكتب على الأيام والفترات",
   "View_Full_Timetable": "عرض الجدول كاملاً",
@@ -126,5 +129,9 @@
   "Manage_Permissions": "إدارة صلاحيات الفروع",
   "Invalid_Credentials": "اسم المستخدم أو كلمة المرور غير صحيحة",
   "Session_Error": "خطأ في الجلسة، يرجى المحاولة مرة أخرى",
-  "Internal_Server_Error": "خطأ داخلي في الخادم"
+  "Internal_Server_Error": "خطأ داخلي في الخادم",
+  "Footer_Developed_By": "تم التطوير بواسطة",
+  "Footer_Company": "شركة المهيمن للتكنولوجيا المحدودة",
+  "Footer_Rights": "جميع الحقوق محفوظة",
+  "Footer_Sub": "نظام إدارة الكلية والمستخدمين • إصدار ١.٠.٠"
 }

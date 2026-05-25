@@ -93,14 +93,33 @@
         <div class="card shadow-sm border-0 rounded-4">
             <div class="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <h3 class="fw-bold mb-0 text-primary">تقارير حضور الطلاب</h3>
-                <div class="d-flex gap-2">
-                    <select id="classFilterSelect" class="form-select form-select-sm border-primary-subtle" style="width: 150px;" onchange="filterByClass()">
-                        <option value="all">كل الصفوف</option>
-                        <% Object.keys(groupedReport).forEach(className => { %>
-                            <option value="<%= className %>"><%= className %></option>
-                        <% }) %>
-                    </select>
-                    <input type="text" id="studentFilter" class="form-control form-control-sm border-primary-subtle" placeholder="ابحث عن طالب..." style="width: 200px;" onkeyup="filterStudents()">
+                <button class="btn btn-outline-primary btn-sm rounded-pill px-3" type="button" data-bs-toggle="collapse" data-bs-target="#studentAttendanceFiltersCollapse" aria-expanded="false">
+                    <i class="bi bi-funnel me-1"></i><%= locals.lang === 'ur' ? 'فلٹرز' : 'خيارات التصفية' %>
+                </button>
+            </div>
+            <!-- Collapsible Filters with Tiles -->
+            <div class="collapse border-bottom" id="studentAttendanceFiltersCollapse">
+                <div class="p-4 bg-light-subtle">
+                    <div class="row g-3">
+                        <!-- Search Input -->
+                        <div class="col-12 col-md-4">
+                            <label class="form-label small fw-bold text-secondary mb-2"><%= locals.lang === 'ur' ? 'طالب تلاش کریں' : 'البحث عن طالب' %></label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white border-primary-subtle"><i class="bi bi-search text-muted"></i></span>
+                                <input type="text" id="studentFilter" class="form-control border-primary-subtle" placeholder="ابحث عن طالب..." onkeyup="filterStudents()">
+                            </div>
+                        </div>
+                        <!-- Class Selector Tiles -->
+                        <div class="col-12 col-md-8">
+                            <label class="form-label small fw-bold text-secondary mb-2"><%= locals.lang === 'ur' ? 'کلاسز کے ٹائلز' : 'تصفية حسب الصف' %></label>
+                            <div class="d-flex flex-wrap gap-2" id="classTilesContainer">
+                                <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 filter-tile active" data-filter="all" onclick="selectClassTile('all', this)">كل الصفوف</button>
+                                <% Object.keys(groupedReport).forEach(className => { %>
+                                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 filter-tile" data-filter="<%= className %>" onclick="selectClassTile('<%= className %>', this)"><%= className %></button>
+                                <% }) %>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="card-body p-4">
@@ -168,8 +187,28 @@
     <div class="col-md-12">
         <div class="card shadow-sm border-0 rounded-4">
             <div class="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <h3 class="fw-bold mb-0 text-warning"><%= __('Teacher_Period_Report_Header') %></h3>
-                <p class="text-muted mb-0 small"><%= __('Teacher_Period_Report_Sub') %></p>
+                <div>
+                    <h3 class="fw-bold mb-0 text-warning"><%= __('Teacher_Period_Report_Header') %></h3>
+                    <p class="text-muted mb-0 small"><%= __('Teacher_Period_Report_Sub') %></p>
+                </div>
+                <button class="btn btn-outline-warning btn-sm rounded-pill px-3" type="button" data-bs-toggle="collapse" data-bs-target="#teacherAttendanceFiltersCollapse" aria-expanded="false">
+                    <i class="bi bi-funnel me-1"></i><%= locals.lang === 'ur' ? 'فلٹرز' : 'خيارات التصفية' %>
+                </button>
+            </div>
+            <!-- Collapsible Filters with Teacher Tiles -->
+            <div class="collapse border-bottom" id="teacherAttendanceFiltersCollapse">
+                <div class="p-4 bg-light-subtle">
+                    <label class="form-label small fw-bold text-secondary mb-2"><%= locals.lang === 'ur' ? 'اساتذہ کے ٹائلز' : 'تصفية حسب المعلم' %></label>
+                    <div class="d-flex flex-wrap gap-2" id="teacherTilesContainer">
+                        <button type="button" class="btn btn-sm btn-warning rounded-pill px-3 teacher-filter-tile active" data-filter="all" onclick="selectTeacherTile('all', this)">كل المعلمين</button>
+                        <% 
+                        const uniqueTeachers = [...new Set(teachersReport.map(tr => tr.name))];
+                        uniqueTeachers.forEach(teacherName => { 
+                        %>
+                            <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-3 teacher-filter-tile" data-filter="<%= teacherName %>" onclick="selectTeacherTile('<%= teacherName %>', this)"><%= teacherName %></button>
+                        <% }) %>
+                    </div>
+                </div>
             </div>
             <div class="card-body p-4">
                 <div class="table-responsive">
@@ -184,7 +223,7 @@
                         </thead>
                         <tbody>
                             <% teachersReport.forEach(tr => { %>
-                                <tr>
+                                <tr class="teacher-attendance-row" data-teacher-name="<%= tr.name %>">
                                     <td class="px-4 fw-bold text-dark"><%= tr.name %></td>
                                     <td><span class="badge bg-light text-secondary border rounded-3 px-3 py-2"><%= tr.required %></span></td>
                                     <td><span class="badge bg-light text-primary border rounded-3 px-3 py-2"><%= tr.taken %></span></td>
@@ -219,17 +258,51 @@
         <div class="card shadow-sm border-0 rounded-4">
             <div class="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <h3 class="fw-bold mb-0 text-success">تقرير إنجاز الكتب</h3>
-                <div class="d-flex gap-2">
-                    <select id="bookClassFilterSelect" class="form-select form-select-sm border-success-subtle" style="width: 150px;" onchange="filterTeacherBooks()">
-                        <option value="all">كل الصفوف</option>
-                        <% 
-                        const uniqueBookClasses = [...new Set(teacherProgress.map(tp => tp.class_name).filter(Boolean))];
-                        uniqueBookClasses.forEach(className => { 
-                        %>
-                            <option value="<%= className %>"><%= className %></option>
-                        <% }) %>
-                    </select>
-                    <input type="text" id="teacherBookFilter" class="form-control form-control-sm border-success-subtle" placeholder="ابحث عن معلم أو كتاب..." style="width: 200px;" onkeyup="filterTeacherBooks()">
+                <button class="btn btn-outline-success btn-sm rounded-pill px-3" type="button" data-bs-toggle="collapse" data-bs-target="#bookProgressFiltersCollapse" aria-expanded="false">
+                    <i class="bi bi-funnel me-1"></i><%= locals.lang === 'ur' ? 'فلٹرز' : 'خيارات التصفية' %>
+                </button>
+            </div>
+            <!-- Collapsible Filters with Class and Teacher Tiles -->
+            <div class="collapse border-bottom" id="bookProgressFiltersCollapse">
+                <div class="p-4 bg-light-subtle">
+                    <div class="row g-4">
+                        <!-- Search Input -->
+                        <div class="col-12 col-md-4">
+                            <label class="form-label small fw-bold text-secondary mb-2"><%= locals.lang === 'ur' ? 'تلاش کریں' : 'البحث النصي' %></label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white border-success-subtle"><i class="bi bi-search text-muted"></i></span>
+                                <input type="text" id="teacherBookFilter" class="form-control border-success-subtle" placeholder="ابحث عن معلم أو كتاب..." onkeyup="filterTeacherBooks()">
+                            </div>
+                        </div>
+                        
+                        <!-- Class Selector Tiles -->
+                        <div class="col-12 col-md-8">
+                            <label class="form-label small fw-bold text-secondary mb-2"><%= locals.lang === 'ur' ? 'کلاسز کے ٹائلز' : 'تصفية حسب الصف' %></label>
+                            <div class="d-flex flex-wrap gap-2" id="bookClassTilesContainer">
+                                <button type="button" class="btn btn-sm btn-success rounded-pill px-3 book-class-tile active" onclick="selectBookClassTile('all', this)">كل الصفوف</button>
+                                <% 
+                                const uniqueBookClasses = [...new Set(teacherProgress.map(tp => tp.class_name).filter(Boolean))];
+                                uniqueBookClasses.forEach(className => { 
+                                %>
+                                    <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3 book-class-tile" onclick="selectBookClassTile('<%= className %>', this)"><%= className %></button>
+                                <% }) %>
+                            </div>
+                        </div>
+
+                        <!-- Teacher Selector Tiles -->
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-secondary mb-2"><%= locals.lang === 'ur' ? 'اساتذہ کے ٹائلز' : 'تصفية حسب المعلم' %></label>
+                            <div class="d-flex flex-wrap gap-2" id="bookTeacherTilesContainer">
+                                <button type="button" class="btn btn-sm btn-success rounded-pill px-3 book-teacher-tile active" onclick="selectBookTeacherTile('all', this)">كل المعلمين</button>
+                                <% 
+                                const uniqueBookTeachers = [...new Set(teacherProgress.map(tp => tp.teacher_name).filter(Boolean))];
+                                uniqueBookTeachers.forEach(teacherName => { 
+                                %>
+                                    <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3 book-teacher-tile" onclick="selectBookTeacherTile('<%= teacherName %>', this)"><%= teacherName %></button>
+                                <% }) %>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="card-body p-4">
@@ -360,12 +433,52 @@ function viewTeacherReport() {
     if (id) window.location.href = `/reports/teacher/${id}`;
 }
 
-function filterByClass() {
-    const selected = document.getElementById('classFilterSelect').value;
+// ==========================================
+// Section 1: Student Attendance Filter Logic
+// ==========================================
+let activeClassFilter = 'all';
+
+function selectClassTile(className, btn) {
+    const container = document.getElementById('classTilesContainer');
+    container.querySelectorAll('.filter-tile').forEach(b => {
+        b.classList.remove('btn-primary', 'active');
+        b.classList.add('btn-outline-primary');
+    });
+    btn.classList.remove('btn-outline-primary');
+    btn.classList.add('btn-primary', 'active');
+    
+    activeClassFilter = className;
+    applyCombinedStudentFilter();
+}
+
+function filterStudents() {
+    applyCombinedStudentFilter();
+}
+
+function applyCombinedStudentFilter() {
+    const searchText = document.getElementById('studentFilter').value.toLowerCase();
     const cards = document.querySelectorAll('.student-class-card');
+    
     cards.forEach(card => {
         const className = card.getAttribute('data-class-name');
-        if (selected === 'all' || className === selected) {
+        const rows = card.querySelectorAll('.student-row');
+        let visibleRows = 0;
+        
+        rows.forEach(row => {
+            const name = row.getAttribute('data-name');
+            const matchesText = name.includes(searchText);
+            
+            if (matchesText) {
+                row.style.display = '';
+                visibleRows++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        const matchesClass = activeClassFilter === 'all' || className === activeClassFilter;
+        
+        if (visibleRows > 0 && matchesClass) {
             card.style.display = '';
         } else {
             card.style.display = 'none';
@@ -373,24 +486,86 @@ function filterByClass() {
     });
 }
 
-function filterStudents() {
-    const filter = document.getElementById('studentFilter').value.toLowerCase();
-    const rows = document.querySelectorAll('.student-row');
-    const cards = document.querySelectorAll('.student-class-card');
-    
-    rows.forEach(row => {
-        const name = row.getAttribute('data-name');
-        row.style.display = name.includes(filter) ? '' : 'none';
+// ==========================================
+// Section 2: Teacher Attendance Filter Logic
+// ==========================================
+function selectTeacherTile(teacherName, btn) {
+    const container = document.getElementById('teacherTilesContainer');
+    container.querySelectorAll('.teacher-filter-tile').forEach(b => {
+        b.classList.remove('btn-warning', 'active');
+        b.classList.add('btn-outline-warning');
     });
-
-    cards.forEach(card => {
-        const visibleRows = card.querySelectorAll('.student-row[style=""]');
-        const isClassMatch = document.getElementById('classFilterSelect').value === 'all' || 
-                           card.getAttribute('data-class-name') === document.getElementById('classFilterSelect').value;
-        
-        card.style.display = (visibleRows.length > 0 && isClassMatch) ? '' : 'none';
+    btn.classList.remove('btn-outline-warning');
+    btn.classList.add('btn-warning', 'active');
+    
+    const rows = document.querySelectorAll('.teacher-attendance-row');
+    rows.forEach(row => {
+        const rowTeacher = row.getAttribute('data-teacher-name');
+        if (teacherName === 'all' || rowTeacher === teacherName) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
     });
 }
+
+// ==========================================
+// Section 3: Teacher Book Progress Filter Logic
+// ==========================================
+let activeBookClassFilter = 'all';
+let activeBookTeacherFilter = 'all';
+
+function selectBookClassTile(className, btn) {
+    const container = document.getElementById('bookClassTilesContainer');
+    container.querySelectorAll('.book-class-tile').forEach(b => {
+        b.classList.remove('btn-success', 'active');
+        b.classList.add('btn-outline-success');
+    });
+    btn.classList.remove('btn-outline-success');
+    btn.classList.add('btn-success', 'active');
+    
+    activeBookClassFilter = className;
+    applyCombinedBookFilter();
+}
+
+function selectBookTeacherTile(teacherName, btn) {
+    const container = document.getElementById('bookTeacherTilesContainer');
+    container.querySelectorAll('.book-teacher-tile').forEach(b => {
+        b.classList.remove('btn-success', 'active');
+        b.classList.add('btn-outline-success');
+    });
+    btn.classList.remove('btn-outline-success');
+    btn.classList.add('btn-success', 'active');
+    
+    activeBookTeacherFilter = teacherName;
+    applyCombinedBookFilter();
+}
+
+function filterTeacherBooks() {
+    applyCombinedBookFilter();
+}
+
+function applyCombinedBookFilter() {
+    const filterText = document.getElementById('teacherBookFilter').value.toLowerCase();
+    const rows = document.querySelectorAll('.teacher-book-row');
+    
+    rows.forEach(row => {
+        const teacher = row.getAttribute('data-teacher');
+        const book = row.getAttribute('data-book');
+        const className = row.getAttribute('data-class');
+        
+        const matchesText = teacher.includes(filterText) || book.includes(filterText);
+        const matchesClass = activeBookClassFilter === 'all' || className === activeBookClassFilter;
+        const matchesTeacher = activeBookTeacherFilter === 'all' || teacher === activeBookTeacherFilter.toLowerCase();
+        
+        if (matchesText && matchesClass && matchesTeacher) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
 let progressModal;
 document.addEventListener('DOMContentLoaded', () => {
     progressModal = new bootstrap.Modal(document.getElementById('updateProgressModal'));
@@ -424,27 +599,6 @@ document.getElementById('updateProgressForm').addEventListener('submit', async (
         alert('خطأ: ' + (data.error || 'فشل التحديث'));
     }
 });
-
-function filterTeacherBooks() {
-    const filterText = document.getElementById('teacherBookFilter').value.toLowerCase();
-    const selectedClass = document.getElementById('bookClassFilterSelect').value;
-    const rows = document.querySelectorAll('.teacher-book-row');
-    
-    rows.forEach(row => {
-        const teacher = row.getAttribute('data-teacher');
-        const book = row.getAttribute('data-book');
-        const className = row.getAttribute('data-class');
-        
-        const matchesText = teacher.includes(filterText) || book.includes(filterText);
-        const matchesClass = selectedClass === 'all' || className === selectedClass;
-        
-        if (matchesText && matchesClass) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
-    });
-}
 </script>
 
 <%- include('partials/footer') %>
