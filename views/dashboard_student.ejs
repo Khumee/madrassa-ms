@@ -115,6 +115,14 @@
                             margin-bottom: 0 !important;
                             padding-bottom: 0 !important;
                         }
+                        .hover-scale-sm {
+                            transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+                        }
+                        .hover-scale-sm:hover {
+                            transform: translateY(-2px);
+                            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.08) !important;
+                            border-color: #10b981 !important;
+                        }
                     </style>
 
                     <script>
@@ -266,59 +274,100 @@
                                             const completed = b.current_page - b.start_page;
                                             const percentage = total > 0 ? Math.min(100, Math.max(0, Math.round((completed / total) * 100))) : 0;
                                         %>
-                                            <div class="mb-3 border-bottom pb-3 last-no-border">
-                                                <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
+                                            <div class="mb-4 border-bottom pb-4 last-no-border">
+                                                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                                                     <div>
-                                                        <h6 class="fw-bold mb-1 text-success text-truncate" style="max-width: 100%; font-size: 1.15rem;"><%= b.book_title %></h6>
-                                                        <div class="badge bg-success-subtle text-success fs-6 rounded-pill px-3 py-1.5 fw-bold mt-1">
-                                                            <i class="bi bi-person-workspace me-1"></i> الأستاذ: <%= b.teacher_name %>
+                                                        <h5 class="fw-bold mb-1 text-success" style="font-size: 1.25rem;"><%= b.book_title %></h5>
+                                                        <div class="badge bg-success-subtle text-success fs-6 rounded-pill px-3 py-1 fw-bold mt-1">
+                                                            <i class="bi bi-person me-1"></i> الأستاذ: <%= b.teacher_name %>
                                                         </div>
                                                     </div>
-                                                    <span class="badge bg-success text-white rounded-pill px-3 py-1.5 fw-bold fs-6"><%= percentage %>%</span>
+                                                    <span class="badge bg-success text-white rounded-pill px-3 py-2 fw-bold fs-6 shadow-xs"><%= percentage %>%</span>
                                                 </div>
 
-                                                <!-- Prominent Unified Recent Lesson & Teacher Progress Card (On Top) -->
-                                                 <% if (b.detailed_history && b.detailed_history.length > 0) { 
-                                                     const latest = b.detailed_history[0];
-                                                 %>
-                                                     <div class="bg-success text-white rounded-3 p-3 mb-3 shadow-xs text-end" style="background: linear-gradient(135deg, #059669, #10b981) !important; border: 1px solid rgba(0,0,0,0.05);">
-                                                         <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-1">
-                                                             <span class="badge bg-white text-success rounded-pill px-2 py-1 fw-bold" style="font-size: 0.7rem;">📖 الدرس الأخير (مؤخراً)</span>
-                                                             <span class="small opacity-90 text-white" style="font-size: 0.72rem;"><%= latest.date %></span>
-                                                         </div>
-                                                         
-                                                         <div class="fw-bold mb-2 text-center" dir="ltr" style="font-size: 1.1rem; display: block; width: 100%;">
-                                                             <span>صفحة</span> <span class="bg-white text-dark rounded px-2 py-0.5"><%= latest.startedAt %></span> &rarr; <span>صفحة</span> <span class="bg-white text-dark rounded px-2 py-0.5"><%= latest.endedAt %></span>
-                                                         </div>
-                                                         
-                                                         <!-- Progress Increment Details Row -->
-                                                         <div class="d-flex justify-content-between align-items-center mt-1 opacity-95 pt-2 border-top border-white-50 flex-wrap gap-2" style="font-size: 0.78rem;">
-                                                             <div>
-                                                                 المسجِّل: <strong><%= latest.updaterName %></strong>
-                                                             </div>
-                                                             <div>
-                                                                 منجز: <span class="badge bg-white text-success rounded-pill px-2 fw-bold">+<%= latest.pagesCompleted %> ص</span>
-                                                             </div>
-                                                         </div>
+                                                <!-- Spacious Metrics Grid -->
+                                                <div class="row g-3 my-2 text-end">
+                                                    <!-- Total Pages Range -->
+                                                    <div class="col-6 col-sm-6">
+                                                        <div class="p-3 rounded-4 bg-white border border-light-subtle shadow-xs h-100 transition-all hover-scale-sm">
+                                                            <div class="text-muted small mb-1" style="font-size: 0.78rem;">
+                                                                <i class="bi bi-book-half text-primary me-1"></i> المدى الكلي للمقرر
+                                                            </div>
+                                                            <div class="fw-bold text-dark" style="font-size: 1.05rem;" dir="rtl">
+                                                                من صفحة <span class="badge bg-primary-subtle text-primary rounded px-2"><%= b.start_page %></span> إلى <span class="badge bg-primary-subtle text-primary rounded px-2"><%= b.end_page %></span>
+                                                            </div>
+                                                            <div class="text-secondary small mt-1 opacity-75" style="font-size: 0.72rem;">
+                                                                (إجمالي: <%= b.end_page - b.start_page + 1 %> صفحة)
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Pages Studied So Far -->
+                                                    <div class="col-6 col-sm-6">
+                                                        <div class="p-3 rounded-4 bg-white border border-light-subtle shadow-xs h-100 transition-all hover-scale-sm">
+                                                            <div class="text-muted small mb-1" style="font-size: 0.78rem;">
+                                                                <i class="bi bi-compass text-success me-1"></i> ما تم إنجازه ودراسته
+                                                            </div>
+                                                            <div class="fw-bold text-success" style="font-size: 1.05rem;" dir="rtl">
+                                                                صفحة <span class="badge bg-success-subtle text-success rounded px-2"><%= b.current_page %></span> الحالية
+                                                            </div>
+                                                            <div class="text-secondary small mt-1 opacity-75" style="font-size: 0.72rem;">
+                                                                (المتبقي: <%= Math.max(0, b.end_page - b.current_page) %> صفحة)
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
 
-                                                         <!-- Secondary Update Info -->
-                                                         <div class="d-flex justify-content-end align-items-center mt-1 opacity-75" style="font-size: 0.72rem;">
-                                                             <span>المدى الكلي للترقية: <%= b.start_page %> - <%= b.end_page %></span>
-                                                         </div>
-                                                     </div>
-                                                 <% } else { %>
-                                                     <div class="alert bg-success-subtle border-0 text-success rounded-3 p-2 mb-3 text-end" style="font-size: 0.78rem;">
-                                                         <i class="bi bi-info-circle me-1"></i> لم يتم تسجيل دروس أو حصص بعد.
-                                                     </div>
-                                                 <% } %>
+                                                <!-- Sleek Gradient Progress Bar -->
+                                                <div class="progress my-3 rounded-pill shadow-xs" style="height: 10px; background-color: #e2e8f0; overflow: hidden;">
+                                                    <div class="progress-bar rounded-pill" role="progressbar" style="width: <%= percentage %>%; background: linear-gradient(90deg, #10b981, #059669);" aria-valuenow="<%= percentage %>" aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                                <div class="d-flex justify-content-between text-muted mb-3" style="font-size: 0.75rem;">
+                                                    <span>نسبة الإنجاز الكلية (<%= percentage %>%)</span>
+                                                    <span class="text-success fw-bold">صفحة <%= b.current_page %> من <%= b.end_page %></span>
+                                                </div>
 
-                                                 <div class="progress mb-2" style="height: 6px; border-radius: 3px;">
-                                                     <div class="progress-bar bg-success" style="width: <%= percentage %>%"></div>
-                                                 </div>
-                                                 <div class="d-flex justify-content-between text-muted" style="font-size: 0.72rem;">
-                                                     <span>نسبة الإنجاز الكلية (<%= percentage %>%)</span>
-                                                     <span class="text-success fw-bold">صفحة <%= b.current_page %> الحالية</span>
-                                                 </div>
+                                                <!-- Collapsible Recent Lesson Details -->
+                                                <% if (b.detailed_history && b.detailed_history.length > 0) { 
+                                                    const latest = b.detailed_history[0];
+                                                %>
+                                                    <div class="mt-2 text-end">
+                                                        <button class="btn btn-sm btn-link text-success p-0 fw-semibold text-decoration-none d-inline-flex align-items-center gap-1 hover-underline" 
+                                                                type="button" 
+                                                                data-bs-toggle="collapse" 
+                                                                data-bs-target="#recentLesson_<%= b.id || b.assignment_id %>" 
+                                                                style="font-size: 0.8rem; cursor: pointer;">
+                                                            <i class="bi bi-chevron-down small"></i>
+                                                            <span>📊 عرض تفاصيل الدرس الأخير (مؤخراً)</span>
+                                                        </button>
+                                                        
+                                                        <div class="collapse mt-2" id="recentLesson_<%= b.id || b.assignment_id %>">
+                                                            <div class="p-3 rounded-4 bg-white border border-light-subtle shadow-xs text-end" style="border: 1px dashed #cbd5e1 !important; font-size: 0.82rem;">
+                                                                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2 flex-wrap gap-2">
+                                                                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2 py-1"><i class="bi bi-clock me-1"></i>الدرس الأخير</span>
+                                                                    <span class="text-muted small"><%= latest.date %></span>
+                                                                </div>
+                                                                <div class="row g-2 mb-2">
+                                                                    <div class="col-6">
+                                                                         <span class="text-muted">المدى:</span>
+                                                                         <strong class="text-dark" dir="ltr">صفحة <%= latest.startedAt %> ← <%= latest.endedAt %></strong>
+                                                                    </div>
+                                                                    <div class="col-6">
+                                                                         <span class="text-muted">المنجز:</span>
+                                                                         <strong class="text-success">+<%= latest.pagesCompleted %> ص</strong>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="d-flex justify-content-between align-items-center pt-2 border-top flex-wrap gap-2" style="font-size: 0.78rem;">
+                                                                     <span>المسجِّل: <strong class="text-dark"><%= latest.updaterName %></strong></span>
+                                                                     <span class="text-muted">المدى الكلي: <%= b.start_page %> - <%= b.end_page %></span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                <% } else { %>
+                                                    <div class="text-muted small text-end" style="font-size: 0.78rem;">
+                                                        <i class="bi bi-info-circle me-1"></i> لم يتم تسجيل دروس أو حصص بعد.
+                                                    </div>
+                                                <% } %>
                                             </div>
                                         <% }) %>
                                     <% } else { %>
