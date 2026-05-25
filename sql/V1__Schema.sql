@@ -1,6 +1,24 @@
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
+/*
+ Navicat Premium Data Transfer
+
+ Source Server         : Nukrim
+ Source Server Type    : MySQL
+ Source Server Version : 80045
+ Source Host           : localhost:3306
+ Source Schema         : kui
+
+ Target Server Type    : MySQL
+ Target Server Version : 80045
+ File Encoding         : 65001
+
+ Date: 25/05/2026 11:20:58
+*/
+
+
+-- ----------------------------
 -- Table structure for attendance_students
 -- ----------------------------
 DROP TABLE IF EXISTS `attendance_students`;
@@ -15,7 +33,10 @@ CREATE TABLE `attendance_students`  (
   INDEX `marked_by`(`marked_by` ASC) USING BTREE,
   CONSTRAINT `attendance_students_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `attendance_students_ibfk_2` FOREIGN KEY (`marked_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 148 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 626 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for attendance_teachers
@@ -33,7 +54,10 @@ CREATE TABLE `attendance_teachers`  (
   INDEX `marked_by`(`marked_by` ASC) USING BTREE,
   CONSTRAINT `attendance_teachers_ibfk_1` FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `attendance_teachers_ibfk_2` FOREIGN KEY (`marked_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 66 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for book_progress
@@ -51,7 +75,10 @@ CREATE TABLE `book_progress`  (
   INDEX `marked_by`(`marked_by` ASC) USING BTREE,
   CONSTRAINT `book_progress_ibfk_1` FOREIGN KEY (`assignment_id`) REFERENCES `teacher_books` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `book_progress_ibfk_2` FOREIGN KEY (`marked_by`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 94 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for books
@@ -60,9 +87,15 @@ DROP TABLE IF EXISTS `books`;
 CREATE TABLE `books`  (
   `id` int NOT NULL AUTO_INCREMENT,
   `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `class_id` int NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `title`(`title` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 48 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+  UNIQUE INDEX `title`(`title` ASC) USING BTREE,
+  INDEX `fk_books_class`(`class_id` ASC) USING BTREE,
+  CONSTRAINT `fk_books_class` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 102 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for classes
@@ -73,7 +106,10 @@ CREATE TABLE `classes`  (
   `name_ar` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `name_en` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for periods
@@ -83,20 +119,49 @@ CREATE TABLE `periods`  (
   `id` int NOT NULL AUTO_INCREMENT,
   `teacher_id` int NULL DEFAULT NULL,
   `class_id` int NULL DEFAULT NULL,
-  `day_of_week` enum('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `day_of_week` enum('Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `start_time` time NULL DEFAULT NULL,
   `end_time` time NULL DEFAULT NULL,
   `subject` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `assignment_id` int NULL DEFAULT NULL,
   `period_number` int NULL DEFAULT NULL,
+  `session_id` int NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `teacher_id`(`teacher_id` ASC) USING BTREE,
   INDEX `class_id`(`class_id` ASC) USING BTREE,
   INDEX `assignment_id`(`assignment_id` ASC) USING BTREE,
+  INDEX `fk_periods_session`(`session_id` ASC) USING BTREE,
+  CONSTRAINT `fk_periods_session` FOREIGN KEY (`session_id`) REFERENCES `sessions` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `periods_ibfk_1` FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `periods_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `periods_ibfk_3` FOREIGN KEY (`assignment_id`) REFERENCES `teacher_books` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 289 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1202 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for role_permissions
+-- ----------------------------
+DROP TABLE IF EXISTS `role_permissions`;
+CREATE TABLE `role_permissions`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `role` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `function_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `allowed` tinyint(1) NULL DEFAULT 0,
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `role_function`(`role` ASC, `function_name` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 228 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for schema_history
+-- ----------------------------
+
+-- ----------------------------
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for sessions
@@ -107,7 +172,31 @@ CREATE TABLE `sessions`  (
   `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `is_active` tinyint(1) NULL DEFAULT 0,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for student_enrollments
+-- ----------------------------
+DROP TABLE IF EXISTS `student_enrollments`;
+CREATE TABLE `student_enrollments`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `student_id` int NOT NULL,
+  `class_id` int NOT NULL,
+  `session_id` int NOT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `student_session`(`student_id` ASC, `session_id` ASC) USING BTREE,
+  INDEX `fk_enrollments_class`(`class_id` ASC) USING BTREE,
+  INDEX `fk_enrollments_session`(`session_id` ASC) USING BTREE,
+  CONSTRAINT `fk_enrollments_class` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `fk_enrollments_session` FOREIGN KEY (`session_id`) REFERENCES `sessions` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `fk_enrollments_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 64 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for students
@@ -120,12 +209,14 @@ CREATE TABLE `students`  (
   `roll_number` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `user_id` int NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `roll_number`(`roll_number` ASC) USING BTREE,
   INDEX `class_id`(`class_id` ASC) USING BTREE,
   INDEX `user_id`(`user_id` ASC) USING BTREE,
   CONSTRAINT `students_ibfk_1` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT,
   CONSTRAINT `students_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 30 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 34 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for teacher_books
@@ -150,7 +241,10 @@ CREATE TABLE `teacher_books`  (
   CONSTRAINT `teacher_books_ibfk_2` FOREIGN KEY (`book_id`) REFERENCES `books` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `teacher_books_ibfk_3` FOREIGN KEY (`session_id`) REFERENCES `sessions` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `teacher_books_ibfk_4` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 53 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 136 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for teachers
@@ -166,7 +260,10 @@ CREATE TABLE `teachers`  (
   UNIQUE INDEX `id_number`(`id_number` ASC) USING BTREE,
   INDEX `user_id`(`user_id` ASC) USING BTREE,
   CONSTRAINT `teachers_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 222 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 304 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for users
@@ -178,11 +275,13 @@ CREATE TABLE `users`  (
   `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `role` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT 'طالب',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `full_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `username`(`username` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 49 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 380 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
+-- ----------------------------
+
+
 
 SET FOREIGN_KEY_CHECKS = 1;
