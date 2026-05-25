@@ -31,21 +31,28 @@
     /* Tab Controller Styling */
     .cr-nav-pills {
         background-color: #f1f5f9;
+        border: 1px solid #cbd5e1;
         border-radius: 50px;
         padding: 6px;
     }
     .cr-nav-pills .nav-link {
         border-radius: 50px;
-        color: #64748b;
-        font-weight: bold;
-        transition: all 0.2s ease;
-        padding: 10px 24px;
+        color: #475569;
+        font-weight: 600;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        padding: 12px 28px;
         border: none !important;
+        background-color: transparent;
+    }
+    .cr-nav-pills .nav-link:hover {
+        color: #0f172a;
+        background-color: rgba(30, 41, 59, 0.05);
     }
     .cr-nav-pills .nav-link.active {
-        background-color: #1e3a8a !important;
+        background: linear-gradient(135deg, #1e3a8a, #3b82f6) !important;
         color: #ffffff !important;
-        box-shadow: 0 4px 10px rgba(30, 58, 138, 0.2);
+        box-shadow: 0 8px 16px rgba(30, 58, 138, 0.25) !important;
+        transform: translateY(-1px);
     }
 
     /* Mobile Finger-Friendly Tactile Attendance Buttons */
@@ -597,7 +604,7 @@
                             <div class="position-relative d-flex align-items-center justify-content-center" style="width: 90px; height: 90px;">
                                 <svg width="90" height="90" viewBox="0 0 36 36" class="circular-chart">
                                     <path class="circle-bg" stroke="#f1f5f9" stroke-width="3" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                                    <path class="circle" stroke="<%= attendancePercentage >= 90 ? '#10b981' : attendancePercentage >= 75 ? '#3b82f6' : '#f59e0b' %>" stroke-width="3" stroke-dasharray="<%= attendancePercentage %>, 100" fill="none" stroke-linecap="round" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831"/>
+                                    <path class="circle" stroke="<%= attendancePercentage >= 90 ? '#10b981' : attendancePercentage >= 75 ? '#3b82f6' : '#f59e0b' %>" stroke-width="3" stroke-dasharray="<%= attendancePercentage %>, 100" fill="none" stroke-linecap="round" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
                                 </svg>
                                 <span class="position-absolute fw-bold text-dark" style="font-size: 0.95rem;"><%= attendancePercentage %>%</span>
                             </div>
@@ -662,11 +669,11 @@
 
                 <!-- Student Right Column: Assigned Textbook Lesson Metrics -->
                 <div class="col-md-6">
-                    <div class="card shadow-sm border-0 rounded-4 bg-white h-100">
-                        <div class="card-header bg-white p-4 border-0 pb-2">
-                            <h5 class="fw-bold mb-0 text-success"><i class="bi bi-book-half me-2"></i>كتبي ومقرراتي الحالية</h5>
+                    <div class="bg-transparent border-0 shadow-none h-100">
+                        <div class="p-3 pb-2 border-0 bg-transparent">
+                            <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-book-half me-2 text-success"></i>كتبي ومقرراتي الحالية</h5>
                         </div>
-                        <div class="card-body p-4 pt-2">
+                        <div class="p-0">
                             <% if (personalBooks.length > 0) { %>
                                 <div class="d-flex flex-column gap-4">
                                     <% personalBooks.forEach(b => { 
