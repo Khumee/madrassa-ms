@@ -414,29 +414,28 @@ exports.showCRDashboard = async (req, res) => {
 
 exports.showStudentsManage = async (req, res) => {
     try {
-        let studentsQuery = 'SELECT s.*, c.name_ar as class_name FROM students s JOIN classes c ON s.class_id = c.id';
+        let studentsQuery = 'SELECT s.*, c.name_ar as class_name FROM students s JOIN classes c ON s.class_id = c.id WHERE s.class_id IN (4, 10, 12, 16)';
         let queryParams = [];
         let crClassId = null;
 
         if (['عريف', 'عریف'].includes(req.session.role)) {
             crClassId = await getCRClassId(req.session.userId);
             if (!crClassId) return res.status(403).send('CR class not found');
-            studentsQuery += ' WHERE s.class_id = ?';
+            studentsQuery = 'SELECT s.*, c.name_ar as class_name FROM students s JOIN classes c ON s.class_id = c.id WHERE s.class_id = ?';
             queryParams.push(crClassId);
+        } else {
+            studentsQuery += ' ORDER BY s.class_id, s.name';
         }
-        studentsQuery += ' ORDER BY s.class_id, s.name';
 
         const [students] = await db.execute(studentsQuery, queryParams);
 
-        let classesQuery = 'SELECT * FROM classes';
+        let classesQuery = 'SELECT * FROM classes WHERE id IN (4, 10, 12, 16)';
         let classParams = [];
         if (crClassId) {
-            classesQuery += ' WHERE id = ?';
+            classesQuery = 'SELECT * FROM classes WHERE id = ?';
             classParams.push(crClassId);
         }
-        const [allClasses] = await db.execute(classesQuery, classParams);
-        const hiddenIds = [1, 3, 4, 7];
-        const classes = allClasses.filter(c => !hiddenIds.includes(parseInt(c.id)));
+        const [classes] = await db.execute(classesQuery, classParams);
 
         res.render('students_manage', { students, classes, role: req.session.role, crClassId });
     } catch (err) {
@@ -446,11 +445,11 @@ exports.showStudentsManage = async (req, res) => {
 };
 
 exports.showStudentsAdd = async (req, res) => {
-    let classesQuery = 'SELECT * FROM classes';
+    let classesQuery = 'SELECT * FROM classes WHERE id IN (4, 10, 12, 16)';
     let params = [];
     if (['عريف', 'عریف'].includes(req.session.role)) {
         const crClassId = await getCRClassId(req.session.userId);
-        classesQuery += ' WHERE id = ?';
+        classesQuery = 'SELECT * FROM classes WHERE id = ?';
         params.push(crClassId);
     }
     const [classes] = await db.execute(classesQuery, params);

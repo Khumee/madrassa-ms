@@ -16,11 +16,22 @@ exports.showPeriodsManage = async (req, res) => {
              JOIN classes c ON p.class_id = c.id
              LEFT JOIN teacher_books tb ON p.assignment_id = tb.id
              LEFT JOIN books b ON tb.book_id = b.id
+             WHERE p.class_id IN (4, 10, 12, 16)
              ORDER BY ${orderBy}`
         );
-        const [teachers] = await db.execute('SELECT * FROM teachers ORDER BY name ASC');
-        const [classes] = await db.execute('SELECT * FROM classes ORDER BY name_ar ASC');
-        const [books] = await db.execute('SELECT * FROM books ORDER BY title ASC');
+        const [teachers] = await db.execute(`
+            SELECT DISTINCT t.* FROM teachers t
+            JOIN teacher_books tb ON tb.teacher_id = t.id
+            WHERE tb.class_id IN (4, 10, 12, 16)
+            ORDER BY t.name ASC
+        `);
+        const [classes] = await db.execute('SELECT * FROM classes WHERE id IN (4, 10, 12, 16) ORDER BY name_ar ASC');
+        const [books] = await db.execute(`
+            SELECT DISTINCT b.* FROM books b
+            JOIN teacher_books tb ON tb.book_id = b.id
+            WHERE tb.class_id IN (4, 10, 12, 16)
+            ORDER BY b.title ASC
+        `);
         const [assignments] = await db.execute(`
             SELECT tb.id, t.name as teacher_name, b.title as book_title, c.name_ar as class_name, tb.teacher_id, tb.class_id, tb.book_id
             FROM teacher_books tb
@@ -28,7 +39,7 @@ exports.showPeriodsManage = async (req, res) => {
             JOIN books b ON tb.book_id = b.id
             JOIN classes c ON tb.class_id = c.id
             JOIN sessions s ON tb.session_id = s.id
-            WHERE s.is_active = TRUE
+            WHERE s.is_active = TRUE AND tb.class_id IN (4, 10, 12, 16)
         `);
         res.render('periods_manage', { periods, teachers, classes, assignments, books, groupBy, generateSuccess: req.query.generateSuccess });
     } catch (err) {
@@ -39,13 +50,13 @@ exports.showPeriodsManage = async (req, res) => {
 
 exports.generateAuto = async (req, res) => {
     try {
-        const [classes] = await db.execute('SELECT * FROM classes');
+        const [classes] = await db.execute('SELECT * FROM classes WHERE id IN (4, 10, 12, 16)');
         const [assignments] = await db.execute(`
             SELECT tb.id, tb.teacher_id, tb.class_id, tb.book_id, b.title as book_title
             FROM teacher_books tb
             JOIN books b ON tb.book_id = b.id
             JOIN sessions s ON tb.session_id = s.id
-            WHERE s.is_active = TRUE
+            WHERE s.is_active = TRUE AND tb.class_id IN (4, 10, 12, 16)
         `);
 
         const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -142,7 +153,7 @@ exports.showFullTimetable = async (req, res) => {
              JOIN classes c ON p.class_id = c.id
              LEFT JOIN teacher_books tb ON p.assignment_id = tb.id
              LEFT JOIN books b ON tb.book_id = b.id
-             WHERE 1=1
+             WHERE p.class_id IN (4, 10, 12, 16)
         `;
         const params = [];
         if (teacherId) {
@@ -159,8 +170,13 @@ exports.showFullTimetable = async (req, res) => {
         }
 
         const [periods] = await db.execute(query, params);
-        const [classes] = await db.execute('SELECT * FROM classes');
-        const [teachers] = await db.execute('SELECT * FROM teachers ORDER BY name');
+        const [classes] = await db.execute('SELECT * FROM classes WHERE id IN (4, 10, 12, 16)');
+        const [teachers] = await db.execute(`
+            SELECT DISTINCT t.* FROM teachers t
+            JOIN periods p ON p.teacher_id = t.id
+            WHERE p.class_id IN (4, 10, 12, 16)
+            ORDER BY t.name
+        `);
 
         res.render('timetable_full', { 
             periods, 
@@ -197,7 +213,7 @@ exports.showPublicTimetable = async (req, res) => {
              JOIN classes c ON p.class_id = c.id
              LEFT JOIN teacher_books tb ON p.assignment_id = tb.id
              LEFT JOIN books b ON tb.book_id = b.id
-             WHERE 1=1
+             WHERE p.class_id IN (4, 10, 12, 16)
         `;
         const params = [];
         if (teacherId) {
@@ -214,8 +230,13 @@ exports.showPublicTimetable = async (req, res) => {
         }
 
         const [periods] = await db.execute(query, params);
-        const [classes] = await db.execute('SELECT * FROM classes');
-        const [teachers] = await db.execute('SELECT * FROM teachers ORDER BY name');
+        const [classes] = await db.execute('SELECT * FROM classes WHERE id IN (4, 10, 12, 16)');
+        const [teachers] = await db.execute(`
+            SELECT DISTINCT t.* FROM teachers t
+            JOIN periods p ON p.teacher_id = t.id
+            WHERE p.class_id IN (4, 10, 12, 16)
+            ORDER BY t.name
+        `);
 
         res.render('timetable_public', { 
             periods, 

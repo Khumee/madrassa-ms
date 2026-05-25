@@ -109,9 +109,7 @@ exports.showDashboard = async (req, res) => {
         } else if (role === 'أستاذ') {
             return res.redirect('/dashboard/teacher');
         } else if (role === 'ناظم' || role === 'مدير') {
-            const [allClasses] = await db.execute('SELECT * FROM classes');
-            const hiddenNames = ['الأولى', 'الثالثة', 'الرابعة', 'السابعة'];
-            const classes = allClasses.filter(c => !hiddenNames.includes(c.name_ar));
+            const [classes] = await db.execute('SELECT * FROM classes WHERE id IN (4, 10, 12, 16)');
             const today = DateTime.now().setLocale('ar').toFormat('cccc, dd MMMM yyyy');
             return res.render('dashboard', { classes, today, role });
         }
