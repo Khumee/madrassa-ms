@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="<%= locals.lang || 'ur' %>" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>كليّة العلوم الإسلامية</title>
+    <title><%= __('College_Name') %></title>
     <link rel="icon" href="/logo.jpg">
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body class="login-page">
     <div class="container" style="display: flex; height: 100vh; align-items: center; justify-content: center;">
         <div class="card" style="width: 100%; max-width: 400px;">
-            <h2 style="text-align: center; margin-bottom: 20px;">كليّة العلوم الإسلامية</h2>
-            <h3 style="text-align: center; margin-bottom: 30px; color: #666;">تسجيل الدخول</h3>
+            <h2 style="text-align: center; margin-bottom: 20px;"><%= __('College_Name') %></h2>
+            <h3 style="text-align: center; margin-bottom: 30px; color: #666;"><%= __('Login_Title') %></h3>
             
             <% if (error) { %>
                 <div style="background: #fee; color: #c00; padding: 10px; border-radius: 5px; margin-bottom: 20px;">
@@ -21,19 +21,19 @@
 
             <form action="/login" method="POST">
                 <div style="margin-bottom: 15px;">
-                    <label>اسم المستخدم</label>
+                    <label><%= __('Username_Label') %></label>
                     <input type="text" name="username" value="مدیر" class="form-control-login" style="width: 100%; text-align: right; background: #f9f9f9; border: 1px solid #ddd; color: #333; padding: 10px; border-radius: 8px;" required>
                 </div>
                 <div style="margin-bottom: 25px;">
-                    <label>كلمة المرور</label>
+                    <label><%= __('Password_Label') %></label>
                     <input type="password" name="password" value="1981" class="form-control-login" style="width: 100%; text-align: right; background: #f9f9f9; border: 1px solid #ddd; color: #333; padding: 10px; border-radius: 8px;" required>
                 </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">دخول</button>
+                <button type="submit" class="btn btn-primary" style="width: 100%;"><%= __('Login_Btn') %></button>
             </form>
             <div style="text-align: center; margin-top: 20px;">
                 <a href="/mobile" style="color: #666; text-decoration: none; font-size: 0.9em; display: inline-flex; align-items: center; gap: 5px;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    تحميل تطبيق أندرويد
+                    <%= __('Download_Android_App') %>
                 </a>
             </div>
         </div>

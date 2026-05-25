@@ -36,7 +36,7 @@ app.use(session({
 i18n.configure({
     locales: ['ar', 'ur'],
     directory: path.join(__dirname, 'locales'),
-    defaultLocale: 'ar',
+    defaultLocale: 'ur',
     cookie: 'lang',
     updateFiles: false
 });
@@ -45,8 +45,8 @@ app.use((req, res, next) => {
     if (req.session.lang && ['ar', 'ur'].includes(req.session.lang)) {
         req.setLocale(req.session.lang);
     } else {
-        req.session.lang = 'ar';
-        req.setLocale('ar');
+        req.session.lang = 'ur';
+        req.setLocale('ur');
     }
     res.locals.lang = req.getLocale();
     res.locals.__ = res.__;

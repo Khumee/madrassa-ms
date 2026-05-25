@@ -305,12 +305,12 @@
             <ul class="nav nav-pills cr-nav-pills d-flex align-items-stretch" id="crTab" role="tablist" style="border: none;">
                 <li class="nav-item flex-fill text-center" role="presentation">
                     <button class="nav-link w-100 active fs-5" id="cr-manage-tab" data-bs-toggle="pill" data-bs-target="#cr-manage-pane" type="button" role="tab" aria-controls="cr-manage-pane" aria-selected="true">
-                        <i class="bi bi-clipboard-check me-2"></i> 📋 كشف وإدارة الصف
+                        <i class="bi bi-clipboard-check me-2"></i> <%= __('CR_Manage_Tab') %>
                     </button>
                 </li>
                 <li class="nav-item flex-fill text-center" role="presentation">
                     <button class="nav-link w-100 fs-5" id="cr-student-tab" data-bs-toggle="pill" data-bs-target="#cr-student-pane" type="button" role="tab" aria-controls="cr-student-pane" aria-selected="false">
-                        <i class="bi bi-mortarboard-fill me-2"></i> 🎓 مستواي الدراسي كطالب
+                        <i class="bi bi-mortarboard-fill me-2"></i> <%= __('CR_Student_Tab') %>
                     </button>
                 </li>
             </ul>
@@ -328,7 +328,7 @@
                     <div class="card shadow-sm border-0 rounded-4 p-3 bg-white">
                         <form method="GET" action="/dashboard/cr" id="dateForm" class="d-flex align-items-center gap-3 flex-wrap">
                             <label class="fw-bold text-secondary mb-0 text-nowrap">
-                                <i class="bi bi-calendar-check me-1 text-primary"></i> تحضير الطلاب وتوقيع الحصص ليوم:
+                                <i class="bi bi-calendar-check me-1 text-primary"></i> <%= __('Take_Attendance_For_Day') %>
                             </label>
                             <input type="date"
                                 name="date"
@@ -337,10 +337,10 @@
                                 value="<%= todayDate %>"
                                 onchange="document.getElementById('dateForm').submit()">
                             <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold hover-scale">
-                                <i class="bi bi-arrow-clockwise me-1"></i> تحديث
+                                <i class="bi bi-arrow-clockwise me-1"></i> <%= __('Update_Btn') %>
                             </button>
                             <a href="/dashboard/cr" class="btn btn-outline-secondary rounded-pill px-3 hover-scale">
-                                <i class="bi bi-calendar-date me-1"></i> اليوم الحالي
+                                <i class="bi bi-calendar-date me-1"></i> <%= __('Current_Day_Btn') %>
                             </a>
                         </form>
                     </div>
@@ -354,12 +354,12 @@
                     <div class="card shadow-sm border-0 rounded-4 h-100 bg-white overflow-hidden">
                         <div class="card-header bg-white p-4 border-0 pb-2">
                             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                                <h4 class="fw-bold mb-0 text-primary"><i class="bi bi-people-fill me-2"></i>حضور طلاب الصف</h4>
+                                <h4 class="fw-bold mb-0 text-primary"><i class="bi bi-people-fill me-2"></i><%= __('Student_Attendance_Class') %></h4>
                                 <div id="attendanceStatusBadge">
                                     <!-- Dynamic lock badge loaded in js -->
                                 </div>
                             </div>
-                            <p class="text-muted small mt-1 mb-0"><i class="bi bi-info-circle me-1"></i>حدد حالة حضور الطلاب كاملة ثم انقر على حفظ في الأسفل لتأكيد الكشف نهائياً.</p>
+                            <p class="text-muted small mt-1 mb-0"><i class="bi bi-info-circle me-1"></i><%= __('Take_Attendance_Sub') %></p>
                         </div>
                         
                         <div class="card-body p-4 pt-2">
@@ -377,28 +377,28 @@
                                                 class="status-btn"
                                                 data-status="present"
                                                 onclick="markLocalStatus(<%= student.id %>, 'present', this)"
-                                                title="حاضر">
+                                                title="<%= __('Status_Present') %>">
                                                 <i class="bi bi-check-lg"></i>
                                             </button>
                                             <button type="button"
                                                 class="status-btn"
                                                 data-status="absent"
                                                 onclick="markLocalStatus(<%= student.id %>, 'absent', this)"
-                                                title="غائب">
+                                                title="<%= __('Status_Absent') %>">
                                                 <i class="bi bi-x-lg"></i>
                                             </button>
                                             <button type="button"
                                                 class="status-btn"
                                                 data-status="leave"
                                                 onclick="markLocalStatus(<%= student.id %>, 'leave', this)"
-                                                title="إجازة">
+                                                title="<%= __('Status_Leave') %>">
                                                 <i class="bi bi-door-open"></i>
                                             </button>
                                             <button type="button"
                                                 class="status-btn"
                                                 data-status="online"
                                                 onclick="markLocalStatus(<%= student.id %>, 'online', this)"
-                                                title="أونلاين">
+                                                title="<%= __('Status_Online') %>">
                                                 <i class="bi bi-wifi"></i>
                                             </button>
                                         </div>
@@ -410,10 +410,10 @@
                         <!-- Footer Actions Lock/Save Panel -->
                         <div class="card-footer bg-light p-4 border-0 d-flex justify-content-center">
                             <button type="button" id="submitAttendanceBtn" class="btn btn-success btn-lg rounded-pill px-5 fw-bold shadow-sm hover-scale w-100" onclick="submitAllAttendance()">
-                                <i class="bi bi-cloud-arrow-up-fill me-2"></i> حفظ وإرسال كشف حضور الطلاب
+                                <i class="bi bi-cloud-arrow-up-fill me-2"></i> <%= __('Save_Attendance_Btn') %>
                             </button>
                             <button type="button" id="editAttendanceBtn" class="btn btn-outline-primary btn-lg rounded-pill px-5 fw-bold hover-scale w-100 d-none" onclick="enableAttendanceEditing()">
-                                <i class="bi bi-pencil-square me-2"></i> تعديل كشف حضور الطلاب
+                                <i class="bi bi-pencil-square me-2"></i> <%= __('Edit_Attendance_Btn') %>
                             </button>
                         </div>
                     </div>
@@ -423,14 +423,14 @@
                 <div class="col-lg-6 mb-4">
                     <div class="card shadow-sm border-0 rounded-4 h-100 bg-white">
                         <div class="card-header bg-white p-4 border-0 pb-2">
-                            <h4 class="fw-bold mb-0 text-success"><i class="bi bi-person-check-fill me-2"></i>سجل المعلمين والحصص</h4>
-                            <p class="text-muted small mt-1 mb-0"><i class="bi bi-info-circle me-1"></i>فعّل أو عطّل حضور الأستاذ لتسجيل الحصص المنجزة لليوم المحدد.</p>
+                            <h4 class="fw-bold mb-0 text-success"><i class="bi bi-person-check-fill me-2"></i><%= __('Schedule_Periods_Books') %></h4>
+                            <p class="text-muted small mt-1 mb-0"><i class="bi bi-info-circle me-1"></i><%= __('Teacher_Attendance_Sub') %></p>
                         </div>
                         <div class="card-body p-4 pt-2">
                             <% if (todayPeriods.length === 0) { %>
                                 <div class="text-center py-5 border rounded-4 bg-light my-3">
                                     <i class="bi bi-calendar-x text-muted opacity-50" style="font-size: 3rem;"></i>
-                                    <p class="text-muted mt-3 fw-bold">لا توجد حصص مجدولة لهذا اليوم!</p>
+                                    <p class="text-muted mt-3 fw-bold"><%= __('No_Scheduled_Periods') %></p>
                                 </div>
                             <% } else { %>
                                 <div class="timeline-container d-flex flex-column gap-3 mt-3">
@@ -453,19 +453,19 @@
                                                                onchange="toggleTeacherAttendance(<%= period.teacher_id %>, this, <%= period.id %>)">
                                                     </div>
                                                     <div>
-                                                        <label class="form-check-label fw-bold text-dark mb-0 d-flex align-items-center flex-wrap gap-1" for="switch_<%= period.id %>" style="cursor: pointer; font-size: 1.05rem;">
-                                                            <span>الحصة <%= period.period_number %>:</span>
-                                                            <span class="text-primary fw-bold"><%= period.teacher_name %></span>
-                                                        </label>
-                                                        
-                                                        <div class="last-update-label mt-1 text-muted d-flex align-items-center gap-2" id="tstatus_<%= period.id %>" style="font-size: 0.72rem;">
-                                                            <% if (isPresent) { %>
-                                                                <span class="text-success fw-semibold"><i class="bi bi-check-circle-fill me-1"></i> حاضر للحصة</span>
-                                                            <% } else { %>
-                                                                <span class="text-danger fw-semibold"><i class="bi bi-x-circle-fill me-1"></i> غائب / لم يؤخذ الحصة</span>
-                                                            <% } %>
-                                                        </div>
-                                                    </div>
+                                                         <label class="form-check-label fw-bold text-dark mb-0 d-flex align-items-center flex-wrap gap-1" for="switch_<%= period.id %>" style="cursor: pointer; font-size: 1.05rem;">
+                                                             <span><%= __('Period_Suffix') %> <%= period.period_number %>:</span>
+                                                             <span class="text-primary fw-bold"><%= period.teacher_name %></span>
+                                                         </label>
+                                                         
+                                                         <div class="last-update-label mt-1 text-muted d-flex align-items-center gap-2" id="tstatus_<%= period.id %>" style="font-size: 0.72rem;">
+                                                             <% if (isPresent) { %>
+                                                                 <span class="text-success fw-semibold"><i class="bi bi-check-circle-fill me-1"></i> <%= __('Status_Present') %></span>
+                                                             <% } else { %>
+                                                                 <span class="text-danger fw-semibold"><i class="bi bi-x-circle-fill me-1"></i> <%= __('Status_Absent') %></span>
+                                                             <% } %>
+                                                         </div>
+                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -483,19 +483,19 @@
                     <div class="card shadow-sm border-0 rounded-4 bg-white overflow-hidden">
                         <div class="card-header bg-white p-4 border-0 pb-2">
                             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                                <h4 class="fw-bold mb-0 text-indigo"><i class="bi bi-journal-bookmark-fill me-2"></i>📚 متابعة وتقدم المناهج والكتب</h4>
+                                <h4 class="fw-bold mb-0 text-indigo"><i class="bi bi-journal-bookmark-fill me-2"></i>📚 <%= __('Syllabus_And_Progress') %></h4>
                                 <span class="badge bg-indigo bg-opacity-10 text-indigo rounded-pill px-3 py-2 fw-semibold" style="font-size: 0.8rem; color: #4f46e5; background: rgba(79, 70, 229, 0.1);">
-                                    مستقل عن التاريخ والجدول اليومي
+                                    <%= __('Independent_Of_Date') %>
                                 </span>
                             </div>
-                            <p class="text-muted small mt-1 mb-0"><i class="bi bi-info-circle me-1"></i>حدد رقم الصفحة المنجزة حالياً للمقرر، واضغط على الأزرار لحفظ التقدم مباشرة في أي وقت.</p>
+                            <p class="text-muted small mt-1 mb-0"><i class="bi bi-info-circle me-1"></i><%= __('Update_Book_Progress_Sub') %></p>
                         </div>
                         
                         <div class="card-body p-4 pt-2">
                             <% if (classBooks.length === 0) { %>
                                 <div class="text-center py-5 border rounded-4 bg-light my-3">
                                     <i class="bi bi-journal-x text-muted opacity-50" style="font-size: 3rem;"></i>
-                                    <p class="text-muted mt-3 fw-bold">لا توجد كتب أو مناهج مسندة لهذا الصف!</p>
+                                    <p class="text-muted mt-3 fw-bold"><%= __('No_Books_Assigned') %></p>
                                 </div>
                             <% } else { %>
                                 <div class="row g-4 mt-1">
@@ -505,16 +505,16 @@
                                                 <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
                                                     <div>
                                                         <h5 class="fw-bold text-dark mb-1" style="font-size: 1.1rem;"><%= book.book_title %></h5>
-                                                        <span class="text-muted small"><i class="bi bi-person me-1"></i>أستاذ: <%= book.teacher_name %></span>
+                                                        <span class="text-muted small"><i class="bi bi-person me-1"></i><%= __('Teacher_Prefix') %> <%= book.teacher_name %></span>
                                                     </div>
                                                     <span class="badge bg-success-subtle text-success rounded-pill px-2 py-1 fw-bold" style="font-size: 0.72rem;">
-                                                        صفحة <%= book.start_page %>–<%= book.end_page %>
+                                                        <%= __('Current_Page') %> <%= book.start_page %>–<%= book.end_page %>
                                                     </span>
                                                 </div>
 
                                                 <!-- Page Adjustment Stepper -->
                                                 <div class="d-flex justify-content-between align-items-center gap-2 bg-light rounded-pill p-2 border mb-3 mt-2" style="box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);">
-                                                    <span class="small text-secondary fw-bold text-nowrap ms-2" style="font-size: 0.82rem;">الصفحة المنجزة:</span>
+                                                    <span class="small text-secondary fw-bold text-nowrap ms-2" style="font-size: 0.82rem;"><%= __('Current_Page') %>:</span>
                                                     <div class="d-flex align-items-center gap-1 bg-white rounded-pill p-0.5 border shadow-sm" style="max-width: 145px; width: 145px;">
                                                         <button type="button" class="adjust-btn btn-outline-danger bg-danger-subtle text-danger" 
                                                                 onclick="adjustPage(<%= book.assignment_id %>, -1)">-</button>
@@ -535,15 +535,15 @@
                                                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 text-muted" style="font-size: 0.72rem;">
                                                     <div id="up_label_<%= book.assignment_id %>">
                                                         <% if (book.lastUpdatedStr) { %>
-                                                            <span><i class="bi bi-clock-history me-1"></i>تحديث: <%= book.lastUpdatedStr %></span>
+                                                            <span><i class="bi bi-clock-history me-1"></i><%= __('Last_Updated') %>: <%= book.lastUpdatedStr %></span>
                                                         <% } else { %>
-                                                            <span>لا يوجد تحديث سابق</span>
+                                                            <span><%= __('No_Previous_Update') %></span>
                                                         <% } %>
                                                     </div>
                                                     <button type="button" class="btn p-0 border-0 text-success fw-bold text-decoration-underline" 
                                                             data-bs-toggle="collapse" data-bs-target="#collapseProgress_<%= book.assignment_id %>" 
                                                             style="font-size: 0.72rem; cursor: pointer;">
-                                                         <i class="bi bi-chevron-down ms-1"></i>التاريخ والرسم البياني
+                                                         <i class="bi bi-chevron-down ms-1"></i><%= __('History_And_Chart') %>
                                                     </button>
                                                 </div>
 
@@ -552,21 +552,21 @@
                                                     <div class="p-3">
                                                          <div class="row align-items-center text-end g-3">
                                                               <div class="col-md-5">
-                                                                   <p class="mb-1 text-muted small"><i class="bi bi-calendar-check me-1"></i>تاريخ آخر تحديث:</p>
+                                                                   <p class="mb-1 text-muted small"><i class="bi bi-calendar-check me-1"></i><%= __('Last_Updated') %>:</p>
                                                                    <p class="fw-bold text-primary mb-3" style="font-size: 0.85rem;"><%= book.last_progress_date %></p>
                                                                    
-                                                                   <p class="mb-1 text-muted small"><i class="bi bi-journal-text me-1"></i>المدى الكلي للمقرر:</p>
-                                                                   <p class="fw-bold text-success mb-0" style="font-size: 0.85rem;">من <%= book.start_page %> إلى <%= book.end_page %></p>
+                                                                   <p class="mb-1 text-muted small"><i class="bi bi-journal-text me-1"></i><%= __('Total_Syllabus_Range') %>:</p>
+                                                                   <p class="fw-bold text-success mb-0" style="font-size: 0.85rem;"><%= __('From_Page') %> <%= book.start_page %> <%= __('To_Page') %> <%= book.end_page %></p>
                                                               </div>
                                                               <div class="col-md-7 text-center">
-                                                                   <p class="mb-2 text-muted small fw-bold text-end"><i class="bi bi-graph-up-arrow me-1"></i>رسم بياني للمنهج:</p>
+                                                                   <p class="mb-2 text-muted small fw-bold text-end"><i class="bi bi-graph-up-arrow me-1"></i><%= __('History_And_Chart') %>:</p>
                                                                    <% if (book.progress_history && book.progress_history.length > 0) { %>
                                                                         <div style="height: 120px; width: 100%;">
                                                                              <canvas id="miniChart_<%= book.assignment_id %>"></canvas>
                                                                         </div>
                                                                    <% } else { %>
                                                                         <div class="text-muted small py-3" style="border: 1px dashed #cbd5e1; border-radius: 8px; background: #fff;">
-                                                                             لا توجد بيانات تاريخية رسم بياني
+                                                                             <%= __('No_Lessons_Recorded') %>
                                                                         </div>
                                                                    <% } %>
                                                               </div>
@@ -594,10 +594,10 @@
                     <div class="card shadow-sm border-0 rounded-4 bg-white">
                         <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
                             <div>
-                                <h5 class="fw-bold text-secondary mb-1">نسبة حضورك الكلية</h5>
+                                <h5 class="fw-bold text-secondary mb-1"><%= __('Your_Total_Attendance') %></h5>
                                 <h2 class="display-5 fw-bold text-primary mb-0"><%= attendancePercentage %>%</h2>
                                 <p class="text-muted small mt-2 mb-0">
-                                    <i class="bi bi-lightning-fill text-warning me-1"></i> أطول سلسلة حضور متتالية: <strong class="text-dark"><%= streak %> أيام</strong>
+                                    <i class="bi bi-lightning-fill text-warning me-1"></i> <%= __('Longest_Streak_Label') %> <strong class="text-dark"><%= streak %> <%= __('Days_Unit') %></strong>
                                 </p>
                             </div>
                             <!-- Styled SVG Radial Progress Ring -->
@@ -615,9 +615,9 @@
                     <div class="card shadow-sm border-0 rounded-4 bg-white">
                         <div class="card-body p-4">
                             <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-clock-history me-2 text-primary"></i>سجل حضورك كطالب</h5>
+                                <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-clock-history me-2 text-primary"></i><%= __('Your_Attendance_As_Student') %></h5>
                                 <button class="btn btn-outline-primary rounded-pill btn-sm px-3 fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#personalFilterCollapse" aria-expanded="false" aria-controls="personalFilterCollapse">
-                                    <i class="bi bi-funnel me-1"></i> تصفية التاريخ
+                                    <i class="bi bi-funnel me-1"></i> <%= __('Date_Filter_Btn') %>
                                 </button>
                             </div>
 
@@ -631,8 +631,8 @@
                                     <table class="table table-hover align-middle mb-0 text-end">
                                         <thead class="table-light">
                                             <tr>
-                                                <th class="px-4 py-3 text-secondary border-0">التاريخ</th>
-                                                <th class="px-4 py-3 text-secondary border-0 text-center">الحالة</th>
+                                                <th class="px-4 py-3 text-secondary border-0"><%= __('Date_Col') %></th>
+                                                <th class="px-4 py-3 text-secondary border-0 text-center"><%= __('Status_Col') %></th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -647,9 +647,9 @@
                                                             row.status === 'absent' ? 'danger' : 
                                                             row.status === 'leave' ? 'warning' : 'info' 
                                                         %>" style="font-size: 0.78rem;">
-                                                            <%= row.status === 'present' ? 'حاضر' : 
-                                                                row.status === 'absent' ? 'غائب' : 
-                                                                row.status === 'leave' ? 'إجازة' : 'أونلاين' %>
+                                                            <%= row.status === 'present' ? __('Status_Present') : 
+                                                                row.status === 'absent' ? __('Status_Absent') : 
+                                                                row.status === 'leave' ? __('Status_Leave') : __('Status_Online') %>
                                                         </span>
                                                     </td>
                                                 </tr>
@@ -660,7 +660,7 @@
                             <% } else { %>
                                 <div class="text-center py-5 text-muted border rounded-4 bg-light">
                                     <i class="bi bi-calendar-x fs-2 d-block mb-2 text-secondary opacity-50"></i>
-                                    لا توجد سجلات حضور مسجلة في هذا النطاق.
+                                    <%= __('No_Attendance_Records_Range') %>
                                 </div>
                             <% } %>
                         </div>
@@ -671,7 +671,7 @@
                 <div class="col-md-6">
                     <div class="bg-transparent border-0 shadow-none h-100">
                         <div class="p-3 pb-2 border-0 bg-transparent">
-                            <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-book-half me-2 text-success"></i>كتبي ومقرراتي الحالية</h5>
+                            <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-book-half me-2 text-success"></i><%= __('My_Current_Books') %></h5>
                         </div>
                         <div class="p-0">
                             <% if (personalBooks.length > 0) { %>
@@ -697,14 +697,14 @@
                                                     <div class="text-end">
                                                         <h5 class="fw-bold text-success mb-1" style="font-size: 1.15rem;"><%= b.book_title %></h5>
                                                         <small class="text-secondary opacity-75">
-                                                            <i class="bi bi-person me-1"></i> الأستاذ: <%= b.teacher_name %>
+                                                            <i class="bi bi-person me-1"></i> <%= __('Teacher_Prefix') %> <%= b.teacher_name %>
                                                         </small>
                                                     </div>
                                                 </div>
                                                 
                                                 <div class="d-flex align-items-center gap-2">
                                                     <span class="badge bg-success-subtle text-success fs-6 px-3 py-2 rounded-pill fw-bold">
-                                                        صفحة <%= b.current_page %> الحالية
+                                                        <%= __('Current_Page') %> <%= b.current_page %>
                                                     </span>
                                                     <span class="badge bg-success text-white rounded-pill px-2.5 py-1.5 fw-bold" style="font-size: 0.85rem;"><%= percentage %>%</span>
                                                 </div>
@@ -719,13 +719,13 @@
                                                         <div class="col-6 col-sm-6">
                                                             <div class="p-3 rounded-4 bg-white border border-light-subtle shadow-xs h-100">
                                                                 <div class="text-muted small mb-1" style="font-size: 0.78rem;">
-                                                                    <i class="bi bi-book-half text-primary me-1"></i> المدى الكلي للمقرر
+                                                                    <i class="bi bi-book-half text-primary me-1"></i> <%= __('Total_Syllabus_Range') %>
                                                                 </div>
                                                                 <div class="fw-bold text-dark" style="font-size: 1.05rem;" dir="rtl">
-                                                                    من صفحة <span class="badge bg-primary-subtle text-primary rounded px-2"><%= b.start_page %></span> إلى <span class="badge bg-primary-subtle text-primary rounded px-2"><%= b.end_page %></span>
+                                                                    <%= __('From_Page') %> <span class="badge bg-primary-subtle text-primary rounded px-2"><%= b.start_page %></span> <%= __('To_Page') %> <span class="badge bg-primary-subtle text-primary rounded px-2"><%= b.end_page %></span>
                                                                 </div>
                                                                 <div class="text-secondary small mt-1 opacity-75" style="font-size: 0.72rem;">
-                                                                    (إجمالي: <%= b.end_page - b.start_page + 1 %> صفحة)
+                                                                    (<%= __('Total_Pages_Count') %>: <%= b.end_page - b.start_page + 1 %>)
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -733,13 +733,13 @@
                                                         <div class="col-6 col-sm-6">
                                                             <div class="p-3 rounded-4 bg-white border border-light-subtle shadow-xs h-100">
                                                                 <div class="text-muted small mb-1" style="font-size: 0.78rem;">
-                                                                    <i class="bi bi-compass text-success me-1"></i> ما تم إنجازه ودراسته
+                                                                    <i class="bi bi-compass text-success me-1"></i> <%= __('Studied_And_Completed') %>
                                                                 </div>
                                                                 <div class="fw-bold text-success" style="font-size: 1.05rem;" dir="rtl">
-                                                                    صفحة <span class="badge bg-success-subtle text-success rounded px-2"><%= b.current_page %></span> الحالية
+                                                                    <%= __('Current_Page') %> <span class="badge bg-success-subtle text-success rounded px-2"><%= b.current_page %></span>
                                                                 </div>
                                                                 <div class="text-secondary small mt-1 opacity-75" style="font-size: 0.72rem;">
-                                                                    (المتبقي: <%= Math.max(0, b.end_page - b.current_page) %> صفحة)
+                                                                    (<%= __('Remaining_Pages') %>: <%= Math.max(0, b.end_page - b.current_page) %>)
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -750,8 +750,8 @@
                                                         <div class="progress-bar rounded-pill" role="progressbar" style="width: <%= percentage %>%; background: linear-gradient(90deg, #10b981, #059669);" aria-valuenow="<%= percentage %>" aria-valuemin="0" aria-valuemax="100"></div>
                                                     </div>
                                                     <div class="d-flex justify-content-between text-muted mb-3" style="font-size: 0.75rem;">
-                                                        <span>نسبة الإنجاز الكلية (<%= percentage %>%)</span>
-                                                        <span class="text-success fw-bold">صفحة <%= b.current_page %> من <%= b.end_page %></span>
+                                                        <span><%= __('Total_Progress_Percentage') %> (<%= percentage %>%)</span>
+                                                        <span class="text-success fw-bold"><%= __('Current_Page') %> <%= b.current_page %> <%= __('Page_Of') %> <%= b.end_page %></span>
                                                     </div>
 
                                                     <!-- Recent Lesson Details (Fully integrated inline) -->
@@ -760,27 +760,27 @@
                                                     %>
                                                         <div class="p-3 rounded-4 bg-white border border-light-subtle shadow-xs text-end" style="border: 1px dashed #cbd5e1 !important; font-size: 0.82rem;">
                                                             <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2 flex-wrap gap-2">
-                                                                <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2 py-1"><i class="bi bi-clock me-1"></i>الدرس الأخير (مؤخراً)</span>
+                                                                <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2 py-1"><i class="bi bi-clock me-1"></i><%= __('Last_Lesson_Recent') %></span>
                                                                 <span class="text-muted small"><%= latest.date %></span>
                                                             </div>
                                                             <div class="row g-2 mb-2">
                                                                 <div class="col-6">
-                                                                     <span class="text-muted">المدى:</span>
-                                                                     <strong class="text-dark" dir="ltr">صفحة <%= latest.startedAt %> ← <%= latest.endedAt %></strong>
+                                                                     <span class="text-muted"><%= __('Range_Label') %></span>
+                                                                     <strong class="text-dark" dir="ltr"><%= __('Current_Page') %> <%= latest.startedAt %> ← <%= latest.endedAt %></strong>
                                                                 </div>
                                                                 <div class="col-6">
-                                                                     <span class="text-muted">المنجز:</span>
+                                                                     <span class="text-muted"><%= __('Completed_Pages_Count') %></span>
                                                                      <strong class="text-success">+<%= latest.pagesCompleted %> ص</strong>
                                                                 </div>
                                                             </div>
                                                             <div class="d-flex justify-content-between align-items-center pt-2 border-top flex-wrap gap-2" style="font-size: 0.78rem;">
-                                                                 <span>المسجِّل: <strong class="text-dark"><%= latest.updaterName %></strong></span>
-                                                                 <span class="text-muted">المدى الكلي: <%= b.start_page %> - <%= b.end_page %></span>
+                                                                 <span><%= __('Registrar_Label') %> <strong class="text-dark"><%= latest.updaterName %></strong></span>
+                                                                 <span class="text-muted"><%= __('Total_Range_Label') %> <%= b.start_page %> - <%= b.end_page %></span>
                                                             </div>
                                                         </div>
                                                     <% } else { %>
                                                         <div class="text-muted small text-end" style="font-size: 0.78rem;">
-                                                            <i class="bi bi-info-circle me-1"></i> لم يتم تسجيل دروس أو حصص بعد.
+                                                            <i class="bi bi-info-circle me-1"></i> <%= __('No_Lessons_Recorded') %>
                                                         </div>
                                                     <% } %>
                                                 </div>
@@ -790,7 +790,7 @@
                             <% } else { %>
                                 <div class="text-center py-5 text-muted border rounded-4 bg-light">
                                     <i class="bi bi-journal-x fs-2 d-block mb-2"></i>
-                                    لم يتم تعيين كتب أو مقررات دراسية لك بعد.
+                                    <%= __('No_Books_Assigned_To_You') %>
                                 </div>
                             <% } %>
                         </div>
