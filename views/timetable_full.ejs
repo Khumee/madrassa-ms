@@ -410,6 +410,31 @@
         .table-responsive {
             overflow-x: auto !important;
             -webkit-overflow-scrolling: touch;
+            /* Premium dynamic scroll shadow indicators */
+            background: 
+                linear-gradient(to right, #ffffff 30%, rgba(255, 255, 255, 0)),
+                linear-gradient(to right, rgba(255, 255, 255, 0), #ffffff 70%) 100% 0,
+                radial-gradient(farthest-side at 0 50%, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0)),
+                radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0)) 100% 0;
+            background-repeat: no-repeat;
+            background-size: 30px 100%, 30px 100%, 12px 100%, 12px 100%;
+            background-attachment: local, local, scroll, scroll;
+            border-radius: 12px !important;
+        }
+        /* Premium custom scrollbar matching slate theme */
+        .table-responsive::-webkit-scrollbar {
+            height: 5px !important;
+        }
+        .table-responsive::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.02) !important;
+            border-radius: 10px !important;
+        }
+        .table-responsive::-webkit-scrollbar-thumb {
+            background: rgba(71, 85, 105, 0.25) !important;
+            border-radius: 10px !important;
+        }
+        .table-responsive::-webkit-scrollbar-thumb:hover {
+            background: rgba(71, 85, 105, 0.4) !important;
         }
         /* Day column: sticky, wide enough for short Urdu/Arabic day names */
         .table th:first-child, .table td:first-child {
