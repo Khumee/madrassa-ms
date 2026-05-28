@@ -518,6 +518,16 @@
         * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         body { background: white !important; margin: 0 !important; padding: 0 1.5cm !important; }
         .timetable-container-wide { width: 100% !important; max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
+        .print-page-block {
+            break-after: page !important;
+            page-break-after: always !important;
+            break-inside: avoid !important;
+            width: 100% !important;
+        }
+        .print-page-block:last-child {
+            break-after: auto !important;
+            page-break-after: auto !important;
+        }
         thead th, th.py-3 {
             box-shadow: inset 0 0 0 1000px #f8fafc !important;
             color: #475569 !important; font-size: 0.75rem !important; padding: 6px 2px !important;

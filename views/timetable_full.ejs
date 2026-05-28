@@ -606,13 +606,14 @@
             padding: 6px 2px !important;
         }
         .print-page-block { 
-            break-inside: avoid; 
-            margin-top: 1.5cm !important;
-            margin-bottom: 1cm !important; 
+            break-after: page !important;
+            page-break-after: always !important;
+            break-inside: avoid !important;
             width: 100% !important;
         }
         .print-page-block:last-child {
-            margin-bottom: 0 !important;
+            break-after: auto !important;
+            page-break-after: auto !important;
         }
         .class-timetable { 
             border: 1px solid #cbd5e1 !important; 
