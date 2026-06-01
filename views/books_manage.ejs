@@ -2,12 +2,12 @@
 
 <div class="row mb-5 align-items-center">
     <div class="col-md-8">
-        <h1 class="fw-bold text-primary">إدارة الكتب</h1>
-        <p class="text-muted">إضافة وتعديل قائمة الكتب المتاحة في الكلية</p>
+        <h1 class="fw-bold text-primary"><%= __('Manage_Books') %></h1>
+        <p class="text-muted"><%= __('Manage_Books_Sub') %></p>
     </div>
     <div class="col-md-4 text-start">
         <a href="/" class="btn btn-outline-primary rounded-pill px-4">
-            <i class="bi bi-house-door me-2"></i>الرجوع للوحة التحكم
+            <i class="bi bi-house-door me-2"></i><%= __('Back_To_Dashboard') %>
         </a>
     </div>
 </div>
@@ -16,25 +16,25 @@
     <div class="col-md-4">
         <div class="card shadow-sm border-0 rounded-4">
             <div class="card-header bg-primary text-white rounded-top-4 p-3">
-                <h5 class="mb-0">إضافة كتاب جديد</h5>
+                <h5 class="mb-0"><%= __('Add_New_Book') %></h5>
             </div>
             <div class="card-body p-4">
                 <form action="/books/add" method="POST">
                     <div class="mb-3">
-                        <label class="form-label fw-bold">اسم الكتاب</label>
+                        <label class="form-label fw-bold"><%= __('Book_Name') %></label>
                         <input type="text" name="title" class="form-control" required placeholder="مثال: البخاري">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold">الصف</label>
+                        <label class="form-label fw-bold"><%= __('Class') %></label>
                         <select name="classId" class="form-select rounded-3" required>
-                            <option value="">-- اختر الصف --</option>
+                            <option value=""><%= __('Select_Class_Placeholder') %></option>
                             <% classes.forEach(cls => { %>
                                 <option value="<%= cls.id %>"><%= cls.name_ar %></option>
                             <% }) %>
                         </select>
                     </div>
                     <div class="d-grid">
-                        <button type="submit" class="btn btn-primary rounded-pill py-2 fw-bold">حفظ الكتاب</button>
+                        <button type="submit" class="btn btn-primary rounded-pill py-2 fw-bold"><%= __('Save_Book_Btn') %></button>
                     </div>
                 </form>
             </div>
@@ -44,13 +44,13 @@
         <div class="card shadow-sm border-0 rounded-4">
             <div class="card-header bg-white p-4 border-bottom">
                 <div class="d-flex align-items-center justify-content-between mb-3">
-                    <h5 class="mb-0 fw-bold text-dark">قائمة الكتب المتاحة</h5>
+                    <h5 class="mb-0 fw-bold text-dark"><%= __('Available_Books_List') %></h5>
                 </div>
                 <div class="d-flex flex-column gap-2">
-                    <small class="text-muted fw-bold"><i class="bi bi-funnel-fill me-1 text-primary"></i>تصفية حسب الصف:</small>
+                    <small class="text-muted fw-bold"><i class="bi bi-funnel-fill me-1 text-primary"></i><%= __('Filter_By_Class') %></small>
                     <div class="d-flex flex-wrap gap-2" id="classFilterTiles">
                         <button class="btn btn-sm btn-primary rounded-pill px-3 class-filter-tile active" data-class-id="all">
-                            جميع الصفوف
+                            <%= __('All_Classes') %>
                         </button>
                         <% classes.forEach(cls => { %>
                             <button class="btn btn-sm btn-outline-primary rounded-pill px-3 class-filter-tile" data-class-id="<%= cls.id %>">
@@ -66,9 +66,9 @@
                         <thead class="table-light">
                             <tr>
                                 <th class="px-4">#</th>
-                                <th>اسم الكتاب</th>
-                                <th>الصف</th>
-                                <th class="px-4 text-center">الإجراءات</th>
+                                <th><%= __('Book_Name') %></th>
+                                <th><%= __('Class') %></th>
+                                <th class="px-4 text-center"><%= __('Actions') %></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -76,14 +76,14 @@
                                 <tr class="book-row" data-class-id="<%= book.class_id || '' %>">
                                     <td class="px-4 text-muted row-index"><%= index + 1 %></td>
                                     <td class="fw-bold"><%= book.title %></td>
-                                    <td class="text-muted"><%= book.class_name || 'غير محدد' %></td>
+                                    <td class="text-muted"><%= book.class_name || __('Not_Specified') %></td>
                                     <td class="px-4 text-center">
                                         <button class="btn btn-sm btn-primary rounded-pill px-3" 
-                                                onclick='openEditModal(<%- JSON.stringify(book) %>)' title="تعديل">
+                                                onclick='openEditModal(<%- JSON.stringify(book) %>)' title="<%= __('Edit') %>">
                                             <i class="bi bi-pencil-square"></i>
                                         </button>
                                         <button class="btn btn-sm btn-outline-danger rounded-pill px-3 ms-1" 
-                                                onclick="deleteBook(<%= book.id %>)" title="حذف">
+                                                onclick="deleteBook(<%= book.id %>)" title="<%= __('Delete') %>">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </td>
@@ -102,27 +102,27 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 rounded-4 shadow">
             <div class="modal-header bg-primary text-white rounded-top-4">
-                <h5 class="modal-title">تعديل اسم الكتاب</h5>
+                <h5 class="modal-title"><%= __('Edit_Book_Title') %></h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4">
                 <form id="editBookForm">
                     <input type="hidden" id="editBookId">
                     <div class="mb-3">
-                        <label class="form-label fw-bold">اسم الكتاب</label>
+                        <label class="form-label fw-bold"><%= __('Book_Name') %></label>
                         <input type="text" id="editBookTitle" class="form-control" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold">الصف</label>
+                        <label class="form-label fw-bold"><%= __('Class') %></label>
                         <select id="editBookClass" class="form-select rounded-3" required>
-                            <option value="">-- اختر الصف --</option>
+                            <option value=""><%= __('Select_Class_Placeholder') %></option>
                             <% classes.forEach(cls => { %>
                                 <option value="<%= cls.id %>"><%= cls.name_ar %></option>
                             <% }) %>
                         </select>
                     </div>
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary rounded-pill py-2">حفظ التغييرات</button>
+                        <button type="submit" class="btn btn-primary rounded-pill py-2"><%= __('Save_Changes') %></button>
                     </div>
                 </form>
             </div>
@@ -201,19 +201,19 @@ document.getElementById('editBookForm').addEventListener('submit', async (e) => 
     if (data.success) {
         location.reload();
     } else {
-        alert('فشل التعديل: ' + data.error);
+        alert('<%= __('Update_Failed') %>' + data.error);
     }
 });
 
 async function deleteBook(id) {
-    const isConfirmed = await showConfirm('هل أنت متأكد من حذف هذا الكتاب؟ سيؤدي ذلك لحذفه من جميع التوزيعات.');
+    const isConfirmed = await showConfirm('<%= __('Confirm_Delete_Book') %>');
     if (!isConfirmed) return;
     const res = await fetch(`/books/delete/${id}`, { method: 'POST' });
     const data = await res.json();
     if (data.success) {
         location.reload();
     } else {
-        alert('فشل الحذف: ' + data.error);
+        alert('<%= __('Delete_Error') %>' + data.error);
     }
 }
 </script>

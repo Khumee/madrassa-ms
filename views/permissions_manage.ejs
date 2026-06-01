@@ -2,12 +2,12 @@
 
 <div class="row mb-5 align-items-center">
     <div class="col-md-6">
-        <h1 class="fw-bold text-primary">إدارة صلاحيات الوصول</h1>
-        <p class="text-muted text-lg">تحكم في الصلاحيات والأدوار لمختلف أقسام النظام</p>
+        <h1 class="fw-bold text-primary"><%= __('Manage_Permissions') %></h1>
+        <p class="text-muted text-lg"><%= __('Manage_Permissions_Sub') %></p>
     </div>
     <div class="col-md-6 text-start">
         <a href="/" class="btn btn-outline-secondary rounded-pill px-4">
-            <i class="bi bi-arrow-right-short me-1"></i> العودة للرئيسية
+            <i class="bi bi-arrow-right-short me-1"></i> <%= __('Back_To_Main') %>
         </a>
     </div>
 </div>
@@ -18,10 +18,10 @@
             <div class="card-header bg-gradient-primary py-3 px-4" style="background: linear-gradient(135deg, #2c3e50, #34495e);">
                 <div class="d-flex align-items-center justify-content-between">
                     <h5 class="mb-0 text-white fw-bold">
-                        <i class="bi bi-shield-lock me-2"></i> جدول توزيع الصلاحيات
+                        <i class="bi bi-shield-lock me-2"></i> <%= __('Permissions_Grid') %>
                     </h5>
                     <span class="badge bg-light text-primary border rounded-pill px-3 py-2 fw-semibold">
-                        خاص بالمدير فقط
+                        <%= __('Mudeer_Only') %>
                     </span>
                 </div>
             </div>
@@ -30,7 +30,7 @@
                     <table class="table table-hover align-middle mb-0 text-end">
                         <thead class="table-light">
                             <tr style="border-bottom: 2px solid #dee2e6;">
-                                <th class="px-4 py-3 text-secondary" style="width: 35%;">الميزة / القسم</th>
+                                <th class="px-4 py-3 text-secondary" style="width: 35%;"><%= __('Feature_Module') %></th>
                                 <% rolesList.forEach(role => { %>
                                     <th class="text-center py-3 text-secondary fw-bold" style="width: 13%;">
                                         <span class="badge bg-soft-primary text-primary px-3 py-2 rounded-pill shadow-xs" style="background-color: rgba(44, 62, 80, 0.08); font-size: 0.85rem;">
@@ -60,7 +60,7 @@
                                             <span class="bg-light text-primary rounded-circle p-2 d-inline-flex justify-content-center align-items-center shadow-xs" style="width: 35px; height: 35px;">
                                                 <i class="bi <%= icon %>"></i>
                                             </span>
-                                            <span><%= f.name %></span>
+                                            <span><%= __(f.id) %></span>
                                         </div>
                                     </td>
                                     <% rolesList.forEach(role => { %>
@@ -72,16 +72,16 @@
                                                         data-function="<%= f.id %>" 
                                                         data-allowed="<%= isAllowed %>"
                                                         onclick="togglePermission(this)"
-                                                        title="انقر لتعديل صلاحية '<%= role %>' لقسم '<%= f.name %>'">
+                                                        title="<%= __('Edit') %>">
                                                     <% if (isAllowed) { %>
                                                         <span class="badge bg-success-soft text-success rounded-pill px-3 py-2 d-flex align-items-center gap-1 shadow-sm transition-all hover-scale" style="background-color: rgba(25, 135, 84, 0.12); cursor: pointer; border: 1px solid rgba(25, 135, 84, 0.2);">
                                                             <i class="bi bi-check-circle-fill text-success fs-6"></i>
-                                                            <span style="font-size: 0.8rem; font-weight: 700;">مسموح</span>
+                                                            <span style="font-size: 0.8rem; font-weight: 700;"><%= __('Allowed') %></span>
                                                         </span>
                                                     <% } else { %>
                                                         <span class="badge bg-danger-soft text-danger rounded-pill px-3 py-2 d-flex align-items-center gap-1 shadow-sm transition-all hover-scale" style="background-color: rgba(220, 53, 69, 0.12); cursor: pointer; border: 1px solid rgba(220, 53, 69, 0.2);">
                                                             <i class="bi bi-x-circle-fill text-danger fs-6"></i>
-                                                            <span style="font-size: 0.8rem; font-weight: 700;">ممنوع</span>
+                                                            <span style="font-size: 0.8rem; font-weight: 700;"><%= __('Forbidden') %></span>
                                                         </span>
                                                     <% } %>
                                                 </button>
@@ -120,9 +120,14 @@ async function togglePermission(button) {
     const currentAllowed = button.getAttribute('data-allowed') === 'true';
     const newAllowed = !currentAllowed;
 
+    const userLang = '<%= lang %>';
+
     // Optional confirmation dialog for high importance actions
     if (functionName === 'users_manage' && role !== 'مدير' && role !== 'ناظم' && newAllowed) {
-        const confirm = await window.showConfirm(`تحذير أمني: هل أنت متأكد من منح صلاحية إدارة المستخدمين لدور "${role}"؟ هذا سيسمح لهم بتعديل صلاحيات وحسابات المستخدمين الآخرين.`);
+        const warnMsg = (userLang === 'ur') 
+            ? `سیکیورٹی وارننگ: کیا آپ واقعی کردار "${role}" کو صارفین کے انتظام کا اختیار دینا چاہتے ہیں؟ یہ انہیں دوسرے صارفین کے اختیارات اور اکاؤنٹس میں ترمیم کرنے کی اجازت دے گا۔`
+            : `تحذير أمني: هل أنت متأكد من منح صلاحية إدارة المستخدمين لدور "${role}"؟ هذا سيسمح لهم بتعديل صلاحيات وحسابات المستخدمين الآخرين.`;
+        const confirm = await window.showConfirm(warnMsg);
         if (!confirm) return;
     }
 
@@ -138,32 +143,37 @@ async function togglePermission(button) {
         
         const data = await res.json();
         if (data.success) {
-            // Update button attributes and inner HTML dynamically without reloading
             button.setAttribute('data-allowed', newAllowed.toString());
             
+            const labelAllowed = (userLang === 'ur') ? 'اجازت ہے' : 'مسموح';
+            const labelForbidden = (userLang === 'ur') ? 'ممنوع / روک ہے' : 'ممنوع';
+            const toastSuccess = (userLang === 'ur') ? 'صلاحیت کو کامیابی کے ساتھ اپ ڈیٹ کر دیا گیا ہے۔' : 'تم تحديث الصلاحية بنجاح.';
+
             if (newAllowed) {
                 button.innerHTML = `
                     <span class="badge bg-success-soft text-success rounded-pill px-3 py-2 d-flex align-items-center gap-1 shadow-sm transition-all hover-scale" style="background-color: rgba(25, 135, 84, 0.12); cursor: pointer; border: 1px solid rgba(25, 135, 84, 0.2);">
                         <i class="bi bi-check-circle-fill text-success fs-6"></i>
-                        <span style="font-size: 0.8rem; font-weight: 700;">مسموح</span>
+                        <span style="font-size: 0.8rem; font-weight: 700;">${labelAllowed}</span>
                     </span>
                 `;
-                window.showToast("تم تحديث الصلاحية بنجاح: مسموح بها الآن.", "success");
+                window.showToast(toastSuccess, "success");
             } else {
                 button.innerHTML = `
                     <span class="badge bg-danger-soft text-danger rounded-pill px-3 py-2 d-flex align-items-center gap-1 shadow-sm transition-all hover-scale" style="background-color: rgba(220, 53, 69, 0.12); cursor: pointer; border: 1px solid rgba(220, 53, 69, 0.2);">
                         <i class="bi bi-x-circle-fill text-danger fs-6"></i>
-                        <span style="font-size: 0.8rem; font-weight: 700;">ممنوع</span>
+                        <span style="font-size: 0.8rem; font-weight: 700;">${labelForbidden}</span>
                     </span>
                 `;
-                window.showToast("تم إلغاء الصلاحية بنجاح: ممنوعة الآن.", "success");
+                window.showToast(toastSuccess, "success");
             }
         } else {
-            window.showToast("فشل في تحديث الصلاحية: " + (data.error || 'خطأ غير معروف'), "danger");
+            const toastFail = (userLang === 'ur') ? 'اختیار کو اپ ڈیٹ کرنے میں ناکامی: ' : 'فشل في تحديث الصلاحية: ';
+            window.showToast(toastFail + (data.error || 'خطأ غير معروف'), "danger");
         }
     } catch (err) {
         console.error(err);
-        window.showToast("حدث خطأ أثناء محاولة الاتصال بالخادم", "danger");
+        const toastErr = (userLang === 'ur') ? 'سرور سے رابطہ قائم کرنے میں خرابی پیش آئی' : 'حدث خطأ أثناء محاولة الاتصال بالخادم';
+        window.showToast(toastErr, "danger");
     } finally {
         button.style.pointerEvents = 'auto';
         button.style.opacity = '1';

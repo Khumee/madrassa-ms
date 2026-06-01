@@ -4,21 +4,20 @@
     <div class="col-md-6">
         <div class="card shadow-sm border-0 rounded-4">
             <div class="card-header bg-primary text-white p-4 rounded-top-4">
-                <h2 class="fw-bold mb-0">إضافة طالب جديد</h2>
+                <h2 class="fw-bold mb-0"><%= __('Add_Student') %></h2>
             </div>
             <div class="card-body p-4">
                 <form action="/students/add" method="POST">
                     <div class="mb-4">
-                        <label class="form-label fw-bold">اسم الطالب الكامل</label>
-                        <input type="text" name="name" class="form-control form-control-lg rounded-3" 
-                               placeholder="مثال: محمد عبد الله" required>
-                        <div class="form-text">سيتم إنشاء حساب مستخدم تلقائياً لهذا الطالب.</div>
+                        <label class="form-label fw-bold"><%= __('Student_Full_Name') %></label>
+                        <input type="text" name="name" class="form-control form-control-lg rounded-3" required>
+                        <div class="form-text"><%= __('Auto_Create_Account_Help') %></div>
                     </div>
                     
                     <div class="mb-4">
-                        <label class="form-label fw-bold">الفصل</label>
+                        <label class="form-label fw-bold"><%= __('Current_Class') %></label>
                         <select name="classId" class="form-select form-select-lg rounded-3" required>
-                            <option value="">اختر الفصل...</option>
+                            <option value=""><%= __('Choose_Class_Placeholder') %></option>
                             <% classes.forEach(cls => { %>
                                 <option value="<%= cls.id %>"><%= __(cls.name_ar) %></option>
                             <% }) %>
@@ -27,12 +26,12 @@
 
                     <div class="alert alert-info border-0 rounded-3">
                         <i class="bi bi-info-circle me-2"></i>
-                        سيتم توليد <strong>رقم القيد</strong> تلقائياً بعد الحفظ.
+                        <%= __('Auto_Roll_No_Help') %>
                     </div>
 
                     <div class="d-grid mt-5">
                         <button type="submit" class="btn btn-primary btn-lg rounded-pill py-3 fw-bold">
-                            حفظ البيانات
+                            <%= __('Save_Data_Btn') %>
                         </button>
                     </div>
                 </form>

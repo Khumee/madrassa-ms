@@ -58,7 +58,7 @@
                                         </div>
                                         <h4 class="fw-bold mb-1 text-dark"><%= activePeriod.subject %></h4>
                                         <p class="text-muted mb-0 small">
-                                            <i class="bi bi-person me-1"></i> مع أ. <%= activePeriod.teacher_name %> &bull; 
+                                            <i class="bi bi-person me-1"></i> <%= __('With_Teacher_Short') %> <%= activePeriod.teacher_name %> &bull; 
                                             <i class="bi bi-clock me-1"></i> <%= activePeriod.start_time.substring(0,5) %> - <%= activePeriod.end_time.substring(0,5) %>
                                         </p>
                                     <% } else if (nextPeriod) { %>

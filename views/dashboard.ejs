@@ -75,7 +75,7 @@
                 <div class="d-flex gap-2 flex-wrap">
                     <a href="/students/manage" class="btn btn-secondary rounded-pill px-4">📂 <%= __('Student_Management') %></a>
                     <a href="/students/add" class="btn btn-success rounded-pill px-4">➕ <%= __('Add_Student') %></a>
-                    <a href="/reports" class="btn btn-primary rounded-pill px-4">📊 <%= __('Reports') %></a>
+                    <a href="/reports?filterType=students" class="btn btn-primary rounded-pill px-4">📊 <%= __('Reports') %></a>
                 </div>
             </div>
         </div>
@@ -91,8 +91,6 @@
                     <% if (role === 'مدير') { %>
                         <a href="/teachers/add" class="btn btn-success rounded-pill px-4">➕ <%= __('Add_Teacher') %></a>
                     <% } %>
-                    <a href="/timetable/manage" class="btn btn-secondary rounded-pill px-4">📅 <%= __('Timetable') %></a>
-                    <a href="/periods/full" class="btn btn-info rounded-pill px-4 text-white">🗓️ <%= __('Full_Timetable') %></a>
                 </div>
             </div>
         </div>

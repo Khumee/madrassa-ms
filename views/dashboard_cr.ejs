@@ -284,7 +284,7 @@
                             <%= classInfo.name_ar %> (مسؤول + طالب)
                         </h2>
                         <span class="opacity-90 small"><i class="bi bi-calendar-event me-1"></i>
-                            <%= new Date(todayDate + 'T00:00:00').toLocaleDateString('ar-EG', { weekday: 'long',
+                            <%= new Date(todayDate + 'T00:00:00').toLocaleDateString(locals.lang === 'ur' ? 'ur-PK' : 'ar-EG', { weekday: 'long',
                                 year: 'numeric', month: 'long', day: 'numeric' }) %>
                         </span>
                     </div>
@@ -1028,8 +1028,8 @@
 
                 const label = document.getElementById(`up_label_${assignmentId}`);
                 if (label) {
-                    const nowStr = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
-                    label.innerHTML = `<span><i class="bi bi-clock-history me-1"></i>تحديث التقدم: الآن (${nowStr})</span>`;
+                    const nowStr = new Date().toLocaleTimeString('<%= locals.lang === "ur" ? "ur-PK" : "ar-EG" %>', { hour: '2-digit', minute: '2-digit' });
+                    label.innerHTML = `<span><i class="bi bi-clock-history me-1"></i><%= __('Last_Updated') %>: <%= __('Now') %> (${nowStr})</span>`;
                 }
 
                 const container = inputField.parentElement;

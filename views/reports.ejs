@@ -2,7 +2,7 @@
 
 <div class="row mb-4 align-items-center">
     <div class="col-md-6">
-        <h1 class="fw-bold text-primary mb-0">التقارير والإحصائيات</h1>
+        <h1 class="fw-bold text-primary mb-0"><%= __('Reports_Stats_Title') %></h1>
         <p class="text-muted"><%= __('Start_Date') %>: <span class="badge bg-light text-primary border"><%= startDate %></span> <%= __('End_Date') %>: <span class="badge bg-light text-primary border"><%= endDate %></span></p>
     </div>
 </div>
@@ -56,6 +56,9 @@
             <div class="card shadow-sm border-0 rounded-4" style="background: linear-gradient(135deg, #ffffff 0%, #fcfdfe 100%);">
                 <div class="card-body p-4">
                     <form id="dateFilterForm" method="GET" action="/reports">
+                        <% if (locals.filterType) { %>
+                            <input type="hidden" name="filterType" value="<%= filterType %>">
+                        <% } %>
                         <div class="row align-items-end g-3">
                             <div class="col-md-3">
                                 <label class="form-label fw-bold text-secondary small"><%= __('Start_Date') %></label>
@@ -92,9 +95,9 @@
     <div class="col-md-12">
         <div class="card shadow-sm border-0 rounded-4">
             <div class="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <h3 class="fw-bold mb-0 text-primary">تقارير حضور الطلاب</h3>
+                <h3 class="fw-bold mb-0 text-primary"><%= __('Student_Attendance_By_Class') %></h3>
                 <button class="btn btn-outline-primary btn-sm rounded-pill px-3" type="button" data-bs-toggle="collapse" data-bs-target="#studentAttendanceFiltersCollapse" aria-expanded="false">
-                    <i class="bi bi-funnel me-1"></i><%= locals.lang === 'ur' ? 'فلٹرز' : 'خيارات التصفية' %>
+                    <i class="bi bi-funnel me-1"></i><%= __('Filter_Label') %>
                 </button>
             </div>
             <!-- Collapsible Filters with Tiles -->
@@ -106,14 +109,14 @@
                             <label class="form-label small fw-bold text-secondary mb-2"><%= locals.lang === 'ur' ? 'طالب تلاش کریں' : 'البحث عن طالب' %></label>
                             <div class="input-group input-group-sm">
                                 <span class="input-group-text bg-white border-primary-subtle"><i class="bi bi-search text-muted"></i></span>
-                                <input type="text" id="studentFilter" class="form-control border-primary-subtle" placeholder="ابحث عن طالب..." onkeyup="filterStudents()">
+                                <input type="text" id="studentFilter" class="form-control border-primary-subtle" placeholder="<%= locals.lang === 'ur' ? 'طالب کا نام تلاش کریں...' : 'البحث عن طالب...' %>" onkeyup="filterStudents()">
                             </div>
                         </div>
                         <!-- Class Selector Tiles -->
                         <div class="col-12 col-md-8">
                             <label class="form-label small fw-bold text-secondary mb-2"><%= locals.lang === 'ur' ? 'کلاسز کے ٹائلز' : 'تصفية حسب الصف' %></label>
                             <div class="d-flex flex-wrap gap-2" id="classTilesContainer">
-                                <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 filter-tile active" data-filter="all" onclick="selectClassTile('all', this)">كل الصفوف</button>
+                                <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 filter-tile active" data-filter="all" onclick="selectClassTile('all', this)"><%= __('All_Classes') %></button>
                                 <% Object.keys(groupedReport).forEach(className => { %>
                                     <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 filter-tile" data-filter="<%= className %>" onclick="selectClassTile('<%= className %>', this)"><%= className %></button>
                                 <% }) %>
@@ -134,8 +137,8 @@
                                     <div class="d-flex justify-content-between align-items-center w-100 me-3">
                                         <span class="fw-bold text-dark fs-5"><%= className %></span>
                                         <div class="d-flex gap-3 text-muted small">
-                                            <span class="badge bg-white border text-primary rounded-pill px-3"><%= students.length %> طلاب</span>
-                                            <span class="badge bg-white border text-success rounded-pill px-3">متوسط الحضور: <%= avg %>%</span>
+                                            <span class="badge bg-white border text-primary rounded-pill px-3"><%= students.length %> <%= __('Students') %></span>
+                                            <span class="badge bg-white border text-success rounded-pill px-3"><%= __('Average_Attendance') %> <%= avg %>%</span>
                                         </div>
                                     </div>
                                 </button>
@@ -146,10 +149,10 @@
                                         <table class="table table-hover align-middle mb-0 text-end">
                                             <thead class="table-light">
                                                 <tr>
-                                                    <th class="px-4">اسم الطالب</th>
-                                                    <th>إجمالي الأيام</th>
-                                                    <th>أيام الحضور</th>
-                                                    <th class="px-4 text-center">النسبة المئوية</th>
+                                                    <th class="px-4"><%= __('Student_Name') %></th>
+                                                    <th><%= __('Total_Days') %></th>
+                                                    <th><%= __('Present_Days') %></th>
+                                                    <th class="px-4 text-center"><%= __('Percentage') %></th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -182,6 +185,7 @@
     </div>
 </div>
 
+<% if (!locals.filterType || filterType !== 'students') { %>
 <!-- Teacher Attendance and Period Variance Report (New Section) -->
 <div class="row mb-5">
     <div class="col-md-12">
@@ -257,9 +261,9 @@
     <div class="col-md-12">
         <div class="card shadow-sm border-0 rounded-4">
             <div class="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <h3 class="fw-bold mb-0 text-success">تقرير إنجاز الكتب</h3>
+                <h3 class="fw-bold mb-0 text-success"><%= __('Book_Completion_Report') %></h3>
                 <button class="btn btn-outline-success btn-sm rounded-pill px-3" type="button" data-bs-toggle="collapse" data-bs-target="#bookProgressFiltersCollapse" aria-expanded="false">
-                    <i class="bi bi-funnel me-1"></i><%= locals.lang === 'ur' ? 'فلٹرز' : 'خيارات التصفية' %>
+                    <i class="bi bi-funnel me-1"></i><%= __('Filter_Label') %>
                 </button>
             </div>
             <!-- Collapsible Filters with Class and Teacher Tiles -->
@@ -310,11 +314,11 @@
                     <table class="table table-hover align-middle mb-0 text-end">
                         <thead class="table-light">
                             <tr>
-                                <th class="px-4">المعلم</th>
-                                <th>الكتاب</th>
-                                <th>الصف</th>
-                                <th>التقدم</th>
-                                <th class="px-4 text-center">الإجراء</th>
+                                <th class="px-4"><%= __('Teacher') %></th>
+                                <th><%= __('Book') %></th>
+                                <th><%= __('Class') %></th>
+                                <th><%= __('Progress') %></th>
+                                <th class="px-4 text-center"><%= __('Action') %></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -340,18 +344,18 @@
                                             </small>
                                         <% } else { %>
                                             <small class="text-muted d-block" style="font-size: 0.72rem;">
-                                                لا توجد تحديثات بعد
+                                                <%= __('No_Updates_Yet') %>
                                             </small>
                                         <% } %>
                                     </td>
                                     <td class="px-4 text-center">
                                         <div class="d-flex justify-content-center gap-2">
                                             <a href="/reports/teacher/<%= tp.teacher_id %>" class="btn btn-sm btn-outline-success rounded-pill px-3">
-                                                <i class="bi bi-graph-up me-1"></i>الرسم البياني
+                                                <i class="bi bi-graph-up me-1"></i><%= __('Chart') %>
                                             </a>
                                             <button class="btn btn-sm btn-success rounded-pill px-3" 
                                                     onclick="openProgressModal(<%= JSON.stringify(tp) %>)">
-                                                تحديث
+                                                <%= __('Update_Btn') %>
                                             </button>
                                         </div>
                                     </td>
@@ -364,13 +368,14 @@
         </div>
     </div>
 </div>
+<% } %>
 
 <!-- Update Progress Modal -->
 <div class="modal fade" id="updateProgressModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 rounded-4 shadow">
             <div class="modal-header bg-success text-white rounded-top-4">
-                <h5 class="modal-title">تحديث تقدم الكتاب</h5>
+                <h5 class="modal-title"><%= __('Update_Book_Progress_Title') %></h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4">
@@ -381,7 +386,7 @@
                         <p class="text-muted small" id="progTeacherName"></p>
                     </div>
                     <div class="mb-4 text-center">
-                        <label class="form-label fw-bold d-block mb-3">رقم الصفحة الحالية</label>
+                        <label class="form-label fw-bold d-block mb-3"><%= __('Current_Page_Number') %></label>
                         <div class="d-flex align-items-center justify-content-center gap-3">
                             <input type="number" id="progPageNumber" 
                                    class="form-control border-0 shadow-sm rounded-3 text-center fw-bold text-success bg-light" 
@@ -391,7 +396,7 @@
                         <small class="text-muted mt-2 d-block" id="progRangeText"></small>
                     </div>
                     <div class="d-grid">
-                        <button type="submit" class="btn btn-success rounded-pill py-2 fw-bold">حفظ التحديث</button>
+                        <button type="submit" class="btn btn-success rounded-pill py-2 fw-bold"><%= __('Save_Changes') %></button>
                     </div>
                 </form>
             </div>
@@ -574,11 +579,11 @@ document.addEventListener('DOMContentLoaded', () => {
 function openProgressModal(tp) {
     document.getElementById('progAssignmentId').value = tp.assignment_id;
     document.getElementById('progBookTitle').innerText = tp.book_title;
-    document.getElementById('progTeacherName').innerText = `المعلم: ${tp.teacher_name}`;
+    document.getElementById('progTeacherName').innerText = '<%= __('Teacher_Prefix_Label') %>: ' + tp.teacher_name;
     document.getElementById('progPageNumber').value = tp.current_page;
     document.getElementById('progPageNumber').min = tp.start_page;
     document.getElementById('progPageNumber').max = tp.end_page;
-    document.getElementById('progRangeText').innerText = `النطاق المسموح: من ${tp.start_page} إلى ${tp.end_page}`;
+    document.getElementById('progRangeText').innerText = '<%= __('Allowed_Range_Text') %>'.replace('%s', tp.start_page).replace('%s', tp.end_page);
     progressModal.show();
 }
 

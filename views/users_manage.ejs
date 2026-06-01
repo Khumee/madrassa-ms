@@ -2,16 +2,16 @@
 
 <div class="row mb-5 align-items-center">
     <div class="col-md-6">
-        <h1 class="fw-bold text-primary">إدارة المستخدمين والأدوار</h1>
-        <p class="text-muted">تحكم في الأسماء، الحسابات، والصلاحيات</p>
+        <h1 class="fw-bold text-primary"><%= __('Manage_Users_Roles') %></h1>
+        <p class="text-muted"><%= __('Manage_Users_Roles_Sub') %></p>
     </div>
     <div class="col-md-6 text-start">
         <div class="btn-group rounded-pill shadow-sm bg-white p-1">
-            <button class="btn btn-primary rounded-pill px-4 filter-btn active" onclick="filterUsers('all', this)">الكل</button>
-            <button class="btn btn-outline-primary rounded-pill px-4 filter-btn" onclick="filterUsers('أستاذ', this)">المعلمون</button>
-            <button class="btn btn-outline-primary rounded-pill px-4 filter-btn" onclick="filterUsers('طالب', this)">الطلاب</button>
-            <button class="btn btn-outline-primary rounded-pill px-4 filter-btn" onclick="filterUsers('عريف', this)">عريف</button>
-            <button class="btn btn-outline-primary rounded-pill px-4 filter-btn" onclick="filterUsers('ناظم', this)">الإدارة</button>
+            <button class="btn btn-primary rounded-pill px-4 filter-btn active" onclick="filterUsers('all', this)"><%= __('Role_All') %></button>
+            <button class="btn btn-outline-primary rounded-pill px-4 filter-btn" onclick="filterUsers('أستاذ', this)"><%= __('Role_Teachers') %></button>
+            <button class="btn btn-outline-primary rounded-pill px-4 filter-btn" onclick="filterUsers('طالب', this)"><%= __('Role_Students') %></button>
+            <button class="btn btn-outline-primary rounded-pill px-4 filter-btn" onclick="filterUsers('عريف', this)"><%= __('Role_CR') %></button>
+            <button class="btn btn-outline-primary rounded-pill px-4 filter-btn" onclick="filterUsers('ناظم', this)"><%= __('Role_Admin_Filter') %></button>
         </div>
     </div>
 </div>
@@ -24,11 +24,11 @@
                     <table class="table table-hover align-middle mb-0 text-end">
                         <thead class="table-light">
                             <tr>
-                                <th class="px-4">رقم التعريف</th>
-                                <th>الاسم الكامل</th>
-                                <th>اسم المستخدم</th>
-                                <th>الدور</th>
-                                <th class="px-4 text-center">الإجراءات</th>
+                                <th class="px-4"><%= __('User_ID') %></th>
+                                <th><%= __('Full_Name') %></th>
+                                <th><%= __('Username_Label') %></th>
+                                <th><%= __('Role') %></th>
+                                <th class="px-4 text-center"><%= __('Actions') %></th>
                             </tr>
                         </thead>
                         <tbody id="userTableBody">
@@ -56,11 +56,11 @@
                                     </td>
                                     <td class="px-4 text-center">
                                         <button class="btn btn-sm btn-primary rounded-pill px-3" 
-                                                onclick="openEditModal(<%= JSON.stringify(user) %>)" title="تعديل">
+                                                onclick="openEditModal(<%= JSON.stringify(user) %>)" title="<%= __('Edit') %>">
                                             <i class="bi bi-pencil-square"></i>
                                         </button>
                                         <button class="btn btn-sm btn-outline-warning rounded-pill px-3 ms-2" 
-                                                onclick="resetPassword(<%= user.id %>)" title="إعادة تعيين كلمة المرور">
+                                                onclick="resetPassword(<%= user.id %>)" title="<%= __('Reset_Password') %>">
                                             <i class="bi bi-key-fill"></i>
                                         </button>
                                     </td>
@@ -79,36 +79,36 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 rounded-4 shadow">
             <div class="modal-header bg-primary text-white rounded-top-4">
-                <h5 class="modal-title">تعديل بيانات المستخدم</h5>
+                <h5 class="modal-title"><%= __('Edit_User_Data') %></h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4">
                 <form id="editUserForm">
                     <input type="hidden" id="editUserId">
                     <div class="mb-3">
-                        <label class="form-label fw-bold">الاسم الكامل</label>
+                        <label class="form-label fw-bold"><%= __('Full_Name') %></label>
                         <input type="text" id="editFullName" class="form-control" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold">اسم المستخدم (Username)</label>
+                        <label class="form-label fw-bold"><%= __('Username_Field_Label') %></label>
                         <input type="text" id="editUsername" class="form-control" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold">الدور (Role)</label>
+                        <label class="form-label fw-bold"><%= __('Role_Field_Label') %></label>
                         <select id="editRole" class="form-select" required>
-                            <option value="طالب">طالب</option>
-                            <option value="عريف">عريف</option>
-                            <option value="أستاذ">أستاذ</option>
-                            <option value="ناظم">ناظم</option>
-                            <option value="مدير">مدير</option>
+                            <option value="طالب"><%= __('طالب') %></option>
+                            <option value="عريف"><%= __('عريف') %></option>
+                            <option value="أستاذ"><%= __('أستاذ') %></option>
+                            <option value="ناظم"><%= __('ناظم') %></option>
+                            <option value="مدير"><%= __('مدير') %></option>
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold">كلمة مرور جديدة (اتركه فارغاً للحفاظ على الحالية)</label>
+                        <label class="form-label fw-bold"><%= __('New_Password_Placeholder_Label') %></label>
                         <input type="password" id="editPassword" class="form-control" placeholder="********">
                     </div>
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary rounded-pill py-2">حفظ التغييرات</button>
+                        <button type="submit" class="btn btn-primary rounded-pill py-2"><%= __('Save_Changes') %></button>
                     </div>
                 </form>
             </div>
@@ -171,18 +171,18 @@ document.getElementById('editUserForm').addEventListener('submit', async (e) => 
     if (data.success) {
         location.reload();
     } else {
-        alert('فشل التحديث: ' + (data.error || 'خطأ غير معروف'));
+        alert('<%= __('Update_Failed') %>' + (data.error || '<%= __('Unknown_Error') %>'));
     }
 });
 
 async function resetPassword(userId) {
-    if (!confirm('هل أنت متأكد من إعادة تعيين كلمة المرور إلى 1234؟')) return;
+    if (!confirm('<%= __('Confirm_Reset_Password_Prompt') %>')) return;
     const res = await fetch('/users/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId })
     });
-    if ((await res.json()).success) alert('تمت إعادة التعيين بنجاح');
+    if ((await res.json()).success) alert('<%= __('Reset_Success') %>');
 }
 </script>
 

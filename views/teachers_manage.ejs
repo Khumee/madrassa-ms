@@ -2,8 +2,8 @@
 
 <div class="row mb-5">
     <div class="col-md-12">
-        <h1 class="fw-bold text-primary">إدارة المعلمين</h1>
-        <p class="text-muted">تعديل بيانات المعلمين وإدارة الملفات الشخصية</p>
+        <h1 class="fw-bold text-primary"><%= __('Teacher_Management') %></h1>
+        <p class="text-muted"><%= __('Manage_Teachers_Sub') %></p>
     </div>
 </div>
 
@@ -15,10 +15,10 @@
                     <table class="table table-hover align-middle mb-0 text-end">
                         <thead class="table-light">
                             <tr>
-                                <th class="px-4">رقم الهوية (Teacher ID)</th>
-                                <th>اسم المعلم</th>
-                                <th>المادة / التخصص</th>
-                                <th class="px-4 text-center">الإجراءات</th>
+                                <th class="px-4"><%= __('Teacher_ID') %></th>
+                                <th><%= __('Teacher_Name') %></th>
+                                <th><%= __('Subject_Specialization') %></th>
+                                <th class="px-4 text-center"><%= __('Actions') %></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -31,16 +31,16 @@
                                     </td>
                                     <td class="fw-bold"><%= teacher.name %></td>
                                     <td>
-                                        <span class="text-muted"><%= teacher.subject || 'غير محدد' %></span>
+                                        <span class="text-muted"><%= teacher.subject || __('Not_Specified') %></span>
                                     </td>
                                     <td class="px-4 text-center">
                                         <button class="btn btn-sm btn-primary rounded-pill px-3" 
-                                                onclick="openEditModal(<%= JSON.stringify(teacher) %>)" title="تعديل">
+                                                onclick="openEditModal(<%= JSON.stringify(teacher) %>)" title="<%= __('Edit') %>">
                                             <i class="bi bi-pencil-square"></i>
                                         </button>
                                         <a href="/teachers/delete/<%= teacher.id %>" 
                                            class="btn btn-sm btn-outline-danger rounded-pill px-3 ms-2"
-                                           onclick="return confirm('هل أنت متأكد من حذف هذا المعلم؟')" title="حذف">
+                                           onclick="return confirm('<%= __('Confirm_Delete_Teacher') %>')" title="<%= __('Delete') %>">
                                             <i class="bi bi-trash"></i>
                                         </a>
                                     </td>
@@ -59,25 +59,25 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 rounded-4 shadow">
             <div class="modal-header bg-primary text-white rounded-top-4">
-                <h5 class="modal-title">تعديل بيانات المعلم</h5>
+                <h5 class="modal-title"><%= __('Edit_Teacher_Data') %></h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4">
                 <form action="" id="editTeacherForm" method="POST">
                     <div class="mb-3">
-                        <label class="form-label">رقم الهوية (غير قابل للتعديل)</label>
+                        <label class="form-label"><%= __('ID_Number_Readonly') %></label>
                         <input type="text" id="editIdNumber" class="form-control bg-light" readonly>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">اسم المعلم الكامل</label>
+                        <label class="form-label"><%= __('Teacher_Full_Name') %></label>
                         <input type="text" name="name" id="editTeacherName" class="form-control" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">المادة / التخصص</label>
+                        <label class="form-label"><%= __('Subject_Specialization') %></label>
                         <input type="text" name="subject" id="editSubject" class="form-control">
                     </div>
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary rounded-pill py-2">حفظ التغييرات</button>
+                        <button type="submit" class="btn btn-primary rounded-pill py-2"><%= __('Save_Changes') %></button>
                     </div>
                 </form>
             </div>

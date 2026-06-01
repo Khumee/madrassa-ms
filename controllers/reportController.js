@@ -12,6 +12,7 @@ exports.showReports = async (req, res) => {
 
         const startDate = req.query.startDate || defaultStartDate;
         const endDate = req.query.endDate || defaultEndDate;
+        const filterType = req.query.filterType || null;
 
         // Get active session ID to scope report
         const [sessionRows] = await db.execute('SELECT id FROM sessions WHERE is_active = TRUE LIMIT 1');
@@ -132,7 +133,7 @@ exports.showReports = async (req, res) => {
             };
         });
 
-        res.render('reports', { groupedReport, teachers, teacherProgress, startDate, endDate, teachersReport });
+        res.render('reports', { groupedReport, teachers, teacherProgress, startDate, endDate, teachersReport, filterType });
     } catch (err) {
         console.error(err);
         res.status(500).send('Error generating reports');

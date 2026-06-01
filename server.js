@@ -34,7 +34,7 @@ app.use(session({
 
 // i18n Translation setup
 i18n.configure({
-    locales: ['ar', 'ur'],
+    locales: ['ar', 'ur', 'en'],
     directory: path.join(__dirname, 'locales'),
     defaultLocale: 'ur',
     cookie: 'lang',
@@ -42,7 +42,7 @@ i18n.configure({
 });
 app.use(i18n.init);
 app.use((req, res, next) => {
-    if (req.session.lang && ['ar', 'ur'].includes(req.session.lang)) {
+    if (req.session.lang && ['ar', 'ur', 'en'].includes(req.session.lang)) {
         req.setLocale(req.session.lang);
     } else {
         req.session.lang = 'ur';
@@ -57,7 +57,7 @@ app.use((req, res, next) => {
 // Set Language Route
 app.get('/set-lang/:lang', (req, res) => {
     const lang = req.params.lang;
-    if (['ar', 'ur'].includes(lang)) {
+    if (['ar', 'ur', 'en'].includes(lang)) {
         req.session.lang = lang;
         res.cookie('lang', lang, { maxAge: 900000, httpOnly: true });
     }
