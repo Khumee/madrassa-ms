@@ -9,7 +9,10 @@
             </span>
         </div>
     </div>
-    <div class="col-md-6 text-start">
+    <div class="col-md-6 text-start d-flex gap-2 justify-content-md-start justify-content-between align-items-center mt-3 mt-md-0">
+        <button class="btn btn-success rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#assignBookModal">
+            <i class="bi bi-journal-plus me-2"></i><%= __('Assign_New_Book') %>
+        </button>
         <a href="/" class="btn btn-outline-primary rounded-pill px-4">
             <i class="bi bi-house-door me-2"></i><%= __('Back_To_Dashboard') %>
         </a>
@@ -17,59 +20,7 @@
 </div>
 
 <div class="row">
-    <div class="col-md-4">
-        <div class="card shadow-sm border-0 rounded-4">
-            <div class="card-header bg-success text-white rounded-top-4 p-3">
-                <h5 class="mb-0"><%= __('Assign_New_Book') %></h5>
-            </div>
-            <div class="card-body p-4">
-                <form action="/teacher-books/assign" method="POST">
-                    <input type="hidden" name="sessionId" value="<%= sessions.find(s => s.is_active).id %>">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold"><%= __('Teacher') %></label>
-                        <select name="teacherId" class="form-select" required>
-                            <option value=""><%= __('Select_Teacher_Placeholder_Assign') %></option>
-                            <% teachers.forEach(t => { %>
-                                <option value="<%= t.id %>"><%= t.name %></option>
-                            <% }) %>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold"><%= __('Book_Name') %></label>
-                        <select name="bookId" class="form-select" required>
-                            <option value=""><%= __('Select_Book_Placeholder_Assign') %></option>
-                            <% books.forEach(b => { %>
-                                <option value="<%= b.id %>"><%= b.title %></option>
-                            <% }) %>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold"><%= __('Class') %></label>
-                        <select name="classId" class="form-select" required>
-                            <option value=""><%= __('Select_Class_Placeholder_Assign') %></option>
-                            <% classes.forEach(c => { %>
-                                <option value="<%= c.id %>"><%= c.name %></option>
-                            <% }) %>
-                        </select>
-                    </div>
-                    <div class="row">
-                        <div class="col-6 mb-3">
-                            <label class="form-label fw-bold"><%= __('From_Page_Label') %></label>
-                            <input type="number" name="startPage" class="form-control" value="1" required>
-                        </div>
-                        <div class="col-6 mb-3">
-                            <label class="form-label fw-bold"><%= __('To_Page_Label') %></label>
-                            <input type="number" name="endPage" class="form-control" value="500" required>
-                        </div>
-                    </div>
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-success rounded-pill py-2 fw-bold"><%= __('Complete_Assignment_Btn') %></button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-8">
+    <div class="col-12">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-journal-text me-2 text-success"></i><%= __('Current_Assignments_List') %></h5>
             <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
@@ -185,7 +136,74 @@
                             </tbody>
                         </table>
                     </div>
-                 <div class="modal-header bg-primary text-white rounded-top-4">
+                </div>
+            </div>
+        <% }) %>
+    </div>
+</div>
+
+<!-- Assign New Book Modal -->
+<div class="modal fade" id="assignBookModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <div class="modal-header bg-success text-white rounded-top-4">
+                <h5 class="modal-title"><%= __('Assign_New_Book') %></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form action="/teacher-books/assign" method="POST">
+                    <input type="hidden" name="sessionId" value="<%= sessions.find(s => s.is_active).id %>">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><%= __('Teacher') %></label>
+                        <select name="teacherId" class="form-select" required>
+                            <option value=""><%= __('Select_Teacher_Placeholder_Assign') %></option>
+                            <% teachers.forEach(t => { %>
+                                <option value="<%= t.id %>"><%= t.name %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><%= __('Book_Name') %></label>
+                        <select name="bookId" class="form-select" required>
+                            <option value=""><%= __('Select_Book_Placeholder_Assign') %></option>
+                            <% books.forEach(b => { %>
+                                <option value="<%= b.id %>"><%= b.title %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><%= __('Class') %></label>
+                        <select name="classId" class="form-select" required>
+                            <option value=""><%= __('Select_Class_Placeholder_Assign') %></option>
+                            <% classes.forEach(c => { %>
+                                <option value="<%= c.id %>"><%= c.name %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-bold"><%= __('From_Page_Label') %></label>
+                            <input type="number" name="startPage" class="form-control" value="1" required>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-bold"><%= __('To_Page_Label') %></label>
+                            <input type="number" name="endPage" class="form-control" value="500" required>
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success rounded-pill py-2 fw-bold"><%= __('Complete_Assignment_Btn') %></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Assignment Modal -->
+<div class="modal fade" id="editAssignmentModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <div class="modal-header bg-primary text-white rounded-top-4">
                 <h5 class="modal-title"><%= __('Edit_Assignment_Title') %></h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -232,12 +250,6 @@
                     <input type="hidden" id="editSessionId">
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-primary rounded-pill py-2"><%= __('Save_Changes') %></button>
-                    </div>               <% }) %>
-                        </select>
-                    </div>
-                    <input type="hidden" id="editSessionId">
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary rounded-pill py-2">حفظ التغييرات</button>
                     </div>
                 </form>
             </div>

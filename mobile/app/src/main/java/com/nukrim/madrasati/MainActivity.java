@@ -37,6 +37,38 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setUseWideViewPort(true);
 
+        // Append custom User-Agent for server detection
+        String defaultUA = webSettings.getUserAgentString();
+        webSettings.setUserAgentString(defaultUA + " KuiMobile/" + BuildConfig.VERSION_NAME);
+
+        // Check for updates asynchronously
+        new Thread(() -> {
+            try {
+                java.net.URL url = new java.net.URL(APP_URL + "/api/app-version");
+                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setConnectTimeout(5000);
+                conn.setReadTimeout(5000);
+                if (conn.getResponseCode() == 200) {
+                    java.io.InputStream in = new java.io.BufferedInputStream(conn.getInputStream());
+                    java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(in));
+                    StringBuilder sb = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        sb.append(line);
+                    }
+                    String response = sb.toString();
+                    org.json.JSONObject json = new org.json.JSONObject(response);
+                    int serverVersionCode = json.getInt("versionCode");
+                    if (serverVersionCode > BuildConfig.VERSION_CODE) {
+                        runOnUiThread(() -> findViewById(R.id.fab_update).setVisibility(android.view.View.VISIBLE));
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {

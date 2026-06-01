@@ -289,6 +289,10 @@
                         </span>
                     </div>
                     <div class="d-flex gap-2">
+                        <a href="/periods/full" class="btn btn-white text-dark rounded-pill px-4 fw-bold shadow-sm bg-white border-0 hover-scale">
+                            <i class="bi bi-calendar3 text-primary me-1"></i>
+                            <%= __('Timetable') %>
+                        </a>
                         <a href="/profile/change-password" class="btn btn-white text-dark rounded-pill px-4 fw-bold shadow-sm bg-white border-0 hover-scale">
                             <i class="bi bi-key text-warning me-1"></i>
                             <%= __('Change_Password') %>
@@ -515,7 +519,7 @@
                                                 <!-- Page Adjustment Stepper -->
                                                 <div class="d-flex justify-content-between align-items-center gap-2 bg-light rounded-pill p-2 border mb-3 mt-2" style="box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);">
                                                     <span class="small text-secondary fw-bold text-nowrap ms-2" style="font-size: 0.82rem;"><%= __('Current_Page') %>:</span>
-                                                    <div class="d-flex align-items-center gap-1 bg-white rounded-pill p-0.5 border shadow-sm" style="max-width: 145px; width: 145px;">
+                                                    <div class="d-flex align-items-center gap-1 bg-white rounded-pill p-0.5 border shadow-sm" style="max-width: 165px; width: 165px;">
                                                         <button type="button" class="adjust-btn btn-outline-danger bg-danger-subtle text-danger" 
                                                                 onclick="adjustPage(<%= book.assignment_id %>, -1)">-</button>
                                                         <input type="number" id="input_<%= book.assignment_id %>"
@@ -525,7 +529,7 @@
                                                                max="<%= book.end_page %>"
                                                                data-current="<%= Math.max(book.current_page, book.start_page) %>"
                                                                onchange="updateBookProgress(<%= book.assignment_id %>, this)"
-                                                               style="width: 55px; font-size: 1.05rem; box-shadow: none;">
+                                                               style="width: 75px; font-size: 1.05rem; box-shadow: none;">
                                                         <button type="button" class="adjust-btn btn-success text-white bg-success" 
                                                                 onclick="adjustPage(<%= book.assignment_id %>, 1)">+</button>
                                                     </div>

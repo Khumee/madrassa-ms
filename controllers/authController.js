@@ -3,7 +3,9 @@ const bcrypt = require('bcryptjs');
 const { DateTime } = require('luxon');
 
 exports.showLogin = (req, res) => {
-    res.render('login', { error: null });
+    const userAgent = req.headers['user-agent'] || '';
+    const isMobileApp = userAgent.includes('KuiMobile');
+    res.render('login', { error: null, isMobileApp });
 };
 
 exports.login = async (req, res) => {
@@ -65,10 +67,14 @@ exports.login = async (req, res) => {
                 });
             }
         }
-        res.render('login', { error: req.__('Invalid_Credentials') });
+        const userAgent = req.headers['user-agent'] || '';
+        const isMobileApp = userAgent.includes('KuiMobile');
+        res.render('login', { error: req.__('Invalid_Credentials'), isMobileApp });
     } catch (err) {
         console.error(err);
-        res.render('login', { error: req.__('Internal_Server_Error') });
+        const userAgent = req.headers['user-agent'] || '';
+        const isMobileApp = userAgent.includes('KuiMobile');
+        res.render('login', { error: req.__('Internal_Server_Error'), isMobileApp });
     }
 };
 

@@ -19,6 +19,25 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/logo.jpg', (req, res) => res.sendFile(path.join(__dirname, 'logo.jpg')));
 app.get('/mobile', (req, res) => res.redirect('/kui.apk'));
+app.get('/api/app-version', (req, res) => {
+    try {
+        const fs = require('fs');
+        const path = require('path');
+        const gradlePath = path.join(__dirname, 'mobile', 'app', 'build.gradle');
+        if (fs.existsSync(gradlePath)) {
+            const content = fs.readFileSync(gradlePath, 'utf8');
+            const matchCode = content.match(/versionCode\s+(\d+)/);
+            const matchName = content.match(/versionName\s+"([^"]+)"/);
+            const versionCode = matchCode ? parseInt(matchCode[1], 10) : 1;
+            const versionName = matchName ? matchName[1] : "1.0";
+            return res.json({ versionCode, versionName });
+        }
+        res.json({ versionCode: 1, versionName: "1.0" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to read app version' });
+    }
+});
 
 // Body parser
 app.use(bodyParser.urlencoded({ extended: true }));
