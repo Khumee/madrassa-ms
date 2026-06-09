@@ -554,3 +554,139 @@ exports.togglePermission = async (req, res) => {
         res.status(500).json({ success: false, error: err.message });
     }
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Areef Standards Report  (class-based)
+// One row per class.  Areef name(s) shown for reference only.
+//
+//  Student attendance days  = distinct dates in attendance_students for
+//                             students enrolled in that class (any record = counted)
+//  Teacher attendance days  = distinct dates in attendance_teachers where
+//                             marked_by is any current Areef of that class
+//                             (proxy: no submit btn, so ≥1 teacher status change = day counted)
+// ─────────────────────────────────────────────────────────────────────────────
+exports.showAreefStandardsReport = async (req, res) => {
+    try {
+        const now = DateTime.now().setZone('Asia/Karachi');
+        const defaultStart = now.startOf('week').minus({ weeks: 1 }).toISODate();
+        const defaultEnd   = now.startOf('week').minus({ weeks: 1 }).plus({ days: 5 }).toISODate();
+
+        const startDate = req.query.startDate || defaultStart;
+        const endDate   = req.query.endDate   || defaultEnd;
+
+        // Luxon helpers for the date-filter partial
+        const sd = DateTime.fromISO(startDate);
+        const ed = DateTime.fromISO(endDate);
+        const prevStartDate   = sd.minus({ days: 7 }).toISODate();
+        const prevEndDate     = ed.minus({ days: 7 }).toISODate();
+        const nextStartDate   = sd.plus({ days: 7 }).toISODate();
+        const nextEndDate     = ed.plus({ days: 7 }).toISODate();
+        const dateToday       = now.toISODate();
+        const dateLastMonth   = now.minus({ months: 1 }).toISODate();
+        const dateLast3Months = now.minus({ months: 3 }).toISODate();
+        const dateLast6Months = now.minus({ months: 6 }).toISODate();
+        const defaultStart2   = defaultStart;
+        const defaultEnd2     = defaultEnd;
+
+        // ── 1. All classes that have at least one Areef ──
+        const [classes] = await db.execute(`
+            SELECT c.id, c.name_ar
+            FROM classes c
+            WHERE EXISTS (
+                SELECT 1 FROM students s
+                JOIN users u ON u.id = s.user_id
+                WHERE s.class_id = c.id
+                  AND u.role IN ('عريف', 'عریف')
+            )
+            ORDER BY c.id
+        `);
+
+        // ── 2. All Areefs (may be multiple per class) ──
+        const [areefs] = await db.execute(`
+            SELECT s.class_id,
+                   s.name    AS areef_name,
+                   u.id      AS user_id,
+                   u.username
+            FROM users u
+            JOIN students s ON s.user_id = u.id
+            WHERE u.role IN ('عريف', 'عریف')
+            ORDER BY s.class_id, s.name
+        `);
+
+        // ── 3. Student attendance days per class ──
+        //    Count distinct dates that have ANY attendance_students row
+        //    for a student enrolled in that class.
+        const [studentDaysRows] = await db.execute(`
+            SELECT s.class_id,
+                   COUNT(DISTINCT a.date) AS days_marked
+            FROM attendance_students a
+            JOIN students s ON s.id = a.student_id
+            WHERE a.date BETWEEN ? AND ?
+            GROUP BY s.class_id
+        `, [startDate, endDate]);
+
+        // ── 4. Teacher attendance days per class ──
+        //    Count distinct dates where at least one row in attendance_teachers
+        //    was submitted by an Areef belonging to that class.
+        const [teacherDaysRows] = await db.execute(`
+            SELECT s.class_id,
+                   COUNT(DISTINCT at.date) AS days_marked
+            FROM attendance_teachers at
+            JOIN users u  ON u.id = at.marked_by
+            JOIN students s ON s.user_id = u.id
+            WHERE u.role IN ('عريف', 'عریف')
+              AND at.date BETWEEN ? AND ?
+            GROUP BY s.class_id
+        `, [startDate, endDate]);
+
+        // ── 5. Total school days = max distinct dates across all classes ──
+        const [totalRow] = await db.execute(`
+            SELECT COUNT(DISTINCT a.date) AS total_days
+            FROM attendance_students a
+            WHERE a.date BETWEEN ? AND ?
+        `, [startDate, endDate]);
+        const totalDays = parseInt(totalRow[0]?.total_days || 0);
+
+        // ── 6. Index the results ──
+        const studentMap = {};
+        studentDaysRows.forEach(r => { studentMap[r.class_id] = parseInt(r.days_marked); });
+        const teacherMap = {};
+        teacherDaysRows.forEach(r => { teacherMap[r.class_id] = parseInt(r.days_marked); });
+
+        // Group Areefs by class_id
+        const areefsByClass = {};
+        areefs.forEach(a => {
+            if (!areefsByClass[a.class_id]) areefsByClass[a.class_id] = [];
+            areefsByClass[a.class_id].push(a.areef_name || a.username);
+        });
+
+        // ── 7. Assemble one row per class ──
+        const reportRows = classes.map(cls => {
+            const studentDays = studentMap[cls.id] || 0;
+            const teacherDays = teacherMap[cls.id] || 0;
+            return {
+                class_id:            cls.id,
+                class_name:          cls.name_ar,
+                areef_names:         areefsByClass[cls.id] || [],
+                student_days_marked: studentDays,
+                teacher_days_marked: teacherDays,
+                total_days:          totalDays,
+                student_pct: totalDays > 0 ? Math.round((studentDays / totalDays) * 100) : 0,
+                teacher_pct: totalDays > 0 ? Math.round((teacherDays / totalDays) * 100) : 0,
+            };
+        });
+
+        res.render('report_areef_standards', {
+            reportRows,
+            totalDays,
+            startDate, endDate,
+            defaultStart: defaultStart2, defaultEnd: defaultEnd2,
+            prevStartDate, prevEndDate,
+            nextStartDate, nextEndDate,
+            dateToday, dateLastMonth, dateLast3Months, dateLast6Months,
+        });
+    } catch (err) {
+        console.error('Error generating Areef standards report:', err);
+        res.status(500).send('Error generating report');
+    }
+};
