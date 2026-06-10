@@ -438,9 +438,15 @@
                                 </div>
                             <% } else { %>
                                 <div class="timeline-container d-flex flex-column gap-3 mt-3">
-                                    <% todayPeriods.forEach(period => {
+                                    <%
+                                    const teacherRemainingSlots = {};
+                                    todayPeriods.forEach(period => {
                                         const ta = teacherAttendance.find(a => a.teacher_id === period.teacher_id);
-                                        const isPresent = ta && ta.classes_taken > 0;
+                                        if (teacherRemainingSlots[period.teacher_id] === undefined) {
+                                            teacherRemainingSlots[period.teacher_id] = ta ? parseInt(ta.classes_taken) : 0;
+                                        }
+                                        const isPresent = teacherRemainingSlots[period.teacher_id] > 0;
+                                        if (isPresent) teacherRemainingSlots[period.teacher_id]--;
                                         %>
                                         <div class="timeline-card border rounded-4 bg-white shadow-xs overflow-hidden <%= isPresent ? 'timeline-card-active' : '' %>" id="tcard_<%= period.id %>">
                                             <div class="timeline-badge-node d-none d-lg-flex">
