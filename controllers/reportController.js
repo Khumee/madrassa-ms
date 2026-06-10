@@ -102,9 +102,31 @@ exports.showReports = async (req, res) => {
             GROUP BY teacher_id
         `, [startDate, endDate]);
 
+        // Fetch per-day per-class detail for the collapsible breakdown rows
+        const [teacherDetailRows] = await db.execute(`
+            SELECT at.teacher_id,
+                   DATE_FORMAT(at.date, '%Y-%m-%d') AS date_str,
+                   DAYNAME(at.date)                  AS day_name,
+                   at.class_id,
+                   c.name_ar                         AS class_name,
+                   at.classes_taken
+            FROM attendance_teachers at
+            LEFT JOIN classes c ON c.id = at.class_id
+            WHERE at.date BETWEEN ? AND ?
+            ORDER BY at.teacher_id, at.date, at.class_id
+        `, [startDate, endDate]);
+
+        // Scheduled periods per teacher per class per day_of_week (for detail)
+        const [scheduledDetail] = await db.execute(`
+            SELECT teacher_id, class_id, day_of_week, COUNT(*) AS p_count
+            FROM periods
+            WHERE class_id IN (4, 10, 12, 16)
+            GROUP BY teacher_id, class_id, day_of_week
+        `);
+
         // Get the list of all teachers to construct reports
         const [teachers] = await db.execute(`
-            SELECT t.*, 
+            SELECT t.*,
             (SELECT COUNT(*) FROM periods WHERE teacher_id = t.id AND class_id IN (4, 10, 12, 16)) as period_count,
             (SELECT COUNT(*) FROM teacher_books WHERE teacher_id = t.id AND class_id IN (4, 10, 12, 16) AND session_id = (SELECT id FROM sessions WHERE is_active = TRUE)) as book_count
             FROM teachers t
@@ -124,12 +146,28 @@ exports.showReports = async (req, res) => {
 
             const difference = taken - required;
 
+            // Build per-day detail for collapsible panel
+            const myRows = teacherDetailRows.filter(r => r.teacher_id === t.id);
+            // Group by date
+            const dayMap = {};
+            myRows.forEach(r => {
+                if (!dayMap[r.date_str]) dayMap[r.date_str] = { date_str: r.date_str, day_name: r.day_name, classes: [] };
+                const sched = scheduledDetail.find(s => s.teacher_id === t.id && s.class_id === r.class_id && s.day_of_week === r.day_name);
+                dayMap[r.date_str].classes.push({
+                    class_name:    r.class_name || '—',
+                    taken:         r.classes_taken,
+                    scheduled:     sched ? sched.p_count : 0
+                });
+            });
+            const detail = Object.values(dayMap).sort((a, b) => a.date_str.localeCompare(b.date_str));
+
             return {
                 id: t.id,
                 name: t.name,
                 required,
                 taken,
-                difference
+                difference,
+                detail
             };
         });
 

@@ -223,11 +223,14 @@
                                 <th><%= __('Required_Periods') %></th>
                                 <th><%= __('Taken_Periods') %></th>
                                 <th class="px-4 text-center"><%= __('Status_Variance') %></th>
+                                <th class="text-center" style="width:48px;"></th>
                             </tr>
                         </thead>
                         <tbody>
-                            <% teachersReport.forEach(tr => { %>
-                                <tr class="teacher-attendance-row" data-teacher-name="<%= tr.name %>">
+                            <% teachersReport.forEach((tr, idx) => { %>
+                                <tr class="teacher-attendance-row" data-teacher-name="<%= tr.name %>"
+                                    style="cursor:pointer;"
+                                    data-bs-toggle="collapse" data-bs-target="#detail_<%= idx %>" aria-expanded="false">
                                     <td class="px-4 fw-bold text-dark"><%= tr.name %></td>
                                     <td><span class="badge bg-light text-secondary border rounded-3 px-3 py-2"><%= tr.required %></span></td>
                                     <td><span class="badge bg-light text-primary border rounded-3 px-3 py-2"><%= tr.taken %></span></td>
@@ -245,6 +248,45 @@
                                                 <i class="bi bi-exclamation-triangle-fill me-1"></i><%= __('Shortage') %> (<%= tr.difference %>)
                                             </span>
                                         <% } %>
+                                    </td>
+                                    <td class="text-center text-muted detail-chevron" id="chevron_<%= idx %>">
+                                        <i class="bi bi-chevron-down small"></i>
+                                    </td>
+                                </tr>
+                                <!-- Collapsible detail row -->
+                                <tr class="teacher-attendance-row" data-teacher-name="<%= tr.name %>">
+                                    <td colspan="5" class="p-0 border-0">
+                                        <div class="collapse" id="detail_<%= idx %>">
+                                            <div class="px-4 py-3 bg-light border-top border-bottom">
+                                                <% if (tr.detail.length === 0) { %>
+                                                    <span class="text-muted small"><%= locals.lang === 'ur' ? 'اس مدت میں کوئی ریکارڈ نہیں' : 'لا توجد سجلات في هذه الفترة' %></span>
+                                                <% } else { %>
+                                                    <div class="d-flex flex-wrap gap-2">
+                                                        <% tr.detail.forEach(day => { %>
+                                                            <div class="card border-0 shadow-sm rounded-3 p-0" style="min-width:180px;">
+                                                                <div class="card-header bg-white py-2 px-3 border-0 fw-semibold small text-muted">
+                                                                    <i class="bi bi-calendar3 me-1"></i><%= day.date_str %>
+                                                                    <span class="ms-1 text-primary">(<%= day.day_name %>)</span>
+                                                                </div>
+                                                                <div class="card-body p-0">
+                                                                    <% day.classes.forEach(cls => { %>
+                                                                        <div class="d-flex justify-content-between align-items-center px-3 py-2 border-top" style="font-size:0.82rem;">
+                                                                            <span class="text-dark fw-semibold"><%= cls.class_name %></span>
+                                                                            <span class="badge rounded-pill <%=
+                                                                                cls.taken === 0 ? 'bg-danger-subtle text-danger' :
+                                                                                cls.taken >= cls.scheduled ? 'bg-success-subtle text-success' :
+                                                                                'bg-warning-subtle text-warning' %>">
+                                                                                <%= cls.taken %>/<%= cls.scheduled %>
+                                                                            </span>
+                                                                        </div>
+                                                                    <% }) %>
+                                                                </div>
+                                                            </div>
+                                                        <% }) %>
+                                                    </div>
+                                                <% } %>
+                                            </div>
+                                        </div>
                                     </td>
                                 </tr>
                             <% }) %>
@@ -490,6 +532,23 @@ function applyCombinedStudentFilter() {
         }
     });
 }
+
+// ==========================================
+// Section 1b: Detail chevron rotation
+// ==========================================
+document.querySelectorAll('[data-bs-target^="#detail_"]').forEach(row => {
+    const targetId = row.getAttribute('data-bs-target');
+    const collapseEl = document.querySelector(targetId);
+    if (!collapseEl) return;
+    const idx = targetId.replace('#detail_', '');
+    const chevron = document.getElementById('chevron_' + idx);
+    collapseEl.addEventListener('show.bs.collapse', () => {
+        if (chevron) chevron.querySelector('i').classList.replace('bi-chevron-down', 'bi-chevron-up');
+    });
+    collapseEl.addEventListener('hide.bs.collapse', () => {
+        if (chevron) chevron.querySelector('i').classList.replace('bi-chevron-up', 'bi-chevron-down');
+    });
+});
 
 // ==========================================
 // Section 2: Teacher Attendance Filter Logic
