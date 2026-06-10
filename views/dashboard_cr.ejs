@@ -471,8 +471,10 @@
                                                          <div class="last-update-label mt-1 text-muted d-flex align-items-center gap-2" id="tstatus_<%= period.id %>" style="font-size: 0.72rem;">
                                                              <% if (isPresent) { %>
                                                                  <span class="text-success fw-semibold"><i class="bi bi-check-circle-fill me-1"></i> <%= __('Status_Present') %></span>
-                                                             <% } else { %>
+                                                             <% } else if (ta) { %>
                                                                  <span class="text-danger fw-semibold"><i class="bi bi-x-circle-fill me-1"></i> <%= __('Status_Absent') %></span>
+                                                             <% } else { %>
+                                                                 <span class="text-secondary fw-semibold"><i class="bi bi-dash-circle me-1"></i> <%= locals.lang === 'ur' ? 'درج نہیں' : 'غير مسجل' %></span>
                                                              <% } %>
                                                          </div>
                                                      </div>
