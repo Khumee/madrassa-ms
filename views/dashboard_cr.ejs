@@ -208,6 +208,16 @@
             color: white;
             box-shadow: 0 0 0 4px #fff, 0 0 12px rgba(16, 185, 129, 0.4);
         }
+        .timeline-card-absent {
+            border-color: #fca5a5 !important;
+            background-color: #fff5f5 !important;
+        }
+        .timeline-card-absent .timeline-badge-node {
+            background-color: #ef4444;
+            border-color: #ef4444;
+            color: white;
+            box-shadow: 0 0 0 4px #fff, 0 0 12px rgba(239, 68, 68, 0.4);
+        }
     }
 
     /* Form Switch Accent */
@@ -439,45 +449,54 @@
                             <% } else { %>
                                 <div class="timeline-container d-flex flex-column gap-3 mt-3">
                                     <%
-                                    const teacherRemainingSlots = {};
-                                    todayPeriods.forEach(period => {
-                                        const ta = teacherAttendance.find(a => a.teacher_id === period.teacher_id);
-                                        if (teacherRemainingSlots[period.teacher_id] === undefined) {
-                                            teacherRemainingSlots[period.teacher_id] = ta ? parseInt(ta.classes_taken) : 0;
+                                    const _teacherSchedMap = {};
+                                    const _teacherStateMap = {};
+                                    todayPeriods.forEach(p => {
+                                        _teacherSchedMap[p.teacher_id] = (_teacherSchedMap[p.teacher_id] || 0) + 1;
+                                    });
+                                    todayPeriods.forEach(p => {
+                                        if (!(p.teacher_id in _teacherStateMap)) {
+                                            const ta = teacherAttendance.find(a => a.teacher_id === p.teacher_id);
+                                            _teacherStateMap[p.teacher_id] = !ta ? null : ta.classes_taken > 0 ? 'present' : 'absent';
                                         }
-                                        const isPresent = teacherRemainingSlots[period.teacher_id] > 0;
-                                        if (isPresent) teacherRemainingSlots[period.teacher_id]--;
-                                        %>
-                                        <div class="timeline-card border rounded-4 bg-white shadow-xs overflow-hidden <%= isPresent ? 'timeline-card-active' : '' %>" id="tcard_<%= period.id %>">
+                                    });
+                                    todayPeriods.forEach(period => {
+                                        const _state = _teacherStateMap[period.teacher_id];
+                                    %>
+                                        <div class="timeline-card border rounded-4 bg-white shadow-xs overflow-hidden <%=
+                                             _state === 'present' ? 'timeline-card-active' :
+                                             _state === 'absent'  ? 'timeline-card-absent'  : '' %>" id="tcard_<%= period.id %>">
                                             <div class="timeline-badge-node d-none d-lg-flex">
                                                 <%= period.period_number %>
                                             </div>
-
-                                            <div class="p-3 d-flex justify-content-between align-items-center flex-wrap gap-3 teacher-period-card" 
+                                            <div class="p-3 d-flex justify-content-between align-items-center flex-wrap gap-3 teacher-period-card"
                                                  data-teacher-id="<%= period.teacher_id %>">
-                                                 
-                                                <div class="d-flex align-items-center gap-3">
-                                                    <div class="form-check form-switch ps-0">
-                                                        <input class="form-check-input ms-0 me-2" type="checkbox" role="switch"
-                                                               id="switch_<%= period.id %>" <%= isPresent ? 'checked' : '' %>
-                                                               onchange="toggleTeacherAttendance(<%= period.teacher_id %>, this, <%= period.id %>)">
+                                                <div>
+                                                    <div class="fw-bold text-dark mb-1" style="font-size:1.05rem;">
+                                                        <span class="text-muted"><%= __('Period_Suffix') %> <%= period.period_number %>:</span>
+                                                        <span class="text-primary fw-bold ms-1"><%= period.teacher_name %></span>
                                                     </div>
-                                                    <div>
-                                                         <label class="form-check-label fw-bold text-dark mb-0 d-flex align-items-center flex-wrap gap-1" for="switch_<%= period.id %>" style="cursor: pointer; font-size: 1.05rem;">
-                                                             <span><%= __('Period_Suffix') %> <%= period.period_number %>:</span>
-                                                             <span class="text-primary fw-bold"><%= period.teacher_name %></span>
-                                                         </label>
-                                                         
-                                                         <div class="last-update-label mt-1 text-muted d-flex align-items-center gap-2" id="tstatus_<%= period.id %>" style="font-size: 0.72rem;">
-                                                             <% if (isPresent) { %>
-                                                                 <span class="text-success fw-semibold"><i class="bi bi-check-circle-fill me-1"></i> <%= __('Status_Present') %></span>
-                                                             <% } else if (ta) { %>
-                                                                 <span class="text-danger fw-semibold"><i class="bi bi-x-circle-fill me-1"></i> <%= __('Status_Absent') %></span>
-                                                             <% } else { %>
-                                                                 <span class="text-secondary fw-semibold"><i class="bi bi-dash-circle me-1"></i> <%= locals.lang === 'ur' ? 'درج نہیں' : 'غير مسجل' %></span>
-                                                             <% } %>
-                                                         </div>
-                                                     </div>
+                                                    <div id="tstatus_<%= period.id %>" style="font-size:0.75rem;">
+                                                        <% if (_state === 'present') { %>
+                                                            <span class="text-success fw-semibold"><i class="bi bi-check-circle-fill me-1"></i><%= __('Status_Present') %></span>
+                                                        <% } else if (_state === 'absent') { %>
+                                                            <span class="text-danger fw-semibold"><i class="bi bi-x-circle-fill me-1"></i><%= __('Status_Absent') %></span>
+                                                        <% } else { %>
+                                                            <span class="text-secondary fw-semibold"><i class="bi bi-dash-circle me-1"></i><%= locals.lang === 'ur' ? 'درج نہیں' : 'غير مسجل' %></span>
+                                                        <% } %>
+                                                    </div>
+                                                </div>
+                                                <div class="btn-group btn-group-sm" role="group" id="tbtngroup_<%= period.id %>">
+                                                    <button type="button"
+                                                            class="btn rounded-start-pill fw-semibold px-3 <%= _state === 'present' ? 'btn-success' : 'btn-outline-success' %>"
+                                                            onclick="setTeacherState(<%= period.teacher_id %>, 'present')">
+                                                        <i class="bi bi-check-lg me-1"></i><%= locals.lang === 'ur' ? 'حاضر' : 'حاضر' %>
+                                                    </button>
+                                                    <button type="button"
+                                                            class="btn rounded-end-pill fw-semibold px-3 <%= _state === 'absent' ? 'btn-danger' : 'btn-outline-danger' %>"
+                                                            onclick="setTeacherState(<%= period.teacher_id %>, 'absent')">
+                                                        <i class="bi bi-x-lg me-1"></i><%= locals.lang === 'ur' ? 'غیر حاضر' : 'غائب' %>
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -817,6 +836,13 @@
 <script>
     const classId = <%= classId %>;
     const todayDate = '<%= todayDate %>';
+    const teacherStates = <%- JSON.stringify(_teacherStateMap || {}) %>;
+    const teacherScheduledCounts = <%- JSON.stringify(_teacherSchedMap || {}) %>;
+    const _statusLabels = {
+        present:   '<%= __("Status_Present") %>',
+        absent:    '<%= locals.lang === "ur" ? "غیر حاضر" : "غائب" %>',
+        notMarked: '<%= locals.lang === "ur" ? "درج نہیں" : "غير مسجل" %>'
+    };
 
     // Local Two-Stage Attendance Object
     let localAttendance = {};
@@ -937,61 +963,66 @@
         }
     }
 
-    async function toggleTeacherAttendance(teacherId, switchInput, periodId) {
-        const teacherCards = document.querySelectorAll(`.teacher-period-card[data-teacher-id="${teacherId}"]`);
-        let checkedCount = 0;
-        teacherCards.forEach(card => {
-            const checkbox = card.querySelector('input[type="checkbox"]');
-            if (checkbox && checkbox.checked) {
-                checkedCount++;
-            }
-        });
+    function _updateTeacherCards(teacherId, state) {
+        document.querySelectorAll(`.teacher-period-card[data-teacher-id="${teacherId}"]`).forEach(card => {
+            const tcard    = card.closest('.timeline-card');
+            const periodId = tcard.id.replace('tcard_', '');
+            const btnGroup = document.getElementById(`tbtngroup_${periodId}`);
+            const tstatus  = document.getElementById(`tstatus_${periodId}`);
 
-        const tcard = document.getElementById(`tcard_${periodId}`);
-        if (tcard) {
-            if (switchInput.checked) {
-                tcard.classList.add('timeline-card-active');
-            } else {
-                tcard.classList.remove('timeline-card-active');
-            }
-        }
+            tcard.classList.remove('timeline-card-active', 'timeline-card-absent');
+            if (state === 'present') tcard.classList.add('timeline-card-active');
+            if (state === 'absent')  tcard.classList.add('timeline-card-absent');
 
-        const updateStatusText = (checked) => {
-            const tstatus = document.getElementById(`tstatus_${periodId}`);
+            if (btnGroup) {
+                const [pBtn, aBtn] = btnGroup.querySelectorAll('button');
+                pBtn.className = `btn rounded-start-pill fw-semibold px-3 ${state === 'present' ? 'btn-success' : 'btn-outline-success'}`;
+                aBtn.className = `btn rounded-end-pill fw-semibold px-3 ${state === 'absent'  ? 'btn-danger'  : 'btn-outline-danger'}`;
+            }
+
             if (tstatus) {
-                if (checked) {
-                    tstatus.innerHTML = `<span class="text-success fw-semibold"><i class="bi bi-check-circle-fill me-1"></i> حاضر للحصة</span>`;
+                if (state === 'present') {
+                    tstatus.innerHTML = `<span class="text-success fw-semibold"><i class="bi bi-check-circle-fill me-1"></i> ${_statusLabels.present}</span>`;
+                } else if (state === 'absent') {
+                    tstatus.innerHTML = `<span class="text-danger fw-semibold"><i class="bi bi-x-circle-fill me-1"></i> ${_statusLabels.absent}</span>`;
                 } else {
-                    tstatus.innerHTML = `<span class="text-danger fw-semibold"><i class="bi bi-x-circle-fill me-1"></i> غائب / لم يؤخذ الحصة</span>`;
+                    tstatus.innerHTML = `<span class="text-secondary fw-semibold"><i class="bi bi-dash-circle me-1"></i> ${_statusLabels.notMarked}</span>`;
                 }
             }
-        };
+        });
+    }
 
-        updateStatusText(switchInput.checked);
+    async function setTeacherState(teacherId, newState) {
+        const prev  = teacherStates[teacherId] || null;
+        const final = prev === newState ? null : newState; // tap active btn → deselect back to درج نہیں
+
+        teacherStates[teacherId] = final;
+        _updateTeacherCards(teacherId, final);
+
+        let body;
+        if (final === null) {
+            body = { date: todayDate, classId, teacherId: String(teacherId), deleteRecord: true };
+        } else {
+            const classesTaken = final === 'present' ? (teacherScheduledCounts[teacherId] || 0) : 0;
+            body = { date: todayDate, classId, attendance: { [teacherId]: classesTaken } };
+        }
 
         try {
-            const res = await fetch('/attendance/teachers/save', {
+            const res  = await fetch('/attendance/teachers/save', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    date: todayDate,
-                    classId: classId,
-                    attendance: { [teacherId]: checkedCount }
-                })
+                body: JSON.stringify(body)
             });
             const data = await res.json();
             if (!data.success) {
-                alert('فشل تعديل حضور المعلم');
-                switchInput.checked = !switchInput.checked;
-                if (tcard) tcard.classList.toggle('timeline-card-active');
-                updateStatusText(switchInput.checked);
+                teacherStates[teacherId] = prev;
+                _updateTeacherCards(teacherId, prev);
+                alert('فشل حفظ الحضور');
             }
         } catch (err) {
             console.error(err);
-            alert('حدث خطأ أثناء الحفظ');
-            switchInput.checked = !switchInput.checked;
-            if (tcard) tcard.classList.toggle('timeline-card-active');
-            updateStatusText(switchInput.checked);
+            teacherStates[teacherId] = prev;
+            _updateTeacherCards(teacherId, prev);
         }
     }
 

@@ -204,6 +204,16 @@ exports.showWeeklyAttendance = async (req, res) => {
 exports.saveWeeklyAttendance = async (req, res) => {
     const { date, teacherId, status, period, attendance } = req.body;
     try {
+        if (req.body.deleteRecord) {
+            // Delete a teacher's attendance record (back to "درج نہیں")
+            const classId = req.body.classId || null;
+            await db.execute(
+                'DELETE FROM attendance_teachers WHERE teacher_id = ? AND class_id = ? AND date = ?',
+                [req.body.teacherId, classId, date]
+            );
+            return res.json({ success: true });
+        }
+
         if (attendance) {
             // Case 1: Toggling/saving teacher attendance from CR Dashboard
             const classId = req.body.classId || null;
