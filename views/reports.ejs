@@ -257,6 +257,11 @@
                                 <tr class="teacher-attendance-row" data-teacher-name="<%= tr.name %>">
                                     <td colspan="5" class="p-0 border-0">
                                         <div class="collapse" id="detail_<%= idx %>">
+                                            <%
+                                            const dayNamesUr = { Monday:'پیر', Tuesday:'منگل', Wednesday:'بدھ', Thursday:'جمعرات', Friday:'جمعہ', Saturday:'ہفتہ', Sunday:'اتوار' };
+                                            const dayNamesAr = { Monday:'الاثنين', Tuesday:'الثلاثاء', Wednesday:'الأربعاء', Thursday:'الخميس', Friday:'الجمعة', Saturday:'السبت', Sunday:'الأحد' };
+                                            const localDay = (en) => locals.lang === 'ur' ? (dayNamesUr[en] || en) : (dayNamesAr[en] || en);
+                                            %>
                                             <div class="px-4 py-3 bg-light border-top border-bottom">
                                                 <% if (tr.detail.length === 0) { %>
                                                     <span class="text-muted small"><%= locals.lang === 'ur' ? 'اس مدت میں کوئی ریکارڈ نہیں' : 'لا توجد سجلات في هذه الفترة' %></span>
@@ -266,18 +271,29 @@
                                                             <div class="card border-0 shadow-sm rounded-3 p-0" style="min-width:180px;">
                                                                 <div class="card-header bg-white py-2 px-3 border-0 fw-semibold small text-muted">
                                                                     <i class="bi bi-calendar3 me-1"></i><%= day.date_str %>
-                                                                    <span class="ms-1 text-primary">(<%= day.day_name %>)</span>
+                                                                    <span class="ms-1 text-primary">(<%= localDay(day.day_name) %>)</span>
                                                                 </div>
                                                                 <div class="card-body p-0">
                                                                     <% day.classes.forEach(cls => { %>
                                                                         <div class="d-flex justify-content-between align-items-center px-3 py-2 border-top" style="font-size:0.82rem;">
                                                                             <span class="text-dark fw-semibold"><%= cls.class_name %></span>
-                                                                            <span class="badge rounded-pill <%=
-                                                                                cls.taken === 0 ? 'bg-danger-subtle text-danger' :
-                                                                                cls.taken >= cls.scheduled ? 'bg-success-subtle text-success' :
-                                                                                'bg-warning-subtle text-warning' %>">
-                                                                                <%= cls.taken %>/<%= cls.scheduled %>
-                                                                            </span>
+                                                                            <% if (cls.taken === null) { %>
+                                                                                <span class="badge rounded-pill bg-secondary-subtle text-secondary">
+                                                                                    <i class="bi bi-dash-circle me-1"></i><%= locals.lang === 'ur' ? 'درج نہیں' : 'غير مسجل' %>
+                                                                                </span>
+                                                                            <% } else if (cls.taken === 0) { %>
+                                                                                <span class="badge rounded-pill bg-danger-subtle text-danger">
+                                                                                    <i class="bi bi-x-circle me-1"></i><%= locals.lang === 'ur' ? 'غیر حاضر' : 'غائب' %> 0/<%= cls.scheduled %>
+                                                                                </span>
+                                                                            <% } else if (cls.taken >= cls.scheduled) { %>
+                                                                                <span class="badge rounded-pill bg-success-subtle text-success">
+                                                                                    <i class="bi bi-check-circle me-1"></i><%= cls.taken %>/<%= cls.scheduled %>
+                                                                                </span>
+                                                                            <% } else { %>
+                                                                                <span class="badge rounded-pill bg-warning-subtle text-warning">
+                                                                                    <i class="bi bi-exclamation-circle me-1"></i><%= cls.taken %>/<%= cls.scheduled %>
+                                                                                </span>
+                                                                            <% } %>
                                                                         </div>
                                                                     <% }) %>
                                                                 </div>
