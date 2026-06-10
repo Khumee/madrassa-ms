@@ -278,8 +278,8 @@ exports.showCRDashboard = async (req, res) => {
         }
 
         const [teacherAttendance] = await db.execute(
-            'SELECT * FROM attendance_teachers WHERE date = ?',
-            [selectedDate]
+            'SELECT * FROM attendance_teachers WHERE date = ? AND class_id = ?',
+            [selectedDate, classId]
         );
 
         // --- Areeb Personal Student Queries ---

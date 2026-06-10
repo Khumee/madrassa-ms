@@ -153,11 +153,12 @@ exports.showWeeklyAttendance = async (req, res) => {
             GROUP BY teacher_id, day_of_week
         `);
 
-        // Fetch all marked attendance for the dates of the week
+        // Fetch all marked attendance for the dates of the week (sum across all classes for each teacher/day)
         const [attendanceList] = await db.execute(`
-            SELECT teacher_id, DATE_FORMAT(date, '%Y-%m-%d') as date_str, classes_taken 
-            FROM attendance_teachers 
+            SELECT teacher_id, DATE_FORMAT(date, '%Y-%m-%d') as date_str, SUM(classes_taken) as classes_taken
+            FROM attendance_teachers
             WHERE date BETWEEN ? AND ?
+            GROUP BY teacher_id, date
         `, [days[0].dateStr, days[5].dateStr]);
 
         // Map it all together
@@ -205,15 +206,16 @@ exports.saveWeeklyAttendance = async (req, res) => {
     try {
         if (attendance) {
             // Case 1: Toggling/saving teacher attendance from CR Dashboard
+            const classId = req.body.classId || null;
             for (const [tId, checkedCount] of Object.entries(attendance)) {
                 const classesTaken = parseInt(checkedCount) || 0;
                 const teacherStatus = classesTaken > 0 ? 'present' : 'absent';
-                
+
                 await db.execute(
-                    `INSERT INTO attendance_teachers (teacher_id, date, classes_taken, status, marked_by) 
-                     VALUES (?, ?, ?, ?, ?) 
+                    `INSERT INTO attendance_teachers (teacher_id, class_id, date, classes_taken, status, marked_by)
+                     VALUES (?, ?, ?, ?, ?, ?)
                      ON DUPLICATE KEY UPDATE classes_taken = ?, status = ?, marked_by = ?`,
-                    [tId, date, classesTaken, teacherStatus, req.session.userId, classesTaken, teacherStatus, req.session.userId]
+                    [tId, classId, date, classesTaken, teacherStatus, req.session.userId, classesTaken, teacherStatus, req.session.userId]
                 );
             }
             return res.json({ success: true });

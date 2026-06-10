@@ -973,6 +973,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     date: todayDate,
+                    classId: classId,
                     attendance: { [teacherId]: checkedCount }
                 })
             });
