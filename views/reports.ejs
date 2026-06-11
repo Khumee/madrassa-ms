@@ -96,9 +96,14 @@
         <div class="card shadow-sm border-0 rounded-4">
             <div class="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <h3 class="fw-bold mb-0 text-primary"><%= __('Student_Attendance_By_Class') %></h3>
-                <button class="btn btn-outline-primary btn-sm rounded-pill px-3" type="button" data-bs-toggle="collapse" data-bs-target="#studentAttendanceFiltersCollapse" aria-expanded="false">
-                    <i class="bi bi-funnel me-1"></i><%= __('Filter_Label') %>
-                </button>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary btn-sm rounded-pill px-3" type="button" data-bs-toggle="collapse" data-bs-target="#studentAttendanceFiltersCollapse" aria-expanded="false">
+                        <i class="bi bi-funnel me-1"></i><%= __('Filter_Label') %>
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="downloadStudentPDF()">
+                        <i class="bi bi-file-earmark-pdf me-1"></i><%= locals.lang === 'ur' ? 'PDF ڈاؤن لوڈ' : 'تحميل PDF' %>
+                    </button>
+                </div>
             </div>
             <!-- Collapsible Filters with Tiles -->
             <div class="collapse border-bottom" id="studentAttendanceFiltersCollapse">
@@ -195,9 +200,14 @@
                     <h3 class="fw-bold mb-0 text-warning"><%= __('Teacher_Period_Report_Header') %></h3>
                     <p class="text-muted mb-0 small"><%= __('Teacher_Period_Report_Sub') %></p>
                 </div>
-                <button class="btn btn-outline-warning btn-sm rounded-pill px-3" type="button" data-bs-toggle="collapse" data-bs-target="#teacherAttendanceFiltersCollapse" aria-expanded="false">
-                    <i class="bi bi-funnel me-1"></i><%= locals.lang === 'ur' ? 'فلٹرز' : 'خيارات التصفية' %>
-                </button>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-warning btn-sm rounded-pill px-3" type="button" data-bs-toggle="collapse" data-bs-target="#teacherAttendanceFiltersCollapse" aria-expanded="false">
+                        <i class="bi bi-funnel me-1"></i><%= locals.lang === 'ur' ? 'فلٹرز' : 'خيارات التصفية' %>
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="downloadTeacherPDF()">
+                        <i class="bi bi-file-earmark-pdf me-1"></i><%= locals.lang === 'ur' ? 'PDF ڈاؤن لوڈ' : 'تحميل PDF' %>
+                    </button>
+                </div>
             </div>
             <!-- Collapsible Filters with Teacher Tiles -->
             <div class="collapse border-bottom" id="teacherAttendanceFiltersCollapse">
@@ -320,9 +330,14 @@
         <div class="card shadow-sm border-0 rounded-4">
             <div class="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <h3 class="fw-bold mb-0 text-success"><%= __('Book_Completion_Report') %></h3>
-                <button class="btn btn-outline-success btn-sm rounded-pill px-3" type="button" data-bs-toggle="collapse" data-bs-target="#bookProgressFiltersCollapse" aria-expanded="false">
-                    <i class="bi bi-funnel me-1"></i><%= __('Filter_Label') %>
-                </button>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-success btn-sm rounded-pill px-3" type="button" data-bs-toggle="collapse" data-bs-target="#bookProgressFiltersCollapse" aria-expanded="false">
+                        <i class="bi bi-funnel me-1"></i><%= __('Filter_Label') %>
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="downloadBooksPDF()">
+                        <i class="bi bi-file-earmark-pdf me-1"></i><%= locals.lang === 'ur' ? 'PDF ڈاؤن لوڈ' : 'تحميل PDF' %>
+                    </button>
+                </div>
             </div>
             <!-- Collapsible Filters with Class and Teacher Tiles -->
             <div class="collapse border-bottom" id="bookProgressFiltersCollapse">
@@ -463,6 +478,14 @@
 </div>
 
 <script>
+// ── PDF report data (injected from server) ──
+const _pdfStartDate = '<%- startDate %>';
+const _pdfEndDate   = '<%- endDate %>';
+const _pdfLang      = '<%= locals.lang || "ur" %>';
+const _pdfGroupedReport     = <%- JSON.stringify(groupedReport) %>;
+const _pdfTeachersReport    = <%- JSON.stringify((teachersReport || []).map(tr => ({ name: tr.name, required: tr.required, taken: tr.taken, difference: tr.difference }))) %>;
+const _pdfTeacherProgress   = <%- JSON.stringify((teacherProgress || []).map(tp => ({ teacher_name: tp.teacher_name, book_title: tp.book_title, class_name: tp.class_name, current_page: tp.current_page, percentage: tp.percentage, lastUpdatedStr: tp.lastUpdatedStr || '' }))) %>;
+
 function setPreset(preset) {
     const today = new Date();
     const formatDate = (date) => {
@@ -666,7 +689,7 @@ document.getElementById('updateProgressForm').addEventListener('submit', async (
     e.preventDefault();
     const assignmentId = document.getElementById('progAssignmentId').value;
     const pageNumber = document.getElementById('progPageNumber').value;
-    
+
     const res = await fetch('/book/update-progress', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -679,6 +702,128 @@ document.getElementById('updateProgressForm').addEventListener('submit', async (
         alert('خطأ: ' + (data.error || 'فشل التحديث'));
     }
 });
+
+// ==========================================
+// PDF Download Functions
+// ==========================================
+function _pdfStyles() {
+    return `<style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; direction: rtl; text-align: right; padding: 16px; color: #212529; font-size: 13px; }
+        .pdf-header { text-align: center; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 2px solid #2c3e50; }
+        .pdf-header h2 { color: #2c3e50; font-size: 17px; margin-bottom: 4px; }
+        .pdf-header p { color: #6c757d; font-size: 12px; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px; }
+        th { background: #2c3e50; color: white; padding: 8px 12px; text-align: right; font-weight: 600; }
+        td { padding: 7px 12px; border-bottom: 1px solid #dee2e6; }
+        tr:nth-child(even) td { background: #f8f9fa; }
+        .class-row td { background: #e8f0fe !important; font-weight: bold; font-size: 13px; color: #1a56db; }
+        .ok   { color: #28a745; font-weight: bold; }
+        .bad  { color: #dc3545; font-weight: bold; }
+        .plus { color: #0d6efd; font-weight: bold; }
+        .teacher-block { margin-bottom: 22px; }
+        .teacher-title { background: #fff3cd; border-right: 4px solid #ffc107; padding: 8px 14px; font-weight: bold; font-size: 14px; color: #856404; border-radius: 4px 4px 0 0; }
+    </style>`;
+}
+
+function _renderPDF(htmlString, filename) {
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:800px;background:white;';
+    wrapper.innerHTML = htmlString;
+    document.body.appendChild(wrapper);
+    html2pdf().set({
+        margin: 10,
+        filename: filename,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, logging: false },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    }).from(wrapper).save().finally(() => document.body.removeChild(wrapper));
+}
+
+function downloadStudentPDF() {
+    const isUr = _pdfLang === 'ur';
+    let rows = '';
+    Object.keys(_pdfGroupedReport).forEach(className => {
+        const students = _pdfGroupedReport[className];
+        const avg = Math.round(students.reduce((acc, s) => acc + s.percentage, 0) / students.length);
+        rows += `<tr class="class-row"><td colspan="4">${className} — ${students.length} ${isUr ? 'طلباء' : 'طالب'} — ${isUr ? 'اوسط حاضری' : 'متوسط الحضور'}: ${avg}%</td></tr>`;
+        students.forEach(s => {
+            rows += `<tr><td>${s.name}</td><td style="text-align:center">${s.total_days}</td><td style="text-align:center">${s.present_days}</td><td style="text-align:center" class="${s.percentage >= 80 ? 'ok' : 'bad'}">${s.percentage}%</td></tr>`;
+        });
+    });
+    const html = `<html><head><meta charset="UTF-8">${_pdfStyles()}</head><body>
+        <div class="pdf-header">
+            <h2>${isUr ? 'کلاس وار طلباء کی حاضری' : 'حضور الطلاب حسب الصف'}</h2>
+            <p>${_pdfStartDate} ${isUr ? 'سے' : 'إلى'} ${_pdfEndDate}</p>
+        </div>
+        <table><thead><tr>
+            <th>${isUr ? 'طالب کا نام' : 'اسم الطالب'}</th>
+            <th style="text-align:center">${isUr ? 'کل دن' : 'إجمالي الأيام'}</th>
+            <th style="text-align:center">${isUr ? 'حاضر دن' : 'أيام الحضور'}</th>
+            <th style="text-align:center">${isUr ? 'فیصد' : 'النسبة'}</th>
+        </tr></thead><tbody>${rows}</tbody></table>
+    </body></html>`;
+    _renderPDF(html, `student_attendance_${_pdfStartDate}_to_${_pdfEndDate}.pdf`);
+}
+
+function downloadTeacherPDF() {
+    const isUr = _pdfLang === 'ur';
+    let rows = '';
+    _pdfTeachersReport.forEach(tr => {
+        let statusHtml;
+        if (tr.difference === 0)      statusHtml = `<span class="ok">✓ ${isUr ? 'بروقت' : 'في الوقت'}</span>`;
+        else if (tr.difference > 0)   statusHtml = `<span class="plus">▲ ${isUr ? 'اضافی' : 'إضافي'} (+${tr.difference})</span>`;
+        else                           statusHtml = `<span class="bad">▼ ${isUr ? 'کمی' : 'نقص'} (${tr.difference})</span>`;
+        rows += `<tr><td style="font-weight:bold">${tr.name}</td><td style="text-align:center">${tr.required}</td><td style="text-align:center">${tr.taken}</td><td style="text-align:center">${statusHtml}</td></tr>`;
+    });
+    const html = `<html><head><meta charset="UTF-8">${_pdfStyles()}</head><body>
+        <div class="pdf-header">
+            <h2>${isUr ? 'اساتذہ کی حاضری اور پیریڈز کی رپورٹ' : 'تقرير حضور المعلمين والحصص'}</h2>
+            <p>${_pdfStartDate} ${isUr ? 'سے' : 'إلى'} ${_pdfEndDate}</p>
+        </div>
+        <table><thead><tr>
+            <th>${isUr ? 'استاد کا نام' : 'اسم المعلم'}</th>
+            <th style="text-align:center">${isUr ? 'مطلوب پیریڈز' : 'الحصص المطلوبة'}</th>
+            <th style="text-align:center">${isUr ? 'لیے گئے پیریڈز' : 'الحصص المنجزة'}</th>
+            <th style="text-align:center">${isUr ? 'حیثیت' : 'الحالة'}</th>
+        </tr></thead><tbody>${rows}</tbody></table>
+    </body></html>`;
+    _renderPDF(html, `teacher_attendance_${_pdfStartDate}_to_${_pdfEndDate}.pdf`);
+}
+
+function downloadBooksPDF() {
+    const isUr = _pdfLang === 'ur';
+    const byTeacher = {};
+    _pdfTeacherProgress.forEach(tp => {
+        if (!byTeacher[tp.teacher_name]) byTeacher[tp.teacher_name] = [];
+        byTeacher[tp.teacher_name].push(tp);
+    });
+    let sections = '';
+    Object.keys(byTeacher).forEach(teacherName => {
+        const books = byTeacher[teacherName];
+        const bookRows = books.map(b => {
+            const cls = b.percentage >= 75 ? 'ok' : b.percentage >= 40 ? '' : 'bad';
+            return `<tr><td>${b.book_title}</td><td>${b.class_name || ''}</td><td style="text-align:center">ص ${b.current_page}</td><td style="text-align:center" class="${cls}">${b.percentage}%</td><td style="text-align:center;font-size:11px">${b.lastUpdatedStr || (isUr ? 'نہیں' : 'لا يوجد')}</td></tr>`;
+        }).join('');
+        sections += `<div class="teacher-block">
+            <div class="teacher-title">${teacherName}</div>
+            <table><thead><tr>
+                <th>${isUr ? 'کتاب' : 'الكتاب'}</th>
+                <th>${isUr ? 'کلاس' : 'الصف'}</th>
+                <th style="text-align:center">${isUr ? 'موجودہ صفحہ' : 'الصفحة الحالية'}</th>
+                <th style="text-align:center">${isUr ? 'پیشرفت' : 'التقدم'}</th>
+                <th style="text-align:center">${isUr ? 'آخری اپڈیٹ' : 'آخر تحديث'}</th>
+            </tr></thead><tbody>${bookRows}</tbody></table>
+        </div>`;
+    });
+    const html = `<html><head><meta charset="UTF-8">${_pdfStyles()}</head><body>
+        <div class="pdf-header">
+            <h2>${isUr ? 'کتابوں کی پیشرفت رپورٹ — استاد کے مطابق' : 'تقرير تقدم الكتب — حسب المعلم'}</h2>
+        </div>
+        ${sections}
+    </body></html>`;
+    _renderPDF(html, 'books_progress_by_teacher.pdf');
+}
 </script>
 
 <%- include('partials/footer') %>
