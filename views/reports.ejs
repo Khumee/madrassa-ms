@@ -329,7 +329,10 @@
     <div class="col-md-12">
         <div class="card shadow-sm border-0 rounded-4">
             <div class="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <h3 class="fw-bold mb-0 text-success"><%= __('Book_Completion_Report') %></h3>
+                <div>
+                    <h3 class="fw-bold mb-0 text-success"><%= __('Book_Completion_Report') %></h3>
+                    <p class="text-muted mb-0 small"><%= locals.lang === 'ur' ? 'موجودہ سیشن — اب تک کی مکمل پیشرفت' : 'الجلسة الحالية — التقدم الإجمالي حتى الآن' %></p>
+                </div>
                 <div class="d-flex gap-2">
                     <button class="btn btn-outline-success btn-sm rounded-pill px-3" type="button" data-bs-toggle="collapse" data-bs-target="#bookProgressFiltersCollapse" aria-expanded="false">
                         <i class="bi bi-funnel me-1"></i><%= __('Filter_Label') %>
@@ -708,7 +711,7 @@ document.getElementById('updateProgressForm').addEventListener('submit', async (
 // ==========================================
 // PDF via Print Window (browser-native, no library)
 // ==========================================
-function _openPrintWindow(bodyHtml, title, filename) {
+function _openPrintWindow(bodyHtml, title, filename, showDates = true) {
     const isUr = _pdfLang === 'ur';
     const win = window.open('', '_blank');
     if (!win) {
@@ -783,7 +786,7 @@ function _openPrintWindow(bodyHtml, title, filename) {
         <img src="${_pdfLogoUrl}" onerror="this.style.display='none'" alt="logo">
         <div class="mh">
             <h1>${_pdfCollegeName}</h1>
-            <p>${title} &nbsp;—&nbsp; ${_pdfStartDate} ${isUr ? 'سے' : 'إلى'} ${_pdfEndDate}</p>
+            <p>${title}${showDates ? ` &nbsp;—&nbsp; ${_pdfStartDate} ${isUr ? 'سے' : 'إلى'} ${_pdfEndDate}` : ` &nbsp;—&nbsp; ${isUr ? 'موجودہ سیشن' : 'الجلسة الحالية'}`}</p>
         </div>
     </div>
     ${bodyHtml}
@@ -906,7 +909,7 @@ function downloadBooksPDF() {
         <div class="ph"><h2>${isUr ? 'کتابوں کی پیشرفت رپورٹ — استاد کے مطابق' : 'تقرير تقدم الكتب — حسب المعلم'}</h2></div>
         ${sections}`,
         isUr ? 'کتابوں کی پیشرفت رپورٹ' : 'تقرير تقدم الكتب',
-        'books_progress_by_teacher');
+        'books_progress_by_teacher', false);
 }
 </script>
 
