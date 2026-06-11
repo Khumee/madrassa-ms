@@ -704,43 +704,54 @@ document.getElementById('updateProgressForm').addEventListener('submit', async (
 });
 
 // ==========================================
-// PDF Download Functions
+// PDF via Print Window (browser-native, no library)
 // ==========================================
-
-// Scoped styles injected into each PDF root div (.pdfr)
-const _pdfStyleTag = `<style>
-    .pdfr { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; direction: rtl; text-align: right; padding: 16px; color: #212529; font-size: 13px; background: white; }
-    .pdfr * { box-sizing: border-box; }
-    .pdfr .ph { text-align: center; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 2px solid #2c3e50; }
-    .pdfr .ph h2 { color: #2c3e50; font-size: 17px; margin-bottom: 4px; }
-    .pdfr .ph p  { color: #6c757d; font-size: 12px; margin: 0; }
-    .pdfr table  { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px; }
-    .pdfr th { background: #2c3e50; color: white; padding: 8px 12px; text-align: right; font-weight: 600; }
-    .pdfr td { padding: 7px 12px; border-bottom: 1px solid #dee2e6; }
-    .pdfr tr:nth-child(even) td { background: #f8f9fa; }
-    .pdfr .cr td { background: #e8f0fe !important; font-weight: bold; color: #1a56db; }
-    .pdfr .ok   { color: #28a745; font-weight: bold; }
-    .pdfr .bad  { color: #dc3545; font-weight: bold; }
-    .pdfr .plus { color: #0d6efd; font-weight: bold; }
-    .pdfr .tb   { margin-bottom: 22px; }
-    .pdfr .tt   { background: #fff3cd; border-right: 4px solid #ffc107; padding: 8px 14px; font-weight: bold; font-size: 14px; color: #856404; }
-</style>`;
-
-function _renderPDF(innerHtml, filename) {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'pdfr';
-    // position:absolute top:0 left:-9999px keeps it off-screen to the side
-    // (NOT position:fixed or negative top — html2canvas can't capture those)
-    wrapper.style.cssText = 'position:absolute;top:0;left:-9999px;width:794px;background:white;';
-    wrapper.innerHTML = _pdfStyleTag + innerHtml;
-    document.body.appendChild(wrapper);
-    html2pdf().set({
-        margin: 10,
-        filename: filename,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, logging: false, scrollX: 0, scrollY: 0 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    }).from(wrapper).save().finally(() => document.body.removeChild(wrapper));
+function _openPrintWindow(bodyHtml, title) {
+    const isUr = _pdfLang === 'ur';
+    const win = window.open('', '_blank');
+    if (!win) {
+        alert(isUr ? 'براہ کرم pop-up بلاکر بند کریں اور دوبارہ کوشش کریں' : 'الرجاء تعطيل مانع النوافذ المنبثقة والمحاولة مرة أخرى');
+        return;
+    }
+    win.document.write(`<!DOCTYPE html>
+<html dir="rtl" lang="${_pdfLang}">
+<head>
+<meta charset="UTF-8">
+<title>${title}</title>
+<style>
+    @media print {
+        @page { margin: 12mm; size: A4 portrait; }
+        body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        .no-print { display: none !important; }
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; direction: rtl; text-align: right; padding: 20px; color: #212529; font-size: 13px; }
+    .no-print { text-align: center; padding: 12px 0 20px; }
+    .no-print button { padding: 8px 24px; background: #2c3e50; color: white; border: none; border-radius: 20px; cursor: pointer; font-size: 14px; font-family: inherit; }
+    .ph { text-align: center; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 2px solid #2c3e50; }
+    .ph h2 { color: #2c3e50; font-size: 17px; margin-bottom: 4px; }
+    .ph p  { color: #6c757d; font-size: 12px; }
+    table  { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px; }
+    th { background: #2c3e50 !important; color: white !important; padding: 8px 12px; text-align: right; font-weight: 600; }
+    td { padding: 7px 12px; border-bottom: 1px solid #dee2e6; }
+    tr:nth-child(even) td { background: #f8f9fa; }
+    .cr td { background: #e8f0fe !important; font-weight: bold; color: #1a56db; }
+    .ok   { color: #28a745; font-weight: bold; }
+    .bad  { color: #dc3545; font-weight: bold; }
+    .plus { color: #0d6efd; font-weight: bold; }
+    .tb   { margin-bottom: 22px; }
+    .tt   { background: #fff3cd !important; border-right: 4px solid #ffc107; padding: 8px 14px; font-weight: bold; font-size: 14px; color: #856404; }
+</style>
+</head>
+<body>
+<div class="no-print">
+    <button onclick="window.print()">${isUr ? '⬇ PDF محفوظ کریں' : '⬇ حفظ كـ PDF'}</button>
+</div>
+${bodyHtml}
+<script>window.addEventListener('load', function(){ setTimeout(function(){ window.print(); }, 400); });<\/script>
+</body>
+</html>`);
+    win.document.close();
 }
 
 function downloadStudentPDF() {
@@ -754,7 +765,7 @@ function downloadStudentPDF() {
             rows += `<tr><td>${s.name}</td><td style="text-align:center">${s.total_days}</td><td style="text-align:center">${s.present_days}</td><td style="text-align:center" class="${s.percentage >= 80 ? 'ok' : 'bad'}">${s.percentage}%</td></tr>`;
         });
     });
-    _renderPDF(`
+    _openPrintWindow(`
         <div class="ph"><h2>${isUr ? 'کلاس وار طلباء کی حاضری' : 'حضور الطلاب حسب الصف'}</h2>
             <p>${_pdfStartDate} ${isUr ? 'سے' : 'إلى'} ${_pdfEndDate}</p></div>
         <table><thead><tr>
@@ -763,7 +774,7 @@ function downloadStudentPDF() {
             <th style="text-align:center">${isUr ? 'حاضر دن' : 'أيام الحضور'}</th>
             <th style="text-align:center">${isUr ? 'فیصد' : 'النسبة'}</th>
         </tr></thead><tbody>${rows}</tbody></table>`,
-    `student_attendance_${_pdfStartDate}_to_${_pdfEndDate}.pdf`);
+        isUr ? 'کلاس وار طلباء کی حاضری' : 'حضور الطلاب حسب الصف');
 }
 
 function downloadTeacherPDF() {
@@ -776,16 +787,16 @@ function downloadTeacherPDF() {
         else                         statusHtml = `<span class="bad">▼ ${isUr ? 'کمی' : 'نقص'} (${tr.difference})</span>`;
         rows += `<tr><td style="font-weight:bold">${tr.name}</td><td style="text-align:center">${tr.required}</td><td style="text-align:center">${tr.taken}</td><td style="text-align:center">${statusHtml}</td></tr>`;
     });
-    _renderPDF(`
+    _openPrintWindow(`
         <div class="ph"><h2>${isUr ? 'اساتذہ کی حاضری اور اسباق کی رپورٹ' : 'تقرير حضور المعلمين والحصص'}</h2>
             <p>${_pdfStartDate} ${isUr ? 'سے' : 'إلى'} ${_pdfEndDate}</p></div>
         <table><thead><tr>
             <th>${isUr ? 'استاد کا نام' : 'اسم المعلم'}</th>
-            <th style="text-align:center">${isUr ? 'مطلوب پیریڈز' : 'الحصص المطلوبة'}</th>
-            <th style="text-align:center">${isUr ? 'لیے گئے پیریڈز' : 'الحصص المنجزة'}</th>
+            <th style="text-align:center">${isUr ? 'مطلوب اسباق' : 'الحصص المطلوبة'}</th>
+            <th style="text-align:center">${isUr ? 'لیے گئے اسباق' : 'الحصص المنجزة'}</th>
             <th style="text-align:center">${isUr ? 'حیثیت' : 'الحالة'}</th>
         </tr></thead><tbody>${rows}</tbody></table>`,
-    `teacher_attendance_${_pdfStartDate}_to_${_pdfEndDate}.pdf`);
+        isUr ? 'اساتذہ کی حاضری اور اسباق کی رپورٹ' : 'تقرير حضور المعلمين والحصص');
 }
 
 function downloadBooksPDF() {
@@ -810,10 +821,10 @@ function downloadBooksPDF() {
                 <th style="text-align:center">${isUr ? 'آخری اپڈیٹ' : 'آخر تحديث'}</th>
             </tr></thead><tbody>${bookRows}</tbody></table></div>`;
     });
-    _renderPDF(`
+    _openPrintWindow(`
         <div class="ph"><h2>${isUr ? 'کتابوں کی پیشرفت رپورٹ — استاد کے مطابق' : 'تقرير تقدم الكتب — حسب المعلم'}</h2></div>
         ${sections}`,
-    'books_progress_by_teacher.pdf');
+        isUr ? 'کتابوں کی پیشرفت رپورٹ' : 'تقرير تقدم الكتب');
 }
 </script>
 
