@@ -483,7 +483,7 @@ const _pdfStartDate = '<%- startDate %>';
 const _pdfEndDate   = '<%- endDate %>';
 const _pdfLang      = '<%= locals.lang || "ur" %>';
 const _pdfGroupedReport     = <%- JSON.stringify(groupedReport) %>;
-const _pdfTeachersReport    = <%- JSON.stringify((teachersReport || []).map(tr => ({ name: tr.name, required: tr.required, taken: tr.taken, difference: tr.difference }))) %>;
+const _pdfTeachersReport    = <%- JSON.stringify((teachersReport || []).map(tr => ({ name: tr.name, required: tr.required, taken: tr.taken, difference: tr.difference, detail: tr.detail || [] }))) %>;
 const _pdfTeacherProgress   = <%- JSON.stringify((teacherProgress || []).map(tp => ({ teacher_name: tp.teacher_name, book_title: tp.book_title, class_name: tp.class_name, current_page: tp.current_page, percentage: tp.percentage, lastUpdatedStr: tp.lastUpdatedStr || '' }))) %>;
 
 function setPreset(preset) {
@@ -741,6 +741,10 @@ function _openPrintWindow(bodyHtml, title) {
     .plus { color: #0d6efd; font-weight: bold; }
     .tb   { margin-bottom: 22px; }
     .tt   { background: #fff3cd !important; border-right: 4px solid #ffc107; padding: 8px 14px; font-weight: bold; font-size: 14px; color: #856404; }
+    .detail-tbl { margin-top: 6px; font-size: 11px; }
+    .detail-tbl th { background: #e9ecef !important; color: #495057 !important; font-size: 11px; padding: 5px 10px; }
+    .detail-tbl td { padding: 5px 10px; }
+    .no-detail { color: #6c757d; font-size: 12px; padding: 6px 14px; }
 </style>
 </head>
 <body>
@@ -779,23 +783,64 @@ function downloadStudentPDF() {
 
 function downloadTeacherPDF() {
     const isUr = _pdfLang === 'ur';
-    let rows = '';
+    const dayNamesUr = { Monday:'پیر', Tuesday:'منگل', Wednesday:'بدھ', Thursday:'جمعرات', Friday:'جمعہ', Saturday:'ہفتہ', Sunday:'اتوار' };
+    const dayNamesAr = { Monday:'الاثنين', Tuesday:'الثلاثاء', Wednesday:'الأربعاء', Thursday:'الخميس', Friday:'الجمعة', Saturday:'السبت', Sunday:'الأحد' };
+    const localDay = en => isUr ? (dayNamesUr[en] || en) : (dayNamesAr[en] || en);
+
+    let sections = '';
     _pdfTeachersReport.forEach(tr => {
         let statusHtml;
         if (tr.difference === 0)    statusHtml = `<span class="ok">✓ ${isUr ? 'بروقت' : 'في الوقت'}</span>`;
         else if (tr.difference > 0) statusHtml = `<span class="plus">▲ ${isUr ? 'اضافی' : 'إضافي'} (+${tr.difference})</span>`;
         else                         statusHtml = `<span class="bad">▼ ${isUr ? 'کمی' : 'نقص'} (${tr.difference})</span>`;
-        rows += `<tr><td style="font-weight:bold">${tr.name}</td><td style="text-align:center">${tr.required}</td><td style="text-align:center">${tr.taken}</td><td style="text-align:center">${statusHtml}</td></tr>`;
+
+        let detailHtml = '';
+        if (tr.detail && tr.detail.length > 0) {
+            let detailRows = '';
+            tr.detail.forEach(day => {
+                day.classes.forEach(cls => {
+                    let clsStatus;
+                    if (cls.taken === null)             clsStatus = `<span style="color:#6c757d">${isUr ? 'درج نہیں' : 'غير مسجل'}</span>`;
+                    else if (cls.taken === 0)           clsStatus = `<span class="bad">${isUr ? 'غیر حاضر' : 'غائب'} 0/${cls.scheduled}</span>`;
+                    else if (cls.taken >= cls.scheduled) clsStatus = `<span class="ok">${cls.taken}/${cls.scheduled}</span>`;
+                    else                                clsStatus = `<span class="plus">${cls.taken}/${cls.scheduled}</span>`;
+                    detailRows += `<tr>
+                        <td>${day.date_str}</td>
+                        <td>${localDay(day.day_name)}</td>
+                        <td style="font-weight:500">${cls.class_name}</td>
+                        <td style="text-align:center">${clsStatus}</td>
+                    </tr>`;
+                });
+            });
+            detailHtml = `<table class="detail-tbl">
+                <thead><tr>
+                    <th>${isUr ? 'تاریخ' : 'التاريخ'}</th>
+                    <th>${isUr ? 'دن' : 'اليوم'}</th>
+                    <th>${isUr ? 'کلاس' : 'الصف'}</th>
+                    <th style="text-align:center">${isUr ? 'اسباق' : 'الحصص'}</th>
+                </tr></thead>
+                <tbody>${detailRows}</tbody>
+            </table>`;
+        } else {
+            detailHtml = `<p class="no-detail">${isUr ? 'اس مدت میں کوئی ریکارڈ نہیں' : 'لا توجد سجلات في هذه الفترة'}</p>`;
+        }
+
+        sections += `<div class="tb">
+            <div class="tt">${tr.name}
+                <span style="font-weight:normal;font-size:12px;margin-right:12px">
+                    ${isUr ? 'مطلوب' : 'مطلوب'}: <b>${tr.required}</b>
+                    &nbsp;|&nbsp; ${isUr ? 'لیے گئے' : 'منجز'}: <b>${tr.taken}</b>
+                    &nbsp;|&nbsp; ${statusHtml}
+                </span>
+            </div>
+            ${detailHtml}
+        </div>`;
     });
+
     _openPrintWindow(`
         <div class="ph"><h2>${isUr ? 'اساتذہ کی حاضری اور اسباق کی رپورٹ' : 'تقرير حضور المعلمين والحصص'}</h2>
             <p>${_pdfStartDate} ${isUr ? 'سے' : 'إلى'} ${_pdfEndDate}</p></div>
-        <table><thead><tr>
-            <th>${isUr ? 'استاد کا نام' : 'اسم المعلم'}</th>
-            <th style="text-align:center">${isUr ? 'مطلوب اسباق' : 'الحصص المطلوبة'}</th>
-            <th style="text-align:center">${isUr ? 'لیے گئے اسباق' : 'الحصص المنجزة'}</th>
-            <th style="text-align:center">${isUr ? 'حیثیت' : 'الحالة'}</th>
-        </tr></thead><tbody>${rows}</tbody></table>`,
+        ${sections}`,
         isUr ? 'اساتذہ کی حاضری اور اسباق کی رپورٹ' : 'تقرير حضور المعلمين والحصص');
 }
 
