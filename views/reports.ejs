@@ -708,7 +708,7 @@ document.getElementById('updateProgressForm').addEventListener('submit', async (
 // ==========================================
 // PDF via Print Window (browser-native, no library)
 // ==========================================
-function _openPrintWindow(bodyHtml, title) {
+function _openPrintWindow(bodyHtml, title, filename) {
     const isUr = _pdfLang === 'ur';
     const win = window.open('', '_blank');
     if (!win) {
@@ -719,7 +719,7 @@ function _openPrintWindow(bodyHtml, title) {
 <html dir="rtl" lang="${_pdfLang}">
 <head>
 <meta charset="UTF-8">
-<title>${title}</title>
+<title>${filename || title}</title>
 <style>
     /* @page margin:0 removes browser-added URL/date from the printout */
     @page { size: A4 portrait; margin: 0; }
@@ -813,7 +813,8 @@ function downloadStudentPDF() {
             <th style="text-align:center">${isUr ? 'حاضر دن' : 'أيام الحضور'}</th>
             <th style="text-align:center">${isUr ? 'فیصد' : 'النسبة'}</th>
         </tr></thead><tbody>${rows}</tbody></table>`,
-        isUr ? 'کلاس وار طلباء کی حاضری' : 'حضور الطلاب حسب الصف');
+        isUr ? 'کلاس وار طلباء کی حاضری' : 'حضور الطلاب حسب الصف',
+        `student_attendance_${_pdfStartDate}_to_${_pdfEndDate}`);
 }
 
 function downloadTeacherPDF() {
@@ -875,7 +876,8 @@ function downloadTeacherPDF() {
     _openPrintWindow(`
         <div class="ph"><h2>${isUr ? 'اساتذہ کی حاضری اور اسباق کی رپورٹ' : 'تقرير حضور المعلمين والحصص'}</h2></div>
         ${sections}`,
-        isUr ? 'اساتذہ کی حاضری اور اسباق کی رپورٹ' : 'تقرير حضور المعلمين والحصص');
+        isUr ? 'اساتذہ کی حاضری اور اسباق کی رپورٹ' : 'تقرير حضور المعلمين والحصص',
+        `teacher_attendance_${_pdfStartDate}_to_${_pdfEndDate}`);
 }
 
 function downloadBooksPDF() {
@@ -903,7 +905,8 @@ function downloadBooksPDF() {
     _openPrintWindow(`
         <div class="ph"><h2>${isUr ? 'کتابوں کی پیشرفت رپورٹ — استاد کے مطابق' : 'تقرير تقدم الكتب — حسب المعلم'}</h2></div>
         ${sections}`,
-        isUr ? 'کتابوں کی پیشرفت رپورٹ' : 'تقرير تقدم الكتب');
+        isUr ? 'کتابوں کی پیشرفت رپورٹ' : 'تقرير تقدم الكتب',
+        'books_progress_by_teacher');
 }
 </script>
 
