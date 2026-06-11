@@ -706,36 +706,39 @@ document.getElementById('updateProgressForm').addEventListener('submit', async (
 // ==========================================
 // PDF Download Functions
 // ==========================================
-function _pdfStyles() {
-    return `<style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; direction: rtl; text-align: right; padding: 16px; color: #212529; font-size: 13px; }
-        .pdf-header { text-align: center; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 2px solid #2c3e50; }
-        .pdf-header h2 { color: #2c3e50; font-size: 17px; margin-bottom: 4px; }
-        .pdf-header p { color: #6c757d; font-size: 12px; }
-        table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px; }
-        th { background: #2c3e50; color: white; padding: 8px 12px; text-align: right; font-weight: 600; }
-        td { padding: 7px 12px; border-bottom: 1px solid #dee2e6; }
-        tr:nth-child(even) td { background: #f8f9fa; }
-        .class-row td { background: #e8f0fe !important; font-weight: bold; font-size: 13px; color: #1a56db; }
-        .ok   { color: #28a745; font-weight: bold; }
-        .bad  { color: #dc3545; font-weight: bold; }
-        .plus { color: #0d6efd; font-weight: bold; }
-        .teacher-block { margin-bottom: 22px; }
-        .teacher-title { background: #fff3cd; border-right: 4px solid #ffc107; padding: 8px 14px; font-weight: bold; font-size: 14px; color: #856404; border-radius: 4px 4px 0 0; }
-    </style>`;
-}
 
-function _renderPDF(htmlString, filename) {
+// Scoped styles injected into each PDF root div (.pdfr)
+const _pdfStyleTag = `<style>
+    .pdfr { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; direction: rtl; text-align: right; padding: 16px; color: #212529; font-size: 13px; background: white; }
+    .pdfr * { box-sizing: border-box; }
+    .pdfr .ph { text-align: center; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 2px solid #2c3e50; }
+    .pdfr .ph h2 { color: #2c3e50; font-size: 17px; margin-bottom: 4px; }
+    .pdfr .ph p  { color: #6c757d; font-size: 12px; margin: 0; }
+    .pdfr table  { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px; }
+    .pdfr th { background: #2c3e50; color: white; padding: 8px 12px; text-align: right; font-weight: 600; }
+    .pdfr td { padding: 7px 12px; border-bottom: 1px solid #dee2e6; }
+    .pdfr tr:nth-child(even) td { background: #f8f9fa; }
+    .pdfr .cr td { background: #e8f0fe !important; font-weight: bold; color: #1a56db; }
+    .pdfr .ok   { color: #28a745; font-weight: bold; }
+    .pdfr .bad  { color: #dc3545; font-weight: bold; }
+    .pdfr .plus { color: #0d6efd; font-weight: bold; }
+    .pdfr .tb   { margin-bottom: 22px; }
+    .pdfr .tt   { background: #fff3cd; border-right: 4px solid #ffc107; padding: 8px 14px; font-weight: bold; font-size: 14px; color: #856404; }
+</style>`;
+
+function _renderPDF(innerHtml, filename) {
     const wrapper = document.createElement('div');
-    wrapper.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:800px;background:white;';
-    wrapper.innerHTML = htmlString;
+    wrapper.className = 'pdfr';
+    // position:absolute top:0 left:-9999px keeps it off-screen to the side
+    // (NOT position:fixed or negative top — html2canvas can't capture those)
+    wrapper.style.cssText = 'position:absolute;top:0;left:-9999px;width:794px;background:white;';
+    wrapper.innerHTML = _pdfStyleTag + innerHtml;
     document.body.appendChild(wrapper);
     html2pdf().set({
         margin: 10,
         filename: filename,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, logging: false },
+        html2canvas: { scale: 2, useCORS: true, logging: false, scrollX: 0, scrollY: 0 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     }).from(wrapper).save().finally(() => document.body.removeChild(wrapper));
 }
@@ -746,24 +749,21 @@ function downloadStudentPDF() {
     Object.keys(_pdfGroupedReport).forEach(className => {
         const students = _pdfGroupedReport[className];
         const avg = Math.round(students.reduce((acc, s) => acc + s.percentage, 0) / students.length);
-        rows += `<tr class="class-row"><td colspan="4">${className} — ${students.length} ${isUr ? 'طلباء' : 'طالب'} — ${isUr ? 'اوسط حاضری' : 'متوسط الحضور'}: ${avg}%</td></tr>`;
+        rows += `<tr class="cr"><td colspan="4">${className} — ${students.length} ${isUr ? 'طلباء' : 'طالب'} — ${isUr ? 'اوسط حاضری' : 'متوسط الحضور'}: ${avg}%</td></tr>`;
         students.forEach(s => {
             rows += `<tr><td>${s.name}</td><td style="text-align:center">${s.total_days}</td><td style="text-align:center">${s.present_days}</td><td style="text-align:center" class="${s.percentage >= 80 ? 'ok' : 'bad'}">${s.percentage}%</td></tr>`;
         });
     });
-    const html = `<html><head><meta charset="UTF-8">${_pdfStyles()}</head><body>
-        <div class="pdf-header">
-            <h2>${isUr ? 'کلاس وار طلباء کی حاضری' : 'حضور الطلاب حسب الصف'}</h2>
-            <p>${_pdfStartDate} ${isUr ? 'سے' : 'إلى'} ${_pdfEndDate}</p>
-        </div>
+    _renderPDF(`
+        <div class="ph"><h2>${isUr ? 'کلاس وار طلباء کی حاضری' : 'حضور الطلاب حسب الصف'}</h2>
+            <p>${_pdfStartDate} ${isUr ? 'سے' : 'إلى'} ${_pdfEndDate}</p></div>
         <table><thead><tr>
             <th>${isUr ? 'طالب کا نام' : 'اسم الطالب'}</th>
             <th style="text-align:center">${isUr ? 'کل دن' : 'إجمالي الأيام'}</th>
             <th style="text-align:center">${isUr ? 'حاضر دن' : 'أيام الحضور'}</th>
             <th style="text-align:center">${isUr ? 'فیصد' : 'النسبة'}</th>
-        </tr></thead><tbody>${rows}</tbody></table>
-    </body></html>`;
-    _renderPDF(html, `student_attendance_${_pdfStartDate}_to_${_pdfEndDate}.pdf`);
+        </tr></thead><tbody>${rows}</tbody></table>`,
+    `student_attendance_${_pdfStartDate}_to_${_pdfEndDate}.pdf`);
 }
 
 function downloadTeacherPDF() {
@@ -771,24 +771,21 @@ function downloadTeacherPDF() {
     let rows = '';
     _pdfTeachersReport.forEach(tr => {
         let statusHtml;
-        if (tr.difference === 0)      statusHtml = `<span class="ok">✓ ${isUr ? 'بروقت' : 'في الوقت'}</span>`;
-        else if (tr.difference > 0)   statusHtml = `<span class="plus">▲ ${isUr ? 'اضافی' : 'إضافي'} (+${tr.difference})</span>`;
-        else                           statusHtml = `<span class="bad">▼ ${isUr ? 'کمی' : 'نقص'} (${tr.difference})</span>`;
+        if (tr.difference === 0)    statusHtml = `<span class="ok">✓ ${isUr ? 'بروقت' : 'في الوقت'}</span>`;
+        else if (tr.difference > 0) statusHtml = `<span class="plus">▲ ${isUr ? 'اضافی' : 'إضافي'} (+${tr.difference})</span>`;
+        else                         statusHtml = `<span class="bad">▼ ${isUr ? 'کمی' : 'نقص'} (${tr.difference})</span>`;
         rows += `<tr><td style="font-weight:bold">${tr.name}</td><td style="text-align:center">${tr.required}</td><td style="text-align:center">${tr.taken}</td><td style="text-align:center">${statusHtml}</td></tr>`;
     });
-    const html = `<html><head><meta charset="UTF-8">${_pdfStyles()}</head><body>
-        <div class="pdf-header">
-            <h2>${isUr ? 'اساتذہ کی حاضری اور پیریڈز کی رپورٹ' : 'تقرير حضور المعلمين والحصص'}</h2>
-            <p>${_pdfStartDate} ${isUr ? 'سے' : 'إلى'} ${_pdfEndDate}</p>
-        </div>
+    _renderPDF(`
+        <div class="ph"><h2>${isUr ? 'اساتذہ کی حاضری اور پیریڈز کی رپورٹ' : 'تقرير حضور المعلمين والحصص'}</h2>
+            <p>${_pdfStartDate} ${isUr ? 'سے' : 'إلى'} ${_pdfEndDate}</p></div>
         <table><thead><tr>
             <th>${isUr ? 'استاد کا نام' : 'اسم المعلم'}</th>
             <th style="text-align:center">${isUr ? 'مطلوب پیریڈز' : 'الحصص المطلوبة'}</th>
             <th style="text-align:center">${isUr ? 'لیے گئے پیریڈز' : 'الحصص المنجزة'}</th>
             <th style="text-align:center">${isUr ? 'حیثیت' : 'الحالة'}</th>
-        </tr></thead><tbody>${rows}</tbody></table>
-    </body></html>`;
-    _renderPDF(html, `teacher_attendance_${_pdfStartDate}_to_${_pdfEndDate}.pdf`);
+        </tr></thead><tbody>${rows}</tbody></table>`,
+    `teacher_attendance_${_pdfStartDate}_to_${_pdfEndDate}.pdf`);
 }
 
 function downloadBooksPDF() {
@@ -800,29 +797,23 @@ function downloadBooksPDF() {
     });
     let sections = '';
     Object.keys(byTeacher).forEach(teacherName => {
-        const books = byTeacher[teacherName];
-        const bookRows = books.map(b => {
+        const bookRows = byTeacher[teacherName].map(b => {
             const cls = b.percentage >= 75 ? 'ok' : b.percentage >= 40 ? '' : 'bad';
             return `<tr><td>${b.book_title}</td><td>${b.class_name || ''}</td><td style="text-align:center">ص ${b.current_page}</td><td style="text-align:center" class="${cls}">${b.percentage}%</td><td style="text-align:center;font-size:11px">${b.lastUpdatedStr || (isUr ? 'نہیں' : 'لا يوجد')}</td></tr>`;
         }).join('');
-        sections += `<div class="teacher-block">
-            <div class="teacher-title">${teacherName}</div>
+        sections += `<div class="tb"><div class="tt">${teacherName}</div>
             <table><thead><tr>
                 <th>${isUr ? 'کتاب' : 'الكتاب'}</th>
                 <th>${isUr ? 'کلاس' : 'الصف'}</th>
                 <th style="text-align:center">${isUr ? 'موجودہ صفحہ' : 'الصفحة الحالية'}</th>
                 <th style="text-align:center">${isUr ? 'پیشرفت' : 'التقدم'}</th>
                 <th style="text-align:center">${isUr ? 'آخری اپڈیٹ' : 'آخر تحديث'}</th>
-            </tr></thead><tbody>${bookRows}</tbody></table>
-        </div>`;
+            </tr></thead><tbody>${bookRows}</tbody></table></div>`;
     });
-    const html = `<html><head><meta charset="UTF-8">${_pdfStyles()}</head><body>
-        <div class="pdf-header">
-            <h2>${isUr ? 'کتابوں کی پیشرفت رپورٹ — استاد کے مطابق' : 'تقرير تقدم الكتب — حسب المعلم'}</h2>
-        </div>
-        ${sections}
-    </body></html>`;
-    _renderPDF(html, 'books_progress_by_teacher.pdf');
+    _renderPDF(`
+        <div class="ph"><h2>${isUr ? 'کتابوں کی پیشرفت رپورٹ — استاد کے مطابق' : 'تقرير تقدم الكتب — حسب المعلم'}</h2></div>
+        ${sections}`,
+    'books_progress_by_teacher.pdf');
 }
 </script>
 
