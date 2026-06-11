@@ -777,7 +777,7 @@ function downloadTeacherPDF() {
         rows += `<tr><td style="font-weight:bold">${tr.name}</td><td style="text-align:center">${tr.required}</td><td style="text-align:center">${tr.taken}</td><td style="text-align:center">${statusHtml}</td></tr>`;
     });
     _renderPDF(`
-        <div class="ph"><h2>${isUr ? 'اساتذہ کی حاضری اور پیریڈز کی رپورٹ' : 'تقرير حضور المعلمين والحصص'}</h2>
+        <div class="ph"><h2>${isUr ? 'اساتذہ کی حاضری اور اسباق کی رپورٹ' : 'تقرير حضور المعلمين والحصص'}</h2>
             <p>${_pdfStartDate} ${isUr ? 'سے' : 'إلى'} ${_pdfEndDate}</p></div>
         <table><thead><tr>
             <th>${isUr ? 'استاد کا نام' : 'اسم المعلم'}</th>
