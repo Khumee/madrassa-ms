@@ -52,15 +52,16 @@ exports.showReports = async (req, res) => {
             WHERE s.is_active = TRUE AND tb.class_id IN (4, 10, 12, 16)
         `);
 
+        const luxonLocale = req.getLocale() === 'ur' ? 'ur' : req.getLocale() === 'en' ? 'en' : 'ar';
         teacherProgress.forEach(tp => {
             const total = tp.end_page - tp.start_page;
             const completed = tp.current_page - tp.start_page;
             tp.percentage = total > 0 ? Math.min(100, Math.max(0, Math.round((completed / total) * 100))) : 0;
 
             if (tp.last_updated_at) {
-                tp.lastUpdatedStr = DateTime.fromJSDate(new Date(tp.last_updated_at)).setLocale('ar').toFormat('dd MMMM yyyy, hh:mm a');
+                tp.lastUpdatedStr = DateTime.fromJSDate(new Date(tp.last_updated_at)).setLocale(luxonLocale).toFormat('dd MMMM yyyy, hh:mm a');
             } else {
-                tp.lastUpdatedStr = 'لا يوجد تحديث بعد';
+                tp.lastUpdatedStr = '';
             }
         });
 
