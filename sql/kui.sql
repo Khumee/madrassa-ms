@@ -376,11 +376,11 @@ INSERT INTO `books` VALUES (12, 'الأدب', 4);
 INSERT INTO `books` VALUES (14, 'الصرف', 2);
 INSERT INTO `books` VALUES (16, 'نورالانوار (قیاس)', 10);
 INSERT INTO `books` VALUES (18, 'النحو', 2);
-INSERT INTO `books` VALUES (24, 'المنطق', 10);
+INSERT INTO `books` VALUES (24, 'المنطق', 4);
 INSERT INTO `books` VALUES (26, 'شرح العقائد', 12);
 INSERT INTO `books` VALUES (28, 'صحيح البخاري  (2)', 16);
 INSERT INTO `books` VALUES (30, 'الترمذي (2)', 16);
-INSERT INTO `books` VALUES (32, 'علم الصيغة', 10);
+INSERT INTO `books` VALUES (32, 'علم الصيغة', 4);
 INSERT INTO `books` VALUES (36, 'شمائل الترمذي', 16);
 INSERT INTO `books` VALUES (38, 'اللغة العربية وحفظ الأحاديث والمحادثة العربية', NULL);
 INSERT INTO `books` VALUES (42, 'گردانوں کا اجرا', 4);
@@ -808,8 +808,8 @@ INSERT INTO `teacher_books` VALUES (120, 288, 14, 2, 1, 500, 1, 2, NULL);
 INSERT INTO `teacher_books` VALUES (122, 290, 18, 2, 1, 500, 1, 2, NULL);
 INSERT INTO `teacher_books` VALUES (124, 284, 98, 2, 1, 200, 1, 4, NULL);
 INSERT INTO `teacher_books` VALUES (130, 296, 100, 2, 488, 30, 1, 16, NULL);
-INSERT INTO `teacher_books` VALUES (132, 292, 24, 2, 1, 500, 1, 10, NULL);
-INSERT INTO `teacher_books` VALUES (134, 298, 32, 2, 1, 500, 1, 10, NULL);
+INSERT INTO `teacher_books` VALUES (132, 292, 24, 2, 1, 500, 1, 4, NULL);
+INSERT INTO `teacher_books` VALUES (134, 298, 32, 2, 1, 500, 1, 4, NULL);
 
 -- ----------------------------
 -- Table structure for teachers
