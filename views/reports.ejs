@@ -72,6 +72,7 @@
                                 <label class="form-label fw-bold text-secondary small d-block"><%= __('Date_Filter_Header') %></label>
                                 <div class="btn-group w-100 shadow-sm rounded-3 overflow-hidden" role="group">
                                     <button type="button" class="btn btn-outline-primary py-2 border-light-subtle small" onclick="setPreset('1day')"><%= __('Preset_1Day') %></button>
+                                    <button type="button" class="btn btn-outline-primary py-2 border-light-subtle small" onclick="setPreset('current_week')"><%= __('Preset_CurrentWeek') %></button>
                                     <button type="button" class="btn btn-outline-primary py-2 border-light-subtle small" onclick="setPreset('7day')"><%= __('Preset_7Day') %></button>
                                     <button type="button" class="btn btn-outline-primary py-2 border-light-subtle small" onclick="setPreset('1month')"><%= __('Preset_1Month') %></button>
                                     <button type="button" class="btn btn-outline-primary py-2 border-light-subtle small" onclick="setPreset('6month')"><%= __('Preset_6Month') %></button>
@@ -230,6 +231,7 @@
                         <thead class="table-light">
                             <tr>
                                 <th class="px-4"><%= __('Teacher_Name') %></th>
+                                <th class="px-4 text-start"><%= __('Book') %></th>
                                 <th><%= __('Required_Periods') %></th>
                                 <th><%= __('Taken_Periods') %></th>
                                 <th class="px-4 text-center"><%= __('Status_Variance') %></th>
@@ -242,6 +244,7 @@
                                     style="cursor:pointer;"
                                     data-bs-toggle="collapse" data-bs-target="#detail_<%= idx %>" aria-expanded="false">
                                     <td class="px-4 fw-bold text-dark"><%= tr.name %></td>
+                                    <td class="px-4 text-secondary text-start small"><%= tr.books_list %></td>
                                     <td><span class="badge bg-light text-secondary border rounded-3 px-3 py-2"><%= tr.required %></span></td>
                                     <td><span class="badge bg-light text-primary border rounded-3 px-3 py-2"><%= tr.taken %></span></td>
                                     <td class="px-4 text-center">
@@ -265,7 +268,7 @@
                                 </tr>
                                 <!-- Collapsible detail row -->
                                 <tr class="teacher-attendance-row" data-teacher-name="<%= tr.name %>">
-                                    <td colspan="5" class="p-0 border-0">
+                                    <td colspan="6" class="p-0 border-0">
                                         <div class="collapse" id="detail_<%= idx %>">
                                             <%
                                             const dayNamesUr = { Monday:'پیر', Tuesday:'منگل', Wednesday:'بدھ', Thursday:'جمعرات', Friday:'جمعہ', Saturday:'ہفتہ', Sunday:'اتوار' };
@@ -488,7 +491,7 @@ const _pdfLang        = '<%= locals.lang || "ur" %>';
 const _pdfCollegeName = '<%= __("College_Name") %>';
 const _pdfLogoUrl     = window.location.origin + '/logo.jpg';
 const _pdfGroupedReport     = <%- JSON.stringify(groupedReport) %>;
-const _pdfTeachersReport    = <%- JSON.stringify((teachersReport || []).map(tr => ({ name: tr.name, required: tr.required, taken: tr.taken, difference: tr.difference, detail: tr.detail || [] }))) %>;
+const _pdfTeachersReport    = <%- JSON.stringify((teachersReport || []).map(tr => ({ name: tr.name, books_list: tr.books_list, required: tr.required, taken: tr.taken, difference: tr.difference, detail: tr.detail || [] }))) %>;
 const _pdfTeacherProgress   = <%- JSON.stringify((teacherProgress || []).map(tp => ({ teacher_name: tp.teacher_name, book_title: tp.book_title, class_name: tp.class_name, current_page: tp.current_page, percentage: tp.percentage, lastUpdatedStr: tp.lastUpdatedStr || '' }))) %>;
 
 function setPreset(preset) {
@@ -504,6 +507,16 @@ function setPreset(preset) {
     
     if (preset === '1day') {
         start = today;
+    } else if (preset === 'current_week') {
+        const day = today.getDay();
+        const distanceToMonday = day === 0 ? 6 : day - 1;
+        start = new Date(today);
+        start.setDate(today.getDate() - distanceToMonday);
+        end = new Date(today);
+        end.setDate(today.getDate() - 1);
+        if (end < start) {
+            end = new Date(start);
+        }
     } else if (preset === '7day') {
         start = new Date();
         start.setDate(today.getDate() - 6);
@@ -866,6 +879,9 @@ function downloadTeacherPDF() {
 
         sections += `<div class="tb">
             <div class="tt">${tr.name}
+                <div style="font-weight:normal;font-size:12px;color:#6c757d;margin-top:4px;">
+                    ${isUr ? 'اسباق / کتب' : 'المقررات / الكتب'}: <b>${tr.books_list}</b>
+                </div>
                 <span style="font-weight:normal;font-size:12px;margin-right:12px">
                     ${isUr ? 'مطلوب' : 'مطلوب'}: <b>${tr.required}</b>
                     &nbsp;|&nbsp; ${isUr ? 'لیے گئے' : 'منجز'}: <b>${tr.taken}</b>

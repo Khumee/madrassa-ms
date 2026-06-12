@@ -129,6 +129,10 @@ exports.showReports = async (req, res) => {
         // Get the list of all teachers to construct reports
         const [teachers] = await db.execute(`
             SELECT t.*,
+            (SELECT GROUP_CONCAT(b.title SEPARATOR ' / ') 
+             FROM teacher_books tb 
+             JOIN books b ON tb.book_id = b.id 
+             WHERE tb.teacher_id = t.id AND tb.class_id IN (4, 10, 12, 16) AND tb.session_id = (SELECT id FROM sessions WHERE is_active = TRUE)) as books_list,
             (SELECT COUNT(*) FROM periods WHERE teacher_id = t.id AND class_id IN (4, 10, 12, 16)) as period_count,
             (SELECT COUNT(*) FROM teacher_books WHERE teacher_id = t.id AND class_id IN (4, 10, 12, 16) AND session_id = (SELECT id FROM sessions WHERE is_active = TRUE)) as book_count
             FROM teachers t
@@ -182,6 +186,7 @@ exports.showReports = async (req, res) => {
             return {
                 id: t.id,
                 name: t.name,
+                books_list: t.books_list || '—',
                 required,
                 taken,
                 difference,

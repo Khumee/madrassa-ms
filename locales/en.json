@@ -111,6 +111,8 @@
   "Preset_7Day": "7 Days",
   "Preset_1Month": "Current Month",
   "Preset_6Month": "6 Months",
+  "Preset_CurrentWeek": "Current Week",
+  "Book": "Book",
   "Teacher_Period_Report_Header": "Teachers Attendance & Periods Report",
   "Teacher_Period_Report_Sub": "Comparison of periods taken and makeup classes against required periods",
   "Required_Periods": "Required Periods",
