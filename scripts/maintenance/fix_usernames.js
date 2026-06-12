@@ -1,5 +1,5 @@
 require('dotenv').config();
-const db = require('./db');
+const db = require('../../db');
 
 async function fix() {
     console.log('Updating usernames to actual names (skipping titles)...');

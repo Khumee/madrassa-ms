@@ -1,5 +1,5 @@
 require('dotenv').config();
-const db = require('./db');
+const db = require('../../db');
 
 async function link() {
     const [s] = await db.execute('SELECT id FROM users WHERE username="Student1"');

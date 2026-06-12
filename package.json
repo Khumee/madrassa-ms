@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npm run migrate && npm run seed && node -e \"if(process.platform==='win32') require('child_process').execSync('start http://localhost:3000')\" && node server.js",
+    "start": "npm run migrate && node -e \"if(process.platform==='win32') require('child_process').execSync('start http://localhost:3000')\" && node server.js",
     "migrate": "node migrate.js",
-    "seed": "node seed.js && node migrate_users.js && node fix_roles.js && node migrate_roles_final.js && node fix_usernames.js && node fix_nazims.js && node map_teacher_books.js && node fix_saf_mapping.js && node update_mudeer_pass.js",
+    "seed": "node scripts/maintenance/seed.js && node scripts/maintenance/migrate_users.js && node scripts/maintenance/fix_roles.js && node scripts/maintenance/migrate_roles_final.js && node scripts/maintenance/fix_usernames.js && node scripts/maintenance/fix_nazims.js && node scripts/maintenance/map_teacher_books.js && node scripts/maintenance/fix_saf_mapping.js && node scripts/maintenance/update_mudeer_pass.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

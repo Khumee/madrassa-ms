@@ -1,4 +1,4 @@
-const db = require('./db');
+const db = require('../db');
 async function check() {
     try {
         const [users] = await db.execute('SELECT id, username, role FROM users WHERE role = ?', ['ناظم']);

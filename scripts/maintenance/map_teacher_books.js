@@ -1,5 +1,5 @@
 require('dotenv').config();
-const db = require('./db');
+const db = require('../../db');
 
 async function map() {
     console.log('Mapping teachers to books based on subject field...');

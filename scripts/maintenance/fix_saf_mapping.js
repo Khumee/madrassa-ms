@@ -1,5 +1,5 @@
 require('dotenv').config();
-const db = require('./db');
+const db = require('../../db');
 
 async function fixSaf() {
     console.log('Mapping books to Saf (Classes) based on Timetable...');

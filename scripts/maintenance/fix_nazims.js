@@ -1,5 +1,5 @@
 require('dotenv').config();
-const db = require('./db');
+const db = require('../../db');
 
 async function fix() {
     console.log('Promoting teachers to Nazim and correcting names...');
