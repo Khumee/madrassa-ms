@@ -2,6 +2,18 @@
 
 This plan outlines the steps to clean, rename, and prepare the repository to be open-sourced under the MIT License.
 
+## Task Summary (Status Checklist)
+- [x] **Branding Rebrand**: Rename package to `madrassa-management-system` and update parameters.
+- [x] **Database Setup**: Set default fallback connection parameter to `madrassa_db`.
+- [x] **Clean Startup logic**: Move local-only modifications to git-ignored `private/kui_normalize.js`.
+- [x] **Arabic Translation Defaults**: Set fallback language locale to Arabic (`ar`) by default.
+- [x] **Database Scrubbing**: Clean historical migration files (`V2__Data.sql`) and remove private institution records.
+- [x] **Urdu Demo Seeder**: Build a full Urdu/Arabic seed script mapping realistic data and varied textbook slopes.
+- [x] **Urdu Role Logins**: Add logins for Mudeer (`مدیر`), Nazim (`ناظم`), Teacher (`استاذ`), Areef (`عریف`), and Student (`طالب`) with password `1234`.
+- [x] **Docker Support**: Setup `Dockerfile` and `docker-compose.yml` configs.
+- [x] **Documentation & MIT License**: Add generic files (`README.md`, `DEPLOYMENT.md`, `CONTRIBUTING.md`, `LICENSE`).
+- [x] **Branch Publish**: Commit and push changes to the remote branch `open-source-transition`.
+
 ## User Review Required
 
 > [!IMPORTANT]
