@@ -12,7 +12,10 @@ This plan outlines the steps to clean, rename, and prepare the repository to be 
 - [x] **Urdu Role Logins**: Add logins for Mudeer (`مدیر`), Nazim (`ناظم`), Teacher (`استاذ`), Areef (`عریف`), and Student (`طالب`) with password `1234`.
 - [x] **Docker Support**: Setup `Dockerfile` and `docker-compose.yml` configs.
 - [x] **Documentation & MIT License**: Add generic files (`README.md`, `DEPLOYMENT.md`, `CONTRIBUTING.md`, `LICENSE`).
+- [x] **Marketing Points**: Document competitive value propositions for marketing.
+- [x] **Video Sequence Details**: Plan step-by-step features video guidelines.
 - [x] **Branch Publish**: Commit and push changes to the remote branch `open-source-transition`.
+
 
 ## User Review Required
 
