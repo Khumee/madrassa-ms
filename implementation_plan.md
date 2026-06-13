@@ -48,6 +48,8 @@ This plan outlines the steps to clean, rename, and prepare the repository to be 
 
 #### [NEW] [seed_demo_urdu.js](file:///d:/kui-ms/scripts/seed_demo_urdu.js)
 - Create a script that populates the database with generic Urdu names for students and teachers, mock timetable periods, mock classes, and mock book assignments to allow users to quickly test the interface with beautiful dummy Arabic/Urdu data.
+- **Urdu/Arabic Role Logins**: Configure Urdu/Arabic login accounts for all 5 roles (Mudeer: `مدیر`, Nazim: `ناظم`, Teacher: `استاذ`, Areef: `عریف`, Student: `طالب`) with digit password `1234` to facilitate demo video creation.
+- **Realistic Book Progress**: Ensure seeded books and progress slopes vary realistically in starting page and speed across different assignments.
 
 #### [NEW] [private/kui_normalize.js](file:///d:/kui-ms/private/kui_normalize.js)
 - Move the specific password reset, username correction, and role normalizations into this script inside the git-ignored `private/` folder. This preserves your ability to run these operations on your local database when needed without running them on boot or pushing them to GitHub.
@@ -55,6 +57,13 @@ This plan outlines the steps to clean, rename, and prepare the repository to be 
 #### [MODIFY] [scripts/maintenance/seed.js](file:///d:/kui-ms/scripts/maintenance/seed.js)
 - Move to `scripts/seed.js` and make it the main generic seed script to set up the default admin user.
 - Remove other institutional maintenance scripts (`scripts/maintenance/migrate_users.js`, `fix_roles.js`, etc.) and import scripts under `scripts/imports/`.
+
+---
+
+### Localization and Default Settings
+
+#### [MODIFY] [server.js](file:///d:/kui-ms/server.js)
+- Default the i18n system to Arabic (`ar`) as the standard language so the demo renders in Arabic by default unless otherwise switched.
 
 ---
 
@@ -103,3 +112,5 @@ This plan outlines the steps to clean, rename, and prepare the repository to be 
 
 ### Manual Verification
 - Review file contents to ensure no institutional names, private keys, or passwords remain.
+- Log in to all 5 roles (`مدیر`, `ناظم`, `استاذ`, `عریف`, `طالب`) with password `1234` to verify language sensitivity and dashboards.
+
