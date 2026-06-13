@@ -126,3 +126,28 @@ This plan outlines the steps to clean, rename, and prepare the repository to be 
 - Review file contents to ensure no institutional names, private keys, or passwords remain.
 - Log in to all 5 roles (`مدیر`, `ناظم`, `استاذ`, `عریف`, `طالب`) with password `1234` to verify language sensitivity and dashboards.
 
+---
+
+## Marketing & Video Demonstration Points
+
+### 1. Key Marketing Points (Value Proposition)
+When presenting the Madrassa Management System (MMS) in your video or marketing materials, highlight these competitive advantages:
+* **Arabic & Urdu Native Interface**: Fully localized and language-sensitive, built from the ground up for Islamic educational institutions.
+* **Dual-Role Class Rep (Areef) Dashboard**: A unique operational feature where a trusted student (Areef) handles daily operations (attendance, book tracking), removing the administrative burden from teachers.
+* **Timetable-Integrated Attendance**: Student and teacher attendance are linked directly to daily scheduled classes, making period-by-period reporting extremely accurate.
+* **Curriculum Progress Tracking**: Interactive page-by-page progress indicators and visualization charts showing current syllabus coverage versus total syllabus goals.
+* **Mobile Companion Compatibility**: Standard WebView design that transforms the web dashboard into an Android/iOS mobile application with native app-version checks.
+
+### 2. Video Demonstration Sequence & Highlights
+Follow this sequence to create a compelling features video:
+1. **Opening / Branding (0:00 - 0:15)**: Show the clean login screen in Arabic. Highlight the translation switcher (Arabic/Urdu/English).
+2. **Director (Mudeer) View (0:15 - 0:45)**: Log in as `مدیر`. Point out the overall metrics: total active classes, registered students, and school-wide status.
+3. **Supervisor (Nazim) View (0:45 - 1:15)**: Log in as `ناظم`. Show how they can view and export unified timetables and review overall progress reports.
+4. **Teacher (Ustadh) View (1:15 - 1:45)**: Log in as `استاذ`. Show the simplified dashboard focusing on today's teaching hours.
+5. **Class Rep (Areef) Day-to-Day (1:45 - 2:30)**: Log in as `عریف`. Show them completing three daily tasks:
+   * Marking classmate attendance.
+   * Marking teacher presence/absence for their periods.
+   * Modifying textbook progress page using the interactive `+`/`-` stepper and expanding the history line charts.
+6. **Student (Talib) View (2:30 - 3:00)**: Log in as `طالب`. Show their personalized dashboard featuring attendance percentages, streak indicators, and their progress on assigned books.
+
+
