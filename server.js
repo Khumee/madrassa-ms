@@ -55,7 +55,7 @@ app.use(session({
 i18n.configure({
     locales: ['ar', 'ur', 'en'],
     directory: path.join(__dirname, 'locales'),
-    defaultLocale: 'ur',
+    defaultLocale: 'ar',
     cookie: 'lang',
     updateFiles: false
 });
@@ -64,8 +64,8 @@ app.use((req, res, next) => {
     if (req.session.lang && ['ar', 'ur', 'en'].includes(req.session.lang)) {
         req.setLocale(req.session.lang);
     } else {
-        req.session.lang = 'ur';
-        req.setLocale('ur');
+        req.session.lang = 'ar';
+        req.setLocale('ar');
     }
     res.locals.lang = req.getLocale();
     res.locals.__ = res.__;
@@ -183,82 +183,9 @@ app.listen(PORT, async () => {
             console.log('✅ Default role permissions seeded.');
         }
 
-        // 1. Roles Normalization
-        await db.execute(`
-            UPDATE users 
-            SET role = 'عريف' 
-            WHERE role IN ('مسؤول_الصف', 'مسؤول الصف', 'عریب', 'عريب', 'عریف')
-        `);
-        await db.execute(`
-            DELETE FROM role_permissions 
-            WHERE role = 'عریب' 
-              AND function_name IN (
-                  SELECT function_name FROM (
-                      SELECT function_name FROM role_permissions WHERE role = 'عريب'
-                  ) as tmp
-              )
-        `);
-        await db.execute(`
-            DELETE FROM role_permissions 
-            WHERE role IN ('عریب', 'عريب', 'عریف')
-              AND function_name IN (
-                  SELECT function_name FROM (
-                      SELECT function_name FROM role_permissions WHERE role = 'عريف'
-                  ) as tmp
-              )
-        `);
-        await db.execute(`
-            UPDATE role_permissions 
-            SET role = 'عريف' 
-            WHERE role IN ('عریب', 'عريب', 'عریف')
-        `);
-        await db.execute(`
-            UPDATE users 
-            SET role = 'طالب' 
-            WHERE role IN ('طالب_علم')
-        `);
-        
-        // Force critical permissions for Areef (عريف) to be allowed on every startup
-        const criticalAreefPerms = ['student_attendance', 'teacher_attendance'];
-        for (const func of criticalAreefPerms) {
-            await db.execute(
-                `INSERT INTO role_permissions (role, function_name, allowed) 
-                 VALUES ('عريف', ?, 1) 
-                 ON DUPLICATE KEY UPDATE allowed = 1`,
-                [func]
-            );
-            await db.execute(
-                `INSERT INTO role_permissions (role, function_name, allowed) 
-                 VALUES ('عریف', ?, 1) 
-                 ON DUPLICATE KEY UPDATE allowed = 1`,
-                [func]
-            );
-        }
-        
-        // 2. Safe trailing '1' removal for all MySQL versions
-        await db.execute(`
-            UPDATE users 
-            SET username = SUBSTRING(username, 1, LENGTH(username) - 1) 
-            WHERE username LIKE '%1' AND role != 'مدير' AND username != 'مدیر'
-        `);
 
-        // 3. Reset passwords to '1234' for everyone except mudeer
-        const defaultHash = '$2b$10$/RPl6CLIP/jkSQXgvsNpNegmlz.Fdd0PX0xtsKZTrY9CtCEuFhWWW'; // Hash for '1234'
-        await db.execute(`
-            UPDATE users 
-            SET password = ? 
-            WHERE id != 2 AND username != 'مدير' AND username != 'مدیر'
-        `, [defaultHash]);
-
-        // 4. Alter day_of_week enum in periods table to include Sunday
-        await db.execute(`
-            ALTER TABLE periods 
-            MODIFY COLUMN day_of_week enum('Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday') 
-            CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
-        `);
-
-        console.log('✅ Startup database roles, usernames, passwords, and day_of_week ENUM normalization complete.');
+        console.log('✅ Startup database roles and permissions check complete.');
     } catch (err) {
-        console.error('❌ Failed to run startup DB normalization:', err);
+        console.error('❌ Failed to run startup DB checks:', err);
     }
 });

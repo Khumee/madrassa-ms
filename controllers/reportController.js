@@ -28,7 +28,7 @@ exports.showReports = async (req, res) => {
             JOIN classes c ON se.class_id = c.id
             LEFT JOIN attendance_students a ON s.id = a.student_id 
                 AND a.date BETWEEN ? AND ?
-            WHERE se.session_id = ? AND se.class_id IN (4, 10, 12, 16)
+            WHERE se.session_id = ?
             GROUP BY s.id, c.id, s.name, c.name_ar
         `, [startDate, endDate, activeSessionId]);
 
@@ -49,7 +49,7 @@ exports.showReports = async (req, res) => {
             JOIN books b ON tb.book_id = b.id
             JOIN sessions s ON tb.session_id = s.id
             LEFT JOIN classes c ON tb.class_id = c.id
-            WHERE s.is_active = TRUE AND tb.class_id IN (4, 10, 12, 16)
+            WHERE s.is_active = TRUE
         `);
 
         const luxonLocale = req.getLocale() === 'ur' ? 'ur' : req.getLocale() === 'en' ? 'en' : 'ar';
@@ -91,7 +91,6 @@ exports.showReports = async (req, res) => {
         const [teacherPeriods] = await db.execute(`
             SELECT teacher_id, day_of_week, COUNT(*) as p_count
             FROM periods
-            WHERE class_id IN (4, 10, 12, 16)
             GROUP BY teacher_id, day_of_week
         `);
 
@@ -122,7 +121,6 @@ exports.showReports = async (req, res) => {
             SELECT p.teacher_id, p.class_id, c.name_ar AS class_name, p.day_of_week, COUNT(*) AS p_count
             FROM periods p
             JOIN classes c ON c.id = p.class_id
-            WHERE p.class_id IN (4, 10, 12, 16)
             GROUP BY p.teacher_id, p.class_id, c.name_ar, p.day_of_week
         `);
 
@@ -132,11 +130,11 @@ exports.showReports = async (req, res) => {
             (SELECT GROUP_CONCAT(b.title SEPARATOR ' / ') 
              FROM teacher_books tb 
              JOIN books b ON tb.book_id = b.id 
-             WHERE tb.teacher_id = t.id AND tb.class_id IN (4, 10, 12, 16) AND tb.session_id = (SELECT id FROM sessions WHERE is_active = TRUE)) as books_list,
-            (SELECT COUNT(*) FROM periods WHERE teacher_id = t.id AND class_id IN (4, 10, 12, 16)) as period_count,
-            (SELECT COUNT(*) FROM teacher_books WHERE teacher_id = t.id AND class_id IN (4, 10, 12, 16) AND session_id = (SELECT id FROM sessions WHERE is_active = TRUE)) as book_count
+             WHERE tb.teacher_id = t.id AND tb.session_id = (SELECT id FROM sessions WHERE is_active = TRUE)) as books_list,
+            (SELECT COUNT(*) FROM periods WHERE teacher_id = t.id) as period_count,
+            (SELECT COUNT(*) FROM teacher_books WHERE teacher_id = t.id AND session_id = (SELECT id FROM sessions WHERE is_active = TRUE)) as book_count
             FROM teachers t
-            WHERE t.id IN (SELECT DISTINCT teacher_id FROM teacher_books WHERE class_id IN (4, 10, 12, 16))
+            WHERE t.id IN (SELECT DISTINCT teacher_id FROM teacher_books)
         `);
 
         const teachersReport = teachers.map(t => {
@@ -227,10 +225,9 @@ exports.showBooksManage = async (req, res) => {
             SELECT b.*, c.name_ar as class_name 
             FROM books b 
             LEFT JOIN classes c ON b.class_id = c.id 
-            WHERE b.class_id IN (4, 10, 12, 16) OR b.class_id IS NULL
             ORDER BY b.title
         `);
-        const [classes] = await db.execute('SELECT * FROM classes WHERE id IN (4, 10, 12, 16) ORDER BY name_ar ASC');
+        const [classes] = await db.execute('SELECT * FROM classes ORDER BY name_ar ASC');
         res.render('books_manage', { books, classes });
     } catch (err) {
         console.error(err);

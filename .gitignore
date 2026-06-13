@@ -27,3 +27,7 @@ Thumbs.db
 
 # Database (if any local sqlite)
 *.sqlite
+
+# Institutional/Private directory
+private/
+

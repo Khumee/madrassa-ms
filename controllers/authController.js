@@ -4,7 +4,7 @@ const { DateTime } = require('luxon');
 
 exports.showLogin = (req, res) => {
     const userAgent = req.headers['user-agent'] || '';
-    const isMobileApp = userAgent.includes('KuiMobile');
+    const isMobileApp = userAgent.includes('KuiMobile') || userAgent.includes('MmsMobile');
     res.render('login', { error: null, isMobileApp });
 };
 
@@ -68,12 +68,12 @@ exports.login = async (req, res) => {
             }
         }
         const userAgent = req.headers['user-agent'] || '';
-        const isMobileApp = userAgent.includes('KuiMobile');
+        const isMobileApp = userAgent.includes('KuiMobile') || userAgent.includes('MmsMobile');
         res.render('login', { error: req.__('Invalid_Credentials'), isMobileApp });
     } catch (err) {
         console.error(err);
         const userAgent = req.headers['user-agent'] || '';
-        const isMobileApp = userAgent.includes('KuiMobile');
+        const isMobileApp = userAgent.includes('KuiMobile') || userAgent.includes('MmsMobile');
         res.render('login', { error: req.__('Internal_Server_Error'), isMobileApp });
     }
 };
@@ -115,7 +115,7 @@ exports.showDashboard = async (req, res) => {
         } else if (role === 'أستاذ') {
             return res.redirect('/dashboard/teacher');
         } else if (role === 'ناظم' || role === 'مدير') {
-            const [classes] = await db.execute('SELECT * FROM classes WHERE id IN (4, 10, 12, 16)');
+            const [classes] = await db.execute('SELECT * FROM classes ORDER BY id ASC');
             const today = DateTime.now().setLocale('ar').toFormat('cccc, dd MMMM yyyy');
             return res.render('dashboard', { classes, today, role });
         }

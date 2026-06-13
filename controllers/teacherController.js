@@ -143,13 +143,12 @@ exports.showWeeklyAttendance = async (req, res) => {
 
     try {
         // Fetch all teachers sorted by name
-        const [teachers] = await db.execute('SELECT * FROM teachers WHERE id IN (SELECT DISTINCT teacher_id FROM periods WHERE class_id IN (4, 10, 12, 16)) ORDER BY name');
+        const [teachers] = await db.execute('SELECT * FROM teachers WHERE id IN (SELECT DISTINCT teacher_id FROM periods) ORDER BY name');
 
         // Fetch all periods count per teacher & day_of_week
         const [periodsCount] = await db.execute(`
             SELECT teacher_id, day_of_week, COUNT(*) as count 
             FROM periods 
-            WHERE class_id IN (4, 10, 12, 16)
             GROUP BY teacher_id, day_of_week
         `);
 
@@ -255,13 +254,12 @@ exports.showAssignmentsManage = async (req, res) => {
             JOIN books b ON tb.book_id = b.id
             JOIN sessions s ON tb.session_id = s.id
             LEFT JOIN classes c ON tb.class_id = c.id
-            WHERE tb.class_id IN (4, 10, 12, 16)
             ORDER BY s.name DESC, t.name
         `);
         const [teachers] = await db.execute('SELECT id, name FROM teachers ORDER BY name');
         const [books] = await db.execute('SELECT id, title FROM books ORDER BY title');
         const [sessions] = await db.execute('SELECT id, name, is_active FROM sessions ORDER BY name DESC');
-        const [classes] = await db.execute('SELECT id, name_ar as name FROM classes WHERE id IN (4, 10, 12, 16) ORDER BY name_ar ASC');
+        const [classes] = await db.execute('SELECT id, name_ar as name FROM classes ORDER BY name_ar ASC');
         res.render('teacher_books_manage', { assignments, teachers, books, sessions, classes });
     } catch (err) {
         console.error(err);

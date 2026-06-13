@@ -414,7 +414,7 @@ exports.showCRDashboard = async (req, res) => {
 
 exports.showStudentsManage = async (req, res) => {
     try {
-        let studentsQuery = 'SELECT s.*, c.name_ar as class_name FROM students s JOIN classes c ON s.class_id = c.id WHERE s.class_id IN (4, 10, 12, 16)';
+        let studentsQuery = 'SELECT s.*, c.name_ar as class_name FROM students s JOIN classes c ON s.class_id = c.id';
         let queryParams = [];
         let crClassId = null;
 
@@ -429,7 +429,7 @@ exports.showStudentsManage = async (req, res) => {
 
         const [students] = await db.execute(studentsQuery, queryParams);
 
-        let classesQuery = 'SELECT * FROM classes WHERE id IN (4, 10, 12, 16)';
+        let classesQuery = 'SELECT * FROM classes';
         let classParams = [];
         if (crClassId) {
             classesQuery = 'SELECT * FROM classes WHERE id = ?';
@@ -445,7 +445,7 @@ exports.showStudentsManage = async (req, res) => {
 };
 
 exports.showStudentsAdd = async (req, res) => {
-    let classesQuery = 'SELECT * FROM classes WHERE id IN (4, 10, 12, 16)';
+    let classesQuery = 'SELECT * FROM classes';
     let params = [];
     if (['عريف', 'عریف'].includes(req.session.role)) {
         const crClassId = await getCRClassId(req.session.userId);

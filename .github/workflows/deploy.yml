@@ -16,7 +16,7 @@ jobs:
     - name: Deploy via SSH
       uses: appleboy/ssh-action@v1.2.0
       with:
-        host: 185.217.127.114
+        host: ${{ secrets.SERVER_HOST }}
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
@@ -24,15 +24,15 @@ jobs:
         script: |
           # Ensure target directory exists
           # Ensure target directory is a valid git repo
-          if [ ! -d "/var/www/kui-ms/.git" ]; then
+          if [ ! -d "/var/www/mms/.git" ]; then
             echo "Directory is not a valid git repo. Performing fresh clone..."
-            sudo rm -rf /var/www/kui-ms
-            sudo mkdir -p /var/www/kui-ms
-            sudo chown -R ${{ secrets.SERVER_USER }}:${{ secrets.SERVER_USER }} /var/www/kui-ms
-            git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git /var/www/kui-ms
+            sudo rm -rf /var/www/mms
+            sudo mkdir -p /var/www/mms
+            sudo chown -R ${{ secrets.SERVER_USER }}:${{ secrets.SERVER_USER }} /var/www/mms
+            git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git /var/www/mms
           fi
           
-          cd /var/www/kui-ms
+          cd /var/www/mms
           # Update the remote URL to ensure the token is current
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
           
@@ -56,5 +56,5 @@ jobs:
           npm run migrate
           
           # This will start the app if it's new, or restart it if it already exists
-          pm2 start server.js --name "kui-ms" || pm2 restart "kui-ms"
+          pm2 start server.js --name "mms" || pm2 restart "mms"
           pm2 save

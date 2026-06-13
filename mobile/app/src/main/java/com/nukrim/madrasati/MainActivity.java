@@ -11,9 +11,9 @@ public class MainActivity extends AppCompatActivity {
 
     private WebView webView;
     private SwipeRefreshLayout swipeRefreshLayout;
-    // Updated production URL
-    private static final String APP_URL = "https://kui.nukrim.com";
-    private static final String UPDATE_URL = "https://kui.nukrim.com/mobile";
+    // Replace with your Madrassa Management System production URL
+    private static final String APP_URL = "https://your-madrassa-domain.com";
+    private static final String UPDATE_URL = "https://your-madrassa-domain.com/mobile";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Append custom User-Agent for server detection
         String defaultUA = webSettings.getUserAgentString();
-        webSettings.setUserAgentString(defaultUA + " KuiMobile/" + BuildConfig.VERSION_NAME);
+        webSettings.setUserAgentString(defaultUA + " MmsMobile/" + BuildConfig.VERSION_NAME);
 
         // Check for updates asynchronously
         new Thread(() -> {

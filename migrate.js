@@ -12,7 +12,7 @@ async function migrate() {
         user: process.env.DB_USER,
         password: process.env.DB_PASSWORD
     });
-    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${process.env.DB_NAME || 'kui'}\``);
+    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${process.env.DB_NAME || 'madrassa_db'}\``);
     await connection.end();
 
     const db = require('./db');

@@ -1,7 +1,7 @@
 -- Madrasa Attendance System Schema
 
-CREATE DATABASE IF NOT EXISTS kui;
-USE kui;
+CREATE DATABASE IF NOT EXISTS madrassa_db;
+USE madrassa_db;
 
 -- Users table for authentication
 CREATE TABLE IF NOT EXISTS users (
@@ -70,15 +70,7 @@ INSERT INTO classes (name_ar, name_en) VALUES
 ('السابعة', 'Sabiya'),
 ('دورة حديث', 'Daura Hadith');
 
--- Insert initial teachers
+-- Insert initial teachers (Generic Placeholders)
 INSERT INTO teachers (name, subject) VALUES 
-('مفتی مشرف بیگ اشرف', 'اللغة الفارسية / التوضيح'),
-('مولانا حبيب محبوب', 'التجويد والسيرة / الهداية'),
-('مولانا کمال', 'تفسير / الأدب'),
-('مولانا حسن', 'الصرف / أصول الفقه'),
-('مولانا عبد القادر عثمان', 'النحو / القدوري / النسائي'),
-('مفتی فرحان انور', 'المنطق / شرح العقائد / البخاري'),
-('مولانا حمزه', 'الهداية / الترمذي'),
-('مولانا قمر اعجاز', 'التوضيح / الترمذي'),
-('مولانا بارون خليل', 'علم الصيغة / سنن أبي داود'),
-('مولانا قمر علی شاہ', 'شمائل الترمذي');
+('أستاذ أول', 'مادة 1'),
+('أستاذ ثان', 'مادة 2');
