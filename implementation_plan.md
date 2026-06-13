@@ -14,6 +14,7 @@ This plan outlines the steps to clean, rename, and prepare the repository to be 
 - [x] **Documentation & MIT License**: Add generic files (`README.md`, `DEPLOYMENT.md`, `CONTRIBUTING.md`, `LICENSE`).
 - [x] **Marketing Points**: Document competitive value propositions for marketing.
 - [x] **Video Sequence Details**: Plan step-by-step features video guidelines.
+- [x] **Launch & Community Strategy**: Outline GitHub tags, live demo steps, and forum launching.
 - [x] **Branch Publish**: Commit and push changes to the remote branch `open-source-transition`.
 
 
@@ -152,5 +153,15 @@ Follow this sequence to create a compelling features video:
    * Marking teacher presence/absence for their periods.
    * Modifying textbook progress page using the interactive `+`/`-` stepper and expanding the history line charts.
 6. **Student (Talib) View (2:30 - 3:00)**: Log in as `طالب`. Show their personalized dashboard featuring attendance percentages, streak indicators, and their progress on assigned books.
+
+### 3. Open Source Launch & Community Strategy
+To attract initial users and developers to the Madrassa Management System:
+* **GitHub Repository Topics (Tags)**: Once public, add these tags to the repository: `madrassa`, `islamic-school`, `school-management`, `attendance-system`, `arabic-rtl`, `self-hosted`, `opensource`.
+* **Live Demo Environment**: Deploy a generic read-only demo instance using the seeded Urdu/Arabic data (instructions in [DEPLOYMENT.md](file:///d:/kui-ms/DEPLOYMENT.md)) so people can test the interface before downloading.
+* **Community Outreach**:
+  * **Reddit**: Share your launch on r/selfhosted, r/opensource, and r/islam (targeting school administrators).
+  * **Hacker News**: Post a "Show HN" text post describing the origin story.
+  * **Launch Pitch**: Explain the "why" clearly—existing school management systems are complex, lack proper Arabic/RTL localization, and are not mobile-friendly for teachers.
+
 
 
