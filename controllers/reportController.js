@@ -15,7 +15,7 @@ exports.showReports = async (req, res) => {
         const filterType = req.query.filterType || null;
 
         // Get active session ID to scope report
-        const [sessionRows] = await db.execute('SELECT id FROM sessions WHERE is_active = TRUE LIMIT 1');
+        const [sessionRows] = await db.execute('SELECT id FROM sessions WHERE is_active = TRUE AND tenant_id = ? LIMIT 1', [req.tenant.id]);
         const activeSessionId = sessionRows.length > 0 ? sessionRows[0].id : null;
 
         // Fetch student attendance filtered by the selected date range and session
@@ -24,13 +24,13 @@ exports.showReports = async (req, res) => {
             COUNT(a.id) as total_days,
             SUM(CASE WHEN a.status = 'present' OR a.status = 'online' THEN 1 ELSE 0 END) as present_days
             FROM students s
-            JOIN student_enrollments se ON s.id = se.student_id
-            JOIN classes c ON se.class_id = c.id
-            LEFT JOIN attendance_students a ON s.id = a.student_id 
+            JOIN student_enrollments se ON s.id = se.student_id AND se.tenant_id = s.tenant_id
+            JOIN classes c ON se.class_id = c.id AND c.tenant_id = s.tenant_id
+            LEFT JOIN attendance_students a ON s.id = a.student_id AND a.tenant_id = s.tenant_id
                 AND a.date BETWEEN ? AND ?
-            WHERE se.session_id = ?
+            WHERE se.session_id = ? AND s.tenant_id = ?
             GROUP BY s.id, c.id, s.name, c.name_ar
-        `, [startDate, endDate, activeSessionId]);
+        `, [startDate, endDate, activeSessionId, req.tenant.id]);
 
         const groupedReport = {};
         rows.forEach(row => {
@@ -42,15 +42,15 @@ exports.showReports = async (req, res) => {
         // Get Teacher Book Progress for active session
         const [teacherProgress] = await db.execute(`
             SELECT tb.id as assignment_id, t.id as teacher_id, t.name as teacher_name, b.title as book_title, tb.start_page, tb.end_page, tb.current_page, c.name_ar as class_name,
-            (SELECT bp.updated_at FROM book_progress bp WHERE bp.assignment_id = tb.id ORDER BY bp.id DESC LIMIT 1) as last_updated_at,
-            (SELECT bp.page_number FROM book_progress bp WHERE bp.assignment_id = tb.id ORDER BY bp.id DESC LIMIT 1) as last_page_number
+            (SELECT bp.updated_at FROM book_progress bp WHERE bp.assignment_id = tb.id AND bp.tenant_id = tb.tenant_id ORDER BY bp.id DESC LIMIT 1) as last_updated_at,
+            (SELECT bp.page_number FROM book_progress bp WHERE bp.assignment_id = tb.id AND bp.tenant_id = tb.tenant_id ORDER BY bp.id DESC LIMIT 1) as last_page_number
             FROM teacher_books tb
-            JOIN teachers t ON tb.teacher_id = t.id
-            JOIN books b ON tb.book_id = b.id
-            JOIN sessions s ON tb.session_id = s.id
-            LEFT JOIN classes c ON tb.class_id = c.id
-            WHERE s.is_active = TRUE
-        `);
+            JOIN teachers t ON tb.teacher_id = t.id AND t.tenant_id = tb.tenant_id
+            JOIN books b ON tb.book_id = b.id AND b.tenant_id = tb.tenant_id
+            JOIN sessions s ON tb.session_id = s.id AND s.tenant_id = tb.tenant_id
+            LEFT JOIN classes c ON tb.class_id = c.id AND c.tenant_id = tb.tenant_id
+            WHERE s.is_active = TRUE AND tb.tenant_id = ?
+        `, [req.tenant.id]);
 
         const luxonLocale = req.getLocale() === 'ur' ? 'ur' : req.getLocale() === 'en' ? 'en' : 'ar';
         teacherProgress.forEach(tp => {
@@ -91,16 +91,17 @@ exports.showReports = async (req, res) => {
         const [teacherPeriods] = await db.execute(`
             SELECT teacher_id, day_of_week, COUNT(*) as p_count
             FROM periods
+            WHERE tenant_id = ?
             GROUP BY teacher_id, day_of_week
-        `);
+        `, [req.tenant.id]);
 
         // Fetch sum of classes_taken in attendance_teachers for the period
         const [teacherAttendance] = await db.execute(`
             SELECT teacher_id, SUM(classes_taken) as taken_count
             FROM attendance_teachers
-            WHERE date BETWEEN ? AND ?
+            WHERE date BETWEEN ? AND ? AND tenant_id = ?
             GROUP BY teacher_id
-        `, [startDate, endDate]);
+        `, [startDate, endDate, req.tenant.id]);
 
         // Fetch per-day per-class detail for the collapsible breakdown rows
         const [teacherDetailRows] = await db.execute(`
@@ -111,31 +112,32 @@ exports.showReports = async (req, res) => {
                    c.name_ar                         AS class_name,
                    at.classes_taken
             FROM attendance_teachers at
-            LEFT JOIN classes c ON c.id = at.class_id
-            WHERE at.date BETWEEN ? AND ?
+            LEFT JOIN classes c ON c.id = at.class_id AND c.tenant_id = at.tenant_id
+            WHERE at.date BETWEEN ? AND ? AND at.tenant_id = ?
             ORDER BY at.teacher_id, at.date, at.class_id
-        `, [startDate, endDate]);
+        `, [startDate, endDate, req.tenant.id]);
 
         // Scheduled periods per teacher per class per day_of_week (for detail) — include class name
         const [scheduledDetail] = await db.execute(`
             SELECT p.teacher_id, p.class_id, c.name_ar AS class_name, p.day_of_week, COUNT(*) AS p_count
             FROM periods p
-            JOIN classes c ON c.id = p.class_id
+            JOIN classes c ON c.id = p.class_id AND c.tenant_id = p.tenant_id
+            WHERE p.tenant_id = ?
             GROUP BY p.teacher_id, p.class_id, c.name_ar, p.day_of_week
-        `);
+        `, [req.tenant.id]);
 
         // Get the list of all teachers to construct reports
         const [teachers] = await db.execute(`
             SELECT t.*,
             (SELECT GROUP_CONCAT(b.title SEPARATOR ' / ') 
              FROM teacher_books tb 
-             JOIN books b ON tb.book_id = b.id 
-             WHERE tb.teacher_id = t.id AND tb.session_id = (SELECT id FROM sessions WHERE is_active = TRUE)) as books_list,
-            (SELECT COUNT(*) FROM periods WHERE teacher_id = t.id) as period_count,
-            (SELECT COUNT(*) FROM teacher_books WHERE teacher_id = t.id AND session_id = (SELECT id FROM sessions WHERE is_active = TRUE)) as book_count
+             JOIN books b ON tb.book_id = b.id AND b.tenant_id = tb.tenant_id
+             WHERE tb.teacher_id = t.id AND tb.session_id = (SELECT id FROM sessions WHERE is_active = TRUE AND tenant_id = t.tenant_id) AND tb.tenant_id = t.tenant_id) as books_list,
+            (SELECT COUNT(*) FROM periods WHERE teacher_id = t.id AND tenant_id = t.tenant_id) as period_count,
+            (SELECT COUNT(*) FROM teacher_books WHERE teacher_id = t.id AND session_id = (SELECT id FROM sessions WHERE is_active = TRUE AND tenant_id = t.tenant_id) AND tenant_id = t.tenant_id) as book_count
             FROM teachers t
-            WHERE t.id IN (SELECT DISTINCT teacher_id FROM teacher_books)
-        `);
+            WHERE t.id IN (SELECT DISTINCT teacher_id FROM teacher_books WHERE tenant_id = t.tenant_id) AND t.tenant_id = ?
+        `, [req.tenant.id]);
 
         const teachersReport = teachers.map(t => {
             const scheduled = teacherPeriods.filter(tp => tp.teacher_id === t.id);
@@ -202,15 +204,15 @@ exports.showReports = async (req, res) => {
 exports.showTeacherProgressReport = async (req, res) => {
     const { teacherId } = req.params;
     try {
-        const [teacher] = await db.execute('SELECT * FROM teachers WHERE id = ?', [teacherId]);
+        const [teacher] = await db.execute('SELECT * FROM teachers WHERE id = ? AND tenant_id = ?', [teacherId, req.tenant.id]);
         const [progress] = await db.execute(
             `SELECT bp.*, b.title as book_title, tb.start_page, tb.end_page 
              FROM book_progress bp 
-             JOIN teacher_books tb ON bp.assignment_id = tb.id
-             JOIN books b ON tb.book_id = b.id 
-             WHERE tb.teacher_id = ? 
+             JOIN teacher_books tb ON bp.assignment_id = tb.id AND tb.tenant_id = bp.tenant_id
+             JOIN books b ON tb.book_id = b.id AND b.tenant_id = bp.tenant_id
+             WHERE tb.teacher_id = ? AND bp.tenant_id = ?
              ORDER BY bp.date ASC`,
-            [teacherId]
+            [teacherId, req.tenant.id]
         );
         res.render('report_teacher_progress', { teacher: teacher[0], progress });
     } catch (err) {
@@ -224,10 +226,11 @@ exports.showBooksManage = async (req, res) => {
         const [books] = await db.execute(`
             SELECT b.*, c.name_ar as class_name 
             FROM books b 
-            LEFT JOIN classes c ON b.class_id = c.id 
+            LEFT JOIN classes c ON b.class_id = c.id AND c.tenant_id = b.tenant_id
+            WHERE b.tenant_id = ?
             ORDER BY b.title
-        `);
-        const [classes] = await db.execute('SELECT * FROM classes ORDER BY name_ar ASC');
+        `, [req.tenant.id]);
+        const [classes] = await db.execute('SELECT * FROM classes WHERE tenant_id = ? ORDER BY name_ar ASC', [req.tenant.id]);
         res.render('books_manage', { books, classes });
     } catch (err) {
         console.error(err);
@@ -238,7 +241,7 @@ exports.showBooksManage = async (req, res) => {
 exports.addBook = async (req, res) => {
     const { title, classId } = req.body;
     try {
-        await db.execute('INSERT INTO books (title, class_id) VALUES (?, ?)', [title, classId || null]);
+        await db.execute('INSERT INTO books (title, class_id, tenant_id) VALUES (?, ?, ?)', [title, classId || null, req.tenant.id]);
         res.redirect('/books/manage');
     } catch (err) {
         console.error(err);
@@ -251,28 +254,28 @@ exports.editBook = async (req, res) => {
     const { title, classId } = req.body;
     try {
         // 1. Retrieve the old title of the book before editing
-        const [oldBookRows] = await db.execute('SELECT title FROM books WHERE id = ?', [id]);
+        const [oldBookRows] = await db.execute('SELECT title FROM books WHERE id = ? AND tenant_id = ?', [id, req.tenant.id]);
         const oldTitle = oldBookRows.length > 0 ? oldBookRows[0].title : null;
 
         // 2. Perform the update on the books table
-        await db.execute('UPDATE books SET title = ?, class_id = ? WHERE id = ?', [title, classId || null, id]);
+        await db.execute('UPDATE books SET title = ?, class_id = ? WHERE id = ? AND tenant_id = ?', [title, classId || null, id, req.tenant.id]);
 
         // 3. Instantly synchronize all timetable periods matching this book or its old name
         if (oldTitle && oldTitle !== title) {
             // Sync periods linked via assignments
             await db.execute(`
                 UPDATE periods p
-                JOIN teacher_books tb ON p.assignment_id = tb.id
+                JOIN teacher_books tb ON p.assignment_id = tb.id AND tb.tenant_id = p.tenant_id
                 SET p.subject = ?
-                WHERE tb.book_id = ?
-            `, [title, id]);
+                WHERE tb.book_id = ? AND p.tenant_id = ?
+            `, [title, id, req.tenant.id]);
 
             // Sync static/unlinked periods that matched the old title exactly
             await db.execute(`
                 UPDATE periods
                 SET subject = ?
-                WHERE subject = ?
-            `, [title, oldTitle]);
+                WHERE subject = ? AND tenant_id = ?
+            `, [title, oldTitle, req.tenant.id]);
         }
 
         res.json({ success: true });
@@ -286,7 +289,7 @@ exports.deleteBook = async (req, res) => {
     const { id } = req.params;
     try {
         // Enforce integrity check: cannot remove a book if it is assigned to teacher
-        const [assignments] = await db.execute('SELECT COUNT(*) as count FROM teacher_books WHERE book_id = ?', [id]);
+        const [assignments] = await db.execute('SELECT COUNT(*) as count FROM teacher_books WHERE book_id = ? AND tenant_id = ?', [id, req.tenant.id]);
         if (assignments[0].count > 0) {
             return res.json({ 
                 success: false, 
@@ -294,7 +297,7 @@ exports.deleteBook = async (req, res) => {
             });
         }
 
-        await db.execute('DELETE FROM books WHERE id = ?', [id]);
+        await db.execute('DELETE FROM books WHERE id = ? AND tenant_id = ?', [id, req.tenant.id]);
         res.json({ success: true });
     } catch (err) {
         console.error(err);
@@ -310,10 +313,11 @@ exports.showUsersManage = async (req, res) => {
             u.role, u.created_at,
             s.roll_number as student_id, t.id_number as teacher_id
             FROM users u
-            LEFT JOIN students s ON u.id = s.user_id
-            LEFT JOIN teachers t ON u.id = t.user_id
+            LEFT JOIN students s ON u.id = s.user_id AND s.tenant_id = u.tenant_id
+            LEFT JOIN teachers t ON u.id = t.user_id AND t.tenant_id = u.tenant_id
+            WHERE u.tenant_id = ?
             ORDER BY u.role, u.username
-        `);
+        `, [req.tenant.id]);
         const normalizeRole = (role) => {
             if (!role) return '';
             let normalized = role.replace(/\u06CC/g, '\u064A').replace(/_/g, ' ').trim();
@@ -343,13 +347,13 @@ exports.updateUser = async (req, res) => {
     try {
         if (password && password.trim() !== '') {
             const hashed = await bcrypt.hash(password, 10);
-            await db.execute('UPDATE users SET username = ?, password = ?, role = ? WHERE id = ?', [username, hashed, role, userId]);
+            await db.execute('UPDATE users SET username = ?, password = ?, role = ? WHERE id = ? AND tenant_id = ?', [username, hashed, role, userId, req.tenant.id]);
         } else {
-            await db.execute('UPDATE users SET username = ?, role = ? WHERE id = ?', [username, role, userId]);
+            await db.execute('UPDATE users SET username = ?, role = ? WHERE id = ? AND tenant_id = ?', [username, role, userId, req.tenant.id]);
         }
 
-        await db.execute('UPDATE teachers SET name = ? WHERE user_id = ?', [fullName, userId]);
-        await db.execute('UPDATE students SET name = ? WHERE user_id = ?', [fullName, userId]);
+        await db.execute('UPDATE teachers SET name = ? WHERE user_id = ? AND tenant_id = ?', [fullName, userId, req.tenant.id]);
+        await db.execute('UPDATE students SET name = ? WHERE user_id = ? AND tenant_id = ?', [fullName, userId, req.tenant.id]);
 
         res.json({ success: true });
     } catch (err) {
@@ -361,7 +365,7 @@ exports.updateUser = async (req, res) => {
 exports.updateUserRole = async (req, res) => {
     const { userId, newRole } = req.body;
     try {
-        await db.execute('UPDATE users SET role = ? WHERE id = ?', [newRole, userId]);
+        await db.execute('UPDATE users SET role = ? WHERE id = ? AND tenant_id = ?', [newRole, userId, req.tenant.id]);
         res.json({ success: true });
     } catch (err) {
         console.error(err);
@@ -373,7 +377,7 @@ exports.resetPassword = async (req, res) => {
     const { userId } = req.body;
     try {
         const hashed = await bcrypt.hash('1234', 10);
-        await db.execute('UPDATE users SET password = ? WHERE id = ?', [hashed, userId]);
+        await db.execute('UPDATE users SET password = ? WHERE id = ? AND tenant_id = ?', [hashed, userId, req.tenant.id]);
         res.json({ success: true });
     } catch (err) {
         console.error(err);
@@ -384,18 +388,18 @@ exports.resetPassword = async (req, res) => {
 exports.adminImportData = async (req, res) => {
     try {
         console.log('Starting Complete Live Sync...');
-        const [sessions] = await db.execute('SELECT id FROM sessions WHERE is_active = TRUE LIMIT 1');
+        const [sessions] = await db.execute('SELECT id FROM sessions WHERE is_active = TRUE AND tenant_id = ? LIMIT 1', [req.tenant.id]);
         if (sessions.length === 0) return res.status(400).send('No active session found!');
         const sessionId = sessions[0].id;
 
-        await db.execute('DELETE FROM periods');
+        await db.execute('DELETE FROM periods WHERE tenant_id = ?', [req.tenant.id]);
 
-        const [zCheck] = await db.execute('SELECT id FROM teachers WHERE name LIKE ?', ['%زبیر%']);
+        const [zCheck] = await db.execute('SELECT id FROM teachers WHERE name LIKE ? AND tenant_id = ?', ['%زبیر%', req.tenant.id]);
         let zubairId = zCheck.length > 0 ? zCheck[0].id : null;
         if (!zubairId) {
             const zPass = await bcrypt.hash('1234', 10);
-            const [zUser] = await db.execute('INSERT INTO users (username, password, role) VALUES (?, ?, ?)', ['زبیر', zPass, 'أستاذ']);
-            const [zTeacher] = await db.execute('INSERT INTO teachers (name, subject, user_id) VALUES (?, ?, ?)', ['مولانا زبیر', 'تجوید', zUser.insertId]);
+            const [zUser] = await db.execute('INSERT INTO users (username, password, role, tenant_id) VALUES (?, ?, ?, ?)', ['زبیر', zPass, 'أستاذ', req.tenant.id]);
+            const [zTeacher] = await db.execute('INSERT INTO teachers (name, subject, user_id, tenant_id) VALUES (?, ?, ?, ?)', ['مولانا زبیر', 'تجوید', zUser.insertId, req.tenant.id]);
             zubairId = zTeacher.insertId;
         }
 
@@ -513,30 +517,30 @@ exports.adminImportData = async (req, res) => {
         for (const item of rawTimetable) {
             if (item.day === 'Sunday') continue;
 
-            const [classRows] = await db.execute('SELECT id FROM classes WHERE name_ar = ?', [item.class]);
+            const [classRows] = await db.execute('SELECT id FROM classes WHERE name_ar = ? AND tenant_id = ?', [item.class, req.tenant.id]);
             if (classRows.length === 0) continue;
             const classId = classRows[0].id;
 
             const searchName = item.teacher.replace('مولانا ', '').replace('مفتی ', '').trim();
-            const [teacherRows] = await db.execute('SELECT id FROM teachers WHERE name LIKE ?', [`%${searchName}%`]);
+            const [teacherRows] = await db.execute('SELECT id FROM teachers WHERE name LIKE ? AND tenant_id = ?', [`%${searchName}%`, req.tenant.id]);
             if (teacherRows.length === 0) continue;
             const teacherId = teacherRows[0].id;
 
-            let [bookRows] = await db.execute('SELECT id FROM books WHERE title = ?', [item.subject]);
+            let [bookRows] = await db.execute('SELECT id FROM books WHERE title = ? AND tenant_id = ?', [item.subject, req.tenant.id]);
             if (bookRows.length === 0) {
-                const [insBook] = await db.execute('INSERT INTO books (title) VALUES (?)', [item.subject]);
+                const [insBook] = await db.execute('INSERT INTO books (title, tenant_id) VALUES (?, ?)', [item.subject, req.tenant.id]);
                 bookRows = [{ id: insBook.insertId }];
             }
             const bookId = bookRows[0].id;
 
             let [tbRows] = await db.execute(
-                'SELECT id FROM teacher_books WHERE teacher_id = ? AND book_id = ? AND class_id = ? AND session_id = ?',
-                [teacherId, bookId, classId, sessionId]
+                'SELECT id FROM teacher_books WHERE teacher_id = ? AND book_id = ? AND class_id = ? AND session_id = ? AND tenant_id = ?',
+                [teacherId, bookId, classId, sessionId, req.tenant.id]
             );
             if (tbRows.length === 0) {
                 const [insTb] = await db.execute(
-                    'INSERT INTO teacher_books (teacher_id, book_id, class_id, session_id, start_page, end_page, current_page) VALUES (?, ?, ?, ?, 1, 100, 1)',
-                    [teacherId, bookId, classId, sessionId]
+                    'INSERT INTO teacher_books (teacher_id, book_id, class_id, session_id, start_page, end_page, current_page, tenant_id) VALUES (?, ?, ?, ?, 1, 100, 1, ?)',
+                    [teacherId, bookId, classId, sessionId, req.tenant.id]
                 );
                 tbRows = [{ id: insTb.insertId }];
             }
@@ -546,8 +550,8 @@ exports.adminImportData = async (req, res) => {
             const endTimes = { 1: '08:45:00', 2: '09:30:00', 3: '10:30:00', 4: '11:15:00', 5: '12:00:00' };
 
             await db.execute(
-                'INSERT INTO periods (teacher_id, class_id, day_of_week, period_number, start_time, end_time, subject, assignment_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-                [teacherId, classId, item.day, item.period, startTimes[item.period], endTimes[item.period], item.subject, assignmentId]
+                'INSERT INTO periods (teacher_id, class_id, day_of_week, period_number, start_time, end_time, subject, assignment_id, tenant_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                [teacherId, classId, item.day, item.period, startTimes[item.period], endTimes[item.period], item.subject, assignmentId, req.tenant.id]
             );
             count++;
         }
@@ -562,7 +566,7 @@ exports.adminImportData = async (req, res) => {
 exports.showPermissionsManage = async (req, res) => {
     try {
         // Fetch all permissions from database
-        const [permissions] = await db.execute('SELECT * FROM role_permissions');
+        const [permissions] = await db.execute('SELECT * FROM role_permissions WHERE tenant_id = ?', [req.tenant.id]);
 
         // Grid functions and list of roles
         const functions = [
@@ -601,10 +605,10 @@ exports.togglePermission = async (req, res) => {
     try {
         // Upsert permission
         await db.execute(`
-            INSERT INTO role_permissions (role, function_name, allowed) 
-            VALUES (?, ?, ?)
+            INSERT INTO role_permissions (role, function_name, allowed, tenant_id) 
+            VALUES (?, ?, ?, ?)
             ON DUPLICATE KEY UPDATE allowed = VALUES(allowed)
-        `, [role, functionName, allowed ? 1 : 0]);
+        `, [role, functionName, allowed ? 1 : 0, req.tenant.id]);
 
         res.json({ success: true });
     } catch (err) {
@@ -652,57 +656,53 @@ exports.showAreefStandardsReport = async (req, res) => {
             FROM classes c
             WHERE EXISTS (
                 SELECT 1 FROM students s
-                JOIN users u ON u.id = s.user_id
-                WHERE s.class_id = c.id
-                  AND u.role IN ('عريف', 'عریف')
-            )
+                JOIN users u ON u.id = s.user_id AND u.tenant_id = s.tenant_id
+                WHERE s.class_id = c.id AND s.tenant_id = c.tenant_id
+                  AND u.role IN ('عریف', 'عريف')
+            ) AND c.tenant_id = ?
             ORDER BY c.id
-        `);
+        `, [req.tenant.id]);
 
-        // ── 2. All Areefs (may be multiple per class) ──
+        // ── 2. All Areefs ──
         const [areefs] = await db.execute(`
             SELECT s.class_id,
                    s.name    AS areef_name,
                    u.id      AS user_id,
                    u.username
             FROM users u
-            JOIN students s ON s.user_id = u.id
-            WHERE u.role IN ('عريف', 'عریف')
+            JOIN students s ON s.user_id = u.id AND s.tenant_id = u.tenant_id
+            WHERE u.role IN ('عریف', 'عريف') AND u.tenant_id = ?
             ORDER BY s.class_id, s.name
-        `);
+        `, [req.tenant.id]);
 
         // ── 3. Student attendance days per class ──
-        //    Count distinct dates that have ANY attendance_students row
-        //    for a student enrolled in that class.
         const [studentDaysRows] = await db.execute(`
             SELECT s.class_id,
                    COUNT(DISTINCT a.date) AS days_marked
             FROM attendance_students a
-            JOIN students s ON s.id = a.student_id
-            WHERE a.date BETWEEN ? AND ?
+            JOIN students s ON s.id = a.student_id AND s.tenant_id = a.tenant_id
+            WHERE a.date BETWEEN ? AND ? AND a.tenant_id = ?
             GROUP BY s.class_id
-        `, [startDate, endDate]);
+        `, [startDate, endDate, req.tenant.id]);
 
         // ── 4. Teacher attendance days per class ──
-        //    Count distinct dates where at least one row in attendance_teachers
-        //    was submitted by an Areef belonging to that class.
         const [teacherDaysRows] = await db.execute(`
             SELECT s.class_id,
                    COUNT(DISTINCT at.date) AS days_marked
             FROM attendance_teachers at
-            JOIN users u  ON u.id = at.marked_by
-            JOIN students s ON s.user_id = u.id
-            WHERE u.role IN ('عريف', 'عریف')
-              AND at.date BETWEEN ? AND ?
+            JOIN users u  ON u.id = at.marked_by AND u.tenant_id = at.tenant_id
+            JOIN students s ON s.user_id = u.id AND s.tenant_id = u.tenant_id
+            WHERE u.role IN ('عریف', 'عريف')
+              AND at.date BETWEEN ? AND ? AND at.tenant_id = ?
             GROUP BY s.class_id
-        `, [startDate, endDate]);
+        `, [startDate, endDate, req.tenant.id]);
 
-        // ── 5. Total school days = max distinct dates across all classes ──
+        // ── 5. Total school days ──
         const [totalRow] = await db.execute(`
             SELECT COUNT(DISTINCT a.date) AS total_days
             FROM attendance_students a
-            WHERE a.date BETWEEN ? AND ?
-        `, [startDate, endDate]);
+            WHERE a.date BETWEEN ? AND ? AND a.tenant_id = ?
+        `, [startDate, endDate, req.tenant.id]);
         const totalDays = parseInt(totalRow[0]?.total_days || 0);
 
         // ── 6. Index the results ──

@@ -12,32 +12,36 @@ exports.showPeriodsManage = async (req, res) => {
         const [periods] = await db.execute(
             `SELECT p.*, t.name as teacher_name, c.name_ar as class_name, b.title as book_title
              FROM periods p 
-             JOIN teachers t ON p.teacher_id = t.id 
-             JOIN classes c ON p.class_id = c.id
-             LEFT JOIN teacher_books tb ON p.assignment_id = tb.id
-             LEFT JOIN books b ON tb.book_id = b.id
-             ORDER BY ${orderBy}`
+             JOIN teachers t ON p.teacher_id = t.id AND t.tenant_id = p.tenant_id
+             JOIN classes c ON p.class_id = c.id AND c.tenant_id = p.tenant_id
+             LEFT JOIN teacher_books tb ON p.assignment_id = tb.id AND tb.tenant_id = p.tenant_id
+             LEFT JOIN books b ON tb.book_id = b.id AND b.tenant_id = p.tenant_id
+             WHERE p.tenant_id = ?
+             ORDER BY ${orderBy}`,
+            [req.tenant.id]
         );
         const [teachers] = await db.execute(`
             SELECT DISTINCT t.* FROM teachers t
-            JOIN teacher_books tb ON tb.teacher_id = t.id
+            JOIN teacher_books tb ON tb.teacher_id = t.id AND tb.tenant_id = t.tenant_id
+            WHERE t.tenant_id = ?
             ORDER BY t.name ASC
-        `);
-        const [classes] = await db.execute('SELECT * FROM classes ORDER BY name_ar ASC');
+        `, [req.tenant.id]);
+        const [classes] = await db.execute('SELECT * FROM classes WHERE tenant_id = ? ORDER BY name_ar ASC', [req.tenant.id]);
         const [books] = await db.execute(`
             SELECT DISTINCT b.* FROM books b
-            JOIN teacher_books tb ON tb.book_id = b.id
+            JOIN teacher_books tb ON tb.book_id = b.id AND tb.tenant_id = b.tenant_id
+            WHERE b.tenant_id = ?
             ORDER BY b.title ASC
-        `);
+        `, [req.tenant.id]);
         const [assignments] = await db.execute(`
             SELECT tb.id, t.name as teacher_name, b.title as book_title, c.name_ar as class_name, tb.teacher_id, tb.class_id, tb.book_id
             FROM teacher_books tb
-            JOIN teachers t ON tb.teacher_id = t.id
-            JOIN books b ON tb.book_id = b.id
-            JOIN classes c ON tb.class_id = c.id
-            JOIN sessions s ON tb.session_id = s.id
-            WHERE s.is_active = TRUE
-        `);
+            JOIN teachers t ON tb.teacher_id = t.id AND t.tenant_id = tb.tenant_id
+            JOIN books b ON tb.book_id = b.id AND b.tenant_id = tb.tenant_id
+            JOIN classes c ON tb.class_id = c.id AND c.tenant_id = tb.tenant_id
+            JOIN sessions s ON tb.session_id = s.id AND s.tenant_id = tb.tenant_id
+            WHERE s.is_active = TRUE AND tb.tenant_id = ?
+        `, [req.tenant.id]);
         res.render('periods_manage', { periods, teachers, classes, assignments, books, groupBy, generateSuccess: req.query.generateSuccess });
     } catch (err) {
         console.error(err);
@@ -47,14 +51,14 @@ exports.showPeriodsManage = async (req, res) => {
 
 exports.generateAuto = async (req, res) => {
     try {
-        const [classes] = await db.execute('SELECT * FROM classes');
+        const [classes] = await db.execute('SELECT * FROM classes WHERE tenant_id = ?', [req.tenant.id]);
         const [assignments] = await db.execute(`
             SELECT tb.id, tb.teacher_id, tb.class_id, tb.book_id, b.title as book_title
             FROM teacher_books tb
-            JOIN books b ON tb.book_id = b.id
-            JOIN sessions s ON tb.session_id = s.id
-            WHERE s.is_active = TRUE
-        `);
+            JOIN books b ON tb.book_id = b.id AND b.tenant_id = tb.tenant_id
+            JOIN sessions s ON tb.session_id = s.id AND s.tenant_id = tb.tenant_id
+            WHERE s.is_active = TRUE AND tb.tenant_id = ?
+        `, [req.tenant.id]);
 
         const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const periodsPerDay = 5;
@@ -67,7 +71,7 @@ exports.generateAuto = async (req, res) => {
             5: { start: '11:15:00', end: '12:00:00' }
         };
 
-        await db.execute('DELETE FROM periods');
+        await db.execute('DELETE FROM periods WHERE tenant_id = ?', [req.tenant.id]);
 
         const teacherBusy = new Set();
         const classBusy = new Set();
@@ -117,8 +121,8 @@ exports.generateAuto = async (req, res) => {
         if (generatedPeriods.length > 0) {
             for (const p of generatedPeriods) {
                 await db.execute(
-                    'INSERT INTO periods (assignment_id, day_of_week, period_number, start_time, end_time, teacher_id, class_id, subject) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-                    [p.assignment_id, p.day_of_week, p.period_number, p.start_time, p.end_time, p.teacher_id, p.class_id, p.subject]
+                    'INSERT INTO periods (assignment_id, day_of_week, period_number, start_time, end_time, teacher_id, class_id, subject, tenant_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                    [p.assignment_id, p.day_of_week, p.period_number, p.start_time, p.end_time, p.teacher_id, p.class_id, p.subject, req.tenant.id]
                 );
             }
         }
@@ -137,7 +141,7 @@ exports.showFullTimetable = async (req, res) => {
 
         // Force student to view only their own class's timetable
         if (req.session.role === 'طالب') {
-            const [student] = await db.execute('SELECT class_id FROM students WHERE user_id = ?', [req.session.userId]);
+            const [student] = await db.execute('SELECT class_id FROM students WHERE user_id = ? AND tenant_id = ?', [req.session.userId, req.tenant.id]);
             if (student.length > 0) {
                 classId = student[0].class_id;
             }
@@ -146,13 +150,13 @@ exports.showFullTimetable = async (req, res) => {
         let query = `
              SELECT p.*, t.name as teacher_name, c.name_ar as class_name, b.title as book_title
              FROM periods p 
-             JOIN teachers t ON p.teacher_id = t.id 
-             JOIN classes c ON p.class_id = c.id
-             LEFT JOIN teacher_books tb ON p.assignment_id = tb.id
-             LEFT JOIN books b ON tb.book_id = b.id
-             WHERE 1=1
+             JOIN teachers t ON p.teacher_id = t.id AND t.tenant_id = p.tenant_id
+             JOIN classes c ON p.class_id = c.id AND c.tenant_id = p.tenant_id
+             LEFT JOIN teacher_books tb ON p.assignment_id = tb.id AND tb.tenant_id = p.tenant_id
+             LEFT JOIN books b ON tb.book_id = b.id AND b.tenant_id = p.tenant_id
+             WHERE p.tenant_id = ?
         `;
-        const params = [];
+        const params = [req.tenant.id];
         if (teacherId) {
             query += ` AND p.teacher_id = ?`;
             params.push(teacherId);
@@ -167,12 +171,13 @@ exports.showFullTimetable = async (req, res) => {
         }
 
         const [periods] = await db.execute(query, params);
-        const [classes] = await db.execute('SELECT * FROM classes');
+        const [classes] = await db.execute('SELECT * FROM classes WHERE tenant_id = ?', [req.tenant.id]);
         const [teachers] = await db.execute(`
             SELECT DISTINCT t.* FROM teachers t
-            JOIN periods p ON p.teacher_id = t.id
+            JOIN periods p ON p.teacher_id = t.id AND p.tenant_id = t.tenant_id
+            WHERE t.tenant_id = ?
             ORDER BY t.name
-        `);
+        `, [req.tenant.id]);
 
         res.render('timetable_full', { 
             periods, 
@@ -205,13 +210,13 @@ exports.showPublicTimetable = async (req, res) => {
         let query = `
              SELECT p.*, t.name as teacher_name, c.name_ar as class_name, b.title as book_title
              FROM periods p 
-             JOIN teachers t ON p.teacher_id = t.id 
-             JOIN classes c ON p.class_id = c.id
-             LEFT JOIN teacher_books tb ON p.assignment_id = tb.id
-             LEFT JOIN books b ON tb.book_id = b.id
-             WHERE 1=1
+             JOIN teachers t ON p.teacher_id = t.id AND t.tenant_id = p.tenant_id
+             JOIN classes c ON p.class_id = c.id AND c.tenant_id = p.tenant_id
+             LEFT JOIN teacher_books tb ON p.assignment_id = tb.id AND tb.tenant_id = p.tenant_id
+             LEFT JOIN books b ON tb.book_id = b.id AND b.tenant_id = p.tenant_id
+             WHERE p.tenant_id = ?
         `;
-        const params = [];
+        const params = [req.tenant.id];
         if (teacherId) {
             query += ` AND p.teacher_id = ?`;
             params.push(teacherId);
@@ -226,12 +231,13 @@ exports.showPublicTimetable = async (req, res) => {
         }
 
         const [periods] = await db.execute(query, params);
-        const [classes] = await db.execute('SELECT * FROM classes');
+        const [classes] = await db.execute('SELECT * FROM classes WHERE tenant_id = ?', [req.tenant.id]);
         const [teachers] = await db.execute(`
             SELECT DISTINCT t.* FROM teachers t
-            JOIN periods p ON p.teacher_id = t.id
+            JOIN periods p ON p.teacher_id = t.id AND p.tenant_id = t.tenant_id
+            WHERE t.tenant_id = ?
             ORDER BY t.name
-        `);
+        `, [req.tenant.id]);
 
         res.render('timetable_public', { 
             periods, 
@@ -269,10 +275,10 @@ exports.addPeriod = async (req, res) => {
                 const [teacherConflicts] = await db.execute(`
                     SELECT p.*, c.name_ar as class_name, t.name as teacher_name
                     FROM periods p 
-                    JOIN classes c ON p.class_id = c.id
-                    JOIN teachers t ON p.teacher_id = t.id
-                    WHERE p.teacher_id = ? AND p.day_of_week = ? AND p.period_number = ?
-                `, [teacherId, day, pNum]);
+                    JOIN classes c ON p.class_id = c.id AND c.tenant_id = p.tenant_id
+                    JOIN teachers t ON p.teacher_id = t.id AND t.tenant_id = p.tenant_id
+                    WHERE p.teacher_id = ? AND p.day_of_week = ? AND p.period_number = ? AND p.tenant_id = ?
+                `, [teacherId, day, pNum, req.tenant.id]);
 
                 if (teacherConflicts.length > 0) {
                     return res.json({ 
@@ -290,10 +296,10 @@ exports.addPeriod = async (req, res) => {
                 const [classConflicts] = await db.execute(`
                     SELECT p.*, c.name_ar as class_name, t.name as teacher_name
                     FROM periods p 
-                    JOIN classes c ON p.class_id = c.id
-                    JOIN teachers t ON p.teacher_id = t.id
-                    WHERE p.class_id = ? AND p.day_of_week = ? AND p.period_number = ?
-                `, [classId, day, pNum]);
+                    JOIN classes c ON p.class_id = c.id AND c.tenant_id = p.tenant_id
+                    JOIN teachers t ON p.teacher_id = t.id AND t.tenant_id = p.tenant_id
+                    WHERE p.class_id = ? AND p.day_of_week = ? AND p.period_number = ? AND p.tenant_id = ?
+                `, [classId, day, pNum, req.tenant.id]);
 
                 if (classConflicts.length > 0) {
                     return res.json({ 
@@ -312,7 +318,7 @@ exports.addPeriod = async (req, res) => {
 
         let finalSubject = subject;
         if ((!assignmentId || assignmentId === '') && bookId) {
-            const [bookRows] = await db.execute('SELECT title FROM books WHERE id = ?', [bookId]);
+            const [bookRows] = await db.execute('SELECT title FROM books WHERE id = ? AND tenant_id = ?', [bookId, req.tenant.id]);
             if (bookRows.length > 0) {
                 finalSubject = bookRows[0].title;
             }
@@ -322,8 +328,8 @@ exports.addPeriod = async (req, res) => {
             for (const pNum of periodsArray) {
                 const timeMapping = standardTimes[pNum] || { start: null, end: null };
                 await db.execute(
-                    'INSERT INTO periods (teacher_id, class_id, day_of_week, start_time, end_time, subject, assignment_id, period_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-                    [teacherId, classId, day, timeMapping.start, timeMapping.end, finalSubject || null, (assignmentId && assignmentId !== '') ? assignmentId : null, pNum]
+                    'INSERT INTO periods (teacher_id, class_id, day_of_week, start_time, end_time, subject, assignment_id, period_number, tenant_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                    [teacherId, classId, day, timeMapping.start, timeMapping.end, finalSubject || null, (assignmentId && assignmentId !== '') ? assignmentId : null, pNum, req.tenant.id]
                 );
             }
         }
@@ -341,10 +347,10 @@ exports.editPeriod = async (req, res) => {
         const [teacherConflicts] = await db.execute(`
             SELECT p.*, c.name_ar as class_name, t.name as teacher_name
             FROM periods p 
-            JOIN classes c ON p.class_id = c.id
-            JOIN teachers t ON p.teacher_id = t.id
-            WHERE p.teacher_id = ? AND p.day_of_week = ? AND p.period_number = ? AND p.id != ?
-        `, [teacherId, dayOfWeek, periodNumber, req.params.id]);
+            JOIN classes c ON p.class_id = c.id AND c.tenant_id = p.tenant_id
+            JOIN teachers t ON p.teacher_id = t.id AND t.tenant_id = p.tenant_id
+            WHERE p.teacher_id = ? AND p.day_of_week = ? AND p.period_number = ? AND p.id != ? AND p.tenant_id = ?
+        `, [teacherId, dayOfWeek, periodNumber, req.params.id, req.tenant.id]);
 
         if (teacherConflicts.length > 0) {
             return res.json({ 
@@ -360,10 +366,10 @@ exports.editPeriod = async (req, res) => {
         const [classConflicts] = await db.execute(`
             SELECT p.*, c.name_ar as class_name, t.name as teacher_name
             FROM periods p 
-            JOIN classes c ON p.class_id = c.id
-            JOIN teachers t ON p.teacher_id = t.id
-            WHERE p.class_id = ? AND p.day_of_week = ? AND p.period_number = ? AND p.id != ?
-        `, [classId, dayOfWeek, periodNumber, req.params.id]);
+            JOIN classes c ON p.class_id = c.id AND c.tenant_id = p.tenant_id
+            JOIN teachers t ON p.teacher_id = t.id AND t.tenant_id = p.tenant_id
+            WHERE p.class_id = ? AND p.day_of_week = ? AND p.period_number = ? AND p.id != ? AND p.tenant_id = ?
+        `, [classId, dayOfWeek, periodNumber, req.params.id, req.tenant.id]);
 
         if (classConflicts.length > 0) {
             return res.json({ 
@@ -378,7 +384,7 @@ exports.editPeriod = async (req, res) => {
 
         let finalSubject = null;
         if ((!assignmentId || assignmentId === '') && bookId) {
-            const [bookRows] = await db.execute('SELECT title FROM books WHERE id = ?', [bookId]);
+            const [bookRows] = await db.execute('SELECT title FROM books WHERE id = ? AND tenant_id = ?', [bookId, req.tenant.id]);
             if (bookRows.length > 0) {
                 finalSubject = bookRows[0].title;
             }
@@ -386,17 +392,17 @@ exports.editPeriod = async (req, res) => {
             const [assRows] = await db.execute(`
                 SELECT b.title 
                 FROM teacher_books tb 
-                JOIN books b ON tb.book_id = b.id 
-                WHERE tb.id = ?
-            `, [assignmentId]);
+                JOIN books b ON tb.book_id = b.id AND b.tenant_id = tb.tenant_id
+                WHERE tb.id = ? AND tb.tenant_id = ?
+            `, [assignmentId, req.tenant.id]);
             if (assRows.length > 0) {
                 finalSubject = assRows[0].title;
             }
         }
 
         await db.execute(
-            'UPDATE periods SET teacher_id = ?, class_id = ?, day_of_week = ?, start_time = ?, end_time = ?, subject = ?, assignment_id = ?, period_number = ? WHERE id = ?',
-            [teacherId, classId, dayOfWeek, startTime, endTime, finalSubject, (assignmentId && assignmentId !== '') ? assignmentId : null, periodNumber, req.params.id]
+            'UPDATE periods SET teacher_id = ?, class_id = ?, day_of_week = ?, start_time = ?, end_time = ?, subject = ?, assignment_id = ?, period_number = ? WHERE id = ? AND tenant_id = ?',
+            [teacherId, classId, dayOfWeek, startTime, endTime, finalSubject, (assignmentId && assignmentId !== '') ? assignmentId : null, periodNumber, req.params.id, req.tenant.id]
         );
 
         return res.json({ success: true });
@@ -408,7 +414,7 @@ exports.editPeriod = async (req, res) => {
 
 exports.deletePeriod = async (req, res) => {
     try {
-        await db.execute('DELETE FROM periods WHERE id = ?', [req.params.id]);
+        await db.execute('DELETE FROM periods WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
         res.json({ success: true });
     } catch (err) {
         console.error(err);
@@ -428,18 +434,18 @@ exports.swapPeriods = async (req, res) => {
         const [rowsA] = await db.execute(`
             SELECT p.*, t.name as teacher_name, c.name_ar as class_name 
             FROM periods p
-            JOIN teachers t ON p.teacher_id = t.id
-            JOIN classes c ON p.class_id = c.id
-            WHERE p.id = ?
-        `, [periodIdA]);
+            JOIN teachers t ON p.teacher_id = t.id AND t.tenant_id = p.tenant_id
+            JOIN classes c ON p.class_id = c.id AND c.tenant_id = p.tenant_id
+            WHERE p.id = ? AND p.tenant_id = ?
+        `, [periodIdA, req.tenant.id]);
         
         const [rowsB] = await db.execute(`
             SELECT p.*, t.name as teacher_name, c.name_ar as class_name 
             FROM periods p
-            JOIN teachers t ON p.teacher_id = t.id
-            JOIN classes c ON p.class_id = c.id
-            WHERE p.id = ?
-        `, [periodIdB]);
+            JOIN teachers t ON p.teacher_id = t.id AND t.tenant_id = p.tenant_id
+            JOIN classes c ON p.class_id = c.id AND c.tenant_id = p.tenant_id
+            WHERE p.id = ? AND p.tenant_id = ?
+        `, [periodIdB, req.tenant.id]);
 
         if (rowsA.length === 0 || rowsB.length === 0) {
             return res.status(404).json({ success: false, error: 'إحدى الحصتين المفتوحتين غير موجودة.' });
@@ -472,10 +478,10 @@ exports.swapPeriods = async (req, res) => {
         const [teacherAConflicts] = await db.execute(`
             SELECT p.*, c.name_ar as class_name, t.name as teacher_name
             FROM periods p 
-            JOIN classes c ON p.class_id = c.id
-            JOIN teachers t ON p.teacher_id = t.id
-            WHERE p.teacher_id = ? AND p.day_of_week = ? AND p.period_number = ? AND p.id NOT IN (?, ?)
-        `, [A.teacher_id, dayOfWeekB, periodNumberB, A.id, B.id]);
+            JOIN classes c ON p.class_id = c.id AND c.tenant_id = p.tenant_id
+            JOIN teachers t ON p.teacher_id = t.id AND t.tenant_id = p.tenant_id
+            WHERE p.teacher_id = ? AND p.day_of_week = ? AND p.period_number = ? AND p.id NOT IN (?, ?) AND p.tenant_id = ?
+        `, [A.teacher_id, dayOfWeekB, periodNumberB, A.id, B.id, req.tenant.id]);
 
         if (teacherAConflicts.length > 0) {
             const label = getDayLabel(dayOfWeekB);
@@ -489,10 +495,10 @@ exports.swapPeriods = async (req, res) => {
         const [classAConflicts] = await db.execute(`
             SELECT p.*, c.name_ar as class_name, t.name as teacher_name
             FROM periods p 
-            JOIN classes c ON p.class_id = c.id
-            JOIN teachers t ON p.teacher_id = t.id
-            WHERE p.class_id = ? AND p.day_of_week = ? AND p.period_number = ? AND p.id NOT IN (?, ?)
-        `, [A.class_id, dayOfWeekB, periodNumberB, A.id, B.id]);
+            JOIN classes c ON p.class_id = c.id AND c.tenant_id = p.tenant_id
+            JOIN teachers t ON p.teacher_id = t.id AND t.tenant_id = p.tenant_id
+            WHERE p.class_id = ? AND p.day_of_week = ? AND p.period_number = ? AND p.id NOT IN (?, ?) AND p.tenant_id = ?
+        `, [A.class_id, dayOfWeekB, periodNumberB, A.id, B.id, req.tenant.id]);
 
         if (classAConflicts.length > 0) {
             const label = getDayLabel(dayOfWeekB);
@@ -507,10 +513,10 @@ exports.swapPeriods = async (req, res) => {
         const [teacherBConflicts] = await db.execute(`
             SELECT p.*, c.name_ar as class_name, t.name as teacher_name
             FROM periods p 
-            JOIN classes c ON p.class_id = c.id
-            JOIN teachers t ON p.teacher_id = t.id
-            WHERE p.teacher_id = ? AND p.day_of_week = ? AND p.period_number = ? AND p.id NOT IN (?, ?)
-        `, [B.teacher_id, dayOfWeekA, periodNumberA, A.id, B.id]);
+            JOIN classes c ON p.class_id = c.id AND c.tenant_id = p.tenant_id
+            JOIN teachers t ON p.teacher_id = t.id AND t.tenant_id = p.tenant_id
+            WHERE p.teacher_id = ? AND p.day_of_week = ? AND p.period_number = ? AND p.id NOT IN (?, ?) AND p.tenant_id = ?
+        `, [B.teacher_id, dayOfWeekA, periodNumberA, A.id, B.id, req.tenant.id]);
 
         if (teacherBConflicts.length > 0) {
             const label = getDayLabel(dayOfWeekA);
@@ -524,10 +530,10 @@ exports.swapPeriods = async (req, res) => {
         const [classBConflicts] = await db.execute(`
             SELECT p.*, c.name_ar as class_name, t.name as teacher_name
             FROM periods p 
-            JOIN classes c ON p.class_id = c.id
-            JOIN teachers t ON p.teacher_id = t.id
-            WHERE p.class_id = ? AND p.day_of_week = ? AND p.period_number = ? AND p.id NOT IN (?, ?)
-        `, [B.class_id, dayOfWeekA, periodNumberA, A.id, B.id]);
+            JOIN classes c ON p.class_id = c.id AND c.tenant_id = p.tenant_id
+            JOIN teachers t ON p.teacher_id = t.id AND t.tenant_id = p.tenant_id
+            WHERE p.class_id = ? AND p.day_of_week = ? AND p.period_number = ? AND p.id NOT IN (?, ?) AND p.tenant_id = ?
+        `, [B.class_id, dayOfWeekA, periodNumberA, A.id, B.id, req.tenant.id]);
 
         if (classBConflicts.length > 0) {
             const label = getDayLabel(dayOfWeekA);
@@ -545,14 +551,14 @@ exports.swapPeriods = async (req, res) => {
             await conn.execute(`
                 UPDATE periods 
                 SET day_of_week = ?, period_number = ?, start_time = ?, end_time = ? 
-                WHERE id = ?
-            `, [dayOfWeekB, periodNumberB, startTimeB, endTimeB, A.id]);
+                WHERE id = ? AND tenant_id = ?
+            `, [dayOfWeekB, periodNumberB, startTimeB, endTimeB, A.id, req.tenant.id]);
 
             await conn.execute(`
                 UPDATE periods 
                 SET day_of_week = ?, period_number = ?, start_time = ?, end_time = ? 
-                WHERE id = ?
-            `, [dayOfWeekA, periodNumberA, startTimeA, endTimeA, B.id]);
+                WHERE id = ? AND tenant_id = ?
+            `, [dayOfWeekA, periodNumberA, startTimeA, endTimeA, B.id, req.tenant.id]);
 
             await conn.query('COMMIT');
             res.json({ success: true });

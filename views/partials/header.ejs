@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= __('College_Name') %></title>
-    <link rel="icon" href="/logo.jpg">
+    <title><%= locals.tenant ? (tenant.subdomain === 'mmsdemo' ? __('Jamia_Habibullah_Islamabad') : (tenant.subdomain === 'kui' ? __('KUI_Production') : tenant.school_name)) : __('College_Name') %></title>
+    <link rel="icon" href="<%= (locals.tenant && tenant.logo_url) ? tenant.logo_url : '/logo.jpg' %>">
     <% if (['ar', 'ur'].includes(lang)) { %>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
     <% } else { %>
@@ -14,8 +14,8 @@
     <link rel="stylesheet" href="/css/style.css">
     <style>
         :root {
-            --primary: #2c3e50;
-            --secondary: #ecf0f1;
+            --primary: <%= (locals.tenant && tenant.primary_color) ? tenant.primary_color : '#2c3e50' %>;
+            --secondary: <%= (locals.tenant && tenant.secondary_color) ? tenant.secondary_color : '#ecf0f1' %>;
             --accent: #27ae60;
         }
         body {
@@ -43,8 +43,8 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-white px-3 px-md-4 py-3 mb-4 shadow-sm">
         <div class="container-fluid">
             <div class="d-flex align-items-center gap-2">
-                <img src="/logo.jpg" alt="Logo" style="height: 40px; border-radius: 5px;">
-                <a href="/" class="navbar-brand logo fw-bold text-decoration-none mb-0"><%= __('College_Name') %></a>
+                <img src="<%= (locals.tenant && tenant.logo_url) ? tenant.logo_url : '/logo.jpg' %>" alt="Logo" style="height: 40px; border-radius: 5px;">
+                <a href="/" class="navbar-brand logo fw-bold text-decoration-none mb-0"><%= locals.tenant ? (tenant.subdomain === 'mmsdemo' ? __('Jamia_Habibullah_Islamabad') : (tenant.subdomain === 'kui' ? __('KUI_Production') : tenant.school_name)) : __('College_Name') %></a>
             </div>
             
             <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,17 +53,24 @@
             
             <div class="collapse navbar-collapse justify-content-end mt-3 mt-lg-0" id="navbarNav">
                 <div class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center gap-2 gap-lg-3">
-                    <a href="/" class="btn btn-outline-primary rounded-pill px-3">
-                        <i class="bi bi-house-door me-1"></i> <%= __('Main_Page') %>
-                    </a>
-                    <a href="/periods/full" class="btn btn-outline-primary rounded-pill px-3">
-                        <i class="bi bi-calendar3 me-1"></i> <%= __('Timetable') %>
-                    </a>
-                    <% if (locals.session && session.role === 'مدير') { %>
-                        <a href="/permissions/manage" class="btn btn-outline-warning rounded-pill px-3 fw-semibold">
-                            <i class="bi bi-shield-lock me-1"></i> <%= __('Permissions') %>
+                    <% if (locals.session && session.userId) { %>
+                        <a href="/" class="btn btn-outline-primary rounded-pill px-3">
+                            <i class="bi bi-house-door me-1"></i> <%= __('Main_Page') %>
+                        </a>
+                        <a href="/periods/full" class="btn btn-outline-primary rounded-pill px-3">
+                            <i class="bi bi-calendar3 me-1"></i> <%= __('Timetable') %>
+                        </a>
+                        <% if (session.role === 'مدير') { %>
+                            <a href="/permissions/manage" class="btn btn-outline-warning rounded-pill px-3 fw-semibold">
+                                <i class="bi bi-shield-lock me-1"></i> <%= __('Permissions') %>
+                            </a>
+                        <% } %>
+                    <% } else { %>
+                        <a href="/timetable/public" class="btn btn-outline-primary rounded-pill px-3">
+                            <i class="bi bi-calendar3 me-1"></i> <%= __('Timetable') %>
                         </a>
                     <% } %>
+                    
                     <div class="dropdown">
                         <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button" id="langDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-globe"></i> <%= __('Language') %>
@@ -74,7 +81,12 @@
                             <li><a class="dropdown-item" href="/set-lang/en">English</a></li>
                         </ul>
                     </div>
-                    <a href="/logout" class="btn btn-outline-danger rounded-pill"><%= __('Logout') %></a>
+                    
+                    <% if (locals.session && session.userId) { %>
+                        <a href="/logout" class="btn btn-outline-danger rounded-pill"><%= __('Logout') %></a>
+                    <% } else { %>
+                        <a href="/login" class="btn btn-outline-primary rounded-pill px-4"><%= __('Login') %></a>
+                    <% } %>
                 </div>
             </div>
         </div>

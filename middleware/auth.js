@@ -59,8 +59,8 @@ const hasPermission = (functionName) => {
 
             // We check the role_permissions table in the database
             const [rows] = await db.execute(
-                'SELECT allowed FROM role_permissions WHERE role = ? AND function_name = ?',
-                [userRole, functionName]
+                'SELECT allowed FROM role_permissions WHERE role = ? AND function_name = ? AND tenant_id = ?',
+                [userRole, functionName, req.tenant.id]
             );
 
             if (rows.length > 0) {
@@ -105,8 +105,8 @@ const isAuthenticated = (req, res, next) => {
     res.redirect('/login');
 };
 
-const getCRClassId = async (userId) => {
-    const [student] = await db.execute('SELECT class_id FROM students WHERE user_id = ?', [userId]);
+const getCRClassId = async (userId, tenantId) => {
+    const [student] = await db.execute('SELECT class_id FROM students WHERE user_id = ? AND tenant_id = ?', [userId, tenantId]);
     return student.length ? student[0].class_id : null;
 };
 

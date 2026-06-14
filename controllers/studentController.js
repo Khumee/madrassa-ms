@@ -6,7 +6,7 @@ const { getDateFilterParams } = require('../utils/dateHelper');
 
 exports.showStudentDashboard = async (req, res) => {
     try {
-        const [student] = await db.execute('SELECT * FROM students WHERE user_id = ?', [req.session.userId]);
+        const [student] = await db.execute('SELECT * FROM students WHERE user_id = ? AND tenant_id = ?', [req.session.userId, req.tenant.id]);
         if (!student[0]) return res.status(404).send('Student record not found');
 
         const classId = student[0].class_id;
@@ -15,20 +15,20 @@ exports.showStudentDashboard = async (req, res) => {
         const [periods] = await db.execute(
             `SELECT p.*, t.name as teacher_name 
              FROM periods p 
-             JOIN teachers t ON p.teacher_id = t.id 
-             WHERE p.class_id = ? AND p.day_of_week = ?
+             JOIN teachers t ON p.teacher_id = t.id AND t.tenant_id = p.tenant_id
+             WHERE p.class_id = ? AND p.day_of_week = ? AND p.tenant_id = ?
              ORDER BY p.period_number`,
-            [classId, dayName]
+            [classId, dayName, req.tenant.id]
         );
 
         const [books] = await db.execute(`
             SELECT tb.*, b.title as book_title, t.name as teacher_name
             FROM teacher_books tb
-            JOIN books b ON tb.book_id = b.id
-            JOIN teachers t ON tb.teacher_id = t.id
-            JOIN sessions s ON tb.session_id = s.id
-            WHERE tb.class_id = ? AND s.is_active = TRUE
-        `, [classId]);
+            JOIN books b ON tb.book_id = b.id AND b.tenant_id = tb.tenant_id
+            JOIN teachers t ON tb.teacher_id = t.id AND t.tenant_id = tb.tenant_id
+            JOIN sessions s ON tb.session_id = s.id AND s.tenant_id = tb.tenant_id
+            WHERE tb.class_id = ? AND s.is_active = TRUE AND tb.tenant_id = ?
+        `, [classId, req.tenant.id]);
 
         const dateParams = getDateFilterParams(req.query);
         const { startDate, endDate } = dateParams;
@@ -37,15 +37,15 @@ exports.showStudentDashboard = async (req, res) => {
             try {
                 // Fetch progress just before filtered startDate
                 const [beforeRange] = await db.execute(
-                    'SELECT page_number FROM book_progress WHERE assignment_id = ? AND date < ? ORDER BY date DESC, id DESC LIMIT 1',
-                    [b.id, startDate]
+                    'SELECT page_number FROM book_progress WHERE assignment_id = ? AND date < ? AND tenant_id = ? ORDER BY date DESC, id DESC LIMIT 1',
+                    [b.id, startDate, req.tenant.id]
                 );
                 const startPageRange = beforeRange.length > 0 ? beforeRange[0].page_number : b.start_page;
 
                 // Fetch progress up to filtered endDate
                 const [endOfRange] = await db.execute(
-                    'SELECT page_number FROM book_progress WHERE assignment_id = ? AND date <= ? ORDER BY date DESC, id DESC LIMIT 1',
-                    [b.id, endDate]
+                    'SELECT page_number FROM book_progress WHERE assignment_id = ? AND date <= ? AND tenant_id = ? ORDER BY date DESC, id DESC LIMIT 1',
+                    [b.id, endDate, req.tenant.id]
                 );
                 const endPageRange = endOfRange.length > 0 ? endOfRange[0].page_number : b.start_page;
 
@@ -57,10 +57,10 @@ exports.showStudentDashboard = async (req, res) => {
                 const [progHistory] = await db.execute(`
                     SELECT bp.id, bp.date, bp.page_number, u.username as updater_name, u.role as updater_role
                     FROM book_progress bp
-                    LEFT JOIN users u ON bp.marked_by = u.id
-                    WHERE bp.assignment_id = ? AND bp.date >= ? AND bp.date <= ?
+                    LEFT JOIN users u ON bp.marked_by = u.id AND u.tenant_id = bp.tenant_id
+                    WHERE bp.assignment_id = ? AND bp.date >= ? AND bp.date <= ? AND bp.tenant_id = ?
                     ORDER BY bp.date ASC, bp.id ASC
-                `, [b.id, startDate, endDate]);
+                `, [b.id, startDate, endDate, req.tenant.id]);
 
                 // Build detailed step-by-step update records showing where it started and ended!
                 let lastPage = startPageRange;
@@ -100,8 +100,8 @@ exports.showStudentDashboard = async (req, res) => {
 
         // Fetch total matching attendance records count for pagination calculations
         const [countRows] = await db.execute(
-            'SELECT COUNT(*) as count FROM attendance_students WHERE student_id = ? AND date >= ? AND date <= ?',
-            [student[0].id, startDate, endDate]
+            'SELECT COUNT(*) as count FROM attendance_students WHERE student_id = ? AND date >= ? AND date <= ? AND tenant_id = ?',
+            [student[0].id, startDate, endDate, req.tenant.id]
         );
         const totalRecords = countRows[0].count;
         const totalPages = Math.ceil(totalRecords / limit) || 1;
@@ -109,9 +109,9 @@ exports.showStudentDashboard = async (req, res) => {
         // Fetch the paginated attendance records
         const [attendance] = await db.execute(
             `SELECT * FROM attendance_students 
-             WHERE student_id = ? AND date >= ? AND date <= ? 
+             WHERE student_id = ? AND date >= ? AND date <= ? AND tenant_id = ?
              ORDER BY date DESC LIMIT ${limit} OFFSET ${offset}`,
-            [student[0].id, startDate, endDate]
+            [student[0].id, startDate, endDate, req.tenant.id]
         );
 
         // Calculate Attendance Stats (For Visual Progress Ring)
@@ -123,8 +123,8 @@ exports.showStudentDashboard = async (req, res) => {
                 SUM(CASE WHEN status = 'online' THEN 1 ELSE 0 END) as online,
                 COUNT(*) as total
              FROM attendance_students 
-             WHERE student_id = ?`,
-            [student[0].id]
+             WHERE student_id = ? AND tenant_id = ?`,
+            [student[0].id, req.tenant.id]
         );
         const presentCount = stats[0] ? Number(stats[0].present || 0) : 0;
         const onlineCount = stats[0] ? Number(stats[0].online || 0) : 0;
@@ -133,8 +133,8 @@ exports.showStudentDashboard = async (req, res) => {
 
         // Calculate Present Streak (Consecutive Present/Online days)
         const [allAttendance] = await db.execute(
-            'SELECT status FROM attendance_students WHERE student_id = ? ORDER BY date DESC',
-            [student[0].id]
+            'SELECT status FROM attendance_students WHERE student_id = ? AND tenant_id = ? ORDER BY date DESC',
+            [student[0].id, req.tenant.id]
         );
         let streak = 0;
         for (const record of allAttendance) {
@@ -149,10 +149,10 @@ exports.showStudentDashboard = async (req, res) => {
         const [periodsToday] = await db.execute(
             `SELECT p.*, t.name as teacher_name 
              FROM periods p 
-             JOIN teachers t ON p.teacher_id = t.id 
-             WHERE p.class_id = ? AND p.day_of_week = ?
+             JOIN teachers t ON p.teacher_id = t.id AND t.tenant_id = p.tenant_id
+             WHERE p.class_id = ? AND p.day_of_week = ? AND p.tenant_id = ?
              ORDER BY p.period_number`,
-            [classId, dayName]
+            [classId, dayName, req.tenant.id]
         );
 
         const now = DateTime.now();
@@ -204,7 +204,7 @@ exports.showStudentDashboard = async (req, res) => {
 
 exports.showCRDashboard = async (req, res) => {
     try {
-        const [student] = await db.execute('SELECT * FROM students WHERE user_id = ?', [req.session.userId]);
+        const [student] = await db.execute('SELECT * FROM students WHERE user_id = ? AND tenant_id = ?', [req.session.userId, req.tenant.id]);
         if (!student[0]) return res.status(404).send('Record not found');
 
         const classId = student[0].class_id;
@@ -218,45 +218,45 @@ exports.showCRDashboard = async (req, res) => {
         const [students] = await db.execute(
             `SELECT s.*, a.status 
              FROM students s 
-             LEFT JOIN attendance_students a ON s.id = a.student_id AND a.date = ? 
-             WHERE s.class_id = ?`,
-            [selectedDate, classId]
+             LEFT JOIN attendance_students a ON s.id = a.student_id AND a.date = ? AND a.tenant_id = s.tenant_id
+             WHERE s.class_id = ? AND s.tenant_id = ?`,
+            [selectedDate, classId, req.tenant.id]
         );
 
-        const [classInfo] = await db.execute('SELECT * FROM classes WHERE id = ?', [classId]);
+        const [classInfo] = await db.execute('SELECT * FROM classes WHERE id = ? AND tenant_id = ?', [classId, req.tenant.id]);
 
         const [todayPeriods] = await db.execute(`
             SELECT p.*, t.name as teacher_name
             FROM periods p
-            JOIN teachers t ON p.teacher_id = t.id
-            JOIN classes c ON p.class_id = c.id
-            WHERE p.class_id = ? AND p.day_of_week = ?
+            JOIN teachers t ON p.teacher_id = t.id AND t.tenant_id = p.tenant_id
+            JOIN classes c ON p.class_id = c.id AND c.tenant_id = p.tenant_id
+            WHERE p.class_id = ? AND p.day_of_week = ? AND p.tenant_id = ?
             ORDER BY p.period_number
-        `, [classId, dayName]);
+        `, [classId, dayName, req.tenant.id]);
 
         const [classBooks] = await db.execute(`
             SELECT tb.id as assignment_id, tb.start_page, tb.end_page, tb.current_page, 
             b.title as book_title, t.name as teacher_name,
-            (SELECT bp.updated_at FROM book_progress bp WHERE bp.assignment_id = tb.id ORDER BY bp.id DESC LIMIT 1) as last_updated_at
+            (SELECT bp.updated_at FROM book_progress bp WHERE bp.assignment_id = tb.id AND bp.tenant_id = tb.tenant_id ORDER BY bp.id DESC LIMIT 1) as last_updated_at
             FROM teacher_books tb
-            JOIN books b ON tb.book_id = b.id
-            JOIN teachers t ON tb.teacher_id = t.id
-            JOIN sessions s ON tb.session_id = s.id
-            WHERE tb.class_id = ? AND s.is_active = TRUE
-        `, [classId]);
+            JOIN books b ON tb.book_id = b.id AND b.tenant_id = tb.tenant_id
+            JOIN teachers t ON tb.teacher_id = t.id AND t.tenant_id = tb.tenant_id
+            JOIN sessions s ON tb.session_id = s.id AND s.tenant_id = tb.tenant_id
+            WHERE tb.class_id = ? AND s.is_active = TRUE AND tb.tenant_id = ?
+        `, [classId, req.tenant.id]);
 
         for (const b of classBooks) {
             // Fetch the last page number logged in book_progress (no date dependency)
             const [lastProgress] = await db.execute(
-                'SELECT page_number, date FROM book_progress WHERE assignment_id = ? ORDER BY date DESC, id DESC LIMIT 1',
-                [b.assignment_id]
+                'SELECT page_number, date FROM book_progress WHERE assignment_id = ? AND tenant_id = ? ORDER BY date DESC, id DESC LIMIT 1',
+                [b.assignment_id, req.tenant.id]
             );
             b.previous_page = lastProgress.length > 0 ? lastProgress[0].page_number : b.start_page;
 
             // Fetch recent progress history for graph
             const [progHistory] = await db.execute(
-                'SELECT date, page_number FROM book_progress WHERE assignment_id = ? ORDER BY date ASC LIMIT 15',
-                [b.assignment_id]
+                'SELECT date, page_number FROM book_progress WHERE assignment_id = ? AND tenant_id = ? ORDER BY date ASC LIMIT 15',
+                [b.assignment_id, req.tenant.id]
             );
             b.progress_history = progHistory.map(ph => ({
                 date: ph.date instanceof Date ? ph.date.toISOString().split('T')[0] : String(ph.date).split('T')[0],
@@ -278,19 +278,19 @@ exports.showCRDashboard = async (req, res) => {
         }
 
         const [teacherAttendance] = await db.execute(
-            'SELECT * FROM attendance_teachers WHERE date = ? AND class_id = ?',
-            [selectedDate, classId]
+            'SELECT * FROM attendance_teachers WHERE date = ? AND class_id = ? AND tenant_id = ?',
+            [selectedDate, classId, req.tenant.id]
         );
 
         // --- Areeb Personal Student Queries ---
         const [personalBooks] = await db.execute(`
             SELECT tb.*, b.title as book_title, t.name as teacher_name
             FROM teacher_books tb
-            JOIN books b ON tb.book_id = b.id
-            JOIN teachers t ON tb.teacher_id = t.id
-            JOIN sessions s ON tb.session_id = s.id
-            WHERE tb.class_id = ? AND s.is_active = TRUE
-        `, [classId]);
+            JOIN books b ON tb.book_id = b.id AND b.tenant_id = tb.tenant_id
+            JOIN teachers t ON tb.teacher_id = t.id AND t.tenant_id = tb.tenant_id
+            JOIN sessions s ON tb.session_id = s.id AND s.tenant_id = tb.tenant_id
+            WHERE tb.class_id = ? AND s.is_active = TRUE AND tb.tenant_id = ?
+        `, [classId, req.tenant.id]);
 
         const dateParams = getDateFilterParams(req.query);
         const { startDate, endDate } = dateParams;
@@ -299,15 +299,15 @@ exports.showCRDashboard = async (req, res) => {
             try {
                 // Fetch progress just before filtered startDate
                 const [beforeRange] = await db.execute(
-                    'SELECT page_number FROM book_progress WHERE assignment_id = ? AND date < ? ORDER BY date DESC, id DESC LIMIT 1',
-                    [b.id, startDate]
+                    'SELECT page_number FROM book_progress WHERE assignment_id = ? AND date < ? AND tenant_id = ? ORDER BY date DESC, id DESC LIMIT 1',
+                    [b.id, startDate, req.tenant.id]
                 );
                 const startPageRange = beforeRange.length > 0 ? beforeRange[0].page_number : b.start_page;
 
                 // Fetch progress up to filtered endDate
                 const [endOfRange] = await db.execute(
-                    'SELECT page_number FROM book_progress WHERE assignment_id = ? AND date <= ? ORDER BY date DESC, id DESC LIMIT 1',
-                    [b.id, endDate]
+                    'SELECT page_number FROM book_progress WHERE assignment_id = ? AND date <= ? AND tenant_id = ? ORDER BY date DESC, id DESC LIMIT 1',
+                    [b.id, endDate, req.tenant.id]
                 );
                 const endPageRange = endOfRange.length > 0 ? endOfRange[0].page_number : b.start_page;
 
@@ -319,10 +319,10 @@ exports.showCRDashboard = async (req, res) => {
                 const [progHistory] = await db.execute(`
                     SELECT bp.id, bp.date, bp.page_number, u.username as updater_name, u.role as updater_role
                     FROM book_progress bp
-                    LEFT JOIN users u ON bp.marked_by = u.id
-                    WHERE bp.assignment_id = ? AND bp.date >= ? AND bp.date <= ?
+                    LEFT JOIN users u ON bp.marked_by = u.id AND u.tenant_id = bp.tenant_id
+                    WHERE bp.assignment_id = ? AND bp.date >= ? AND bp.date <= ? AND bp.tenant_id = ?
                     ORDER BY bp.date ASC, bp.id ASC
-                `, [b.id, startDate, endDate]);
+                `, [b.id, startDate, endDate, req.tenant.id]);
 
                 let lastPage = startPageRange;
                 b.detailed_history = [];
@@ -355,8 +355,8 @@ exports.showCRDashboard = async (req, res) => {
                 SUM(CASE WHEN status = 'online' THEN 1 ELSE 0 END) as online,
                 COUNT(*) as total
              FROM attendance_students 
-             WHERE student_id = ?`,
-            [student[0].id]
+             WHERE student_id = ? AND tenant_id = ?`,
+            [student[0].id, req.tenant.id]
         );
         const presentCount = personalStats[0] ? Number(personalStats[0].present || 0) : 0;
         const onlineCount = personalStats[0] ? Number(personalStats[0].online || 0) : 0;
@@ -365,8 +365,8 @@ exports.showCRDashboard = async (req, res) => {
 
         // Calculate present streak
         const [personalAllAttendance] = await db.execute(
-            'SELECT status FROM attendance_students WHERE student_id = ? ORDER BY date DESC',
-            [student[0].id]
+            'SELECT status FROM attendance_students WHERE student_id = ? AND tenant_id = ? ORDER BY date DESC',
+            [student[0].id, req.tenant.id]
         );
         let streak = 0;
         for (const record of personalAllAttendance) {
@@ -380,9 +380,9 @@ exports.showCRDashboard = async (req, res) => {
         // Paginated attendance list
         const [personalAttendanceList] = await db.execute(
             `SELECT * FROM attendance_students 
-             WHERE student_id = ? AND date >= ? AND date <= ? 
+             WHERE student_id = ? AND date >= ? AND date <= ? AND tenant_id = ?
              ORDER BY date DESC LIMIT 10`,
-            [student[0].id, startDate, endDate]
+            [student[0].id, startDate, endDate, req.tenant.id]
         );
 
         res.render('dashboard_cr', {
@@ -414,26 +414,26 @@ exports.showCRDashboard = async (req, res) => {
 
 exports.showStudentsManage = async (req, res) => {
     try {
-        let studentsQuery = 'SELECT s.*, c.name_ar as class_name FROM students s JOIN classes c ON s.class_id = c.id';
-        let queryParams = [];
+        let studentsQuery = 'SELECT s.*, c.name_ar as class_name FROM students s JOIN classes c ON s.class_id = c.id AND c.tenant_id = s.tenant_id WHERE s.tenant_id = ?';
+        let queryParams = [req.tenant.id];
         let crClassId = null;
 
         if (['عريف', 'عریف'].includes(req.session.role)) {
-            crClassId = await getCRClassId(req.session.userId);
+            crClassId = await getCRClassId(req.session.userId, req.tenant.id);
             if (!crClassId) return res.status(403).send('CR class not found');
-            studentsQuery = 'SELECT s.*, c.name_ar as class_name FROM students s JOIN classes c ON s.class_id = c.id WHERE s.class_id = ?';
-            queryParams.push(crClassId);
+            studentsQuery = 'SELECT s.*, c.name_ar as class_name FROM students s JOIN classes c ON s.class_id = c.id AND c.tenant_id = s.tenant_id WHERE s.class_id = ? AND s.tenant_id = ?';
+            queryParams = [crClassId, req.tenant.id];
         } else {
             studentsQuery += ' ORDER BY s.class_id, s.name';
         }
 
         const [students] = await db.execute(studentsQuery, queryParams);
 
-        let classesQuery = 'SELECT * FROM classes';
-        let classParams = [];
+        let classesQuery = 'SELECT * FROM classes WHERE tenant_id = ?';
+        let classParams = [req.tenant.id];
         if (crClassId) {
-            classesQuery = 'SELECT * FROM classes WHERE id = ?';
-            classParams.push(crClassId);
+            classesQuery = 'SELECT * FROM classes WHERE id = ? AND tenant_id = ?';
+            classParams = [crClassId, req.tenant.id];
         }
         const [classes] = await db.execute(classesQuery, classParams);
 
@@ -445,49 +445,56 @@ exports.showStudentsManage = async (req, res) => {
 };
 
 exports.showStudentsAdd = async (req, res) => {
-    let classesQuery = 'SELECT * FROM classes';
-    let params = [];
+    let classesQuery = 'SELECT * FROM classes WHERE tenant_id = ?';
+    let params = [req.tenant.id];
     if (['عريف', 'عریف'].includes(req.session.role)) {
-        const crClassId = await getCRClassId(req.session.userId);
-        classesQuery = 'SELECT * FROM classes WHERE id = ?';
-        params.push(crClassId);
+        const crClassId = await getCRClassId(req.session.userId, req.tenant.id);
+        classesQuery = 'SELECT * FROM classes WHERE id = ? AND tenant_id = ?';
+        params = [crClassId, req.tenant.id];
     }
     const [classes] = await db.execute(classesQuery, params);
     res.render('student_add', { classes, role: req.session.role });
 };
 
+const { checkQuota } = require('../utils/quota');
+
 exports.addStudent = async (req, res) => {
     const { name, classId } = req.body;
     try {
+        const quota = await checkQuota(req.tenant.id, 'students');
+        if (!quota.allowed) {
+            return res.status(403).send(`خطأ: لقد تجاوزت الحد الأقصى المسموح به للطلاب وهو ${quota.limit} طالب. يرجى ترقية الباقة لزيادة الحد.`);
+        }
+
         if (['عريف', 'عریف'].includes(req.session.role)) {
-            const crClassId = await getCRClassId(req.session.userId);
+            const crClassId = await getCRClassId(req.session.userId, req.tenant.id);
             if (crClassId != classId) return res.status(403).send('Unauthorized to add to this class');
         }
 
         const username = name.split(' ')[0] + Math.floor(Math.random() * 1000);
         const password = await bcrypt.hash('1234', 10);
-        const [userResult] = await db.execute('INSERT INTO users (username, password, role) VALUES (?, ?, ?)', [username, password, 'طالب']);
+        const [userResult] = await db.execute('INSERT INTO users (username, password, role, tenant_id) VALUES (?, ?, ?, ?)', [username, password, 'طالب', req.tenant.id]);
         const userId = userResult.insertId;
 
-        const [studentResult] = await db.execute('INSERT INTO students (name, class_id, user_id) VALUES (?, ?, ?)', [name, classId, userId]);
+        const [studentResult] = await db.execute('INSERT INTO students (name, class_id, user_id, tenant_id) VALUES (?, ?, ?, ?)', [name, classId, userId, req.tenant.id]);
         const studentId = studentResult.insertId;
         const year = new Date().getFullYear().toString().slice(-2);
         const rollNumber = `S-${year}-${1000 + studentId}`;
 
-        await db.execute('UPDATE students SET roll_number = ? WHERE id = ?', [rollNumber, studentId]);
+        await db.execute('UPDATE students SET roll_number = ? WHERE id = ? AND tenant_id = ?', [rollNumber, studentId, req.tenant.id]);
 
-        const [activeSessions] = await db.execute('SELECT id FROM sessions WHERE is_active = TRUE LIMIT 1');
+        const [activeSessions] = await db.execute('SELECT id FROM sessions WHERE is_active = TRUE AND tenant_id = ? LIMIT 1', [req.tenant.id]);
         if (activeSessions.length > 0) {
             await db.execute(
-                'INSERT INTO student_enrollments (student_id, class_id, session_id) VALUES (?, ?, ?)',
-                [studentId, classId, activeSessions[0].id]
+                'INSERT INTO student_enrollments (student_id, class_id, session_id, tenant_id) VALUES (?, ?, ?, ?)',
+                [studentId, classId, activeSessions[0].id, req.tenant.id]
             );
         }
 
         let finalUsername = name.split(' ')[0];
-        const [existing] = await db.execute('SELECT id FROM users WHERE username = ?', [finalUsername]);
+        const [existing] = await db.execute('SELECT id FROM users WHERE username = ? AND tenant_id = ?', [finalUsername, req.tenant.id]);
         if (existing.length > 0) finalUsername += studentId;
-        await db.execute('UPDATE users SET username = ? WHERE id = ?', [finalUsername, userId]);
+        await db.execute('UPDATE users SET username = ? WHERE id = ? AND tenant_id = ?', [finalUsername, userId, req.tenant.id]);
 
         res.redirect('/students/manage');
     } catch (err) {
@@ -501,21 +508,21 @@ exports.editStudent = async (req, res) => {
     const { name, classId } = req.body;
     try {
         if (['عريف', 'عریف'].includes(req.session.role)) {
-            const crClassId = await getCRClassId(req.session.userId);
-            const [student] = await db.execute('SELECT class_id FROM students WHERE id = ?', [id]);
+            const crClassId = await getCRClassId(req.session.userId, req.tenant.id);
+            const [student] = await db.execute('SELECT class_id FROM students WHERE id = ? AND tenant_id = ?', [id, req.tenant.id]);
             if (!student.length || student[0].class_id !== crClassId || crClassId != classId) {
                 return res.status(403).send('Unauthorized to edit this student or change to this class');
             }
         }
-        await db.execute('UPDATE students SET name = ?, class_id = ? WHERE id = ?', [name, classId, id]);
+        await db.execute('UPDATE students SET name = ?, class_id = ? WHERE id = ? AND tenant_id = ?', [name, classId, id, req.tenant.id]);
         
-        const [activeSessions] = await db.execute('SELECT id FROM sessions WHERE is_active = TRUE LIMIT 1');
+        const [activeSessions] = await db.execute('SELECT id FROM sessions WHERE is_active = TRUE AND tenant_id = ? LIMIT 1', [req.tenant.id]);
         if (activeSessions.length > 0) {
             await db.execute(`
-                INSERT INTO student_enrollments (student_id, class_id, session_id) 
-                VALUES (?, ?, ?)
+                INSERT INTO student_enrollments (student_id, class_id, session_id, tenant_id) 
+                VALUES (?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE class_id = VALUES(class_id)
-            `, [id, classId, activeSessions[0].id]);
+            `, [id, classId, activeSessions[0].id, req.tenant.id]);
         }
         res.redirect('/students/manage?success=true');
     } catch (err) {
@@ -528,13 +535,13 @@ exports.deleteStudent = async (req, res) => {
     const { id } = req.params;
     try {
         if (['عريف', 'عریف'].includes(req.session.role)) {
-            const crClassId = await getCRClassId(req.session.userId);
-            const [student] = await db.execute('SELECT class_id FROM students WHERE id = ?', [id]);
+            const crClassId = await getCRClassId(req.session.userId, req.tenant.id);
+            const [student] = await db.execute('SELECT class_id FROM students WHERE id = ? AND tenant_id = ?', [id, req.tenant.id]);
             if (!student.length || student[0].class_id !== crClassId) {
                 return res.status(403).send('Unauthorized to delete this student');
             }
         }
-        await db.execute('DELETE FROM students WHERE id = ?', [id]);
+        await db.execute('DELETE FROM students WHERE id = ? AND tenant_id = ?', [id, req.tenant.id]);
         res.redirect('/students/manage');
     } catch (err) {
         console.error(err);
@@ -545,7 +552,7 @@ exports.deleteStudent = async (req, res) => {
 exports.showAttendance = async (req, res) => {
     const { classId } = req.params;
     if (['عريف', 'عریف'].includes(req.session.role)) {
-        const crClassId = await getCRClassId(req.session.userId);
+        const crClassId = await getCRClassId(req.session.userId, req.tenant.id);
         if (crClassId != classId) return res.status(403).send('Unauthorized');
     }
     const date = req.query.date || DateTime.now().toISODate();
@@ -554,9 +561,9 @@ exports.showAttendance = async (req, res) => {
         const [students] = await db.execute(
             `SELECT s.*, a.status 
              FROM students s 
-             LEFT JOIN attendance_students a ON s.id = a.student_id AND a.date = ?
-             WHERE s.class_id = ?`,
-            [date, classId]
+             LEFT JOIN attendance_students a ON s.id = a.student_id AND a.date = ? AND a.tenant_id = s.tenant_id
+             WHERE s.class_id = ? AND s.tenant_id = ?`,
+            [date, classId, req.tenant.id]
         );
         console.log(`✅ Found ${students.length} students for this class.`);
 
@@ -567,14 +574,14 @@ exports.showAttendance = async (req, res) => {
              SUM(CASE WHEN status = 'leave' THEN 1 ELSE 0 END) as leave_count,
              SUM(CASE WHEN status = 'online' THEN 1 ELSE 0 END) as online
              FROM attendance_students 
-             WHERE student_id IN (SELECT id FROM students WHERE class_id = ?)
+             WHERE student_id IN (SELECT id FROM students WHERE class_id = ? AND tenant_id = ?) AND tenant_id = ?
              GROUP BY date 
              ORDER BY date DESC LIMIT 14`,
-            [classId]
+            [classId, req.tenant.id, req.tenant.id]
         );
         console.log(`📊 Weekly history rows found: ${history.length}`);
 
-        const [classInfo] = await db.execute('SELECT * FROM classes WHERE id = ?', [classId]);
+        const [classInfo] = await db.execute('SELECT * FROM classes WHERE id = ? AND tenant_id = ?', [classId, req.tenant.id]);
         res.render('attendance_students', { students, classInfo: classInfo[0], date, history });
     } catch (err) {
         console.error(err);
@@ -585,16 +592,16 @@ exports.showAttendance = async (req, res) => {
 exports.saveAttendance = async (req, res) => {
     const { date, attendance, classId } = req.body;
     if (['عريف', 'عریف'].includes(req.session.role)) {
-        const crClassId = await getCRClassId(req.session.userId);
+        const crClassId = await getCRClassId(req.session.userId, req.tenant.id);
         if (crClassId != classId) return res.status(403).send('Unauthorized');
     }
     try {
         for (const [studentId, status] of Object.entries(attendance)) {
             await db.execute(
-                `INSERT INTO attendance_students (student_id, date, status, marked_by) 
-                 VALUES (?, ?, ?, ?) 
+                `INSERT INTO attendance_students (student_id, date, status, marked_by, tenant_id) 
+                 VALUES (?, ?, ?, ?, ?) 
                  ON DUPLICATE KEY UPDATE status = ?`,
-                [studentId, date, status, req.session.userId, status]
+                [studentId, date, status, req.session.userId, req.tenant.id, status]
             );
         }
         res.json({ success: true });

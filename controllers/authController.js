@@ -31,7 +31,7 @@ exports.login = async (req, res) => {
                 .replace(/\u0629/g, '\u0647');
         };
 
-        const [rows] = await db.execute('SELECT * FROM users');
+        const [rows] = await db.execute('SELECT * FROM users WHERE tenant_id = ?', [req.tenant.id]);
         const user = rows.find(u => normalizeUsername(u.username) === normalizeUsername(cleanUsername));
         
         if (user) {
@@ -90,13 +90,13 @@ exports.showChangePassword = (req, res) => {
 exports.changePassword = async (req, res) => {
     const { currentPassword, newPassword, confirmPassword } = req.body;
     try {
-        const [user] = await db.execute('SELECT password FROM users WHERE id = ?', [req.session.userId]);
+        const [user] = await db.execute('SELECT password FROM users WHERE id = ? AND tenant_id = ?', [req.session.userId, req.tenant.id]);
         const match = await bcrypt.compare(currentPassword, user[0].password);
         if (!match) return res.render('change_password', { error: 'Current password incorrect', success: null });
         if (newPassword !== confirmPassword) return res.render('change_password', { error: 'Passwords do not match', success: null });
 
         const hashed = await bcrypt.hash(newPassword, 10);
-        await db.execute('UPDATE users SET password = ? WHERE id = ?', [hashed, req.session.userId]);
+        await db.execute('UPDATE users SET password = ? WHERE id = ? AND tenant_id = ?', [hashed, req.session.userId, req.tenant.id]);
         res.render('change_password', { error: null, success: 'Password updated successfully' });
     } catch (err) {
         console.error(err);
@@ -115,7 +115,7 @@ exports.showDashboard = async (req, res) => {
         } else if (role === 'أستاذ') {
             return res.redirect('/dashboard/teacher');
         } else if (role === 'ناظم' || role === 'مدير') {
-            const [classes] = await db.execute('SELECT * FROM classes ORDER BY id ASC');
+            const [classes] = await db.execute('SELECT * FROM classes WHERE tenant_id = ? ORDER BY id ASC', [req.tenant.id]);
             const today = DateTime.now().setLocale('ar').toFormat('cccc, dd MMMM yyyy');
             return res.render('dashboard', { classes, today, role });
         }

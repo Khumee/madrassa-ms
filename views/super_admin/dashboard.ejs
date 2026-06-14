@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدير النظام المشترك | لوحة التحكم</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Cairo:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Cairo', 'Outfit', sans-serif;
+            background-color: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .navbar-super {
+            background: #0f172a;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .stat-card {
+            background: white;
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(99, 102, 241, 0.1);
+        }
+
+        .icon-box {
+            width: 55px;
+            height: 55px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .table-card {
+            background: white;
+            border: none;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+            overflow: hidden;
+        }
+
+        .table th {
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            color: #64748b;
+            border-bottom: 2px solid #f1f5f9;
+            padding: 18px 24px;
+        }
+
+        .table td {
+            padding: 18px 24px;
+            vertical-align: middle;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .badge-plan {
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+        .badge-free { background: #f1f5f9; color: #475569; }
+        .badge-pro { background: #eff6ff; color: #2563eb; }
+        .badge-enterprise { background: #faf5ff; color: #7c3aed; }
+
+        .btn-action {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .modal-content {
+            border: none;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        }
+
+        .form-control, .form-select {
+            border-radius: 12px;
+            padding: 10px 16px;
+            border: 1px solid #cbd5e1;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-super py-3 px-4">
+        <div class="container-fluid">
+            <div class="d-flex align-items-center gap-3">
+                <div class="bg-indigo p-2 rounded-3 text-white d-flex align-items-center justify-content-center" style="background: #6366f1; width: 40px; height: 40px;">
+                    <i class="bi bi-shield-fill-check"></i>
+                </div>
+                <a href="#" class="navbar-brand fw-bold mb-0">لوحة التحكم بالنظام المشترك (Super Admin)</a>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span class="text-light-50 small text-white-50">أهلاً بك، مدير النظام</span>
+                <a href="/admin/logout" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                    <i class="bi bi-box-arrow-left me-1"></i> خروج
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container py-5">
+        
+        <!-- Stats Summary Grid -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-3">
+                <div class="card stat-card p-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted small fw-bold d-block mb-1">المستأجرون الكليون</span>
+                            <h3 class="fw-bold mb-0"><%= stats.totalTenants %></h3>
+                        </div>
+                        <div class="icon-box bg-primary-subtle text-primary" style="background-color: #eff6ff; color: #2563eb;">
+                            <i class="bi bi-building"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card p-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted small fw-bold d-block mb-1">المستأجرون النشطون</span>
+                            <h3 class="fw-bold mb-0 text-success"><%= stats.activeTenants %></h3>
+                        </div>
+                        <div class="icon-box bg-success-subtle text-success" style="background-color: #f0fdf4; color: #16a34a;">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card p-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted small fw-bold d-block mb-1">إجمالي الطلاب</span>
+                            <h3 class="fw-bold mb-0"><%= stats.totalStudents %></h3>
+                        </div>
+                        <div class="icon-box bg-info-subtle text-info" style="background-color: #ecfeff; color: #0891b2;">
+                            <i class="bi bi-people"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card p-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted small fw-bold d-block mb-1">إجمالي المعلمين</span>
+                            <h3 class="fw-bold mb-0"><%= stats.totalTeachers %></h3>
+                        </div>
+                        <div class="icon-box bg-warning-subtle text-warning" style="background-color: #fffbeb; color: #d97706;">
+                            <i class="bi bi-person-badge"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold mb-0">المستأجرون وحسابات المدارس</h4>
+            <button class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#createTenantModal">
+                <i class="bi bi-plus-lg me-1"></i> إنشاء مستأجر جديد
+            </button>
+        </div>
+
+        <!-- Tenants Table -->
+        <div class="card table-card">
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th>الرقم</th>
+                            <th>المستأجر (الاسم)</th>
+                            <th>الرابط / النطاق الفرعي</th>
+                            <th>باقة الاشتراك</th>
+                            <th>الحدود الاستيعابية (طلاب/معلمين)</th>
+                            <th>الحالة</th>
+                            <th class="text-center">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% tenants.forEach(tenant => { %>
+                            <tr>
+                                <td class="fw-bold text-muted">#<%= tenant.id %></td>
+                                <td>
+                                    <div class="fw-bold"><%= tenant.name %></div>
+                                    <div class="text-muted small"><%= tenant.school_name %></div>
+                                </td>
+                                <td>
+                                    <a href="http://<%= tenant.subdomain %>.localhost:3000" target="_blank" class="badge bg-secondary-subtle text-secondary text-decoration-none">
+                                        <%= tenant.subdomain %>.mms
+                                    </a>
+                                    <% if (tenant.custom_domain) { %>
+                                        <div class="small mt-1 text-primary fw-semibold"><i class="bi bi-globe me-1"></i><%= tenant.custom_domain %></div>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <span class="badge-plan badge-<%= tenant.plan_tier %>">
+                                        <% if (tenant.plan_tier === 'free') { %>مجاني<% } %>
+                                        <% if (tenant.plan_tier === 'pro') { %>احترافي<% } %>
+                                        <% if (tenant.plan_tier === 'enterprise') { %>مؤسساتي<% } %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="small">الطلاب: <strong class="text-indigo"><%= tenant.max_students %></strong></div>
+                                    <div class="small">المعلمون: <strong class="text-indigo"><%= tenant.max_teachers %></strong></div>
+                                </td>
+                                <td>
+                                    <% if (tenant.status === 'active') { %>
+                                        <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2 small fw-bold">نشط</span>
+                                    <% } else { %>
+                                        <span class="badge bg-danger-subtle text-danger rounded-pill px-3 py-2 small fw-bold">معلق</span>
+                                    <% } %>
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <button class="btn btn-outline-primary btn-action" title="تعديل التفاصيل والحدود"
+                                                data-bs-toggle="modal" data-bs-target="#editTenantModal<%= tenant.id %>">
+                                            <i class="bi bi-pencil-fill"></i>
+                                        </button>
+                                        
+                                        <% if (tenant.status === 'active') { %>
+                                            <button class="btn btn-outline-danger btn-action" title="تعليق المستأجر" onclick="toggleStatus(<%= tenant.id %>, 'suspended')">
+                                                <i class="bi bi-slash-circle"></i>
+                                            </button>
+                                        <% } else { %>
+                                            <button class="btn btn-outline-success btn-action" title="تفعيل المستأجر" onclick="toggleStatus(<%= tenant.id %>, 'active')">
+                                                <i class="bi bi-check-circle"></i>
+                                            </button>
+                                        <% } %>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Edit Tenant Modal for each Tenant -->
+                            <div class="modal fade" id="editTenantModal<%= tenant.id %>" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header px-4 py-3 border-0 bg-light-subtle">
+                                            <h5 class="modal-title fw-bold">تعديل حساب المستأجر #<%= tenant.id %></h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <form action="/admin/tenants/edit/<%= tenant.id %>" method="POST">
+                                            <div class="modal-body px-4 py-4">
+                                                <div class="row g-3">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">اسم الشركة/المستأجر</label>
+                                                        <input type="text" class="form-control" name="name" value="<%= tenant.name %>" required>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">الاسم الرسمي للمدرسة</label>
+                                                        <input type="text" class="form-control" name="schoolName" value="<%= tenant.school_name %>" required>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">النطاق الفرعي (Subdomain)</label>
+                                                        <input type="text" class="form-control" name="subdomain" value="<%= tenant.subdomain %>" required>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">نطاق مخصص (Custom Domain)</label>
+                                                        <input type="text" class="form-control" name="customDomain" value="<%= tenant.custom_domain || '' %>" placeholder="مثال: sch.edu.com">
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="form-label fw-semibold">باقة الاشتراك</label>
+                                                        <select class="form-select" name="planTier">
+                                                            <option value="free" <%= tenant.plan_tier === 'free' ? 'selected' : '' %>>مجانية (Free)</option>
+                                                            <option value="pro" <%= tenant.plan_tier === 'pro' ? 'selected' : '' %>>احترافية (Pro)</option>
+                                                            <option value="enterprise" <%= tenant.plan_tier === 'enterprise' ? 'selected' : '' %>>مؤسساتي (Enterprise)</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="form-label fw-semibold">الحد الأقصى للطلاب</label>
+                                                        <input type="number" class="form-control" name="maxStudents" value="<%= tenant.max_students %>" required>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="form-label fw-semibold">الحد الأقصى للمعلمين</label>
+                                                        <input type="number" class="form-control" name="maxTeachers" value="<%= tenant.max_teachers %>" required>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="form-label fw-semibold">الحد الأقصى للفصول/الحصص</label>
+                                                        <input type="number" class="form-control" name="maxClasses" value="<%= tenant.max_classes %>" required>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="form-label fw-semibold">اللون الأساسي للعلامة التجارية</label>
+                                                        <input type="color" class="form-control form-control-color w-100" name="primaryColor" value="<%= tenant.primary_color || '#3b82f6' %>">
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="form-label fw-semibold">اللون الثانوي للعلامة التجارية</label>
+                                                        <input type="color" class="form-control form-control-color w-100" name="secondaryColor" value="<%= tenant.secondary_color || '#1d4ed8' %>">
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">حالة المستأجر</label>
+                                                        <select class="form-select" name="status">
+                                                            <option value="active" <%= tenant.status === 'active' ? 'selected' : '' %>>نشط</option>
+                                                            <option value="suspended" <%= tenant.status === 'suspended' ? 'selected' : '' %>>معلق / suspended</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer border-0 px-4 pb-4">
+                                                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">إلغاء</button>
+                                                <button type="submit" class="btn btn-primary rounded-pill px-4">حفظ التغييرات</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Create Tenant Modal -->
+    <div class="modal fade" id="createTenantModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header px-4 py-3 border-0 bg-light-subtle">
+                    <h5 class="modal-title fw-bold">إنشاء مستأجر جديد</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="/admin/tenants/create" method="POST">
+                    <div class="modal-body px-4 py-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">اسم الشركة/المستأجر</label>
+                                <input type="text" class="form-control" name="name" placeholder="مثال: مدرسة الإخلاص" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">الاسم الرسمي للمدرسة</label>
+                                <input type="text" class="form-control" name="schoolName" placeholder="مثال: مدرسة الإخلاص الأهلية" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">النطاق الفرعي (Subdomain)</label>
+                                <input type="text" class="form-control" name="subdomain" placeholder="مثال: ikhlas (بدون نقاط أو مسافات)" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">نطاق مخصص (Custom Domain)</label>
+                                <input type="text" class="form-control" name="customDomain" placeholder="اختياري، مثال: ikhlas.com">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">باقة الاشتراك</label>
+                                <select class="form-select" name="planTier">
+                                    <option value="free" selected>مجانية (Free)</option>
+                                    <option value="pro">احترافية (Pro)</option>
+                                    <option value="enterprise">مؤسساتي (Enterprise)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">الحد الأقصى للطلاب</label>
+                                <input type="number" class="form-control" name="maxStudents" value="50" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">الحد الأقصى للمعلمين</label>
+                                <input type="number" class="form-control" name="maxTeachers" value="5" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">الحد الأقصى للفصول/الحصص</label>
+                                <input type="number" class="form-control" name="maxClasses" value="5" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 px-4 pb-4">
+                        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">إلغاء</button>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4">إنشاء وتجهيز</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function toggleStatus(tenantId, newStatus) {
+            if (!confirm(`هل أنت متأكد من تغيير حالة المستأجر إلى: ${newStatus === 'active' ? 'نشط' : 'معلق'}؟`)) return;
+
+            try {
+                const res = await fetch(`/admin/tenants/toggle/${tenantId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('خطأ أثناء تعديل حالة المستأجر: ' + data.error);
+                }
+            } catch (err) {
+                console.error(err);
+                alert('خطأ في الاتصال بالخادم.');
+            }
+        }
+    </script>
+</body>
+</html>

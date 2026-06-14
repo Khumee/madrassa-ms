@@ -4,7 +4,7 @@ const { DateTime } = require('luxon');
 
 exports.showTeacherDashboard = async (req, res) => {
     try {
-        const [teacher] = await db.execute('SELECT * FROM teachers WHERE user_id = ?', [req.session.userId]);
+        const [teacher] = await db.execute('SELECT * FROM teachers WHERE user_id = ? AND tenant_id = ?', [req.session.userId, req.tenant.id]);
         if (!teacher[0]) return res.status(404).send('Teacher record not found');
 
         const teacherId = teacher[0].id;
@@ -18,24 +18,24 @@ exports.showTeacherDashboard = async (req, res) => {
         const [periods] = await db.execute(
             `SELECT p.*, c.name_ar as class_name 
              FROM periods p 
-             JOIN classes c ON p.class_id = c.id 
-             WHERE p.teacher_id = ? AND p.day_of_week = ?`,
-            [teacherId, dayName]
+             JOIN classes c ON p.class_id = c.id AND c.tenant_id = p.tenant_id
+             WHERE p.teacher_id = ? AND p.day_of_week = ? AND p.tenant_id = ?`,
+            [teacherId, dayName, req.tenant.id]
         );
 
         const [assignedBooks] = await db.execute(`
             SELECT tb.*, b.title as book_title, c.name_ar as class_name,
                    (SELECT COUNT(*) FROM periods p 
-                    WHERE p.assignment_id = tb.id AND p.day_of_week = ?) as has_period_today,
+                    WHERE p.assignment_id = tb.id AND p.day_of_week = ? AND p.tenant_id = tb.tenant_id) as has_period_today,
                    (SELECT MIN(p.period_number) FROM periods p 
-                    WHERE p.assignment_id = tb.id AND p.day_of_week = ?) as first_period_today
+                    WHERE p.assignment_id = tb.id AND p.day_of_week = ? AND p.tenant_id = tb.tenant_id) as first_period_today
             FROM teacher_books tb
-            JOIN books b ON tb.book_id = b.id
-            JOIN sessions s ON tb.session_id = s.id
-            LEFT JOIN classes c ON tb.class_id = c.id
-            WHERE tb.teacher_id = ? AND s.is_active = TRUE
+            JOIN books b ON tb.book_id = b.id AND b.tenant_id = tb.tenant_id
+            JOIN sessions s ON tb.session_id = s.id AND s.tenant_id = tb.tenant_id
+            LEFT JOIN classes c ON tb.class_id = c.id AND c.tenant_id = tb.tenant_id
+            WHERE tb.teacher_id = ? AND s.is_active = TRUE AND tb.tenant_id = ?
             ORDER BY has_period_today DESC, first_period_today ASC, tb.id DESC
-        `, [dayName, dayName, teacherId]);
+        `, [dayName, dayName, teacherId, req.tenant.id]);
 
         res.render('dashboard_teacher', {
             teacher: teacher[0],
@@ -52,7 +52,7 @@ exports.showTeacherDashboard = async (req, res) => {
 
 exports.showTeachersManage = async (req, res) => {
     try {
-        const [teachers] = await db.execute('SELECT * FROM teachers');
+        const [teachers] = await db.execute('SELECT * FROM teachers WHERE tenant_id = ?', [req.tenant.id]);
         res.render('teachers_manage', { teachers, role: req.session.role });
     } catch (err) {
         console.error(err);
@@ -64,25 +64,32 @@ exports.showTeachersAdd = (req, res) => {
     res.render('teacher_add');
 };
 
+const { checkQuota } = require('../utils/quota');
+
 exports.addTeacher = async (req, res) => {
     const { name, subject } = req.body;
     try {
+        const quota = await checkQuota(req.tenant.id, 'teachers');
+        if (!quota.allowed) {
+            return res.status(403).send(`خطأ: لقد تجاوزت الحد الأقصى المسموح به للمعلمين وهو ${quota.limit} معلم. يرجى ترقية الباقة لزيادة الحد.`);
+        }
+
         const username = name.split(' ')[0] + Math.floor(Math.random() * 1000);
         const password = await bcrypt.hash('1234', 10);
-        const [userResult] = await db.execute('INSERT INTO users (username, password, role) VALUES (?, ?, ?)', [username, password, 'أستاذ']);
+        const [userResult] = await db.execute('INSERT INTO users (username, password, role, tenant_id) VALUES (?, ?, ?, ?)', [username, password, 'أستاذ', req.tenant.id]);
         const userId = userResult.insertId;
 
-        const [teacherResult] = await db.execute('INSERT INTO teachers (name, subject, user_id) VALUES (?, ?, ?)', [name, subject, userId]);
+        const [teacherResult] = await db.execute('INSERT INTO teachers (name, subject, user_id, tenant_id) VALUES (?, ?, ?, ?)', [name, subject, userId, req.tenant.id]);
         const teacherId = teacherResult.insertId;
         const year = new Date().getFullYear();
         const idNumber = `${year}-${1000 + teacherId}`;
 
-        await db.execute('UPDATE teachers SET id_number = ? WHERE id = ?', [idNumber, teacherId]);
+        await db.execute('UPDATE teachers SET id_number = ? WHERE id = ? AND tenant_id = ?', [idNumber, teacherId, req.tenant.id]);
 
         let finalUsername = name.split(' ')[0];
-        const [existing] = await db.execute('SELECT id FROM users WHERE username = ?', [finalUsername]);
+        const [existing] = await db.execute('SELECT id FROM users WHERE username = ? AND tenant_id = ?', [finalUsername, req.tenant.id]);
         if (existing.length > 0) finalUsername += userResult.insertId;
-        await db.execute('UPDATE users SET username = ? WHERE id = ?', [finalUsername, userId]);
+        await db.execute('UPDATE users SET username = ? WHERE id = ? AND tenant_id = ?', [finalUsername, userId, req.tenant.id]);
 
         res.redirect('/teachers/manage');
     } catch (err) {
@@ -95,7 +102,7 @@ exports.editTeacher = async (req, res) => {
     const { id } = req.params;
     const { name, subject } = req.body;
     try {
-        await db.execute('UPDATE teachers SET name = ?, subject = ? WHERE id = ?', [name, subject, id]);
+        await db.execute('UPDATE teachers SET name = ?, subject = ? WHERE id = ? AND tenant_id = ?', [name, subject, id, req.tenant.id]);
         res.redirect('/teachers/manage?success=true');
     } catch (err) {
         console.error(err);
@@ -106,7 +113,7 @@ exports.editTeacher = async (req, res) => {
 exports.deleteTeacher = async (req, res) => {
     const { id } = req.params;
     try {
-        await db.execute('DELETE FROM teachers WHERE id = ?', [id]);
+        await db.execute('DELETE FROM teachers WHERE id = ? AND tenant_id = ?', [id, req.tenant.id]);
         res.redirect('/teachers/manage');
     } catch (err) {
         console.error(err);
@@ -143,22 +150,23 @@ exports.showWeeklyAttendance = async (req, res) => {
 
     try {
         // Fetch all teachers sorted by name
-        const [teachers] = await db.execute('SELECT * FROM teachers WHERE id IN (SELECT DISTINCT teacher_id FROM periods) ORDER BY name');
+        const [teachers] = await db.execute('SELECT * FROM teachers WHERE id IN (SELECT DISTINCT teacher_id FROM periods WHERE tenant_id = ?) AND tenant_id = ? ORDER BY name', [req.tenant.id, req.tenant.id]);
 
         // Fetch all periods count per teacher & day_of_week
         const [periodsCount] = await db.execute(`
             SELECT teacher_id, day_of_week, COUNT(*) as count 
             FROM periods 
+            WHERE tenant_id = ?
             GROUP BY teacher_id, day_of_week
-        `);
+        `, [req.tenant.id]);
 
         // Fetch all marked attendance for the dates of the week (sum across all classes for each teacher/day)
         const [attendanceList] = await db.execute(`
             SELECT teacher_id, DATE_FORMAT(date, '%Y-%m-%d') as date_str, SUM(classes_taken) as classes_taken
             FROM attendance_teachers
-            WHERE date BETWEEN ? AND ?
+            WHERE date BETWEEN ? AND ? AND tenant_id = ?
             GROUP BY teacher_id, date
-        `, [days[0].dateStr, days[5].dateStr]);
+        `, [days[0].dateStr, days[5].dateStr, req.tenant.id]);
 
         // Map it all together
         const reportData = teachers.map(teacher => {
@@ -207,8 +215,8 @@ exports.saveWeeklyAttendance = async (req, res) => {
             // Delete a teacher's attendance record (back to "درج نہیں")
             const classId = req.body.classId || null;
             await db.execute(
-                'DELETE FROM attendance_teachers WHERE teacher_id = ? AND class_id = ? AND date = ?',
-                [req.body.teacherId, classId, date]
+                'DELETE FROM attendance_teachers WHERE teacher_id = ? AND class_id = ? AND date = ? AND tenant_id = ?',
+                [req.body.teacherId, classId, date, req.tenant.id]
             );
             return res.json({ success: true });
         }
@@ -221,10 +229,10 @@ exports.saveWeeklyAttendance = async (req, res) => {
                 const teacherStatus = classesTaken > 0 ? 'present' : 'absent';
 
                 await db.execute(
-                    `INSERT INTO attendance_teachers (teacher_id, class_id, date, classes_taken, status, marked_by)
-                     VALUES (?, ?, ?, ?, ?, ?)
+                    `INSERT INTO attendance_teachers (teacher_id, class_id, date, classes_taken, status, marked_by, tenant_id)
+                     VALUES (?, ?, ?, ?, ?, ?, ?)
                      ON DUPLICATE KEY UPDATE classes_taken = ?, status = ?, marked_by = ?`,
-                    [tId, classId, date, classesTaken, teacherStatus, req.session.userId, classesTaken, teacherStatus, req.session.userId]
+                    [tId, classId, date, classesTaken, teacherStatus, req.session.userId, req.tenant.id, classesTaken, teacherStatus, req.session.userId]
                 );
             }
             return res.json({ success: true });
@@ -233,10 +241,10 @@ exports.saveWeeklyAttendance = async (req, res) => {
         // Case 2: Saving from older legacy forms (if any)
         const classesTaken = (status === 'present') ? 1 : 0;
         await db.execute(
-            `INSERT INTO attendance_teachers (teacher_id, date, classes_taken, status, marked_by) 
-             VALUES (?, ?, ?, ?, ?) 
+            `INSERT INTO attendance_teachers (teacher_id, date, classes_taken, status, marked_by, tenant_id) 
+             VALUES (?, ?, ?, ?, ?, ?) 
              ON DUPLICATE KEY UPDATE classes_taken = ?, status = ?, marked_by = ?`,
-            [teacherId, date, classesTaken, status || 'present', req.session.userId, classesTaken, status || 'present', req.session.userId]
+            [teacherId, date, classesTaken, status || 'present', req.session.userId, req.tenant.id, classesTaken, status || 'present', req.session.userId]
         );
         res.json({ success: true });
     } catch (err) {
@@ -250,16 +258,17 @@ exports.showAssignmentsManage = async (req, res) => {
         const [assignments] = await db.execute(`
             SELECT tb.*, t.name as teacher_name, b.title as book_title, s.name as session_name, c.name_ar as class_name
             FROM teacher_books tb
-            JOIN teachers t ON tb.teacher_id = t.id
-            JOIN books b ON tb.book_id = b.id
-            JOIN sessions s ON tb.session_id = s.id
-            LEFT JOIN classes c ON tb.class_id = c.id
+            JOIN teachers t ON tb.teacher_id = t.id AND t.tenant_id = tb.tenant_id
+            JOIN books b ON tb.book_id = b.id AND b.tenant_id = tb.tenant_id
+            JOIN sessions s ON tb.session_id = s.id AND s.tenant_id = tb.tenant_id
+            LEFT JOIN classes c ON tb.class_id = c.id AND c.tenant_id = tb.tenant_id
+            WHERE tb.tenant_id = ?
             ORDER BY s.name DESC, t.name
-        `);
-        const [teachers] = await db.execute('SELECT id, name FROM teachers ORDER BY name');
-        const [books] = await db.execute('SELECT id, title FROM books ORDER BY title');
-        const [sessions] = await db.execute('SELECT id, name, is_active FROM sessions ORDER BY name DESC');
-        const [classes] = await db.execute('SELECT id, name_ar as name FROM classes ORDER BY name_ar ASC');
+        `, [req.tenant.id]);
+        const [teachers] = await db.execute('SELECT id, name FROM teachers WHERE tenant_id = ? ORDER BY name', [req.tenant.id]);
+        const [books] = await db.execute('SELECT id, title FROM books WHERE tenant_id = ? ORDER BY title', [req.tenant.id]);
+        const [sessions] = await db.execute('SELECT id, name, is_active FROM sessions WHERE tenant_id = ? ORDER BY name DESC', [req.tenant.id]);
+        const [classes] = await db.execute('SELECT id, name_ar as name FROM classes WHERE tenant_id = ? ORDER BY name_ar ASC', [req.tenant.id]);
         res.render('teacher_books_manage', { assignments, teachers, books, sessions, classes });
     } catch (err) {
         console.error(err);
@@ -271,9 +280,9 @@ exports.assignBook = async (req, res) => {
     const { teacherId, bookId, sessionId, startPage, endPage, classId } = req.body;
     try {
         await db.execute(
-            `INSERT INTO teacher_books (teacher_id, book_id, session_id, start_page, end_page, current_page, class_id) 
-             VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [teacherId, bookId, sessionId, startPage, endPage, startPage, classId]
+            `INSERT INTO teacher_books (teacher_id, book_id, session_id, start_page, end_page, current_page, class_id, tenant_id) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            [teacherId, bookId, sessionId, startPage, endPage, startPage, classId, req.tenant.id]
         );
         res.redirect('/teacher-books/manage');
     } catch (err) {
@@ -287,14 +296,14 @@ exports.editAssignment = async (req, res) => {
     const { teacherId, bookId, startPage, endPage, sessionId, classId } = req.body;
     try {
         await db.execute(
-            'UPDATE teacher_books SET teacher_id = ?, book_id = ?, start_page = ?, end_page = ?, session_id = ?, class_id = ? WHERE id = ?',
-            [teacherId, bookId, startPage, endPage, sessionId, classId, id]
+            'UPDATE teacher_books SET teacher_id = ?, book_id = ?, start_page = ?, end_page = ?, session_id = ?, class_id = ? WHERE id = ? AND tenant_id = ?',
+            [teacherId, bookId, startPage, endPage, sessionId, classId, id, req.tenant.id]
         );
 
         // Instantly synchronize the static subject column for any timetable periods linked to this assignment
-        const [bookRows] = await db.execute('SELECT title FROM books WHERE id = ?', [bookId]);
+        const [bookRows] = await db.execute('SELECT title FROM books WHERE id = ? AND tenant_id = ?', [bookId, req.tenant.id]);
         if (bookRows.length > 0) {
-            await db.execute('UPDATE periods SET subject = ? WHERE assignment_id = ?', [bookRows[0].title, id]);
+            await db.execute('UPDATE periods SET subject = ? WHERE assignment_id = ? AND tenant_id = ?', [bookRows[0].title, id, req.tenant.id]);
         }
 
         res.json({ success: true });
@@ -307,7 +316,7 @@ exports.editAssignment = async (req, res) => {
 exports.checkAssignmentPeriods = async (req, res) => {
     const { id } = req.params;
     try {
-        const [rows] = await db.execute('SELECT COUNT(*) as count FROM periods WHERE assignment_id = ?', [id]);
+        const [rows] = await db.execute('SELECT COUNT(*) as count FROM periods WHERE assignment_id = ? AND tenant_id = ?', [id, req.tenant.id]);
         res.json({ success: true, count: rows[0].count });
     } catch (err) {
         console.error(err);
@@ -319,8 +328,8 @@ exports.deleteAssignment = async (req, res) => {
     const { id } = req.params;
     try {
         // Explicitly clean up any periods associated with this assignment
-        await db.execute('DELETE FROM periods WHERE assignment_id = ?', [id]);
-        await db.execute('DELETE FROM teacher_books WHERE id = ?', [id]);
+        await db.execute('DELETE FROM periods WHERE assignment_id = ? AND tenant_id = ?', [id, req.tenant.id]);
+        await db.execute('DELETE FROM teacher_books WHERE id = ? AND tenant_id = ?', [id, req.tenant.id]);
         res.json({ success: true });
     } catch (err) {
         console.error(err);
@@ -337,7 +346,7 @@ exports.updateBookProgress = async (req, res) => {
     }
 
     try {
-        const [assignment] = await db.execute('SELECT start_page, end_page, current_page FROM teacher_books WHERE id = ?', [assignmentId]);
+        const [assignment] = await db.execute('SELECT start_page, end_page, current_page FROM teacher_books WHERE id = ? AND tenant_id = ?', [assignmentId, req.tenant.id]);
         if (!assignment.length) {
             return res.json({ success: false, error: 'سجل التوزيع غير موجود' });
         }
@@ -351,18 +360,18 @@ exports.updateBookProgress = async (req, res) => {
 
         // If correcting a mistake backwards, delete any progress records higher than the new page
         await db.execute(
-            'DELETE FROM book_progress WHERE assignment_id = ? AND page_number > ?',
-            [assignmentId, numPage]
+            'DELETE FROM book_progress WHERE assignment_id = ? AND page_number > ? AND tenant_id = ?',
+            [assignmentId, numPage, req.tenant.id]
         );
 
         await db.execute(
-            `INSERT INTO book_progress (assignment_id, date, page_number, marked_by) 
-             VALUES (?, ?, ?, ?) 
+            `INSERT INTO book_progress (assignment_id, date, page_number, marked_by, tenant_id) 
+             VALUES (?, ?, ?, ?, ?) 
              ON DUPLICATE KEY UPDATE page_number = ?`,
-            [assignmentId, date, pageNumber, req.session.userId, pageNumber]
+            [assignmentId, date, pageNumber, req.session.userId, req.tenant.id, pageNumber]
         );
 
-        const [result] = await db.execute('UPDATE teacher_books SET current_page = ? WHERE id = ?', [pageNumber, assignmentId]);
+        const [result] = await db.execute('UPDATE teacher_books SET current_page = ? WHERE id = ? AND tenant_id = ?', [pageNumber, assignmentId, req.tenant.id]);
 
         if (result.affectedRows === 0) {
             return res.json({ success: false, error: 'لم يتم العثور على سجل التوزيع' });

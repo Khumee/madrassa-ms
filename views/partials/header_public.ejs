@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= __('College_Name') %> - <%= __('Timetable') %></title>
-    <link rel="icon" href="/logo.jpg">
+    <title><%= (locals.tenant && tenant.school_name) ? tenant.school_name : __('College_Name') %> - <%= __('Timetable') %></title>
+    <link rel="icon" href="<%= (locals.tenant && tenant.logo_url) ? tenant.logo_url : '/logo.jpg' %>">
     <% if (['ar', 'ur'].includes(lang)) { %>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
     <% } else { %>
@@ -14,8 +14,8 @@
     <link rel="stylesheet" href="/css/style.css">
     <style>
         :root {
-            --primary: #2c3e50;
-            --secondary: #ecf0f1;
+            --primary: <%= (locals.tenant && tenant.primary_color) ? tenant.primary_color : '#2c3e50' %>;
+            --secondary: <%= (locals.tenant && tenant.secondary_color) ? tenant.secondary_color : '#ecf0f1' %>;
             --accent: #27ae60;
         }
         body {
@@ -43,8 +43,8 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-white px-3 px-md-4 py-3 mb-4 shadow-sm">
         <div class="container-fluid">
             <div class="d-flex align-items-center gap-2">
-                <img src="/logo.jpg" alt="Logo" style="height: 40px; border-radius: 5px;">
-                <a href="/timetable/public" class="navbar-brand logo fw-bold text-decoration-none mb-0"><%= __('College_Name') %></a>
+                <img src="<%= (locals.tenant && tenant.logo_url) ? tenant.logo_url : '/logo.jpg' %>" alt="Logo" style="height: 40px; border-radius: 5px;">
+                <a href="/timetable/public" class="navbar-brand logo fw-bold text-decoration-none mb-0"><%= (locals.tenant && tenant.school_name) ? tenant.school_name : __('College_Name') %></a>
             </div>
             
             <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">

@@ -1,167 +1,182 @@
-# Open Source Transition Plan
+# Unified Open Source Transition & Multi-Tenant SaaS Architecture Plan
 
-This plan outlines the steps to clean, rename, and prepare the repository to be open-sourced under the MIT License.
+This plan merges the steps to clean, rename, and prepare the repository to be open-sourced under the MIT License with the database redesign and features required to turn the system into a multi-tenant SaaS application.
 
-## Task Summary (Status Checklist)
+---
+
+## 1. Task Summary (Status Checklist)
+
+### Phase 1: Open Source Cleanup (Completed)
 - [x] **Branding Rebrand**: Rename package to `madrassa-management-system` and update parameters.
 - [x] **Database Setup**: Set default fallback connection parameter to `madrassa_db`.
 - [x] **Clean Startup logic**: Move local-only modifications to git-ignored `private/kui_normalize.js`.
 - [x] **Arabic Translation Defaults**: Set fallback language locale to Arabic (`ar`) by default.
 - [x] **Database Scrubbing**: Clean historical migration files (`V2__Data.sql`) and remove private institution records.
-- [x] **Urdu Demo Seeder**: Build a full Urdu/Arabic seed script mapping realistic data and varied textbook slopes.
+- [x] **Urdu Demo Seeder**: Build a full Urdu/Arabic seed script mapping realistic data and varied textbook progress slopes.
 - [x] **Urdu Role Logins**: Add logins for Mudeer (`مدیر`), Nazim (`ناظم`), Teacher (`استاذ`), Areef (`عریف`), and Student (`طالب`) with password `1234`.
 - [x] **Docker Support**: Setup `Dockerfile` and `docker-compose.yml` configs.
 - [x] **Documentation & MIT License**: Add generic files (`README.md`, `DEPLOYMENT.md`, `CONTRIBUTING.md`, `LICENSE`).
-- [x] **Marketing Points**: Document competitive value propositions for marketing.
-- [x] **Video Sequence Details**: Plan step-by-step features video guidelines.
-- [x] **Launch & Community Strategy**: Outline GitHub tags, live demo steps, and forum launching.
-- [x] **Branch Publish**: Commit and push changes to the remote branch `open-source-transition`.
+- [x] **Mobile App**: Update Java entries to generic URLs.
 
-
-## User Review Required
-
-> [!IMPORTANT]
-> - **Generic Name**: The project will be renamed to **Madrassa Management System (MMS)**.
-> - **Data Scrubbing**: We will scrub `sql/V2__Data.sql`, `sql/kui.sql`, `schema.sql`, `schema_new.sql`, and `seed_data.js` of specific student/teacher names, logs, and custom configuration entries. We will keep default roles, permissions, and classes.
-> - **History Reset**: We will initialize a clean Git history starting with an initial clean generic commit, keeping a local copy of your historical commits safely backed up.
-
-## Proposed Changes
-
-### Configuration and Branding
-
-#### [MODIFY] [package.json](file:///d:/kui-ms/package.json)
-- Rename package from `mas` to `madrassa-management-system`.
-- Update description and scripts. Replace the long, custom `seed` script with a generic `node scripts/seed.js` and add a script for seeding demo data (`npm run seed:demo`).
-
-#### [NEW] [.env.example](file:///d:/kui-ms/.env.example)
-- Create a template for environment variables containing `PORT`, `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, and `SESSION_SECRET` with generic placeholder values.
-
-#### [MODIFY] [db.js](file:///d:/kui-ms/db.js) and [migrate.js](file:///d:/kui-ms/migrate.js)
-- Change default database name fallback from `kui` to `madrassa_db`.
-
-#### [MODIFY] [server.js](file:///d:/kui-ms/server.js)
-- Remove security-sensitive and institution-specific boot-time queries:
-  - Remove the query that resets passwords to `'1234'` on startup.
-  - Remove role normalizations and username modifications on startup.
-- Keep the table check/generation logic for `role_permissions` and default permission inserts, as these are critical for system operation.
+### Phase 2: Multi-Tenant & SaaS Conversion (Completed)
+- [x] **Create Tenants & Super-Admin Tables**: Introduce the `tenants` table and a `master_admins` table.
+- [x] **Database Migration (tenant_id)**: Add `tenant_id` columns and foreign keys to all tenant-scoped tables. Update unique indexes to include `tenant_id`.
+- [x] **Context-Based Middleware**: Build subdomain parsing middleware and set up `AsyncLocalStorage` to carry the active `tenantId`.
+- [x] **Query Safety Wrapper**: Modify `db.js` to assert that all queries run under the tenant context, throwing errors in development if a tenant filter is omitted.
+- [x] **Limit Enforcement Logic**: Add quota checks before inserting new students, teachers, or classes (Free vs Pro limits).
+- [x] **Dynamic Branding Injection**: Inject CSS variables (colors) and logo URLs into EJS templates based on the current tenant config.
+- [x] **Super-Admin Interface (`admin.mms.nukrim.com`)**: Build the control interface for provisioning new tenants, upgrading plan tiers, and suspending/activating domains.
 
 ---
 
-### Database and Data Scripts
+## 2. Multi-Tenant Architecture & Database Redesign (Shared Database)
 
-#### [DELETE] [seed_data.js](file:///d:/kui-ms/seed_data.js)
-- Delete this custom script since it contains specific teacher names.
+To ensure ease of migrations, we will host all tenants inside a **Single Database (Shared Schema)** and scope all data logically using a `tenant_id` column.
 
-#### [MODIFY] [schema.sql](file:///d:/kui-ms/schema.sql) and [schema_new.sql](file:///d:/kui-ms/schema_new.sql)
-- Remove hardcoded teacher/subject insert statements.
-- Change database name from `kui` to `madrassa_db`.
+### A. Core Tenant Schema
+We will create the `tenants` table to manage tenant routing, limits, status, and branding.
 
-#### [DELETE] [kui.sql](file:///d:/kui-ms/sql/kui.sql)
-- Remove the full database backup/dump containing institutional data.
+#### 1. The `tenants` Table
+```sql
+CREATE TABLE IF NOT EXISTS tenants (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    subdomain VARCHAR(100) NOT NULL UNIQUE, -- e.g. 'mmsdemo' or 'kui'
+    custom_domain VARCHAR(255) UNIQUE,       -- e.g. 'mmsdemo.nukrim.com' or 'kui.nukrim.com'
+    status ENUM('active', 'suspended', 'maintenance') DEFAULT 'active',
+    
+    -- Plan and Limits
+    plan_tier ENUM('free', 'pro', 'enterprise') DEFAULT 'free',
+    max_students INT DEFAULT 50,             -- Limit for Free tier
+    max_teachers INT DEFAULT 5,              -- Limit for Free tier
+    max_classes INT DEFAULT 5,               -- Limit for Free tier
+    
+    -- Feature Flags
+    enable_custom_branding TINYINT(1) DEFAULT 0,
+    enable_mobile_app TINYINT(1) DEFAULT 0,
+    enable_advanced_reports TINYINT(1) DEFAULT 0,
+    
+    -- Branding details
+    logo_url VARCHAR(255) DEFAULT '/images/default_logo.png',
+    school_name VARCHAR(255) NOT NULL,       -- e.g., 'Jamia Dar-ul-Huda' or 'Kulliyat-ul-Uloom Al-Islamia'
+    primary_color VARCHAR(7) DEFAULT '#3b82f6',
+    secondary_color VARCHAR(7) DEFAULT '#1d4ed8',
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+```
 
-#### [MODIFY] [V2__Data.sql](file:///d:/kui-ms/sql/V2__Data.sql)
-- Clean this migration file to only insert default classes, sessions, and roles/permissions. Remove all individual students, teachers, book progress, periods, and attendance records.
+#### 2. The `master_admins` Table
+Admin users managing the entire SaaS network will log in through `admin.mms.nukrim.com` (or `adminmms.nukrim.com`) and exist in a globally isolated table:
+```sql
+CREATE TABLE IF NOT EXISTS master_admins (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
 
-#### [NEW] [seed_demo_urdu.js](file:///d:/kui-ms/scripts/seed_demo_urdu.js)
-- Create a script that populates the database with generic Urdu names for students and teachers, mock timetable periods, mock classes, and mock book assignments to allow users to quickly test the interface with beautiful dummy Arabic/Urdu data.
-- **Urdu/Arabic Role Logins**: Configure Urdu/Arabic login accounts for all 5 roles (Mudeer: `مدیر`, Nazim: `ناظم`, Teacher: `استاذ`, Areef: `عریف`, Student: `طالب`) with digit password `1234` to facilitate demo video creation.
-- **Realistic Book Progress**: Ensure seeded books and progress slopes vary realistically in starting page and speed across different assignments.
+### B. Table Modification & Composite Unique Constraints
+We will add `tenant_id INT` and foreign keys referencing `tenants(id) ON DELETE CASCADE` to all tenant-scoped tables. Existing global unique constraints must be converted to composite indexes scoped by `tenant_id`:
 
-#### [NEW] [private/kui_normalize.js](file:///d:/kui-ms/private/kui_normalize.js)
-- Move the specific password reset, username correction, and role normalizations into this script inside the git-ignored `private/` folder. This preserves your ability to run these operations on your local database when needed without running them on boot or pushing them to GitHub.
+#### 1. Users Table (`users`)
+```sql
+ALTER TABLE users ADD COLUMN tenant_id INT NOT NULL;
+ALTER TABLE users DROP INDEX username;
+ALTER TABLE users ADD UNIQUE KEY unique_username_per_tenant (tenant_id, username);
+ALTER TABLE users ADD CONSTRAINT fk_users_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE;
+```
 
-#### [MODIFY] [scripts/maintenance/seed.js](file:///d:/kui-ms/scripts/maintenance/seed.js)
-- Move to `scripts/seed.js` and make it the main generic seed script to set up the default admin user.
-- Remove other institutional maintenance scripts (`scripts/maintenance/migrate_users.js`, `fix_roles.js`, etc.) and import scripts under `scripts/imports/`.
+#### 2. Students Table (`students`)
+```sql
+ALTER TABLE students ADD COLUMN tenant_id INT NOT NULL;
+ALTER TABLE students DROP INDEX roll_number;
+ALTER TABLE students ADD UNIQUE KEY unique_roll_number_per_tenant (tenant_id, roll_number);
+ALTER TABLE students ADD CONSTRAINT fk_students_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE;
+```
+
+#### 3. Teachers Table (`teachers`)
+```sql
+ALTER TABLE teachers ADD COLUMN tenant_id INT NOT NULL;
+ALTER TABLE teachers DROP INDEX id_number;
+ALTER TABLE teachers ADD UNIQUE KEY unique_id_number_per_tenant (tenant_id, id_number);
+ALTER TABLE teachers ADD CONSTRAINT fk_teachers_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE;
+```
+
+#### 4. Other Scoped Tables
+The following tables will also have `tenant_id INT NOT NULL` and a foreign key constraint added:
+`classes`, `attendance_students`, `attendance_teachers`, `books`, `teacher_books`, `book_progress`, `periods`, `sessions`, `student_enrollments`, and `role_permissions`.
+
+### C. URL Routing & Authentication Flow
+1. **Domain Detection**:
+   When a user requests a URL, the middleware inspects the host header:
+   * `mmsdemo.nukrim.com` maps to **Tenant 1** (Demo tenant name: **Jamia Habibullah Islamabad (Demo Account) / جامعہ حبیب اللہ اسلام آباد (فرضی نام)**).
+   * `kui.nukrim.com` maps to **Tenant 2** (KUI Production name: **Kulliyat-ul-Uloom Al-Islamia / کلیۃ العلوم الاسلامیہ**).
+   * `admin.mms.nukrim.com` (or `adminmms.nukrim.com`) bypasses tenant lookup and activates the Super-Admin panel.
+2. **Context Binding**:
+   The active `tenantId` is bound to the request thread using Node's `AsyncLocalStorage`.
+3. **Login Lookup**:
+   Authentication queries retrieve users matching both the username and the resolved tenant:
+   ```sql
+   SELECT * FROM users WHERE username = ? AND tenant_id = ?;
+   ```
+
+### D. Developer Guardrails (Query Scoping)
+Because this application uses raw SQL strings via `db.execute()`, we will protect against data leaks by implementing runtime validations:
+1. **Tenant Middleware**: Resolves tenant by hostname and binds `tenantId` to an `AsyncLocalStorage` instance.
+2. **Query Scoping Check**: In development, `db.execute` will check queries targetting tenant tables (e.g. `students`, `teachers`) and throw a runtime error if the query lacks a `tenant_id` filter.
 
 ---
 
-### Localization and Default Settings
+## 3. SaaS Feature Controls & Quotas
 
-#### [MODIFY] [server.js](file:///d:/kui-ms/server.js)
-- Default the i18n system to Arabic (`ar`) as the standard language so the demo renders in Arabic by default unless otherwise switched.
+### A. Lifecycle Status Routing
+* **Active**: Standard application access.
+* **Suspended**: Users see an account lockout screen; login is blocked.
+* **Maintenance**: Only Super-Admins or tenant admins can log in; others see a maintenance screen.
 
----
+### B. Quota Checks
+A utility function will execute before record insertions:
+```javascript
+async function checkQuota(tenantId, resourceType) {
+    const [[tenant]] = await db.query('SELECT plan_tier, max_students, max_teachers, max_classes FROM tenants WHERE id = ?', [tenantId]);
+    // Checks if count >= limit, throwing a Quota Exception if true
+}
+```
 
-### Developer Experience (DX) and Docker Support
-
-#### [NEW] [Dockerfile](file:///d:/kui-ms/Dockerfile)
-- Create a standard lightweight Dockerfile using `node:18-alpine` to package the Node.js application.
-
-#### [NEW] [docker-compose.yml](file:///d:/kui-ms/docker-compose.yml)
-- Configure a multi-container local setup containing the Node.js app and a MySQL database service, including automatic environment variable injection and volume mounting for persistent DB data.
-
-#### [NEW] [.dockerignore](file:///d:/kui-ms/.dockerignore)
-- Ignore `node_modules`, `.git`, `.env`, and private files during Docker image building.
-
----
-
-### Legal and Documentation
-
-#### [NEW] [LICENSE](file:///d:/kui-ms/LICENSE)
-- Create an MIT License file.
-
-#### [NEW] [CONTRIBUTING.md](file:///d:/kui-ms/CONTRIBUTING.md)
-- Provide guidelines on how external developers can set up the environment, run tests, adhere to conventions, and submit Pull Requests.
-
-#### [MODIFY] [README.md](file:///d:/kui-ms/README.md)
-- Rewrite `README.md` to introduce the project under its generic name.
-- Include one-liner instructions for Docker deployment and manual installation instructions using new generic scripts.
-
-#### [NEW] [DEPLOYMENT.md](file:///d:/kui-ms/DEPLOYMENT.md)
-- Provide a detailed deployment guide covering server setup (Node.js, MySQL, PM2), environment configuration, Nginx reverse proxy configuration, SSL setup, and database migrations.
-- **Demo Subdomain**: Add instructions for configuring `demo.nukrim.com` on your existing server, directing to a separate PM2 process loaded with the generic Urdu demo seed data.
+### C. Branding Customization
+The main HTML layout file will load CSS variables dynamically:
+```html
+<style>
+  :root {
+    --primary-color: <%= tenant.enable_custom_branding ? tenant.primary_color : '#3b82f6' %>;
+    --secondary-color: <%= tenant.enable_custom_branding ? tenant.secondary_color : '#1d4ed8' %>;
+  }
+</style>
+```
 
 ---
 
-### Mobile App (Android)
+## 4. Central Administration Interface (`admin.mms.nukrim.com`)
 
-#### [MODIFY] [MainActivity.java](file:///d:/kui-ms/mobile/app/src/main/java/com/nukrim/madrasati/MainActivity.java)
-- Replace hardcoded private domain URL (`https://kui.nukrim.com`) with a generic placeholder URL or instruct on how to customize it.
+We will configure a separate Nginx site config or subfolder routing for the Super-Admin dashboard:
+* **Tenant Registry**: Table displaying all tenants, their subdomains, statuses, and current student count vs limits.
+* **Tenant Provisioner & Management**: Form to add new tenants, update plan type (Free/Pro/Enterprise), and override specific quotas.
+* **Tenant Lifecycle Control**: Enable/Disable (Suspend) or place a tenant in maintenance mode.
+* **Branding Settings**: Form to upload custom school logos and update colors.
 
-## Verification Plan
+---
+
+## 5. Verification Plan
 
 ### Automated Tests
-- Run database migrations (`npm run migrate`) on a clean local database to verify schema setup.
-- Run the seed script (`npm run seed`) and demo script (`npm run seed:demo`) to check data creation.
-- Start the server using both `npm start` and `docker compose up` to ensure it boots without errors.
+- Run database migrations on a clean local database to verify new schema setup.
+- Execute unit checks testing that inserting students beyond limits returns a quota warning.
 
 ### Manual Verification
-- Review file contents to ensure no institutional names, private keys, or passwords remain.
-- Log in to all 5 roles (`مدیر`, `ناظم`, `استاذ`, `عریف`, `طالب`) with password `1234` to verify language sensitivity and dashboards.
-
----
-
-## Marketing & Video Demonstration Points
-
-### 1. Key Marketing Points (Value Proposition)
-When presenting the Madrassa Management System (MMS) in your video or marketing materials, highlight these competitive advantages:
-* **Arabic & Urdu Native Interface**: Fully localized and language-sensitive, built from the ground up for Islamic educational institutions.
-* **Dual-Role Class Rep (Areef) Dashboard**: A unique operational feature where a trusted student (Areef) handles daily operations (attendance, book tracking), removing the administrative burden from teachers.
-* **Timetable-Integrated Attendance**: Student and teacher attendance are linked directly to daily scheduled classes, making period-by-period reporting extremely accurate.
-* **Curriculum Progress Tracking**: Interactive page-by-page progress indicators and visualization charts showing current syllabus coverage versus total syllabus goals.
-* **Mobile Companion Compatibility**: Standard WebView design that transforms the web dashboard into an Android/iOS mobile application with native app-version checks.
-
-### 2. Video Demonstration Sequence & Highlights
-Follow this sequence to create a compelling features video:
-1. **Opening / Branding (0:00 - 0:15)**: Show the clean login screen in Arabic. Highlight the translation switcher (Arabic/Urdu/English).
-2. **Director (Mudeer) View (0:15 - 0:45)**: Log in as `مدیر`. Point out the overall metrics: total active classes, registered students, and school-wide status.
-3. **Supervisor (Nazim) View (0:45 - 1:15)**: Log in as `ناظم`. Show how they can view and export unified timetables and review overall progress reports.
-4. **Teacher (Ustadh) View (1:15 - 1:45)**: Log in as `استاذ`. Show the simplified dashboard focusing on today's teaching hours.
-5. **Class Rep (Areef) Day-to-Day (1:45 - 2:30)**: Log in as `عریف`. Show them completing three daily tasks:
-   * Marking classmate attendance.
-   * Marking teacher presence/absence for their periods.
-   * Modifying textbook progress page using the interactive `+`/`-` stepper and expanding the history line charts.
-6. **Student (Talib) View (2:30 - 3:00)**: Log in as `طالب`. Show their personalized dashboard featuring attendance percentages, streak indicators, and their progress on assigned books.
-
-### 3. Open Source Launch & Community Strategy
-To attract initial users and developers to the Madrassa Management System:
-* **GitHub Repository Topics (Tags)**: Once public, add these tags to the repository: `madrassa`, `islamic-school`, `school-management`, `attendance-system`, `arabic-rtl`, `self-hosted`, `opensource`.
-* **Live Demo Environment**: Deploy a generic read-only demo instance using the seeded Urdu/Arabic data (instructions in [DEPLOYMENT.md](file:///d:/kui-ms/DEPLOYMENT.md)) so people can test the interface before downloading.
-* **Community Outreach**:
-  * **Reddit**: Share your launch on r/selfhosted, r/opensource, and r/islam (targeting school administrators).
-  * **Hacker News**: Post a "Show HN" text post describing the origin story.
-  * **Launch Pitch**: Explain the "why" clearly—existing school management systems are complex, lack proper Arabic/RTL localization, and are not mobile-friendly for teachers.
-
-
-
+- Point hostnames in the local `hosts` file.
+- Log in to `kui.nukrim.local` and `mmsdemo.nukrim.local`. Confirm that adding a student to the demo does not alter production.
+- Suspend the demo tenant from `admin.mms.nukrim.local` and verify the tenant website immediately locks down.

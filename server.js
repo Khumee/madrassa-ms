@@ -51,11 +51,15 @@ app.use(session({
     cookie: { maxAge: 24 * 60 * 60 * 1000 } // 24 hours
 }));
 
+// Tenant Context Middleware
+const tenantMiddleware = require('./middleware/tenant');
+app.use(tenantMiddleware);
+
 // i18n Translation setup
 i18n.configure({
     locales: ['ar', 'ur', 'en'],
     directory: path.join(__dirname, 'locales'),
-    defaultLocale: 'ar',
+    defaultLocale: 'ur',
     cookie: 'lang',
     updateFiles: false
 });
@@ -64,8 +68,8 @@ app.use((req, res, next) => {
     if (req.session.lang && ['ar', 'ur', 'en'].includes(req.session.lang)) {
         req.setLocale(req.session.lang);
     } else {
-        req.session.lang = 'ar';
-        req.setLocale('ar');
+        req.session.lang = 'ur';
+        req.setLocale('ur');
     }
     res.locals.lang = req.getLocale();
     res.locals.__ = res.__;
@@ -90,6 +94,7 @@ const studentRoutes = require('./routes/studentRoutes');
 const teacherRoutes = require('./routes/teacherRoutes');
 const periodRoutes = require('./routes/periodRoutes');
 const reportRoutes = require('./routes/reportRoutes');
+const superAdminRoutes = require('./routes/superAdminRoutes');
 
 // Register Routers
 app.use(authRoutes);
@@ -97,95 +102,8 @@ app.use(studentRoutes);
 app.use(teacherRoutes);
 app.use(periodRoutes);
 app.use(reportRoutes);
+app.use(superAdminRoutes);
 
-// Start Server
-app.listen(PORT, async () => {
+app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
-    try {
-        const db = require('./config/db');
-        
-        // 0. Permissions Schema & Initial Seeding
-        await db.execute(`
-            CREATE TABLE IF NOT EXISTS role_permissions (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                role VARCHAR(50) NOT NULL,
-                function_name VARCHAR(100) NOT NULL,
-                allowed BOOLEAN DEFAULT FALSE,
-                UNIQUE KEY role_function (role, function_name)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-        `);
-
-        const [permCount] = await db.execute('SELECT COUNT(*) as count FROM role_permissions');
-        if (permCount[0].count === 0) {
-            console.log('Seeding default role permissions...');
-            const defaultPermissions = [
-                { function_name: 'reports', role: 'مدير', allowed: true },
-                { function_name: 'reports', role: 'ناظم', allowed: true },
-                { function_name: 'reports', role: 'عريف', allowed: false },
-                { function_name: 'reports', role: 'أستاذ', allowed: false },
-                { function_name: 'reports', role: 'طالب', allowed: false },
-
-                { function_name: 'books_manage', role: 'مدير', allowed: true },
-                { function_name: 'books_manage', role: 'ناظم', allowed: true },
-                { function_name: 'books_manage', role: 'عريف', allowed: false },
-                { function_name: 'books_manage', role: 'أستاذ', allowed: false },
-                { function_name: 'books_manage', role: 'طالب', allowed: false },
-
-                { function_name: 'users_manage', role: 'مدير', allowed: true },
-                { function_name: 'users_manage', role: 'ناظم', allowed: true },
-                { function_name: 'users_manage', role: 'عريف', allowed: false },
-                { function_name: 'users_manage', role: 'أستاذ', allowed: false },
-                { function_name: 'users_manage', role: 'طالب', allowed: false },
-
-                { function_name: 'students_manage', role: 'مدير', allowed: true },
-                { function_name: 'students_manage', role: 'ناظم', allowed: true },
-                { function_name: 'students_manage', role: 'عريف', allowed: false },
-                { function_name: 'students_manage', role: 'أستاذ', allowed: false },
-                { function_name: 'students_manage', role: 'طالب', allowed: false },
-
-                { function_name: 'student_attendance', role: 'مدير', allowed: true },
-                { function_name: 'student_attendance', role: 'ناظم', allowed: true },
-                { function_name: 'student_attendance', role: 'عريف', allowed: true },
-                { function_name: 'student_attendance', role: 'أستاذ', allowed: false },
-                { function_name: 'student_attendance', role: 'طالب', allowed: false },
-
-                { function_name: 'teachers_manage', role: 'مدير', allowed: true },
-                { function_name: 'teachers_manage', role: 'ناظم', allowed: true },
-                { function_name: 'teachers_manage', role: 'عريف', allowed: false },
-                { function_name: 'teachers_manage', role: 'أستاذ', allowed: false },
-                { function_name: 'teachers_manage', role: 'طالب', allowed: false },
-
-                { function_name: 'teacher_attendance', role: 'مدير', allowed: true },
-                { function_name: 'teacher_attendance', role: 'ناظم', allowed: true },
-                { function_name: 'teacher_attendance', role: 'عريف', allowed: true },
-                { function_name: 'teacher_attendance', role: 'أستاذ', allowed: false },
-                { function_name: 'teacher_attendance', role: 'طالب', allowed: false },
-
-                { function_name: 'teacher_books_manage', role: 'مدير', allowed: true },
-                { function_name: 'teacher_books_manage', role: 'ناظم', allowed: true },
-                { function_name: 'teacher_books_manage', role: 'عريف', allowed: false },
-                { function_name: 'teacher_books_manage', role: 'أستاذ', allowed: false },
-                { function_name: 'teacher_books_manage', role: 'طالب', allowed: false },
-
-                { function_name: 'periods_manage', role: 'مدير', allowed: true },
-                { function_name: 'periods_manage', role: 'ناظم', allowed: true },
-                { function_name: 'periods_manage', role: 'عريف', allowed: false },
-                { function_name: 'periods_manage', role: 'أستاذ', allowed: false },
-                { function_name: 'periods_manage', role: 'طالب', allowed: false }
-            ];
-
-            for (const perm of defaultPermissions) {
-                await db.execute(
-                    'INSERT IGNORE INTO role_permissions (role, function_name, allowed) VALUES (?, ?, ?)',
-                    [perm.role, perm.function_name, perm.allowed]
-                );
-            }
-            console.log('✅ Default role permissions seeded.');
-        }
-
-
-        console.log('✅ Startup database roles and permissions check complete.');
-    } catch (err) {
-        console.error('❌ Failed to run startup DB checks:', err);
-    }
 });
