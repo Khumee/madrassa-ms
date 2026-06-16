@@ -210,9 +210,10 @@ async function seedDemoForTenant(tenantId = 1) {
             for (let i = 0; i < 10; i++) {
                 const name = generateUniqueName(i, cIdx);
                 let username = `student_${cls.id}_${i + 1}`;
-                if (cIdx === 0) { // First class
-                    if (i === 0) username = 'عریف';
-                    else if (i === 1) username = 'طالب';
+                if (cIdx === 0 && i === 0) {
+                    username = 'عریف';
+                } else if (cIdx === 5 && i === 0) {
+                    username = 'طالب';
                 }
                 const hash = await bcrypt.hash('1234', 10);
                 const role = (cIdx === 0 && i === 0) ? 'عریف' : 'طالب'; // Translate representation to 'عریف' matching setup
