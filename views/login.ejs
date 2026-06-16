@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= __('College_Name') %></title>
-    <link rel="icon" href="/logo.jpg">
+    <title><%= locals.tenant ? (tenant.subdomain === 'madrassa-ms' ? __('Jamia_Habibullah_Islamabad') : (tenant.subdomain === 'kui' ? __('KUI_Production') : tenant.school_name)) : __('College_Name') %></title>
+    <link rel="icon" href="<%= (locals.tenant && tenant.logo_url) ? tenant.logo_url : '/logo.jpg' %>">
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body class="login-page">
     <div class="container" style="display: flex; height: 100vh; align-items: center; justify-content: center;">
         <div class="card" style="width: 100%; max-width: 400px; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
             <div style="text-align: center; margin-bottom: 25px;">
-                <img src="/logo.jpg" alt="<%= __('College_Name') %>" style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 15px;">
-                <h2 style="margin: 0; font-size: 1.6rem; color: var(--primary); font-weight: 700;"><%= __('College_Name') %></h2>
+                <img src="<%= (locals.tenant && tenant.logo_url) ? tenant.logo_url : '/logo.jpg' %>" alt="<%= locals.tenant ? (tenant.subdomain === 'madrassa-ms' ? __('Jamia_Habibullah_Islamabad') : (tenant.subdomain === 'kui' ? __('KUI_Production') : tenant.school_name)) : __('College_Name') %>" style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 15px;">
+                <h2 style="margin: 0; font-size: 1.6rem; color: var(--primary); font-weight: 700;"><%= locals.tenant ? (tenant.subdomain === 'madrassa-ms' ? __('Jamia_Habibullah_Islamabad') : (tenant.subdomain === 'kui' ? __('KUI_Production') : tenant.school_name)) : __('College_Name') %></h2>
                 <h3 style="margin: 5px 0 0 0; color: #666; font-size: 1.1rem; font-weight: 400;"><%= __('Login_Title') %></h3>
             </div>
             
