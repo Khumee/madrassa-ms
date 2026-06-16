@@ -53,8 +53,23 @@
         <button onclick="window.print()" class="btn btn-primary rounded-pill px-4">
             <i class="bi bi-printer-fill me-2"></i><%= locals.lang === 'ur' ? 'پرنٹ' : 'طباعة' %>
         </button>
+        <button onclick="downloadPDF()" class="btn btn-success rounded-pill px-4 ms-2">
+            <i class="bi bi-file-earmark-pdf-fill me-2"></i><%= locals.lang === 'ur' ? 'PDF ڈاؤن لوڈ' : 'تحميل PDF' %>
+        </button>
     </div>
 </div>
+
+<script>
+function downloadPDF() {
+    if (typeof showPdfLoader === 'function') showPdfLoader();
+    const url = new URL(window.location.origin + '/timetable/public/pdf');
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.forEach((value, key) => {
+        url.searchParams.set(key, value);
+    });
+    window.location.href = url.pathname + url.search;
+}
+</script>
 
 <!-- Expandable Filter Chips -->
 <div class="collapse no-print <%= (locals.selectedTeacherId || locals.selectedDay || locals.selectedClassId) ? 'show' : '' %>" id="filterCollapse">

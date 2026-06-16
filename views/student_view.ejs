@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="<%= lang %>" dir="<%= lang === 'en' ? 'ltr' : 'rtl' %>">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= student.name %> - <%= __('Student_Management') %></title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f3f4f6;
+            font-family: 'Inter', 'Outfit', sans-serif;
+            color: #1f2937;
+        }
+        .profile-container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            padding: 40px;
+        }
+        .header-section {
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 25px;
+            margin-bottom: 30px;
+        }
+        .school-logo {
+            max-height: 80px;
+            object-fit: contain;
+        }
+        .student-photo {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+        }
+        .section-title {
+            font-weight: 700;
+            color: #1d4ed8;
+            border-bottom: 2px solid #bfdbfe;
+            padding-bottom: 6px;
+            margin-bottom: 18px;
+            font-size: 1.15rem;
+        }
+        .data-label {
+            font-weight: 700;
+            color: #4b5563;
+            font-size: 0.9rem;
+        }
+        .data-value {
+            font-size: 0.95rem;
+            color: #111827;
+            padding: 6px 12px;
+            background-color: #f9fafb;
+            border-radius: 6px;
+            min-height: 38px;
+            display: flex;
+            align-items: center;
+        }
+        
+        /* Print styles */
+        @media print {
+            body {
+                background: #ffffff;
+                color: #000000;
+            }
+            .profile-container {
+                box-shadow: none;
+                margin: 0;
+                padding: 0;
+                max-width: 100%;
+                width: 100%;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .data-value {
+                background: none;
+                border-bottom: 1px dashed #9ca3af;
+                border-radius: 0;
+                padding: 2px 5px;
+                min-height: auto;
+            }
+            @page {
+                size: A4;
+                margin: 1.5cm;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Action Panel (No Print) -->
+    <div class="profile-container no-print d-flex justify-content-between align-items-center mb-0 p-3 bg-dark text-white rounded-3 shadow-sm">
+        <a href="/students/manage" class="btn btn-outline-light rounded-pill px-3">
+            <i class="bi bi-arrow-left me-2"></i><%= __('Back_To_Dashboard') %>
+        </a>
+        <div class="d-flex gap-2">
+            <button onclick="window.print()" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">
+                <i class="bi bi-printer-fill me-2"></i><%= __('Print') %>
+            </button>
+            <a href="/students/pdf/<%= student.id %>" onclick="if (typeof showPdfLoader === 'function') showPdfLoader()" class="btn btn-success rounded-pill px-4 fw-bold shadow-sm">
+                <i class="bi bi-file-earmark-pdf-fill me-2"></i>PDF Download
+            </a>
+        </div>
+    </div>
+
+    <!-- Official Profile Page -->
+    <div class="profile-container">
+        <!-- Header -->
+        <div class="header-section">
+            <div class="row align-items-center">
+                <div class="col-md-2 text-center text-md-start mb-3 mb-md-0">
+                    <img src="<%= tenant.logo_url %>" onerror="this.src='/logo.jpg'" class="school-logo img-fluid">
+                </div>
+                <div class="col-md-8 text-center mb-3 mb-md-0">
+                    <h2 class="fw-bold mb-1"><%= tenant.school_name %></h2>
+                    <h5 class="text-muted mb-0"><%= __('College_Name') %></h5>
+                    <h4 class="fw-bold mt-3 mb-0 text-primary"><%= __('Student_Profile') %> (<%= __('Admission_Year') %>: <%= student.admission_year || '' %>)</h4>
+                </div>
+                <div class="col-md-2 text-center text-md-end">
+                    <img src="<%= student.photo_url || '/images/default_student.png' %>" class="student-photo shadow-sm">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Academic Information -->
+            <div class="col-md-12 mb-4">
+                <div class="section-title"><i class="bi bi-mortarboard-fill me-2"></i><%= __('Academic_Details') %></div>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="data-label"><%= __('Student_Full_Name') %></div>
+                        <div class="data-value"><%= student.name %></div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="data-label"><%= __('Roll_No') %></div>
+                        <div class="data-value"><%= student.roll_number || '' %></div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="data-label"><%= __('Current_Class') %></div>
+                        <div class="data-value"><%= __(student.class_name) %></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personal & Contact Information -->
+            <div class="col-md-12 mb-4">
+                <div class="section-title"><i class="bi bi-person-fill me-2"></i><%= __('Contact_Details') %></div>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="data-label"><%= __('Father_Name') %></div>
+                        <div class="data-value"><%= student.father_name || '' %></div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="data-label"><%= __('Date_Of_Birth') %></div>
+                        <div class="data-value">
+                            <% if (student.dob) { %>
+                                <%= new Date(student.dob).toLocaleDateString(lang === 'en' ? 'en-US' : 'ur-PK', { year: 'numeric', month: 'long', day: 'numeric' }) %>
+                            <% } %>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="data-label"><%= __('CNIC_BForm') %></div>
+                        <div class="data-value"><%= student.cnic || '' %></div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="data-label"><%= __('Identification_Mark') %></div>
+                        <div class="data-value"><%= student.identification_mark || '' %></div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="data-label"><%= __('Residential_Phone') %></div>
+                        <div class="data-value"><%= student.phone || '' %></div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="data-label"><%= __('Mobile_Number') %></div>
+                        <div class="data-value"><%= student.mobile || '' %></div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="data-label"><%= __('Email_Address') %></div>
+                        <div class="data-value"><%= student.email || '' %></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="data-label"><%= __('Current_Address') %></div>
+                        <div class="data-value"><%= student.current_address || '' %></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="data-label"><%= __('Permanent_Address') %></div>
+                        <div class="data-value"><%= student.permanent_address || '' %></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Guardian Information -->
+            <div class="col-md-12 mb-4">
+                <div class="section-title"><i class="bi bi-shield-fill-check me-2"></i><%= __('Guardian_Details') %></div>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="data-label"><%= __('Guardian_Name') %></div>
+                        <div class="data-value"><%= student.guardian_name || '' %></div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="data-label"><%= __('Guardian_Father_Name') %></div>
+                        <div class="data-value"><%= student.guardian_father_name || '' %></div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="data-label"><%= __('Relationship_To_Guardian') %></div>
+                        <div class="data-value"><%= student.guardian_relationship || '' %></div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="data-label"><%= __('Guardian_CNIC') %></div>
+                        <div class="data-value"><%= student.guardian_cnic || '' %></div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="data-label"><%= __('Residential_Phone') %> (<%= __('Guardian_Info') %>)</div>
+                        <div class="data-value"><%= student.guardian_phone || '' %></div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="data-label"><%= __('Mobile_Number') %> (<%= __('Guardian_Info') %>)</div>
+                        <div class="data-value"><%= student.guardian_mobile || '' %></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Educational Background & Referrals -->
+            <div class="col-md-12 mb-5">
+                <div class="section-title"><i class="bi bi-journal-bookmark-fill me-2"></i><%= __('Academic_Details') %> & Referral</div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="data-label"><%= __('Religious_Education') %></div>
+                        <div class="data-value"><%= student.religious_education || '' %></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="data-label"><%= __('Religious_Institution') %></div>
+                        <div class="data-value"><%= student.religious_institution || '' %></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="data-label"><%= __('Contemporary_Education') %></div>
+                        <div class="data-value"><%= student.contemporary_education || '' %></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="data-label"><%= __('Contemporary_Board') %></div>
+                        <div class="data-value"><%= student.contemporary_board || '' %></div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="data-label"><%= __('Wifaq_Registration') %></div>
+                        <div class="data-value"><%= student.is_wifaq_registered ? __('Yes') : __('No') %></div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="data-label"><%= __('Wifaq_Reg_Number') %></div>
+                        <div class="data-value"><%= student.wifaq_reg_number || '' %></div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="data-label"><%= __('Previous_Madrasa') %></div>
+                        <div class="data-value"><%= student.previous_madrasa_details || '' %></div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="data-label"><%= __('Referral_Source') %></div>
+                        <div class="data-value">
+                            <% if (student.referral_source === 'Personal') { %>
+                                <%= __('Personal_Reference') %>
+                            <% } else if (student.referral_source === 'Social Media') { %>
+                                <%= __('Social_Media') %>
+                            <% } else if (student.referral_source === 'Other') { %>
+                                <%= __('Other_Source') %>
+                            <% } else { %>
+                                <%= student.referral_source || '' %>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Official Seal / Signature Area -->
+        <div class="row mt-5 pt-4 border-top">
+            <div class="col-6 text-center">
+                <div style="border-top: 1.5px solid #000; width: 200px; margin: 30px auto 0;"></div>
+                <p class="fw-bold mt-2"><%= __('Signature_Status_Periods') || 'دستخط ممتحن / ناظم' %></p>
+            </div>
+            <div class="col-6 text-center">
+                <div style="border-top: 1.5px solid #000; width: 200px; margin: 30px auto 0;"></div>
+                <p class="fw-bold mt-2">دستخط مہتمم / ناظم اعلیٰ</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

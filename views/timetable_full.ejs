@@ -62,6 +62,9 @@
         <button onclick="window.print()" class="btn btn-primary rounded-pill px-4 me-2">
             <i class="bi bi-printer-fill me-2"></i><%= locals.lang === 'ur' ? 'پرنٹ' : 'طباعة' %>
         </button>
+        <button onclick="downloadPDF()" class="btn btn-success rounded-pill px-4 me-2">
+            <i class="bi bi-file-earmark-pdf-fill me-2"></i><%= locals.lang === 'ur' ? 'PDF ڈاؤن لوڈ' : 'تحميل PDF' %>
+        </button>
         <% if (locals.session && ['ناظم', 'مدير', 'عريف'].includes(session.role)) { %>
             <a href="/periods/manage" class="btn btn-outline-secondary rounded-pill px-4">
                 <i class="bi bi-gear me-2"></i><%= __('Manage') %>
@@ -69,6 +72,18 @@
         <% } %>
     </div>
 </div>
+
+<script>
+function downloadPDF() {
+    if (typeof showPdfLoader === 'function') showPdfLoader();
+    const url = new URL(window.location.origin + '/periods/full/pdf');
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.forEach((value, key) => {
+        url.searchParams.set(key, value);
+    });
+    window.location.href = url.pathname + url.search;
+}
+</script>
 
 <!-- Expandable Filter Chips -->
 <div class="collapse no-print <%= (locals.selectedTeacherId || locals.selectedDay || locals.selectedClassId) ? 'show' : '' %>" id="filterCollapse">

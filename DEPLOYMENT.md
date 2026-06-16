@@ -42,7 +42,13 @@ Ensure your server has the following installed:
    npm run migrate
    npm run seed
    ```
-5. **Start the application with PM2**:
+5. **Configure PDF Generation Dependencies (One-time setup)**:
+   Run the included automation script to install Python pip, playwright, and chromium dependencies:
+   ```bash
+   chmod +x scripts/setup_pdf_generator.sh
+   ./scripts/setup_pdf_generator.sh
+   ```
+6. **Start the application with PM2**:
    ```bash
    pm2 start server.js --name "mms"
    pm2 save

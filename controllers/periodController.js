@@ -573,3 +573,202 @@ exports.swapPeriods = async (req, res) => {
         res.status(500).json({ success: false, error: err.message });
     }
 };
+
+const { exec } = require('child_process');
+const fs = require('fs');
+const path = require('path');
+const ejs = require('ejs');
+
+exports.exportFullTimetablePdf = async (req, res) => {
+    try {
+        const groupBy = req.query.groupBy || 'class';
+        let { teacherId, classId, day } = req.query;
+
+        if (req.session.role === 'طالب') {
+            const [student] = await db.execute('SELECT class_id FROM students WHERE user_id = ? AND tenant_id = ?', [req.session.userId, req.tenant.id]);
+            if (student.length > 0) {
+                classId = student[0].class_id;
+            }
+        }
+
+        let query = `
+             SELECT p.*, t.name as teacher_name, c.name_ar as class_name, b.title as book_title
+             FROM periods p 
+             JOIN teachers t ON p.teacher_id = t.id AND t.tenant_id = p.tenant_id
+             JOIN classes c ON p.class_id = c.id AND c.tenant_id = p.tenant_id
+             LEFT JOIN teacher_books tb ON p.assignment_id = tb.id AND tb.tenant_id = p.tenant_id
+             LEFT JOIN books b ON tb.book_id = b.id AND b.tenant_id = p.tenant_id
+             WHERE p.tenant_id = ?
+        `;
+        const params = [req.tenant.id];
+        if (teacherId) {
+            query += ` AND p.teacher_id = ?`;
+            params.push(teacherId);
+        }
+        if (classId) {
+            query += ` AND p.class_id = ?`;
+            params.push(classId);
+        }
+        if (day) {
+            query += ` AND p.day_of_week = ?`;
+            params.push(day);
+        }
+
+        const [periods] = await db.execute(query, params);
+        const [classes] = await db.execute('SELECT * FROM classes WHERE tenant_id = ?', [req.tenant.id]);
+        const [teachers] = await db.execute(`
+            SELECT DISTINCT t.* FROM teachers t
+            JOIN periods p ON p.teacher_id = t.id AND p.tenant_id = t.tenant_id
+            WHERE t.tenant_id = ?
+            ORDER BY t.name
+        `, [req.tenant.id]);
+
+        const templatePath = path.join(__dirname, '../views/timetable_full.ejs');
+        const lang = req.getLocale ? req.getLocale() : 'ur';
+
+        const html = await ejs.renderFile(templatePath, {
+            periods,
+            classes,
+            teachers,
+            groupBy,
+            selectedTeacherId: teacherId || '',
+            selectedClassId: classId || '',
+            selectedDay: day || '',
+            tenant: req.tenant,
+            lang: lang,
+            session: req.session,
+            __: res.__ || (key => key)
+        });
+
+        const scratchDir = path.join(__dirname, '../scratch');
+        if (!fs.existsSync(scratchDir)) {
+            fs.mkdirSync(scratchDir, { recursive: true });
+        }
+
+        const tempHtmlPath = path.join(scratchDir, `timetable_full_${req.tenant.id}.html`);
+        const tempPdfPath = path.join(scratchDir, `timetable_full_${req.tenant.id}.pdf`);
+
+        fs.writeFileSync(tempHtmlPath, html, 'utf8');
+
+        const scriptPath = process.env.PDF_SCRIPT_PATH || path.join(__dirname, '../utils/html_to_pdf.py');
+        const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
+        const cmd = `${pythonCmd} "${scriptPath}" -i "${tempHtmlPath}" -o "${tempPdfPath}" -w 2000`;
+
+        console.log(`[PDF Generator] Compiling timetable to PDF: ${cmd}`);
+
+        exec(cmd, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`[PDF Generator] Execution failed: ${error.message}`);
+                return res.status(500).send('Error compiling PDF');
+            }
+            res.download(tempPdfPath, `timetable-full.pdf`, (err) => {
+                try {
+                    if (fs.existsSync(tempHtmlPath)) fs.unlinkSync(tempHtmlPath);
+                    if (fs.existsSync(tempPdfPath)) fs.unlinkSync(tempPdfPath);
+                } catch (cleanErr) {
+                    console.error('Temp cleanup failed:', cleanErr);
+                }
+            });
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error compiling PDF');
+    }
+};
+
+exports.exportPublicTimetablePdf = async (req, res) => {
+    try {
+        if (!req.session.lang) {
+            req.session.lang = 'ur';
+        }
+        req.setLocale(req.session.lang);
+        res.locals.lang = req.getLocale();
+        res.locals.__ = res.__;
+
+        const groupBy = req.query.groupBy || 'class';
+        let { teacherId, classId, day } = req.query;
+
+        let query = `
+             SELECT p.*, t.name as teacher_name, c.name_ar as class_name, b.title as book_title
+             FROM periods p 
+             JOIN teachers t ON p.teacher_id = t.id AND t.tenant_id = p.tenant_id
+             JOIN classes c ON p.class_id = c.id AND c.tenant_id = p.tenant_id
+             LEFT JOIN teacher_books tb ON p.assignment_id = tb.id AND tb.tenant_id = p.tenant_id
+             LEFT JOIN books b ON tb.book_id = b.id AND b.tenant_id = p.tenant_id
+             WHERE p.tenant_id = ?
+        `;
+        const params = [req.tenant.id];
+        if (teacherId) {
+            query += ` AND p.teacher_id = ?`;
+            params.push(teacherId);
+        }
+        if (classId) {
+            query += ` AND p.class_id = ?`;
+            params.push(classId);
+        }
+        if (day) {
+            query += ` AND p.day_of_week = ?`;
+            params.push(day);
+        }
+
+        const [periods] = await db.execute(query, params);
+        const [classes] = await db.execute('SELECT * FROM classes WHERE tenant_id = ?', [req.tenant.id]);
+        const [teachers] = await db.execute(`
+            SELECT DISTINCT t.* FROM teachers t
+            JOIN periods p ON p.teacher_id = t.id AND p.tenant_id = t.tenant_id
+            WHERE t.tenant_id = ?
+            ORDER BY t.name
+        `, [req.tenant.id]);
+
+        const templatePath = path.join(__dirname, '../views/timetable_public.ejs');
+        const lang = req.getLocale ? req.getLocale() : 'ur';
+
+        const html = await ejs.renderFile(templatePath, {
+            periods,
+            classes,
+            teachers,
+            groupBy,
+            selectedTeacherId: teacherId || '',
+            selectedClassId: classId || '',
+            selectedDay: day || '',
+            tenant: req.tenant,
+            lang: lang,
+            session: req.session,
+            __: res.__ || (key => key)
+        });
+
+        const scratchDir = path.join(__dirname, '../scratch');
+        if (!fs.existsSync(scratchDir)) {
+            fs.mkdirSync(scratchDir, { recursive: true });
+        }
+
+        const tempHtmlPath = path.join(scratchDir, `timetable_public_${req.tenant.id}.html`);
+        const tempPdfPath = path.join(scratchDir, `timetable_public_${req.tenant.id}.pdf`);
+
+        fs.writeFileSync(tempHtmlPath, html, 'utf8');
+
+        const scriptPath = process.env.PDF_SCRIPT_PATH || path.join(__dirname, '../utils/html_to_pdf.py');
+        const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
+        const cmd = `${pythonCmd} "${scriptPath}" -i "${tempHtmlPath}" -o "${tempPdfPath}" -w 2000`;
+
+        console.log(`[PDF Generator] Compiling public timetable to PDF: ${cmd}`);
+
+        exec(cmd, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`[PDF Generator] Execution failed: ${error.message}`);
+                return res.status(500).send('Error compiling PDF');
+            }
+            res.download(tempPdfPath, `timetable-public.pdf`, (err) => {
+                try {
+                    if (fs.existsSync(tempHtmlPath)) fs.unlinkSync(tempHtmlPath);
+                    if (fs.existsSync(tempPdfPath)) fs.unlinkSync(tempPdfPath);
+                } catch (cleanErr) {
+                    console.error('Temp cleanup failed:', cleanErr);
+                }
+            });
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error compiling PDF');
+    }
+};

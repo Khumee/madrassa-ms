@@ -1,11 +1,27 @@
 <%- include('partials/header') %>
 
-<div class="row mb-4 align-items-center">
+<div class="row mb-4 align-items-center no-print">
     <div class="col-md-6">
         <h1 class="fw-bold text-primary mb-0"><%= __('Reports_Stats_Title') %></h1>
         <p class="text-muted"><%= __('Start_Date') %>: <span class="badge bg-light text-primary border"><%= startDate %></span> <%= __('End_Date') %>: <span class="badge bg-light text-primary border"><%= endDate %></span></p>
     </div>
+    <div class="col-md-6 text-start">
+        <button onclick="downloadServerPDF()" class="btn btn-success rounded-pill px-4 shadow-sm fw-bold">
+            <i class="bi bi-file-earmark-pdf-fill me-2"></i><%= locals.lang === 'ur' ? 'مکمل رپورٹ PDF ڈاؤن لوڈ کریں' : 'تحميل التقرير الكامل كـ PDF' %>
+        </button>
+    </div>
 </div>
+
+<style>
+    @media print {
+        .no-print, nav, #toastContainer, footer, .btn, .btn-group, .input-group, .filter-trigger-btn { display: none !important; }
+        .collapse { display: block !important; height: auto !important; visibility: visible !important; }
+        body { background: white !important; margin: 0 !important; padding: 1.5cm !important; }
+        .card { border: 1px solid #dee2e6 !important; box-shadow: none !important; }
+        .accordion-button::after { display: none !important; }
+        .accordion-button { background-color: #f8fafc !important; color: #1e293b !important; }
+    }
+</style>
 
 <style>
     /* smooth arrow rotation */
@@ -91,6 +107,7 @@
     </div>
 </div>
 
+<% if (!locals.exportSection || exportSection === 'students') { %>
 <!-- Student Attendance Section (Top) -->
 <div class="row mb-5">
     <div class="col-md-12">
@@ -101,7 +118,7 @@
                     <button class="btn btn-outline-primary btn-sm rounded-pill px-3" type="button" data-bs-toggle="collapse" data-bs-target="#studentAttendanceFiltersCollapse" aria-expanded="false">
                         <i class="bi bi-funnel me-1"></i><%= __('Filter_Label') %>
                     </button>
-                    <button class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="downloadStudentPDF()">
+                    <button class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="downloadServerPDFSection('students')">
                         <i class="bi bi-file-earmark-pdf me-1"></i><%= locals.lang === 'ur' ? 'PDF ڈاؤن لوڈ' : 'تحميل PDF' %>
                     </button>
                 </div>
@@ -190,8 +207,10 @@
         </div>
     </div>
 </div>
+<% } %>
 
 <% if (!locals.filterType || filterType !== 'students') { %>
+<% if (!locals.exportSection || exportSection === 'teachers') { %>
 <!-- Teacher Attendance and Period Variance Report (New Section) -->
 <div class="row mb-5">
     <div class="col-md-12">
@@ -205,7 +224,7 @@
                     <button class="btn btn-outline-warning btn-sm rounded-pill px-3" type="button" data-bs-toggle="collapse" data-bs-target="#teacherAttendanceFiltersCollapse" aria-expanded="false">
                         <i class="bi bi-funnel me-1"></i><%= locals.lang === 'ur' ? 'فلٹرز' : 'خيارات التصفية' %>
                     </button>
-                    <button class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="downloadTeacherPDF()">
+                    <button class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="downloadServerPDFSection('teachers')">
                         <i class="bi bi-file-earmark-pdf me-1"></i><%= locals.lang === 'ur' ? 'PDF ڈاؤن لوڈ' : 'تحميل PDF' %>
                     </button>
                 </div>
@@ -326,7 +345,9 @@
         </div>
     </div>
 </div>
+<% } %>
 
+<% if (!locals.exportSection || exportSection === 'books') { %>
 <!-- Teacher Book Progress Section -->
 <div class="row mb-5">
     <div class="col-md-12">
@@ -340,7 +361,7 @@
                     <button class="btn btn-outline-success btn-sm rounded-pill px-3" type="button" data-bs-toggle="collapse" data-bs-target="#bookProgressFiltersCollapse" aria-expanded="false">
                         <i class="bi bi-funnel me-1"></i><%= __('Filter_Label') %>
                     </button>
-                    <button class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="downloadBooksPDF()">
+                    <button class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="downloadServerPDFSection('books')">
                         <i class="bi bi-file-earmark-pdf me-1"></i><%= locals.lang === 'ur' ? 'PDF ڈاؤن لوڈ' : 'تحميل PDF' %>
                     </button>
                 </div>
@@ -448,6 +469,8 @@
     </div>
 </div>
 <% } %>
+<% } %>
+
 
 <!-- Update Progress Modal -->
 <div class="modal fade" id="updateProgressModal" tabindex="-1">
@@ -926,6 +949,27 @@ function downloadBooksPDF() {
         ${sections}`,
         isUr ? 'کتابوں کی پیشرفت رپورٹ' : 'تقرير تقدم الكتب',
         'books_progress_by_teacher', false);
+}
+
+function downloadServerPDF() {
+    if (typeof showPdfLoader === 'function') showPdfLoader();
+    const url = new URL(window.location.origin + '/reports/pdf');
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.forEach((value, key) => {
+        url.searchParams.set(key, value);
+    });
+    window.location.href = url.pathname + url.search;
+}
+
+function downloadServerPDFSection(section) {
+    if (typeof showPdfLoader === 'function') showPdfLoader();
+    const url = new URL(window.location.origin + '/reports/pdf');
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.forEach((value, key) => {
+        url.searchParams.set(key, value);
+    });
+    url.searchParams.set('section', section);
+    window.location.href = url.pathname + url.search;
 }
 </script>
 

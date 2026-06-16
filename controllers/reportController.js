@@ -194,7 +194,7 @@ exports.showReports = async (req, res) => {
             };
         });
 
-        res.render('reports', { groupedReport, teachers, teacherProgress, startDate, endDate, teachersReport, filterType });
+        res.render('reports', { groupedReport, teachers, teacherProgress, startDate, endDate, teachersReport, filterType, exportSection: null });
     } catch (err) {
         console.error(err);
         res.status(500).send('Error generating reports');
@@ -746,5 +746,399 @@ exports.showAreefStandardsReport = async (req, res) => {
     } catch (err) {
         console.error('Error generating Areef standards report:', err);
         res.status(500).send('Error generating report');
+    }
+};
+
+const { exec } = require('child_process');
+const fs = require('fs');
+const path = require('path');
+const ejs = require('ejs');
+
+exports.exportReportsPdf = async (req, res) => {
+    try {
+        const now = DateTime.now().setZone('Asia/Karachi');
+        const lastMonday = now.startOf('week').minus({ weeks: 1 });
+        const lastSaturday = lastMonday.plus({ days: 5 });
+        const defaultStartDate = lastMonday.toISODate();
+        const defaultEndDate = lastSaturday.toISODate();
+
+        const startDate = req.query.startDate || defaultStartDate;
+        const endDate = req.query.endDate || defaultEndDate;
+        const filterType = req.query.filterType || null;
+
+        const [sessionRows] = await db.execute('SELECT id FROM sessions WHERE is_active = TRUE AND tenant_id = ? LIMIT 1', [req.tenant.id]);
+        const activeSessionId = sessionRows.length > 0 ? sessionRows[0].id : null;
+
+        const [rows] = await db.execute(`
+            SELECT s.name, c.name_ar as class_name,
+            COUNT(a.id) as total_days,
+            SUM(CASE WHEN a.status = 'present' OR a.status = 'online' THEN 1 ELSE 0 END) as present_days
+            FROM students s
+            JOIN student_enrollments se ON s.id = se.student_id AND se.tenant_id = s.tenant_id
+            JOIN classes c ON se.class_id = c.id AND c.tenant_id = s.tenant_id
+            LEFT JOIN attendance_students a ON s.id = a.student_id AND a.tenant_id = s.tenant_id
+                AND a.date BETWEEN ? AND ?
+            WHERE se.session_id = ? AND s.tenant_id = ?
+            GROUP BY s.id, c.id, s.name, c.name_ar
+        `, [startDate, endDate, activeSessionId, req.tenant.id]);
+
+        const groupedReport = {};
+        rows.forEach(row => {
+            if (!groupedReport[row.class_name]) groupedReport[row.class_name] = [];
+            row.percentage = row.total_days > 0 ? Math.round((row.present_days / row.total_days) * 100) : 0;
+            groupedReport[row.class_name].push(row);
+        });
+
+        const [teacherProgress] = await db.execute(`
+            SELECT tb.id as assignment_id, t.id as teacher_id, t.name as teacher_name, b.title as book_title, tb.start_page, tb.end_page, tb.current_page, c.name_ar as class_name,
+            (SELECT bp.updated_at FROM book_progress bp WHERE bp.assignment_id = tb.id AND bp.tenant_id = tb.tenant_id ORDER BY bp.id DESC LIMIT 1) as last_updated_at,
+            (SELECT bp.page_number FROM book_progress bp WHERE bp.assignment_id = tb.id AND bp.tenant_id = tb.tenant_id ORDER BY bp.id DESC LIMIT 1) as last_page_number
+            FROM teacher_books tb
+            JOIN teachers t ON tb.teacher_id = t.id AND t.tenant_id = tb.tenant_id
+            JOIN books b ON tb.book_id = b.id AND b.tenant_id = tb.tenant_id
+            JOIN sessions s ON tb.session_id = s.id AND s.tenant_id = tb.tenant_id
+            LEFT JOIN classes c ON tb.class_id = c.id AND c.tenant_id = tb.tenant_id
+            WHERE s.is_active = TRUE AND tb.tenant_id = ?
+        `, [req.tenant.id]);
+
+        const luxonLocale = req.getLocale() === 'ur' ? 'ur' : req.getLocale() === 'en' ? 'en' : 'ar';
+        teacherProgress.forEach(tp => {
+            const total = tp.end_page - tp.start_page;
+            const completed = tp.current_page - tp.start_page;
+            tp.percentage = total > 0 ? Math.min(100, Math.max(0, Math.round((completed / total) * 100))) : 0;
+
+            if (tp.last_updated_at) {
+                tp.lastUpdatedStr = DateTime.fromJSDate(new Date(tp.last_updated_at)).setLocale(luxonLocale).toFormat('dd MMMM yyyy, hh:mm a');
+            } else {
+                tp.lastUpdatedStr = '';
+            }
+        });
+
+        const countDayOccurrences = (startStr, endStr) => {
+            const start = DateTime.fromISO(startStr);
+            const end = DateTime.fromISO(endStr);
+            const counts = {
+                'Monday': 0, 'Tuesday': 0, 'Wednesday': 0, 'Thursday': 0, 'Friday': 0, 'Saturday': 0, 'Sunday': 0
+            };
+            if (start > end) return counts;
+
+            let current = start;
+            while (current <= end) {
+                const dayName = current.setLocale('en').toFormat('cccc');
+                if (counts[dayName] !== undefined) {
+                    counts[dayName]++;
+                }
+                current = current.plus({ days: 1 });
+            }
+            return counts;
+        };
+
+        const dayOccurrences = countDayOccurrences(startDate, endDate);
+
+        const [teacherPeriods] = await db.execute(`
+            SELECT teacher_id, day_of_week, COUNT(*) as p_count
+            FROM periods
+            WHERE tenant_id = ?
+            GROUP BY teacher_id, day_of_week
+        `, [req.tenant.id]);
+
+        const [teacherAttendance] = await db.execute(`
+            SELECT teacher_id, SUM(classes_taken) as taken_count
+            FROM attendance_teachers
+            WHERE date BETWEEN ? AND ? AND tenant_id = ?
+            GROUP BY teacher_id
+        `, [startDate, endDate, req.tenant.id]);
+
+        const [teacherDetailRows] = await db.execute(`
+            SELECT at.teacher_id,
+                   DATE_FORMAT(at.date, '%Y-%m-%d') AS date_str,
+                   DAYNAME(at.date)                  AS day_name,
+                   at.class_id,
+                   c.name_ar                         AS class_name,
+                   at.classes_taken
+            FROM attendance_teachers at
+            LEFT JOIN classes c ON c.id = at.class_id AND c.tenant_id = at.tenant_id
+            WHERE at.date BETWEEN ? AND ? AND at.tenant_id = ?
+            ORDER BY at.teacher_id, at.date, at.class_id
+        `, [startDate, endDate, req.tenant.id]);
+
+        const [scheduledDetail] = await db.execute(`
+            SELECT p.teacher_id, p.class_id, c.name_ar AS class_name, p.day_of_week, COUNT(*) AS p_count
+            FROM periods p
+            JOIN classes c ON c.id = p.class_id AND c.tenant_id = p.tenant_id
+            WHERE p.tenant_id = ?
+            GROUP BY p.teacher_id, p.class_id, c.name_ar, p.day_of_week
+        `, [req.tenant.id]);
+
+        const [teachers] = await db.execute(`
+            SELECT t.*,
+            (SELECT GROUP_CONCAT(b.title SEPARATOR ' / ') 
+             FROM teacher_books tb 
+             JOIN books b ON tb.book_id = b.id AND b.tenant_id = tb.tenant_id
+             WHERE tb.teacher_id = t.id AND tb.session_id = (SELECT id FROM sessions WHERE is_active = TRUE AND tenant_id = t.tenant_id) AND tb.tenant_id = t.tenant_id) as books_list,
+            (SELECT COUNT(*) FROM periods WHERE teacher_id = t.id AND tenant_id = t.tenant_id) as period_count,
+            (SELECT COUNT(*) FROM teacher_books WHERE teacher_id = t.id AND session_id = (SELECT id FROM sessions WHERE is_active = TRUE AND tenant_id = t.tenant_id) AND tenant_id = t.tenant_id) as book_count
+            FROM teachers t
+            WHERE t.id IN (SELECT DISTINCT teacher_id FROM teacher_books WHERE tenant_id = t.tenant_id) AND t.tenant_id = ?
+        `, [req.tenant.id]);
+
+        const teachersReport = teachers.map(t => {
+            const scheduled = teacherPeriods.filter(tp => tp.teacher_id === t.id);
+            let required = 0;
+            scheduled.forEach(sp => {
+                const occ = dayOccurrences[sp.day_of_week] || 0;
+                required += sp.p_count * occ;
+            });
+
+            const att = teacherAttendance.find(ta => ta.teacher_id === t.id);
+            const taken = att ? parseInt(att.taken_count) || 0 : 0;
+
+            const difference = taken - required;
+
+            const myAttMap = {};
+            teacherDetailRows.filter(r => r.teacher_id === t.id).forEach(r => {
+                if (!myAttMap[r.date_str]) myAttMap[r.date_str] = {};
+                myAttMap[r.date_str][r.class_id] = r.classes_taken;
+            });
+
+            const mySchedule = scheduledDetail.filter(s => s.teacher_id === t.id);
+            const detail = [];
+            let cur = DateTime.fromISO(startDate);
+            const edDt = DateTime.fromISO(endDate);
+            while (cur <= edDt) {
+                const dateStr   = cur.toISODate();
+                const dayNameEn = cur.setLocale('en').toFormat('cccc');
+                const dayClasses = mySchedule.filter(s => s.day_of_week === dayNameEn);
+                if (dayClasses.length > 0) {
+                    detail.push({
+                        date_str: dateStr,
+                        day_name: dayNameEn,
+                        classes: dayClasses.map(cls => ({
+                            class_name: cls.class_name || '—',
+                            taken:      (myAttMap[dateStr] && myAttMap[dateStr][cls.class_id] !== undefined)
+                                            ? myAttMap[dateStr][cls.class_id]
+                                            : null,
+                            scheduled:  cls.p_count
+                        }))
+                    });
+                }
+                cur = cur.plus({ days: 1 });
+            }
+
+            return {
+                id: t.id,
+                name: t.name,
+                books_list: t.books_list || '—',
+                required,
+                taken,
+                difference,
+                detail
+            };
+        });
+
+        const templatePath = path.join(__dirname, '../views/reports.ejs');
+        const lang = req.getLocale ? req.getLocale() : 'ur';
+        const exportSection = req.query.section || null;
+
+        const html = await ejs.renderFile(templatePath, {
+            groupedReport,
+            teachers,
+            teacherProgress,
+            startDate,
+            endDate,
+            teachersReport,
+            filterType,
+            exportSection,
+            tenant: req.tenant,
+            lang: lang,
+            session: req.session,
+            __: res.__ || (key => key)
+        });
+
+        const scratchDir = path.join(__dirname, '../scratch');
+        if (!fs.existsSync(scratchDir)) {
+            fs.mkdirSync(scratchDir, { recursive: true });
+        }
+
+        const tempHtmlPath = path.join(scratchDir, `reports_${req.tenant.id}.html`);
+        const tempPdfPath = path.join(scratchDir, `reports_${req.tenant.id}.pdf`);
+
+        fs.writeFileSync(tempHtmlPath, html, 'utf8');
+
+        const scriptPath = process.env.PDF_SCRIPT_PATH || path.join(__dirname, '../utils/html_to_pdf.py');
+        const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
+        const cmd = `${pythonCmd} "${scriptPath}" -i "${tempHtmlPath}" -o "${tempPdfPath}" -w 2000`;
+
+        console.log(`[PDF Generator] Compiling reports to PDF: ${cmd}`);
+
+        exec(cmd, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`[PDF Generator] Execution failed: ${error.message}`);
+                return res.status(500).send('Error compiling PDF');
+            }
+            res.download(tempPdfPath, `reports-${startDate}-to-${endDate}.pdf`, (err) => {
+                try {
+                    if (fs.existsSync(tempHtmlPath)) fs.unlinkSync(tempHtmlPath);
+                    if (fs.existsSync(tempPdfPath)) fs.unlinkSync(tempPdfPath);
+                } catch (cleanErr) {
+                    console.error('Temp cleanup failed:', cleanErr);
+                }
+            });
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error compiling PDF');
+    }
+};
+
+exports.exportAreefStandardsReportPdf = async (req, res) => {
+    try {
+        const now = DateTime.now().setZone('Asia/Karachi');
+        const defaultStart = now.startOf('week').minus({ weeks: 1 }).toISODate();
+        const defaultEnd   = now.startOf('week').minus({ weeks: 1 }).plus({ days: 5 }).toISODate();
+
+        const startDate = req.query.startDate || defaultStart;
+        const endDate   = req.query.endDate   || defaultEnd;
+
+        const sd = DateTime.fromISO(startDate);
+        const ed = DateTime.fromISO(endDate);
+        const prevStartDate   = sd.minus({ days: 7 }).toISODate();
+        const prevEndDate     = ed.minus({ days: 7 }).toISODate();
+        const nextStartDate   = sd.plus({ days: 7 }).toISODate();
+        const nextEndDate     = ed.plus({ days: 7 }).toISODate();
+        const dateToday       = now.toISODate();
+        const dateLastMonth   = now.minus({ months: 1 }).toISODate();
+        const dateLast3Months = now.minus({ months: 3 }).toISODate();
+        const dateLast6Months = now.minus({ months: 6 }).toISODate();
+        const defaultStart2   = defaultStart;
+        const defaultEnd2     = defaultEnd;
+
+        const [classes] = await db.execute(`
+            SELECT c.id, c.name_ar
+            FROM classes c
+            WHERE EXISTS (
+                SELECT 1 FROM students s
+                JOIN users u ON u.id = s.user_id AND u.tenant_id = s.tenant_id
+                WHERE s.class_id = c.id AND s.tenant_id = c.tenant_id
+                  AND u.role IN ('عریف', 'عريف')
+            ) AND c.tenant_id = ?
+            ORDER BY c.id
+        `, [req.tenant.id]);
+
+        const [areefs] = await db.execute(`
+            SELECT s.class_id,
+                   s.name    AS areef_name,
+                   u.id      AS user_id,
+                   u.username
+            FROM users u
+            JOIN students s ON s.user_id = u.id AND s.tenant_id = u.tenant_id
+            WHERE u.role IN ('عریف', 'عريف') AND u.tenant_id = ?
+            ORDER BY s.class_id, s.name
+        `, [req.tenant.id]);
+
+        const [studentDaysRows] = await db.execute(`
+            SELECT s.class_id,
+                   COUNT(DISTINCT a.date) AS days_marked
+            FROM attendance_students a
+            JOIN students s ON s.id = a.student_id AND s.tenant_id = a.tenant_id
+            WHERE a.date BETWEEN ? AND ? AND a.tenant_id = ?
+            GROUP BY s.class_id
+        `, [startDate, endDate, req.tenant.id]);
+
+        const [teacherDaysRows] = await db.execute(`
+            SELECT s.class_id,
+                   COUNT(DISTINCT at.date) AS days_marked
+            FROM attendance_teachers at
+            JOIN users u  ON u.id = at.marked_by AND u.tenant_id = at.tenant_id
+            JOIN students s ON s.user_id = u.id AND s.tenant_id = u.tenant_id
+            WHERE u.role IN ('عریف', 'عريف')
+              AND at.date BETWEEN ? AND ? AND at.tenant_id = ?
+            GROUP BY s.class_id
+        `, [startDate, endDate, req.tenant.id]);
+
+        const [totalRow] = await db.execute(`
+            SELECT COUNT(DISTINCT a.date) AS total_days
+            FROM attendance_students a
+            WHERE a.date BETWEEN ? AND ? AND a.tenant_id = ?
+        `, [startDate, endDate, req.tenant.id]);
+        const totalDays = parseInt(totalRow[0]?.total_days || 0);
+
+        const studentMap = {};
+        studentDaysRows.forEach(r => { studentMap[r.class_id] = parseInt(r.days_marked); });
+
+        const teacherMap = {};
+        teacherDaysRows.forEach(r => { teacherMap[r.class_id] = parseInt(r.days_marked); });
+
+        const areefsByClass = {};
+        areefs.forEach(a => {
+            if (!areefsByClass[a.class_id]) areefsByClass[a.class_id] = [];
+            areefsByClass[a.class_id].push(a.areef_name || a.username);
+        });
+
+        const reportRows = classes.map(cls => {
+            const studentDays = studentMap[cls.id] || 0;
+            const teacherDays = teacherMap[cls.id] || 0;
+            return {
+                class_id:            cls.id,
+                class_name:          cls.name_ar,
+                areef_names:         areefsByClass[cls.id] || [],
+                student_days_marked: studentDays,
+                teacher_days_marked: teacherDays,
+                total_days:          totalDays,
+                student_pct: totalDays > 0 ? Math.round((studentDays / totalDays) * 100) : 0,
+                teacher_pct: totalDays > 0 ? Math.round((teacherDays / totalDays) * 100) : 0,
+            };
+        });
+
+        const templatePath = path.join(__dirname, '../views/report_areef_standards.ejs');
+        const lang = req.getLocale ? req.getLocale() : 'ur';
+
+        const html = await ejs.renderFile(templatePath, {
+            reportRows,
+            totalDays,
+            startDate, endDate,
+            defaultStart: defaultStart2, defaultEnd: defaultEnd2,
+            prevStartDate, prevEndDate,
+            nextStartDate, nextEndDate,
+            dateToday, dateLastMonth, dateLast3Months, dateLast6Months,
+            tenant: req.tenant,
+            lang: lang,
+            session: req.session,
+            __: res.__ || (key => key)
+        });
+
+        const scratchDir = path.join(__dirname, '../scratch');
+        if (!fs.existsSync(scratchDir)) {
+            fs.mkdirSync(scratchDir, { recursive: true });
+        }
+
+        const tempHtmlPath = path.join(scratchDir, `areef_standards_${req.tenant.id}.html`);
+        const tempPdfPath = path.join(scratchDir, `areef_standards_${req.tenant.id}.pdf`);
+
+        fs.writeFileSync(tempHtmlPath, html, 'utf8');
+
+        const scriptPath = process.env.PDF_SCRIPT_PATH || path.join(__dirname, '../utils/html_to_pdf.py');
+        const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
+        const cmd = `${pythonCmd} "${scriptPath}" -i "${tempHtmlPath}" -o "${tempPdfPath}" -w 2000`;
+
+        console.log(`[PDF Generator] Compiling areef standards to PDF: ${cmd}`);
+
+        exec(cmd, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`[PDF Generator] Execution failed: ${error.message}`);
+                return res.status(500).send('Error compiling PDF');
+            }
+            res.download(tempPdfPath, `areef-standards-${startDate}-to-${endDate}.pdf`, (err) => {
+                try {
+                    if (fs.existsSync(tempHtmlPath)) fs.unlinkSync(tempHtmlPath);
+                    if (fs.existsSync(tempPdfPath)) fs.unlinkSync(tempPdfPath);
+                } catch (cleanErr) {
+                    console.error('Temp cleanup failed:', cleanErr);
+                }
+            });
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error compiling PDF');
     }
 };
