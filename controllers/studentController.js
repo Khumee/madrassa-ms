@@ -672,7 +672,7 @@ exports.editStudent = async (req, res) => {
         res.redirect('/students/manage?success=true');
     } catch (err) {
         console.error(err);
-        res.status(500).send('Error updating student');
+        res.status(500).send('Error updating student: ' + err.message);
     }
 };
 

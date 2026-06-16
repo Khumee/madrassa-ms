@@ -304,6 +304,34 @@
 let editModal;
 document.addEventListener('DOMContentLoaded', () => {
     editModal = new bootstrap.Modal(document.getElementById('editStudentModal'));
+    
+    document.getElementById('editStudentForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+        
+        try {
+            const res = await fetch(form.action, {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (res.redirected) {
+                window.location.href = res.url;
+                return;
+            }
+            
+            const text = await res.text();
+            if (res.ok) {
+                window.location.href = '/students/manage?success=true';
+            } else {
+                alert('Error updating student: ' + text);
+            }
+        } catch (err) {
+            console.error(err);
+            alert('A network error occurred while updating the student.');
+        }
+    });
 });
 
 function toggleEditWifaqRegField() {
