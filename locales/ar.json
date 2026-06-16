@@ -365,5 +365,6 @@
   "Historical_Achievement_Log": "السجل التاريخي للإنجاز",
   "Assigned_Range": "المدى المقرر",
   "From_Page": "من",
-  "To_Page": "إلى"
+  "To_Page": "إلى",
+  "Demo_Protection_Enabled": "تم تعطيل هذا الإجراء في النسخة التجريبية العامة لضمان تجربة مستقرة لجميع الزوار."
 }

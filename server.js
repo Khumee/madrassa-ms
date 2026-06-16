@@ -55,6 +55,10 @@ app.use(session({
 const tenantMiddleware = require('./middleware/tenant');
 app.use(tenantMiddleware);
 
+const demoGuard = require('./middleware/demoGuard');
+app.use(demoGuard);
+
+
 // i18n Translation setup
 i18n.configure({
     locales: ['ar', 'ur', 'en'],

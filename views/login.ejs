@@ -25,11 +25,11 @@
             <form action="/login" method="POST">
                 <div style="margin-bottom: 15px;">
                     <label><%= __('Username_Label') %></label>
-                    <input type="text" name="username" value="<%= __('Default_Mudeer_Username') %>" class="form-control-login" style="width: 100%; text-align: inherit; background: #f9f9f9; border: 1px solid #ddd; color: #333; padding: 10px; border-radius: 8px;" required>
+                    <input type="text" name="username" value="<%= (locals.tenant && tenant.subdomain === 'madrassa-ms') ? __('Default_Mudeer_Username') : '' %>" class="form-control-login" style="width: 100%; text-align: inherit; background: #f9f9f9; border: 1px solid #ddd; color: #333; padding: 10px; border-radius: 8px;" required>
                 </div>
                 <div style="margin-bottom: 25px;">
                     <label><%= __('Password_Label') %></label>
-                    <input type="password" name="password" value="1981" class="form-control-login" style="width: 100%; text-align: inherit; background: #f9f9f9; border: 1px solid #ddd; color: #333; padding: 10px; border-radius: 8px;" required>
+                    <input type="password" name="password" value="<%= (locals.tenant && tenant.subdomain === 'madrassa-ms') ? '1234' : '' %>" class="form-control-login" style="width: 100%; text-align: inherit; background: #f9f9f9; border: 1px solid #ddd; color: #333; padding: 10px; border-radius: 8px;" required>
                 </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%;"><%= __('Login_Btn') %></button>
             </form>

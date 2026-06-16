@@ -19,7 +19,7 @@ Ensure your server has the following installed:
 ## 2. Manual Server Setup
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/your-username/madrassa-ms.git /var/www/mms
+   git clone https://github.com/Khumee/madrassa-ms.git /var/www/mms
    cd /var/www/mms
    ```
 2. **Install production dependencies**:
@@ -147,3 +147,20 @@ When publishing the repository to GitHub:
 3. Target branch name: `main`.
 4. Enable **Require a pull request before merging** and require at least **1 approval**. This prevents unauthorized changes to code that deploys to production.
 5. In GitHub Settings, hide your server IP by setting up `SERVER_HOST` as a GitHub secret, referencing it in your workflow as `${{ secrets.SERVER_HOST }}`.
+
+---
+
+## 6. Public Demo Sandbox Protection (Demo Guard)
+
+To keep the public demo site (`demo.nukrim.com`) clean and secure from vandalism or lockout:
+1. **Demo Guard Middleware**: We have registered a `demoGuard` middleware in `server.js`. For the demo subdomain (`madrassa-ms`), it automatically blocks destructive actions (like changing the administrator password, deleting students/teachers/books/periods, or editing user roles) and returns a clean warning card.
+2. **Marking & Operations**: Visitors can still mark student/teacher attendance and add new mock students/teachers to test all real-time features.
+3. **Automated Reset Cron Job**: Setup a cron job on your server to automatically clean up and re-seed the demo database every hour:
+   ```bash
+   # Open crontab editor
+   crontab -e
+
+   # Add this line to reset the demo data at the start of every hour:
+   0 * * * * cd /var/www/mms-demo && NODE_ENV=production node scripts/seed_demo_urdu.js > /dev/null 2>&1
+   ```
+

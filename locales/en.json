@@ -365,5 +365,6 @@
   "Historical_Achievement_Log": "Historical Achievement & Completion Log",
   "Assigned_Range": "Assigned Pages Target",
   "From_Page": "From",
-  "To_Page": "To"
+  "To_Page": "To",
+  "Demo_Protection_Enabled": "This action is disabled in the public demo to ensure a consistent experience for all visitors."
 }
