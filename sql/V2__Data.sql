@@ -1,0 +1,4 @@
+-- Database Seeding separated from schema migrations.
+-- Seeding is now handled by npm script commands:
+-- npm run seed (baseline configuration)
+-- npm run seed:demo (realistic Urdu demo dataset)

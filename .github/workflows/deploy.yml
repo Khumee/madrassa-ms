@@ -1,0 +1,60 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - live
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Deploy via SSH
+      uses: appleboy/ssh-action@v1.2.0
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: 22
+        script_stop: true
+        script: |
+          # Ensure target directory exists
+          # Ensure target directory is a valid git repo
+          if [ ! -d "/var/www/mms/.git" ]; then
+            echo "Directory is not a valid git repo. Performing fresh clone..."
+            sudo rm -rf /var/www/mms
+            sudo mkdir -p /var/www/mms
+            sudo chown -R ${{ secrets.SERVER_USER }}:${{ secrets.SERVER_USER }} /var/www/mms
+            git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git /var/www/mms
+          fi
+          
+          cd /var/www/mms
+          # Update the remote URL to ensure the token is current
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          
+          # Force the server to match GitHub exactly
+          git fetch origin main
+          git reset --hard origin/main
+          
+          # Force create .env file
+          cat <<EOF > .env
+          PORT=3000
+          DB_HOST=localhost
+          DB_PORT=3306
+          DB_USER=${{ secrets.DB_USER }}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          DB_NAME=${{ secrets.DB_NAME }}
+          SESSION_SECRET=${{ secrets.SESSION_SECRET }}
+          EOF
+          
+          npm install --production
+          # Explicitly run migrations
+          npm run migrate
+          
+          # This will start the app if it's new, or restart it if it already exists
+          pm2 start server.js --name "mms" || pm2 restart "mms"
+          pm2 save

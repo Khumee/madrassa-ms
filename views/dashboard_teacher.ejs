@@ -1,0 +1,190 @@
+<%- include('partials/header') %>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm border-0 rounded-4 p-4 text-white" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <h1 class="fw-bold mb-1">أهلاً، <%= teacher.name %></h1>
+                    <div class="d-flex align-items-center gap-3 flex-wrap">
+                        <span class="text-white-50 small"><i class="bi bi-calendar-event me-1"></i><%= today %></span>
+                        <div class="d-flex align-items-center gap-2 bg-white bg-opacity-10 px-3 py-1 rounded-pill" style="border: 1px solid rgba(255,255,255,0.2);">
+                            <label class="small text-white-50 mb-0 text-nowrap"><i class="bi bi-calendar-check me-1"></i>تغيير التاريخ:</label>
+                            <input type="date" class="form-control form-control-sm bg-transparent border-0 text-white fw-bold p-0" 
+                                   value="<%= todayDate %>" 
+                                   style="width: 130px; cursor: pointer; color-scheme: dark;" 
+                                   onchange="changeTeacherDate(this.value)">
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="/profile/change-password" class="btn btn-outline-light rounded-pill px-4 fw-bold">
+                        <i class="bi bi-key me-2"></i><%= __('Change_Password') %>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Today's Schedule -->
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm border-0 rounded-4 h-100">
+            <div class="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center">
+                <h4 class="fw-bold mb-0 text-primary"><i class="bi bi-calendar-check me-2"></i>حصص اليوم</h4>
+                <a href="/periods/full" class="btn btn-sm btn-outline-primary rounded-pill">الجدول الكامل</a>
+            </div>
+            <div class="card-body p-4 pt-0">
+                <% if (periods.length > 0) { %>
+                    <div class="list-group list-group-flush">
+                        <% periods.forEach(p => { %>
+                            <div class="list-group-item px-0 py-3 border-bottom">
+                                <h6 class="fw-bold mb-1"><%= p.subject %></h6>
+                                <div class="d-flex justify-content-between text-muted small">
+                                    <span><%= p.class_name %></span>
+                                    <span><%= p.start_time %> - <%= p.end_time %></span>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-clock-history fs-1 mb-3 d-block"></i>
+                        لا توجد حصص مجدولة اليوم.
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assigned Books Progress -->
+    <div class="col-md-8 mb-4">
+        <div class="card shadow-sm border-0 rounded-4 h-100">
+            <div class="card-header bg-white p-4 border-0">
+                <h4 class="fw-bold mb-0 text-success"><i class="bi bi-book-half me-2"></i>تقدم الكتب المقررة</h4>
+            </div>
+            <div class="card-body p-4 pt-0">
+                <% if (assignedBooks.length > 0) { %>
+                    <div class="row g-4">
+                        <% assignedBooks.forEach(b => { 
+                            const total = b.end_page - b.start_page;
+                            const completed = b.current_page - b.start_page;
+                            const percentage = total > 0 ? Math.min(100, Math.max(0, Math.round((completed / total) * 100))) : 0;
+                        %>
+                            <div class="col-md-6 mb-3">
+                                <div class="p-4 border <%= b.has_period_today ? 'border-success border-2' : 'border-0' %> rounded-4 bg-white shadow-sm h-100 d-flex flex-column">
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-start mb-1 gap-2">
+                                            <h5 class="fw-bold text-dark mb-0 text-truncate w-100" title="<%= b.book_title %>"><%= b.book_title %></h5>
+                                            <% if (b.has_period_today) { %>
+                                                <span class="badge bg-success rounded-pill px-2 py-1 flex-shrink-0" style="font-size: 0.6rem;" title="اليوم: الحصة <%= b.first_period_today %>">اليوم: الحصة <%= b.first_period_today %></span>
+                                            <% } %>
+                                        </div>
+                                        <p class="text-muted small mb-3"><%= b.class_name %></p>
+                                        
+                                        <!-- Aligned Progress Section -->
+                                        <div style="min-height: 80px;">
+                                            <div class="d-flex justify-content-between align-items-end mb-2">
+                                                <div>
+                                                    <span class="text-muted x-small d-block">المستوى الحالي</span>
+                                                    <span class="fw-bold text-primary fs-5">صفحة <%= b.current_page %></span>
+                                                </div>
+                                                <div class="text-end">
+                                                    <span class="badge bg-success-subtle text-success ms-1"><%= percentage %>%</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="progress" style="height: 8px; border-radius: 4px; background-color: #f0f0f0;">
+                                                <div class="progress-bar bg-success" 
+                                                     role="progressbar" 
+                                                     style="width: <%= percentage %>%"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex align-items-center gap-3 mt-4">
+                                        <div class="position-relative flex-grow-1">
+                                            <input type="number" id="page_<%= b.id %>" 
+                                                   class="form-control border-0 shadow-sm rounded-3 text-center fw-bold text-primary bg-white w-100" 
+                                                   value="<%= (b.current_page && b.current_page >= b.start_page) ? b.current_page : b.start_page %>"
+                                                   min="<%= b.start_page %>"
+                                                   max="<%= b.end_page %>"
+                                                   onchange="if(this.value < <%= b.start_page %>) this.value = <%= b.start_page %>; if(this.value > <%= b.end_page %>) this.value = <%= b.end_page %>;"
+                                                   style="height: 50px; font-size: 1.25rem;">
+                                            <small class="position-absolute top-100 start-50 translate-middle-x text-muted mt-2 w-100 text-center fw-bold" 
+                                                   style="font-size: 0.7rem;" title="النطاق: <%= b.start_page %> - <%= b.end_page %>">
+                                                النطاق: <%= b.start_page %> - <%= b.end_page %>
+                                            </small>
+                                        </div>
+                                        <button class="btn btn-success rounded-3 shadow-sm d-flex align-items-center justify-content-center flex-shrink-0" 
+                                                onclick="updateProgress(event, <%= b.id %>, <%= b.start_page %>, <%= b.end_page %>)"
+                                                style="width: 50px; height: 50px;"
+                                                title="حفظ">
+                                            <i class="bi bi-check-lg fs-4"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="mt-5 pt-2 border-top">
+                                        <small class="text-muted" style="font-size: 0.75rem;">
+                                            <i class="bi bi-clock-history me-1"></i>
+                                            آخر تحديث: صفحة <%= b.current_page %>
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-journal-x fs-1 mb-3 d-block"></i>
+                        لم يتم تعيين كتب لك في هذا الفصل الدراسي.
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function updateProgress(event, assignmentId, startPage, endPage) {
+    const pageInput = document.getElementById(`page_${assignmentId}`);
+    const pageNumber = parseInt(pageInput.value);
+
+    if (isNaN(pageNumber) || pageNumber < startPage || pageNumber > endPage) {
+        return showToast(`يرجى إدخال رقم صفحة بين ${startPage} و ${endPage}`, 'danger');
+    }
+    
+    const btn = event.currentTarget;
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner-border spinner-border-sm text-white" style="width: 1.2rem; height: 1.2rem;"></div>';
+
+    try {
+        const response = await fetch('/book/update-progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ assignmentId, pageNumber })
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+            location.reload();
+        } else {
+            showToast('فشل التحديث: ' + (data.error || 'خطأ غير معروف'), 'danger');
+        }
+    } catch (err) {
+        console.error('Fetch Error:', err);
+        showToast('حدث خطأ في الاتصال: ' + err.message, 'danger');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
+}
+
+function changeTeacherDate(selectedDate) {
+    window.location.href = `/dashboard/teacher?date=${selectedDate}`;
+}
+</script>
+
+<%- include('partials/footer') %>

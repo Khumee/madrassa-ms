@@ -1,0 +1,70 @@
+<div class="card border-0 bg-light rounded-4 p-4 mb-4 shadow-sm">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+        <!-- Week Navigation Arrows -->
+        <div class="d-flex align-items-center gap-2">
+            <a href="?startDate=<%= prevStartDate %>&endDate=<%= prevEndDate %>" class="btn btn-white rounded-pill shadow-xs border px-3 py-2 text-dark d-flex align-items-center gap-1 hover-primary transition-all">
+                <i class="bi bi-chevron-right fs-6"></i> <%= locals.lang === 'ur' ? 'پچھلا ہفتہ' : 'الأسبوع السابق' %>
+            </a>
+            <span class="fw-bold text-secondary px-2" style="font-family: monospace; font-size: 0.95rem; direction: ltr; display: inline-block;">
+                <%= startDate %> &rarr; <%= endDate %>
+            </span>
+            <a href="?startDate=<%= nextStartDate %>&endDate=<%= nextEndDate %>" class="btn btn-white rounded-pill shadow-xs border px-3 py-2 text-dark d-flex align-items-center gap-1 hover-primary transition-all">
+                <%= locals.lang === 'ur' ? 'اگلا ہفتہ' : 'الأسبوع التالي' %> <i class="bi bi-chevron-left fs-6"></i>
+            </a>
+        </div>
+
+        <!-- Quick selection pills -->
+        <div class="d-flex flex-wrap gap-2">
+            <a href="?startDate=<%= dateToday %>&endDate=<%= dateToday %>" class="btn btn-sm rounded-pill px-3 py-2 <%= startDate === dateToday && endDate === dateToday ? 'btn-primary' : 'btn-white border text-secondary shadow-xs' %>">
+                <%= locals.lang === 'ur' ? 'آج' : 'اليوم' %>
+            </a>
+            <a href="?startDate=<%= defaultStart %>&endDate=<%= defaultEnd %>" class="btn btn-sm rounded-pill px-3 py-2 <%= startDate === defaultStart && endDate === defaultEnd ? 'btn-primary' : 'btn-white border text-secondary shadow-xs' %>">
+                <%= locals.lang === 'ur' ? 'ہفتہ وار (افتراضى)' : 'الافتراضي (الإثنين - السبت)' %>
+            </a>
+            <a href="?startDate=<%= dateLastMonth %>&endDate=<%= dateToday %>" class="btn btn-sm rounded-pill px-3 py-2 <%= startDate === dateLastMonth && endDate === dateToday ? 'btn-primary' : 'btn-white border text-secondary shadow-xs' %>">
+                <%= locals.lang === 'ur' ? 'پچھلا مہینہ' : 'الشهر الماضي' %>
+            </a>
+            <a href="?startDate=<%= dateLast3Months %>&endDate=<%= dateToday %>" class="btn btn-sm rounded-pill px-3 py-2 <%= startDate === dateLast3Months && endDate === dateToday ? 'btn-primary' : 'btn-white border text-secondary shadow-xs' %>">
+                <%= locals.lang === 'ur' ? 'آخری 3 مہینے' : 'آخر ٣ أشهر' %>
+            </a>
+            <a href="?startDate=<%= dateLast6Months %>&endDate=<%= dateToday %>" class="btn btn-sm rounded-pill px-3 py-2 <%= startDate === dateLast6Months && endDate === dateToday ? 'btn-primary' : 'btn-white border text-secondary shadow-xs' %>">
+                <%= locals.lang === 'ur' ? 'آخری 6 مہینے' : 'آخر ٦ أشهر' %>
+            </a>
+        </div>
+    </div>
+
+    <!-- Manual Custom Range Inputs -->
+    <form method="GET" action="" class="row g-3 align-items-end mt-1 border-top pt-3">
+        <div class="col-md-4">
+            <label class="form-label fw-bold text-secondary" style="font-size: 0.85rem;"><%= locals.lang === 'ur' ? 'تاریخ شروع:' : 'من تاريخ (البدء):' %></label>
+            <input type="date" name="startDate" value="<%= startDate %>" class="form-control rounded-3 border-0 shadow-sm px-3" onchange="this.form.submit()" required>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label fw-bold text-secondary" style="font-size: 0.85rem;"><%= locals.lang === 'ur' ? 'تاریخ اختتام:' : 'إلى تاريخ (الانتهاء):' %></label>
+            <input type="date" name="endDate" value="<%= endDate %>" class="form-control rounded-3 border-0 shadow-sm px-3" onchange="this.form.submit()" required>
+        </div>
+        <div class="col-md-4 d-flex gap-2">
+            <button type="submit" class="btn btn-primary rounded-pill w-100 py-2 fw-semibold shadow-sm">
+                <i class="bi bi-funnel-fill me-1"></i> <%= locals.lang === 'ur' ? 'تصفیہ کریں' : 'تصفية' %>
+            </button>
+            <a href="?" class="btn btn-outline-secondary rounded-pill w-100 py-2">
+                <%= locals.lang === 'ur' ? 'ری سیٹ' : 'إعادة تعيين' %>
+            </a>
+        </div>
+    </form>
+</div>
+
+<style>
+    .btn-white {
+        background-color: #ffffff;
+        color: #475569;
+        border-color: #e2e8f0;
+    }
+    .btn-white:hover {
+        background-color: #f8fafc;
+        color: #0f172a;
+    }
+    .shadow-xs {
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+</style>

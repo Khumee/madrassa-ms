@@ -1,0 +1,221 @@
+<%- include('partials/header') %>
+
+<div class="row mb-5 align-items-center">
+    <div class="col-md-8">
+        <h1 class="fw-bold text-primary"><%= __('Manage_Books') %></h1>
+        <p class="text-muted"><%= __('Manage_Books_Sub') %></p>
+    </div>
+    <div class="col-md-4 text-start">
+        <a href="/" class="btn btn-outline-primary rounded-pill px-4">
+            <i class="bi bi-house-door me-2"></i><%= __('Back_To_Dashboard') %>
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-primary text-white rounded-top-4 p-3">
+                <h5 class="mb-0"><%= __('Add_New_Book') %></h5>
+            </div>
+            <div class="card-body p-4">
+                <form action="/books/add" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><%= __('Book_Name') %></label>
+                        <input type="text" name="title" class="form-control" required placeholder="مثال: البخاري">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><%= __('Class') %></label>
+                        <select name="classId" class="form-select rounded-3" required>
+                            <option value=""><%= __('Select_Class_Placeholder') %></option>
+                            <% classes.forEach(cls => { %>
+                                <option value="<%= cls.id %>"><%= cls.name_ar %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary rounded-pill py-2 fw-bold"><%= __('Save_Book_Btn') %></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-white p-4 border-bottom">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="mb-0 fw-bold text-dark"><%= __('Available_Books_List') %></h5>
+                </div>
+                <div class="d-flex flex-column gap-2">
+                    <small class="text-muted fw-bold"><i class="bi bi-funnel-fill me-1 text-primary"></i><%= __('Filter_By_Class') %></small>
+                    <div class="d-flex flex-wrap gap-2" id="classFilterTiles">
+                        <button class="btn btn-sm btn-primary rounded-pill px-3 class-filter-tile active" data-class-id="all">
+                            <%= __('All_Classes') %>
+                        </button>
+                        <% classes.forEach(cls => { %>
+                            <button class="btn btn-sm btn-outline-primary rounded-pill px-3 class-filter-tile" data-class-id="<%= cls.id %>">
+                                <%= cls.name_ar %>
+                            </button>
+                        <% }) %>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 text-end">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-4">#</th>
+                                <th><%= __('Book_Name') %></th>
+                                <th><%= __('Class') %></th>
+                                <th class="px-4 text-center"><%= __('Actions') %></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% books.forEach((book, index) => { %>
+                                <tr class="book-row" data-class-id="<%= book.class_id || '' %>">
+                                    <td class="px-4 text-muted row-index"><%= index + 1 %></td>
+                                    <td class="fw-bold"><%= book.title %></td>
+                                    <td class="text-muted"><%= book.class_name || __('Not_Specified') %></td>
+                                    <td class="px-4 text-center">
+                                        <button class="btn btn-sm btn-primary rounded-pill px-3" 
+                                                onclick='openEditModal(<%- JSON.stringify(book) %>)' title="<%= __('Edit') %>">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger rounded-pill px-3 ms-1" 
+                                                onclick="deleteBook(<%= book.id %>)" title="<%= __('Delete') %>">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Book Modal -->
+<div class="modal fade" id="editBookModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <div class="modal-header bg-primary text-white rounded-top-4">
+                <h5 class="modal-title"><%= __('Edit_Book_Title') %></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="editBookForm">
+                    <input type="hidden" id="editBookId">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><%= __('Book_Name') %></label>
+                        <input type="text" id="editBookTitle" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><%= __('Class') %></label>
+                        <select id="editBookClass" class="form-select rounded-3" required>
+                            <option value=""><%= __('Select_Class_Placeholder') %></option>
+                            <% classes.forEach(cls => { %>
+                                <option value="<%= cls.id %>"><%= cls.name_ar %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary rounded-pill py-2"><%= __('Save_Changes') %></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let editBookModal;
+document.addEventListener('DOMContentLoaded', () => {
+    editBookModal = new bootstrap.Modal(document.getElementById('editBookModal'));
+    
+    // Wire up Class Filter Tiles
+    const tiles = document.querySelectorAll('.class-filter-tile');
+    tiles.forEach(tile => {
+        tile.addEventListener('click', function() {
+            // Toggle active style across tiles
+            tiles.forEach(t => {
+                t.classList.remove('btn-primary', 'active');
+                t.classList.add('btn-outline-primary');
+            });
+            this.classList.remove('btn-outline-primary');
+            this.classList.add('btn-primary', 'active');
+            
+            const selectedClassId = this.dataset.classId;
+            localStorage.setItem('activeBookClassFilter', selectedClassId);
+            filterRowsByClass(selectedClassId);
+        });
+    });
+
+    // Restore saved filter if present to retain it on page refresh/action reloads
+    const savedClassId = localStorage.getItem('activeBookClassFilter') || 'all';
+    const activeTile = document.querySelector(`.class-filter-tile[data-class-id="${savedClassId}"]`);
+    if (activeTile) {
+        activeTile.click();
+    } else {
+        const allTile = document.querySelector('.class-filter-tile[data-class-id="all"]');
+        if (allTile) allTile.click();
+    }
+});
+
+function filterRowsByClass(selectedClassId) {
+    const rows = document.querySelectorAll('.book-row');
+    let visibleIndex = 1;
+    
+    rows.forEach(row => {
+        const rowClassId = row.dataset.classId;
+        if (selectedClassId === 'all' || rowClassId === selectedClassId) {
+            row.style.display = '';
+            row.querySelector('.row-index').textContent = visibleIndex++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+function openEditModal(book) {
+    document.getElementById('editBookId').value = book.id;
+    document.getElementById('editBookTitle').value = book.title;
+    document.getElementById('editBookClass').value = book.class_id || '';
+    editBookModal.show();
+}
+
+document.getElementById('editBookForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('editBookId').value;
+    const title = document.getElementById('editBookTitle').value;
+    const classId = document.getElementById('editBookClass').value;
+
+    const res = await fetch(`/books/edit/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, classId })
+    });
+    const data = await res.json();
+    if (data.success) {
+        location.reload();
+    } else {
+        alert('<%= __('Update_Failed') %>' + data.error);
+    }
+});
+
+async function deleteBook(id) {
+    const isConfirmed = await showConfirm('<%= __('Confirm_Delete_Book') %>');
+    if (!isConfirmed) return;
+    const res = await fetch(`/books/delete/${id}`, { method: 'POST' });
+    const data = await res.json();
+    if (data.success) {
+        location.reload();
+    } else {
+        alert('<%= __('Delete_Error') %>' + data.error);
+    }
+}
+</script>
+
+<%- include('partials/footer') %>

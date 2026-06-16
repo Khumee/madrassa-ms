@@ -1,0 +1,33 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3001:3000"
+    environment:
+      - PORT=3000
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=secretpassword
+      - DB_NAME=mms
+      - SESSION_SECRET=madrassa_secret_session_key
+      - AUTO_SEED=true
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+
+  db:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - "3308:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=secretpassword
+      - MYSQL_DATABASE=mms
+    # Volume is omitted deliberately to support "build, use, and destroy" behavior
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-psecretpassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always

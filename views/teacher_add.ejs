@@ -1,0 +1,40 @@
+<%- include('partials/header') %>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-primary text-white p-4 rounded-top-4">
+                <h2 class="fw-bold mb-0"><%= __('Add_Teacher') %></h2>
+            </div>
+            <div class="card-body p-4">
+                <form action="/teachers/add" method="POST">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold"><%= __('Teacher_Full_Name') %></label>
+                        <input type="text" name="name" class="form-control form-control-lg rounded-3" 
+                               placeholder="مثال: مولانا حبيب محبوب" required>
+                        <div class="form-text"><%= __('Auto_Create_Account_Help') %></div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-bold"><%= __('Subject_Specialization') %></label>
+                        <input type="text" name="subject" class="form-control form-control-lg rounded-3" 
+                               placeholder="<%= __('Example_Subject') %>">
+                    </div>
+
+                    <div class="alert alert-success border-0 rounded-3">
+                        <i class="bi bi-person-badge me-2"></i>
+                        <%= __('Auto_ID_Help') %>
+                    </div>
+
+                    <div class="d-grid mt-5">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill py-3 fw-bold">
+                            <%= __('Save_Data_Btn') %>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

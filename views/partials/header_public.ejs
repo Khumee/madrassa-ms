@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="<%= lang %>" dir="<%= ['ar', 'ur'].includes(lang) ? 'rtl' : 'ltr' %>">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= (locals.tenant && tenant.school_name) ? tenant.school_name : __('College_Name') %> - <%= __('Timetable') %></title>
+    <link rel="icon" href="<%= (locals.tenant && tenant.logo_url) ? tenant.logo_url : '/logo.jpg' %>">
+    <% if (['ar', 'ur'].includes(lang)) { %>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <% } else { %>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <% } %>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        :root {
+            --primary: <%= (locals.tenant && tenant.primary_color) ? tenant.primary_color : '#2c3e50' %>;
+            --secondary: <%= (locals.tenant && tenant.secondary_color) ? tenant.secondary_color : '#ecf0f1' %>;
+            --accent: #27ae60;
+        }
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .btn-primary { background-color: var(--primary); border: none; }
+        .btn-success { background-color: var(--accent); border: none; }
+        nav.navbar {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .logo { font-size: 1.5rem; fw-bold; color: var(--primary); }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white px-3 px-md-4 py-3 mb-4 shadow-sm">
+        <div class="container-fluid">
+            <div class="d-flex align-items-center gap-2">
+                <img src="<%= (locals.tenant && tenant.logo_url) ? tenant.logo_url : '/logo.jpg' %>" alt="Logo" style="height: 40px; border-radius: 5px;">
+                <a href="/timetable/public" class="navbar-brand logo fw-bold text-decoration-none mb-0"><%= (locals.tenant && tenant.school_name) ? tenant.school_name : __('College_Name') %></a>
+            </div>
+            
+            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse justify-content-end mt-3 mt-lg-0" id="navbarNav">
+                <div class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center gap-2 gap-lg-3">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button" id="langDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-globe"></i> <%= __('Language') %>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end <%= ['ar', 'ur'].includes(lang) ? 'text-end' : 'text-start' %>" aria-labelledby="langDropdown">
+                            <li><a class="dropdown-item" href="/set-lang/ar">العربية</a></li>
+                            <li><a class="dropdown-item" href="/set-lang/ur">اردو</a></li>
+                            <li><a class="dropdown-item" href="/set-lang/en">English</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container pb-5">

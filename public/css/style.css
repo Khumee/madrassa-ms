@@ -1,0 +1,321 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;600;700&display=swap');
+
+:root {
+    --primary: #2c3e50;
+    --secondary: #27ae60;
+    --accent: #e67e22;
+    --background: #f4f7f6;
+    --card-bg: #ffffff;
+    --text: #2d3436;
+    --danger: #e74c3c;
+    --success: #2ecc71;
+    --warning: #f1c40f;
+    --glass: rgba(255, 255, 255, 0.8);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Noto Sans Arabic', sans-serif !important; /* Ensure it overrides header.ejs */
+    background-color: var(--background);
+    color: var(--text);
+    font-size: 19px; /* Slightly larger than 18px as per user request for "small font" */
+    line-height: 1.7;
+}
+
+html[dir="rtl"] body {
+    direction: rtl;
+    text-align: right;
+}
+
+html[dir="ltr"] body {
+    direction: ltr;
+    text-align: left;
+}
+
+/* Ensure headings scale up too */
+h1, h2, h3, h4, h5, h6 {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+h1 { font-size: 2.5rem; }
+h3 { font-size: 1.8rem; }
+h4 { font-size: 1.5rem; }
+h5 { font-size: 1.25rem; }
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Glassmorphism Navbar */
+nav {
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255,255,255,0.3);
+    padding: 15px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.logo {
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: var(--primary);
+}
+
+/* Cards */
+.card {
+    background: var(--card-bg);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+}
+
+/* Buttons */
+.btn {
+    padding: 12px 24px; /* Increased padding */
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease-in-out;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    color: #ffffff !important; /* Force text color to white on hover to prevent "hiding" */
+}
+
+/* Increase badge and small component widths to prevent cropping */
+.badge {
+    min-width: 2.5rem;
+    padding: 0.5em 1em !important;
+}
+
+.status-btn {
+    width: 48px !important; /* Increased from 40px to prevent 3-digit cropping */
+    height: 48px !important;
+    font-size: 1rem !important;
+}
+
+.btn-primary { background-color: var(--primary); color: white; }
+.btn-secondary { background-color: var(--secondary); color: white; }
+.btn-danger { background-color: var(--danger); color: white; }
+
+/* Grid for classes */
+.class-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.class-card {
+    background: var(--primary);
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+/* Attendance Toggle */
+.attendance-list {
+    list-style: none;
+}
+
+.student-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    gap: 10px;
+}
+
+/* Mobile Responsive Attendance */
+@media (max-width: 500px) {
+    .student-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    .status-toggle {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .status-btn {
+        width: 42px;
+        height: 42px;
+    }
+}
+
+.status-toggle {
+    display: flex;
+    gap: 10px;
+}
+
+.status-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.status-btn.active.present { background: var(--success); color: white; border-color: var(--success); }
+.status-btn.active.absent { background: var(--danger); color: white; border-color: var(--danger); }
+.status-btn.active.leave { background: var(--warning); color: white; border-color: var(--warning); }
+.status-btn.active.online { background: #3498db; color: white; border-color: #3498db; }
+
+/* Table Styles */
+table th, table td {
+    text-align: center;
+    vertical-align: middle;
+}
+.card {
+    background: linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%);
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.class-card {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    box-shadow: 0 4px 15px rgba(44, 62, 80, 0.3);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+}
+
+/* Dashboard Specific Large Buttons */
+.dashboard-btn {
+    padding: 20px 30px;
+    font-size: 1.2rem;
+    width: 100%;
+    transition: all 0.2s ease-in-out;
+}
+
+.dashboard-btn:hover {
+    background-color: var(--primary) !important;
+    color: #ffffff !important;
+}
+
+.dashboard-btn:hover i, 
+.dashboard-btn:hover span {
+    color: #ffffff !important;
+}
+
+/* Login Form Controls */
+.form-control-login {
+    display: block;
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 1rem;
+    color: #212529;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+.form-control-login:focus {
+    color: #212529;
+    background-color: #fff;
+    border-color: var(--primary);
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(44, 62, 80, 0.25);
+}
+
+/* Table Text Handling */
+.subject-text-wrap {
+    max-width: 250px;
+    white-space: normal;
+    word-wrap: break-word;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Responsive Table & Full Width Fixes */
+@media (min-width: 992px) {
+    .table-responsive { overflow-x: visible !important; }
+    .container, .container-fluid { max-width: 100% !important; padding-left: 2rem !important; padding-right: 2rem !important; }
+    .timetable-container-wide { max-width: 100% !important; }
+}
+
+/* Custom Vibrant Button Colors */
+.btn-indigo { background-color: #6610f2; border-color: #6610f2; color: #fff; }
+.btn-indigo:hover { background-color: #520dc2; border-color: #4d0ab6; color: #fff; }
+.btn-outline-indigo { color: #6610f2; border-color: #6610f2; }
+.btn-outline-indigo:hover, .btn-outline-indigo.active { background-color: #6610f2; color: #fff; }
+
+.btn-orange { background-color: #fd7e14; border-color: #fd7e14; color: #fff; }
+.btn-orange:hover { background-color: #ca6510; border-color: #ca6510; color: #fff; }
+.btn-outline-orange { color: #fd7e14; border-color: #fd7e14; }
+.btn-outline-orange:hover, .btn-outline-orange.active { background-color: #fd7e14; color: #fff; }
+
+.btn-teal { background-color: #20c997; border-color: #20c997; color: #fff; }
+.btn-teal:hover { background-color: #1aa179; border-color: #1aa179; color: #fff; }
+.btn-outline-teal { color: #20c997; border-color: #20c997; }
+.btn-outline-teal:hover, .btn-outline-teal.active { background-color: #20c997; color: #fff; }
+
+.btn-purple { background-color: #6f42c1; border-color: #6f42c1; color: #fff; }
+.btn-purple:hover { background-color: #59359a; border-color: #59359a; color: #fff; }
+.btn-outline-purple { color: #6f42c1; border-color: #6f42c1; }
+.btn-outline-purple:hover, .btn-outline-purple.active { background-color: #6f42c1; color: #fff; }
+
+.filter-chip { transition: all 0.2s; }
+.filter-chip.active { box-shadow: 0 4px 10px rgba(0,0,0,0.15); transform: translateY(-1px); }
+
+/* Removed global transitions and heavy animations */
+
+/* Mobile specific fixes */
+@media (max-width: 600px) {
+    h1 { font-size: 1.5rem; }
+    .card { padding: 15px; }
+    .bi.fs-1 { font-size: 2rem !important; }
+    .bi.fs-2 { font-size: 1.75rem !important; }
+    .bi.fs-3 { font-size: 1.5rem !important; }
+}
+
+/* Light fade in for main content only */
+.container {
+    animation: none; /* Removed heavy animation */
+}
+
+.toast {
+    transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border-radius: 12px;
+}
+.toast.show {
+    opacity: 1;
+    transform: translateY(20px);
+}

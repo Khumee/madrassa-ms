@@ -1,0 +1,117 @@
+<%- include('partials/header') %>
+
+<div class="row">
+    <div class="col-md-12 text-center mb-5">
+        <h1 class="display-4 fw-bold text-primary"><%= __('Dashboard') %></h1>
+        <p class="lead text-muted"><%= today %></p>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h3 class="card-title mb-4"><%= __('Student_Attendance_By_Class') %></h3>
+                <div class="row g-3">
+                    <% classes.forEach(cls => { %>
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <a href="/attendance/students/<%= cls.id %>" class="text-decoration-none">
+                                <div class="card h-100 border-0 shadow-sm text-center p-3 bg-light">
+                                    <div class="card-body p-0 d-flex flex-column align-items-center justify-content-center">
+                                        <i class="bi bi-mortarboard text-primary fs-3 mb-2"></i>
+                                        <h6 class="fw-bold mb-0 text-dark w-100" style="font-size: 0.9rem;"><%= __(cls.name_ar) %></h6>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h3 class="card-title mb-4"><%= __('Quick_Access') %></h3>
+                <div class="row g-3">
+                    <div class="col-md-3 mb-3">
+                        <a href="/users/manage" class="btn btn-outline-primary dashboard-btn rounded-4 shadow-sm border-0 h-100 d-flex flex-column align-items-center justify-content-center">
+                            <i class="bi bi-people-fill fs-3 mb-2"></i>
+                            <span class="fw-bold"><%= __('Manage_Users') %></span>
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="/books/manage" class="btn btn-outline-info dashboard-btn rounded-4 shadow-sm border-0 h-100 d-flex flex-column align-items-center justify-content-center">
+                            <i class="bi bi-book-half fs-3 mb-2"></i>
+                            <span class="fw-bold"><%= __('Manage_Books') %></span>
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="/teacher-books/manage" class="btn btn-outline-success dashboard-btn rounded-4 shadow-sm border-0 h-100 d-flex flex-column align-items-center justify-content-center">
+                            <i class="bi bi-person-check fs-3 mb-2"></i>
+                            <span class="fw-bold"><%= __('Book_Assignments') %></span>
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="/reports" class="btn btn-outline-warning dashboard-btn rounded-4 shadow-sm border-0 h-100 d-flex flex-column align-items-center justify-content-center">
+                            <i class="bi bi-bar-chart-fill fs-3 mb-2"></i>
+                            <span class="fw-bold"><%= __('General_Reports') %></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-body p-4">
+                <h3 class="card-title mb-4 text-primary"><%= __('Student_Management') %></h3>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="/students/manage" class="btn btn-secondary rounded-pill px-4">📂 <%= __('Student_Management') %></a>
+                    <a href="/students/add" class="btn btn-success rounded-pill px-4">➕ <%= __('Add_Student') %></a>
+                    <a href="/reports?filterType=students" class="btn btn-primary rounded-pill px-4">📊 <%= __('Reports') %></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-body p-4">
+                <h3 class="card-title mb-4 text-primary"><%= __('Teacher_Management') %></h3>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="/teachers" class="btn btn-secondary rounded-pill px-4">📝 <%= __('Teacher_Attendance') %></a>
+                    <a href="/teachers/manage" class="btn btn-secondary rounded-pill px-4">👥 <%= __('Teacher_Management') %></a>
+                    <% if (role === 'مدير') { %>
+                        <a href="/teachers/add" class="btn btn-success rounded-pill px-4">➕ <%= __('Add_Teacher') %></a>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h3 class="card-title mb-3 text-primary"><%= __('Settings') %></h3>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="/profile/change-password" class="btn btn-outline-secondary rounded-pill px-4">🔑 <%= __('Change_Password') %></a>
+                    <a href="/users/manage" class="btn btn-outline-danger rounded-pill px-4">👤 <%= __('Manage_Users_Roles') %></a>
+                    <% if (role === 'مدير') { %>
+                        <a href="/permissions/manage" class="btn btn-outline-warning rounded-pill px-4">🔒 <%= __('Manage_Permissions') %></a>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

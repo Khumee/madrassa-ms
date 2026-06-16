@@ -1,0 +1,214 @@
+<%- include('partials/header') %>
+
+<style>
+    .bar-wrap { height: 8px; border-radius: 99px; background: #e9ecef; overflow: hidden; }
+    .bar-fill  { height: 8px; border-radius: 99px; transition: width 0.6s ease; }
+    .areef-pill { font-size: 0.72rem; font-weight: 600; }
+    .stat-col { min-width: 160px; }
+    .class-row:hover { background: #f8faff; }
+</style>
+
+<!-- Page Header -->
+<div class="row mb-3 align-items-center">
+    <div class="col">
+        <h1 class="fw-bold text-primary mb-0">
+            <i class="bi bi-person-lines-fill me-2"></i>
+            <%= locals.lang === 'ur' ? 'عریف کی معیاری رپورٹ (فصل کے لحاظ سے)' : 'تقرير معايير العرفاء حسب الفصل' %>
+        </h1>
+        <p class="text-muted mb-0 mt-1 small">
+            <%= locals.lang === 'ur'
+                ? 'ہر فصل میں طلباء اور اساتذہ کی حاضری ثبت کرنے کے ایام — عریف کے نام صرف معلومات کے لیے'
+                : 'عدد الأيام التي سُجِّل فيها حضور الطلاب وحضور الأساتذة لكل فصل — أسماء العرفاء للإشارة فقط' %>
+        </p>
+    </div>
+    <div class="col-auto">
+        <span class="badge bg-primary-subtle text-primary border rounded-pill px-3 py-2">
+            <i class="bi bi-calendar3 me-1"></i><%= startDate %> ← <%= endDate %>
+        </span>
+    </div>
+</div>
+
+<!-- Date Filter -->
+<%- include('partials/date_filter') %>
+
+<!-- Summary Row -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-4">
+        <div class="card border-0 shadow-sm rounded-4 p-3 d-flex flex-row align-items-center gap-3">
+            <div class="bg-primary-subtle text-primary rounded-3 p-3"><i class="bi bi-mortarboard-fill fs-4"></i></div>
+            <div>
+                <div class="text-muted small fw-semibold"><%= locals.lang === 'ur' ? 'کل فصول' : 'إجمالي الفصول' %></div>
+                <div class="fw-bold fs-3 text-primary"><%= reportRows.length %></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="card border-0 shadow-sm rounded-4 p-3 d-flex flex-row align-items-center gap-3">
+            <div class="bg-success-subtle text-success rounded-3 p-3"><i class="bi bi-calendar-check-fill fs-4"></i></div>
+            <div>
+                <div class="text-muted small fw-semibold"><%= locals.lang === 'ur' ? 'کل تدریسی ایام' : 'إجمالي أيام الدراسة' %></div>
+                <div class="fw-bold fs-3 text-success"><%= totalDays %></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="card border-0 shadow-sm rounded-4 p-3 d-flex flex-row align-items-center gap-3">
+            <div class="bg-warning-subtle text-warning rounded-3 p-3"><i class="bi bi-info-circle-fill fs-4"></i></div>
+            <div class="small text-muted">
+                <% if (locals.lang === 'ur') { %>
+                    اساتذہ حاضری: اگر اس دن عریف نے کسی ایک استاد کی حاضری تبدیل کی تو وہ دن شمار ہوگا
+                <% } else { %>
+                    حضور الأساتذة: يُعدّ اليوم محضوراً إذا عدَّل العريف سجل أي أستاذ في ذلك اليوم
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Report Table -->
+<% if (reportRows.length === 0) { %>
+<div class="card border-0 shadow-sm rounded-4 text-center py-5">
+    <i class="bi bi-person-x fs-1 text-muted mb-3 d-block"></i>
+    <p class="text-muted fw-semibold">
+        <%= locals.lang === 'ur' ? 'کوئی فصل نہیں ملی جس میں عریف ہو' : 'لا توجد فصول مرتبطة بعريف' %>
+    </p>
+</div>
+<% } else { %>
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card-header bg-white border-0 p-4 d-flex align-items-center gap-2">
+        <i class="bi bi-table text-primary fs-5"></i>
+        <h5 class="fw-bold mb-0 text-dark"><%= locals.lang === 'ur' ? 'تفصیلی رپورٹ' : 'التقرير التفصيلي' %></h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" style="min-width: 720px;">
+            <thead style="background:#f1f5f9;">
+                <tr>
+                    <th class="py-3 px-4 fw-bold text-muted" style="width:40px;">#</th>
+                    <th class="py-3 fw-bold text-muted">
+                        <%= locals.lang === 'ur' ? 'فصل' : 'الفصل' %>
+                    </th>
+                    <th class="py-3 fw-bold text-muted">
+                        <i class="bi bi-person-badge me-1 text-secondary"></i>
+                        <%= locals.lang === 'ur' ? 'عریف (عرفاء)' : 'العريف / العرفاء' %>
+                    </th>
+                    <th class="py-3 fw-bold text-muted text-center stat-col">
+                        <i class="bi bi-person-check-fill text-success me-1"></i>
+                        <%= locals.lang === 'ur' ? 'طلباء حاضری' : 'حضور الطلاب' %>
+                    </th>
+                    <th class="py-3 fw-bold text-muted text-center stat-col">
+                        <i class="bi bi-person-badge-fill text-primary me-1"></i>
+                        <%= locals.lang === 'ur' ? 'اساتذہ حاضری' : 'حضور الأساتذة' %>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <% reportRows.forEach((row, idx) => { %>
+                <tr class="class-row">
+                    <td class="px-4 text-muted fw-semibold"><%= idx + 1 %></td>
+
+                    <!-- Class Name -->
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                                 style="width:38px;height:38px;font-size:0.9rem;flex-shrink:0;">
+                                <i class="bi bi-mortarboard-fill"></i>
+                            </div>
+                            <span class="fw-bold text-dark"><%= row.class_name %></span>
+                        </div>
+                    </td>
+
+                    <!-- Areef Name(s) -->
+                    <td>
+                        <div class="d-flex flex-wrap gap-1">
+                            <% if (row.areef_names.length === 0) { %>
+                                <span class="badge bg-secondary-subtle text-secondary areef-pill rounded-pill px-2 py-1">
+                                    <%= locals.lang === 'ur' ? 'کوئی عریف نہیں' : 'لا يوجد' %>
+                                </span>
+                            <% } else { %>
+                                <% row.areef_names.forEach(name => { %>
+                                    <span class="badge bg-info-subtle text-info areef-pill rounded-pill px-2 py-1">
+                                        <i class="bi bi-person-fill me-1"></i><%= name %>
+                                    </span>
+                                <% }); %>
+                            <% } %>
+                        </div>
+                    </td>
+
+                    <!-- Student Attendance -->
+                    <td class="text-center">
+                        <div class="d-flex flex-column align-items-center gap-1 mx-auto" style="max-width:150px;">
+                            <div class="fw-bold fs-5 <%=
+                                row.student_pct >= 80 ? 'text-success' :
+                                row.student_pct >= 50 ? 'text-warning' : 'text-danger' %>">
+                                <%= row.student_days_marked %>
+                                <span class="text-muted fw-normal" style="font-size:0.78rem;">/ <%= row.total_days %></span>
+                            </div>
+                            <div class="bar-wrap w-100">
+                                <div class="bar-fill <%=
+                                    row.student_pct >= 80 ? 'bg-success' :
+                                    row.student_pct >= 50 ? 'bg-warning' : 'bg-danger' %>"
+                                     style="width:<%= row.student_pct %>%;"></div>
+                            </div>
+                            <span class="badge rounded-pill fw-bold <%=
+                                row.student_pct >= 80 ? 'bg-success-subtle text-success' :
+                                row.student_pct >= 50 ? 'bg-warning-subtle text-warning' : 'bg-danger-subtle text-danger' %>"
+                                  style="font-size:0.7rem;">
+                                <%= row.student_pct %>%
+                            </span>
+                        </div>
+                    </td>
+
+                    <!-- Teacher Attendance -->
+                    <td class="text-center">
+                        <div class="d-flex flex-column align-items-center gap-1 mx-auto" style="max-width:150px;">
+                            <div class="fw-bold fs-5 <%=
+                                row.teacher_pct >= 80 ? 'text-success' :
+                                row.teacher_pct >= 50 ? 'text-warning' : 'text-danger' %>">
+                                <%= row.teacher_days_marked %>
+                                <span class="text-muted fw-normal" style="font-size:0.78rem;">/ <%= row.total_days %></span>
+                            </div>
+                            <div class="bar-wrap w-100">
+                                <div class="bar-fill <%=
+                                    row.teacher_pct >= 80 ? 'bg-success' :
+                                    row.teacher_pct >= 50 ? 'bg-warning' : 'bg-danger' %>"
+                                     style="width:<%= row.teacher_pct %>%;"></div>
+                            </div>
+                            <span class="badge rounded-pill fw-bold <%=
+                                row.teacher_pct >= 80 ? 'bg-success-subtle text-success' :
+                                row.teacher_pct >= 50 ? 'bg-warning-subtle text-warning' : 'bg-danger-subtle text-danger' %>"
+                                  style="font-size:0.7rem;">
+                                <%= row.teacher_pct %>%
+                            </span>
+                        </div>
+                    </td>
+                </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Footer Legend -->
+    <div class="card-footer bg-white border-0 px-4 py-3 d-flex flex-wrap gap-3 align-items-center">
+        <span class="d-flex align-items-center gap-1 small text-success fw-semibold">
+            <span class="d-inline-block rounded-circle bg-success" style="width:10px;height:10px;"></span>
+            ≥80% &nbsp;<%= locals.lang === 'ur' ? 'عمدہ' : 'ممتاز' %>
+        </span>
+        <span class="d-flex align-items-center gap-1 small text-warning fw-semibold">
+            <span class="d-inline-block rounded-circle bg-warning" style="width:10px;height:10px;"></span>
+            50–79% &nbsp;<%= locals.lang === 'ur' ? 'اوسط' : 'متوسط' %>
+        </span>
+        <span class="d-flex align-items-center gap-1 small text-danger fw-semibold">
+            <span class="d-inline-block rounded-circle bg-danger" style="width:10px;height:10px;"></span>
+            &lt;50% &nbsp;<%= locals.lang === 'ur' ? 'ناقص' : 'ضعيف' %>
+        </span>
+        <span class="ms-auto text-muted small">
+            <i class="bi bi-info-circle me-1"></i>
+            <%= locals.lang === 'ur'
+                ? 'کل تدریسی ایام = وہ ایام جن میں کسی بھی فصل کے طلباء کی حاضری ثبت ہوئی'
+                : 'إجمالي أيام الدراسة = الأيام التي سُجِّل فيها حضور طلاب في أي فصل' %>
+        </span>
+    </div>
+</div>
+<% } %>
+
+<%- include('partials/footer') %>

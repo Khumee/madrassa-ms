@@ -1,0 +1,106 @@
+package com.nukrim.madrasati;
+
+import android.os.Bundle;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+public class MainActivity extends AppCompatActivity {
+
+    private WebView webView;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    // Replace with your Madrassa Management System production URL
+    private static final String APP_URL = "https://your-madrassa-domain.com";
+    private static final String UPDATE_URL = "https://your-madrassa-domain.com/mobile";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        swipeRefreshLayout = findViewById(R.id.swipeRefresh);
+        webView = findViewById(R.id.webview);
+        
+        findViewById(R.id.fab_update).setOnClickListener(v -> {
+            android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(UPDATE_URL));
+            startActivity(intent);
+        });
+
+        WebSettings webSettings = webView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+        webSettings.setDomStorageEnabled(true);
+        webSettings.setDatabaseEnabled(true);
+        webSettings.setAllowFileAccess(true);
+        webSettings.setAllowContentAccess(true);
+        webSettings.setLoadWithOverviewMode(true);
+        webSettings.setUseWideViewPort(true);
+
+        // Append custom User-Agent for server detection
+        String defaultUA = webSettings.getUserAgentString();
+        webSettings.setUserAgentString(defaultUA + " MmsMobile/" + BuildConfig.VERSION_NAME);
+
+        // Check for updates asynchronously
+        new Thread(() -> {
+            try {
+                java.net.URL url = new java.net.URL(APP_URL + "/api/app-version");
+                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setConnectTimeout(5000);
+                conn.setReadTimeout(5000);
+                if (conn.getResponseCode() == 200) {
+                    java.io.InputStream in = new java.io.BufferedInputStream(conn.getInputStream());
+                    java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(in));
+                    StringBuilder sb = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        sb.append(line);
+                    }
+                    String response = sb.toString();
+                    org.json.JSONObject json = new org.json.JSONObject(response);
+                    int serverVersionCode = json.getInt("versionCode");
+                    if (serverVersionCode > BuildConfig.VERSION_CODE) {
+                        runOnUiThread(() -> findViewById(R.id.fab_update).setVisibility(android.view.View.VISIBLE));
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                swipeRefreshLayout.setRefreshing(false);
+            }
+        });
+
+        swipeRefreshLayout.setOnRefreshListener(() -> webView.reload());
+
+        if (savedInstanceState == null) {
+            webView.loadUrl(APP_URL);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (webView.canGoBack()) {
+            webView.goBack();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        webView.saveState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        webView.restoreState(savedInstanceState);
+    }
+}

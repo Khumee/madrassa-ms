@@ -1,0 +1,932 @@
+<%- include('partials/header') %>
+
+<div class="row mb-4 align-items-center">
+    <div class="col-md-6">
+        <h1 class="fw-bold text-primary mb-0"><%= __('Reports_Stats_Title') %></h1>
+        <p class="text-muted"><%= __('Start_Date') %>: <span class="badge bg-light text-primary border"><%= startDate %></span> <%= __('End_Date') %>: <span class="badge bg-light text-primary border"><%= endDate %></span></p>
+    </div>
+</div>
+
+<style>
+    /* smooth arrow rotation */
+    [aria-expanded="true"] .transition-icon {
+        transform: rotate(180deg);
+    }
+    .transition-icon {
+        transition: transform 0.3s ease;
+    }
+    .filter-trigger-btn:hover {
+        background-color: #f8f9fa !important;
+        border-color: var(--bs-primary) !important;
+    }
+</style>
+
+<!-- Time-Based Filter Control Panel (Collapsed by default) -->
+<div class="row mb-5">
+    <div class="col-md-12">
+        <!-- Gorgeous Toggle Button/Bar -->
+        <button class="btn btn-white w-100 border shadow-sm rounded-4 p-3 d-flex justify-content-between align-items-center text-decoration-none filter-trigger-btn" 
+                type="button" 
+                data-bs-toggle="collapse" 
+                data-bs-target="#filterCollapsePanel" 
+                aria-expanded="false" 
+                aria-controls="filterCollapsePanel"
+                style="background: #ffffff; transition: all 0.3s ease;">
+            <div class="d-flex align-items-center gap-3">
+                <div class="bg-primary-subtle text-primary rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                    <i class="bi bi-funnel-fill fs-5"></i>
+                </div>
+                <div class="text-end">
+                    <span class="fw-bold text-dark d-block"><%= locals.lang === 'ur' ? 'فلٹر کے اختیارات' : 'خيارات تصفية التقارير' %></span>
+                    <span class="text-muted small">
+                        <%= locals.lang === 'ur' ? 'تاریخ کی حد منتخب کریں اور لاگو کریں' : 'حدد نطاق التواريخ المخصص لتحديث جميع الأقسام' %>
+                    </span>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-light text-primary border rounded-pill px-3 py-2">
+                    <i class="bi bi-calendar3 me-1"></i><%= startDate %> ⇄ <%= endDate %>
+                </span>
+                <i class="bi bi-chevron-down text-muted fs-5 transition-icon"></i>
+            </div>
+        </button>
+
+        <!-- Collapsible Content -->
+        <div class="collapse mt-3" id="filterCollapsePanel">
+            <div class="card shadow-sm border-0 rounded-4" style="background: linear-gradient(135deg, #ffffff 0%, #fcfdfe 100%);">
+                <div class="card-body p-4">
+                    <form id="dateFilterForm" method="GET" action="/reports">
+                        <% if (locals.filterType) { %>
+                            <input type="hidden" name="filterType" value="<%= filterType %>">
+                        <% } %>
+                        <div class="row align-items-end g-3">
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-secondary small"><%= __('Start_Date') %></label>
+                                <input type="date" name="startDate" id="startDateInput" class="form-control rounded-3 border-light shadow-sm" value="<%= startDate %>" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-secondary small"><%= __('End_Date') %></label>
+                                <input type="date" name="endDate" id="endDateInput" class="form-control rounded-3 border-light shadow-sm" value="<%= endDate %>" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold text-secondary small d-block"><%= __('Date_Filter_Header') %></label>
+                                <div class="btn-group w-100 shadow-sm rounded-3 overflow-hidden" role="group">
+                                    <button type="button" class="btn btn-outline-primary py-2 border-light-subtle small" onclick="setPreset('1day')"><%= __('Preset_1Day') %></button>
+                                    <button type="button" class="btn btn-outline-primary py-2 border-light-subtle small" onclick="setPreset('current_week')"><%= __('Preset_CurrentWeek') %></button>
+                                    <button type="button" class="btn btn-outline-primary py-2 border-light-subtle small" onclick="setPreset('7day')"><%= __('Preset_7Day') %></button>
+                                    <button type="button" class="btn btn-outline-primary py-2 border-light-subtle small" onclick="setPreset('1month')"><%= __('Preset_1Month') %></button>
+                                    <button type="button" class="btn btn-outline-primary py-2 border-light-subtle small" onclick="setPreset('6month')"><%= __('Preset_6Month') %></button>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary w-100 py-2 rounded-3 fw-bold shadow-sm">
+                                    <i class="bi bi-filter me-1"></i><%= __('Apply') %>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Student Attendance Section (Top) -->
+<div class="row mb-5">
+    <div class="col-md-12">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <h3 class="fw-bold mb-0 text-primary"><%= __('Student_Attendance_By_Class') %></h3>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary btn-sm rounded-pill px-3" type="button" data-bs-toggle="collapse" data-bs-target="#studentAttendanceFiltersCollapse" aria-expanded="false">
+                        <i class="bi bi-funnel me-1"></i><%= __('Filter_Label') %>
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="downloadStudentPDF()">
+                        <i class="bi bi-file-earmark-pdf me-1"></i><%= locals.lang === 'ur' ? 'PDF ڈاؤن لوڈ' : 'تحميل PDF' %>
+                    </button>
+                </div>
+            </div>
+            <!-- Collapsible Filters with Tiles -->
+            <div class="collapse border-bottom" id="studentAttendanceFiltersCollapse">
+                <div class="p-4 bg-light-subtle">
+                    <div class="row g-3">
+                        <!-- Search Input -->
+                        <div class="col-12 col-md-4">
+                            <label class="form-label small fw-bold text-secondary mb-2"><%= locals.lang === 'ur' ? 'طالب تلاش کریں' : 'البحث عن طالب' %></label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white border-primary-subtle"><i class="bi bi-search text-muted"></i></span>
+                                <input type="text" id="studentFilter" class="form-control border-primary-subtle" placeholder="<%= locals.lang === 'ur' ? 'طالب کا نام تلاش کریں...' : 'البحث عن طالب...' %>" onkeyup="filterStudents()">
+                            </div>
+                        </div>
+                        <!-- Class Selector Tiles -->
+                        <div class="col-12 col-md-8">
+                            <label class="form-label small fw-bold text-secondary mb-2"><%= locals.lang === 'ur' ? 'کلاسز کے ٹائلز' : 'تصفية حسب الصف' %></label>
+                            <div class="d-flex flex-wrap gap-2" id="classTilesContainer">
+                                <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 filter-tile active" data-filter="all" onclick="selectClassTile('all', this)"><%= __('All_Classes') %></button>
+                                <% Object.keys(groupedReport).forEach(className => { %>
+                                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 filter-tile" data-filter="<%= className %>" onclick="selectClassTile('<%= className %>', this)"><%= className %></button>
+                                <% }) %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <div class="accordion accordion-flush" id="attendanceAccordion">
+                    <% Object.keys(groupedReport).forEach((className, index) => { 
+                        const students = groupedReport[className];
+                        const avg = Math.round(students.reduce((acc, s) => acc + s.percentage, 0) / students.length);
+                    %>
+                        <div class="accordion-item border rounded-4 mb-3 overflow-hidden student-class-card" data-class-name="<%= className %>">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed p-4 bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_<%= index %>">
+                                    <div class="d-flex justify-content-between align-items-center w-100 me-3">
+                                        <span class="fw-bold text-dark fs-5"><%= className %></span>
+                                        <div class="d-flex gap-3 text-muted small">
+                                            <span class="badge bg-white border text-primary rounded-pill px-3"><%= students.length %> <%= __('Students') %></span>
+                                            <span class="badge bg-white border text-success rounded-pill px-3"><%= __('Average_Attendance') %> <%= avg %>%</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </h2>
+                            <div id="collapse_<%= index %>" class="accordion-collapse collapse" data-bs-parent="#attendanceAccordion">
+                                <div class="accordion-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0 text-end">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th class="px-4"><%= __('Student_Name') %></th>
+                                                    <th><%= __('Total_Days') %></th>
+                                                    <th><%= __('Present_Days') %></th>
+                                                    <th class="px-4 text-center"><%= __('Percentage') %></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <% students.forEach(student => { %>
+                                                    <tr class="student-row" data-name="<%= student.name.toLowerCase() %>">
+                                                        <td class="px-4"><%= student.name %></td>
+                                                        <td><%= student.total_days %></td>
+                                                        <td><%= student.present_days %></td>
+                                                        <td class="px-4 text-center">
+                                                            <div class="d-flex align-items-center justify-content-center gap-2">
+                                                                <div class="progress flex-grow-1" style="height: 8px; width: 100px;">
+                                                                    <div class="progress-bar bg-<%= student.percentage >= 80 ? 'success' : 'danger' %>" 
+                                                                         role="progressbar" style="width: <%= student.percentage %>%"></div>
+                                                                </div>
+                                                                <span class="fw-bold"><%= student.percentage %>%</span>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                <% }) %>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<% if (!locals.filterType || filterType !== 'students') { %>
+<!-- Teacher Attendance and Period Variance Report (New Section) -->
+<div class="row mb-5">
+    <div class="col-md-12">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <h3 class="fw-bold mb-0 text-warning"><%= __('Teacher_Period_Report_Header') %></h3>
+                    <p class="text-muted mb-0 small"><%= __('Teacher_Period_Report_Sub') %></p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-warning btn-sm rounded-pill px-3" type="button" data-bs-toggle="collapse" data-bs-target="#teacherAttendanceFiltersCollapse" aria-expanded="false">
+                        <i class="bi bi-funnel me-1"></i><%= locals.lang === 'ur' ? 'فلٹرز' : 'خيارات التصفية' %>
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="downloadTeacherPDF()">
+                        <i class="bi bi-file-earmark-pdf me-1"></i><%= locals.lang === 'ur' ? 'PDF ڈاؤن لوڈ' : 'تحميل PDF' %>
+                    </button>
+                </div>
+            </div>
+            <!-- Collapsible Filters with Teacher Tiles -->
+            <div class="collapse border-bottom" id="teacherAttendanceFiltersCollapse">
+                <div class="p-4 bg-light-subtle">
+                    <label class="form-label small fw-bold text-secondary mb-2"><%= locals.lang === 'ur' ? 'اساتذہ کے ٹائلز' : 'تصفية حسب المعلم' %></label>
+                    <div class="d-flex flex-wrap gap-2" id="teacherTilesContainer">
+                        <button type="button" class="btn btn-sm btn-warning rounded-pill px-3 teacher-filter-tile active" data-filter="all" onclick="selectTeacherTile('all', this)">كل المعلمين</button>
+                        <% 
+                        const uniqueTeachers = [...new Set(teachersReport.map(tr => tr.name))];
+                        uniqueTeachers.forEach(teacherName => { 
+                        %>
+                            <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-3 teacher-filter-tile" data-filter="<%= teacherName %>" onclick="selectTeacherTile('<%= teacherName %>', this)"><%= teacherName %></button>
+                        <% }) %>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 text-end">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-4"><%= __('Teacher_Name') %></th>
+                                <th class="px-4 text-start"><%= __('Book') %></th>
+                                <th><%= __('Required_Periods') %></th>
+                                <th><%= __('Taken_Periods') %></th>
+                                <th class="px-4 text-center"><%= __('Status_Variance') %></th>
+                                <th class="text-center" style="width:48px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% teachersReport.forEach((tr, idx) => { %>
+                                <tr class="teacher-attendance-row" data-teacher-name="<%= tr.name %>"
+                                    style="cursor:pointer;"
+                                    data-bs-toggle="collapse" data-bs-target="#detail_<%= idx %>" aria-expanded="false">
+                                    <td class="px-4 fw-bold text-dark"><%= tr.name %></td>
+                                    <td class="px-4 text-secondary text-start small"><%= tr.books_list %></td>
+                                    <td><span class="badge bg-light text-secondary border rounded-3 px-3 py-2"><%= tr.required %></span></td>
+                                    <td><span class="badge bg-light text-primary border rounded-3 px-3 py-2"><%= tr.taken %></span></td>
+                                    <td class="px-4 text-center">
+                                        <% if (tr.difference === 0) { %>
+                                            <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2 fw-bold">
+                                                <i class="bi bi-check-circle-fill me-1"></i><%= __('Ontime') %>
+                                            </span>
+                                        <% } else if (tr.difference > 0) { %>
+                                            <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2 fw-bold">
+                                                <i class="bi bi-plus-circle-fill me-1"></i><%= __('Extra_Makeup') %> (+<%= tr.difference %>)
+                                            </span>
+                                        <% } else { %>
+                                            <span class="badge bg-danger-subtle text-danger rounded-pill px-3 py-2 fw-bold">
+                                                <i class="bi bi-exclamation-triangle-fill me-1"></i><%= __('Shortage') %> (<%= tr.difference %>)
+                                            </span>
+                                        <% } %>
+                                    </td>
+                                    <td class="text-center text-muted detail-chevron" id="chevron_<%= idx %>">
+                                        <i class="bi bi-chevron-down small"></i>
+                                    </td>
+                                </tr>
+                                <!-- Collapsible detail row -->
+                                <tr class="teacher-attendance-row" data-teacher-name="<%= tr.name %>">
+                                    <td colspan="6" class="p-0 border-0">
+                                        <div class="collapse" id="detail_<%= idx %>">
+                                            <%
+                                            const dayNamesUr = { Monday:'پیر', Tuesday:'منگل', Wednesday:'بدھ', Thursday:'جمعرات', Friday:'جمعہ', Saturday:'ہفتہ', Sunday:'اتوار' };
+                                            const dayNamesAr = { Monday:'الاثنين', Tuesday:'الثلاثاء', Wednesday:'الأربعاء', Thursday:'الخميس', Friday:'الجمعة', Saturday:'السبت', Sunday:'الأحد' };
+                                            const localDay = (en) => locals.lang === 'ur' ? (dayNamesUr[en] || en) : (dayNamesAr[en] || en);
+                                            %>
+                                            <div class="px-4 py-3 bg-light border-top border-bottom">
+                                                <% if (tr.detail.length === 0) { %>
+                                                    <span class="text-muted small"><%= locals.lang === 'ur' ? 'اس مدت میں کوئی ریکارڈ نہیں' : 'لا توجد سجلات في هذه الفترة' %></span>
+                                                <% } else { %>
+                                                    <div class="d-flex flex-wrap gap-2">
+                                                        <% tr.detail.forEach(day => { %>
+                                                            <div class="card border-0 shadow-sm rounded-3 p-0" style="min-width:180px;">
+                                                                <div class="card-header bg-white py-2 px-3 border-0 fw-semibold small text-muted">
+                                                                    <i class="bi bi-calendar3 me-1"></i><%= day.date_str %>
+                                                                    <span class="ms-1 text-primary">(<%= localDay(day.day_name) %>)</span>
+                                                                </div>
+                                                                <div class="card-body p-0">
+                                                                    <% day.classes.forEach(cls => { %>
+                                                                        <div class="d-flex justify-content-between align-items-center px-3 py-2 border-top" style="font-size:0.82rem;">
+                                                                            <span class="text-dark fw-semibold"><%= cls.class_name %></span>
+                                                                            <% if (cls.taken === null) { %>
+                                                                                <span class="badge rounded-pill bg-secondary-subtle text-secondary">
+                                                                                    <i class="bi bi-dash-circle me-1"></i><%= locals.lang === 'ur' ? 'درج نہیں' : 'غير مسجل' %>
+                                                                                </span>
+                                                                            <% } else if (cls.taken === 0) { %>
+                                                                                <span class="badge rounded-pill bg-danger-subtle text-danger">
+                                                                                    <i class="bi bi-x-circle me-1"></i><%= locals.lang === 'ur' ? 'غیر حاضر' : 'غائب' %> 0/<%= cls.scheduled %>
+                                                                                </span>
+                                                                            <% } else if (cls.taken >= cls.scheduled) { %>
+                                                                                <span class="badge rounded-pill bg-success-subtle text-success">
+                                                                                    <i class="bi bi-check-circle me-1"></i><%= cls.taken %>/<%= cls.scheduled %>
+                                                                                </span>
+                                                                            <% } else { %>
+                                                                                <span class="badge rounded-pill bg-warning-subtle text-warning">
+                                                                                    <i class="bi bi-exclamation-circle me-1"></i><%= cls.taken %>/<%= cls.scheduled %>
+                                                                                </span>
+                                                                            <% } %>
+                                                                        </div>
+                                                                    <% }) %>
+                                                                </div>
+                                                            </div>
+                                                        <% }) %>
+                                                    </div>
+                                                <% } %>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Teacher Book Progress Section -->
+<div class="row mb-5">
+    <div class="col-md-12">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <h3 class="fw-bold mb-0 text-success"><%= __('Book_Completion_Report') %></h3>
+                    <p class="text-muted mb-0 small"><%= locals.lang === 'ur' ? 'موجودہ سیشن — اب تک کی مکمل پیشرفت' : 'الجلسة الحالية — التقدم الإجمالي حتى الآن' %></p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-success btn-sm rounded-pill px-3" type="button" data-bs-toggle="collapse" data-bs-target="#bookProgressFiltersCollapse" aria-expanded="false">
+                        <i class="bi bi-funnel me-1"></i><%= __('Filter_Label') %>
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="downloadBooksPDF()">
+                        <i class="bi bi-file-earmark-pdf me-1"></i><%= locals.lang === 'ur' ? 'PDF ڈاؤن لوڈ' : 'تحميل PDF' %>
+                    </button>
+                </div>
+            </div>
+            <!-- Collapsible Filters with Class and Teacher Tiles -->
+            <div class="collapse border-bottom" id="bookProgressFiltersCollapse">
+                <div class="p-4 bg-light-subtle">
+                    <div class="row g-4">
+                        <!-- Search Input -->
+                        <div class="col-12 col-md-4">
+                            <label class="form-label small fw-bold text-secondary mb-2"><%= locals.lang === 'ur' ? 'تلاش کریں' : 'البحث النصي' %></label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white border-success-subtle"><i class="bi bi-search text-muted"></i></span>
+                                <input type="text" id="teacherBookFilter" class="form-control border-success-subtle" placeholder="ابحث عن معلم أو كتاب..." onkeyup="filterTeacherBooks()">
+                            </div>
+                        </div>
+                        
+                        <!-- Class Selector Tiles -->
+                        <div class="col-12 col-md-8">
+                            <label class="form-label small fw-bold text-secondary mb-2"><%= locals.lang === 'ur' ? 'کلاسز کے ٹائلز' : 'تصفية حسب الصف' %></label>
+                            <div class="d-flex flex-wrap gap-2" id="bookClassTilesContainer">
+                                <button type="button" class="btn btn-sm btn-success rounded-pill px-3 book-class-tile active" onclick="selectBookClassTile('all', this)">كل الصفوف</button>
+                                <% 
+                                const uniqueBookClasses = [...new Set(teacherProgress.map(tp => tp.class_name).filter(Boolean))];
+                                uniqueBookClasses.forEach(className => { 
+                                %>
+                                    <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3 book-class-tile" onclick="selectBookClassTile('<%= className %>', this)"><%= className %></button>
+                                <% }) %>
+                            </div>
+                        </div>
+
+                        <!-- Teacher Selector Tiles -->
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-secondary mb-2"><%= locals.lang === 'ur' ? 'اساتذہ کے ٹائلز' : 'تصفية حسب المعلم' %></label>
+                            <div class="d-flex flex-wrap gap-2" id="bookTeacherTilesContainer">
+                                <button type="button" class="btn btn-sm btn-success rounded-pill px-3 book-teacher-tile active" onclick="selectBookTeacherTile('all', this)">كل المعلمين</button>
+                                <% 
+                                const uniqueBookTeachers = [...new Set(teacherProgress.map(tp => tp.teacher_name).filter(Boolean))];
+                                uniqueBookTeachers.forEach(teacherName => { 
+                                %>
+                                    <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3 book-teacher-tile" onclick="selectBookTeacherTile('<%= teacherName %>', this)"><%= teacherName %></button>
+                                <% }) %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 text-end">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-4"><%= __('Teacher') %></th>
+                                <th><%= __('Book') %></th>
+                                <th><%= __('Class') %></th>
+                                <th><%= __('Progress') %></th>
+                                <th class="px-4 text-center"><%= __('Action') %></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% teacherProgress.forEach(tp => { %>
+                                <tr class="teacher-book-row" data-teacher="<%= tp.teacher_name.toLowerCase() %>" data-book="<%= tp.book_title.toLowerCase() %>" data-class="<%= tp.class_name || '' %>">
+                                    <td class="px-4 fw-bold">
+                                        <a href="/reports/teacher/<%= tp.teacher_id %>" class="text-decoration-none text-success hover-underline">
+                                            <i class="bi bi-person-fill me-1"></i><%= tp.teacher_name %>
+                                        </a>
+                                    </td>
+                                    <td><%= tp.book_title %></td>
+                                    <td><span class="badge bg-primary-subtle text-primary rounded-pill"><%= tp.class_name %></span></td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2 mb-1">
+                                            <div class="progress flex-grow-1" style="height: 8px; width: 100px;">
+                                                <div class="progress-bar bg-success" role="progressbar" style="width: <%= tp.percentage %>%"></div>
+                                            </div>
+                                            <span class="small text-muted">ص <%= tp.current_page %> (<%= tp.percentage %>%)</span>
+                                        </div>
+                                        <% if (tp.last_updated_at) { %>
+                                            <small class="text-muted d-block" style="font-size: 0.72rem;">
+                                                <i class="bi bi-clock-history me-1"></i><%= __('Last_Updated') %>: <%= tp.lastUpdatedStr %>
+                                            </small>
+                                        <% } else { %>
+                                            <small class="text-muted d-block" style="font-size: 0.72rem;">
+                                                <%= __('No_Updates_Yet') %>
+                                            </small>
+                                        <% } %>
+                                    </td>
+                                    <td class="px-4 text-center">
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <a href="/reports/teacher/<%= tp.teacher_id %>" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                                                <i class="bi bi-graph-up me-1"></i><%= __('Chart') %>
+                                            </a>
+                                            <button class="btn btn-sm btn-success rounded-pill px-3" 
+                                                    onclick="openProgressModal(<%= JSON.stringify(tp) %>)">
+                                                <%= __('Update_Btn') %>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<% } %>
+
+<!-- Update Progress Modal -->
+<div class="modal fade" id="updateProgressModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <div class="modal-header bg-success text-white rounded-top-4">
+                <h5 class="modal-title"><%= __('Update_Book_Progress_Title') %></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="updateProgressForm">
+                    <input type="hidden" id="progAssignmentId">
+                    <div class="mb-3 text-center">
+                        <h6 class="fw-bold text-dark mb-1" id="progBookTitle"></h6>
+                        <p class="text-muted small" id="progTeacherName"></p>
+                    </div>
+                    <div class="mb-4 text-center">
+                        <label class="form-label fw-bold d-block mb-3"><%= __('Current_Page_Number') %></label>
+                        <div class="d-flex align-items-center justify-content-center gap-3">
+                            <input type="number" id="progPageNumber" 
+                                   class="form-control border-0 shadow-sm rounded-3 text-center fw-bold text-success bg-light" 
+                                   style="height: 60px; font-size: 1.5rem; width: 150px;"
+                                   required>
+                        </div>
+                        <small class="text-muted mt-2 d-block" id="progRangeText"></small>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success rounded-pill py-2 fw-bold"><%= __('Save_Changes') %></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ── PDF report data (injected from server) ──
+const _pdfStartDate   = '<%- startDate %>';
+const _pdfEndDate     = '<%- endDate %>';
+const _pdfLang        = '<%= locals.lang || "ur" %>';
+const _pdfCollegeName = '<%= __("College_Name") %>';
+const _pdfLogoUrl     = window.location.origin + '/logo.jpg';
+const _pdfGroupedReport     = <%- JSON.stringify(groupedReport) %>;
+const _pdfTeachersReport    = <%- JSON.stringify((teachersReport || []).map(tr => ({ name: tr.name, books_list: tr.books_list, required: tr.required, taken: tr.taken, difference: tr.difference, detail: tr.detail || [] }))) %>;
+const _pdfTeacherProgress   = <%- JSON.stringify((teacherProgress || []).map(tp => ({ teacher_name: tp.teacher_name, book_title: tp.book_title, class_name: tp.class_name, current_page: tp.current_page, percentage: tp.percentage, lastUpdatedStr: tp.lastUpdatedStr || '' }))) %>;
+
+function setPreset(preset) {
+    const today = new Date();
+    const formatDate = (date) => {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    };
+
+    let start, end = today;
+    
+    if (preset === '1day') {
+        start = today;
+    } else if (preset === 'current_week') {
+        const day = today.getDay();
+        const distanceToMonday = day === 0 ? 6 : day - 1;
+        start = new Date(today);
+        start.setDate(today.getDate() - distanceToMonday);
+        end = new Date(today);
+        end.setDate(today.getDate() - 1);
+        if (end < start) {
+            end = new Date(start);
+        }
+    } else if (preset === '7day') {
+        start = new Date();
+        start.setDate(today.getDate() - 6);
+    } else if (preset === '1month') {
+        start = new Date(today.getFullYear(), today.getMonth(), 1);
+    } else if (preset === '6month') {
+        start = new Date();
+        start.setMonth(today.getMonth() - 6);
+    }
+    
+    document.getElementById('startDateInput').value = formatDate(start);
+    document.getElementById('endDateInput').value = formatDate(end);
+    document.getElementById('dateFilterForm').submit();
+}
+
+function viewTeacherReport() {
+    const id = document.getElementById('teacherSelect').value;
+    if (id) window.location.href = `/reports/teacher/${id}`;
+}
+
+// ==========================================
+// Section 1: Student Attendance Filter Logic
+// ==========================================
+let activeClassFilter = 'all';
+
+function selectClassTile(className, btn) {
+    const container = document.getElementById('classTilesContainer');
+    container.querySelectorAll('.filter-tile').forEach(b => {
+        b.classList.remove('btn-primary', 'active');
+        b.classList.add('btn-outline-primary');
+    });
+    btn.classList.remove('btn-outline-primary');
+    btn.classList.add('btn-primary', 'active');
+    
+    activeClassFilter = className;
+    applyCombinedStudentFilter();
+}
+
+function filterStudents() {
+    applyCombinedStudentFilter();
+}
+
+function applyCombinedStudentFilter() {
+    const searchText = document.getElementById('studentFilter').value.toLowerCase();
+    const cards = document.querySelectorAll('.student-class-card');
+    
+    cards.forEach(card => {
+        const className = card.getAttribute('data-class-name');
+        const rows = card.querySelectorAll('.student-row');
+        let visibleRows = 0;
+        
+        rows.forEach(row => {
+            const name = row.getAttribute('data-name');
+            const matchesText = name.includes(searchText);
+            
+            if (matchesText) {
+                row.style.display = '';
+                visibleRows++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        const matchesClass = activeClassFilter === 'all' || className === activeClassFilter;
+        
+        if (visibleRows > 0 && matchesClass) {
+            card.style.display = '';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+// ==========================================
+// Section 1b: Detail chevron rotation
+// ==========================================
+document.querySelectorAll('[data-bs-target^="#detail_"]').forEach(row => {
+    const targetId = row.getAttribute('data-bs-target');
+    const collapseEl = document.querySelector(targetId);
+    if (!collapseEl) return;
+    const idx = targetId.replace('#detail_', '');
+    const chevron = document.getElementById('chevron_' + idx);
+    collapseEl.addEventListener('show.bs.collapse', () => {
+        if (chevron) chevron.querySelector('i').classList.replace('bi-chevron-down', 'bi-chevron-up');
+    });
+    collapseEl.addEventListener('hide.bs.collapse', () => {
+        if (chevron) chevron.querySelector('i').classList.replace('bi-chevron-up', 'bi-chevron-down');
+    });
+});
+
+// ==========================================
+// Section 2: Teacher Attendance Filter Logic
+// ==========================================
+function selectTeacherTile(teacherName, btn) {
+    const container = document.getElementById('teacherTilesContainer');
+    container.querySelectorAll('.teacher-filter-tile').forEach(b => {
+        b.classList.remove('btn-warning', 'active');
+        b.classList.add('btn-outline-warning');
+    });
+    btn.classList.remove('btn-outline-warning');
+    btn.classList.add('btn-warning', 'active');
+    
+    const rows = document.querySelectorAll('.teacher-attendance-row');
+    rows.forEach(row => {
+        const rowTeacher = row.getAttribute('data-teacher-name');
+        if (teacherName === 'all' || rowTeacher === teacherName) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+// ==========================================
+// Section 3: Teacher Book Progress Filter Logic
+// ==========================================
+let activeBookClassFilter = 'all';
+let activeBookTeacherFilter = 'all';
+
+function selectBookClassTile(className, btn) {
+    const container = document.getElementById('bookClassTilesContainer');
+    container.querySelectorAll('.book-class-tile').forEach(b => {
+        b.classList.remove('btn-success', 'active');
+        b.classList.add('btn-outline-success');
+    });
+    btn.classList.remove('btn-outline-success');
+    btn.classList.add('btn-success', 'active');
+    
+    activeBookClassFilter = className;
+    applyCombinedBookFilter();
+}
+
+function selectBookTeacherTile(teacherName, btn) {
+    const container = document.getElementById('bookTeacherTilesContainer');
+    container.querySelectorAll('.book-teacher-tile').forEach(b => {
+        b.classList.remove('btn-success', 'active');
+        b.classList.add('btn-outline-success');
+    });
+    btn.classList.remove('btn-outline-success');
+    btn.classList.add('btn-success', 'active');
+    
+    activeBookTeacherFilter = teacherName;
+    applyCombinedBookFilter();
+}
+
+function filterTeacherBooks() {
+    applyCombinedBookFilter();
+}
+
+function applyCombinedBookFilter() {
+    const filterText = document.getElementById('teacherBookFilter').value.toLowerCase();
+    const rows = document.querySelectorAll('.teacher-book-row');
+    
+    rows.forEach(row => {
+        const teacher = row.getAttribute('data-teacher');
+        const book = row.getAttribute('data-book');
+        const className = row.getAttribute('data-class');
+        
+        const matchesText = teacher.includes(filterText) || book.includes(filterText);
+        const matchesClass = activeBookClassFilter === 'all' || className === activeBookClassFilter;
+        const matchesTeacher = activeBookTeacherFilter === 'all' || teacher === activeBookTeacherFilter.toLowerCase();
+        
+        if (matchesText && matchesClass && matchesTeacher) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+let progressModal;
+document.addEventListener('DOMContentLoaded', () => {
+    progressModal = new bootstrap.Modal(document.getElementById('updateProgressModal'));
+});
+
+function openProgressModal(tp) {
+    document.getElementById('progAssignmentId').value = tp.assignment_id;
+    document.getElementById('progBookTitle').innerText = tp.book_title;
+    document.getElementById('progTeacherName').innerText = '<%= __('Teacher_Prefix_Label') %>: ' + tp.teacher_name;
+    document.getElementById('progPageNumber').value = tp.current_page;
+    document.getElementById('progPageNumber').min = tp.start_page;
+    document.getElementById('progPageNumber').max = tp.end_page;
+    document.getElementById('progRangeText').innerText = '<%= __('Allowed_Range_Text') %>'.replace('%s', tp.start_page).replace('%s', tp.end_page);
+    progressModal.show();
+}
+
+document.getElementById('updateProgressForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const assignmentId = document.getElementById('progAssignmentId').value;
+    const pageNumber = document.getElementById('progPageNumber').value;
+
+    const res = await fetch('/book/update-progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assignmentId, pageNumber })
+    });
+    const data = await res.json();
+    if (data.success) {
+        location.reload();
+    } else {
+        alert('خطأ: ' + (data.error || 'فشل التحديث'));
+    }
+});
+
+// ==========================================
+// PDF via Print Window (browser-native, no library)
+// ==========================================
+function _openPrintWindow(bodyHtml, title, filename, showDates = true) {
+    const isUr = _pdfLang === 'ur';
+    const win = window.open('', '_blank');
+    if (!win) {
+        alert(isUr ? 'براہ کرم pop-up بلاکر بند کریں اور دوبارہ کوشش کریں' : 'الرجاء تعطيل مانع النوافذ المنبثقة والمحاولة مرة أخرى');
+        return;
+    }
+    win.document.write(`<!DOCTYPE html>
+<html dir="rtl" lang="${_pdfLang}">
+<head>
+<meta charset="UTF-8">
+<title>${filename || title}</title>
+<style>
+    /* @page margin:0 removes browser-added URL/date from the printout */
+    @page { size: A4 portrait; margin: 0; }
+    @media print {
+        body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        .no-print { display: none !important; }
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; direction: rtl; text-align: right; color: #1e293b; font-size: 13px; background: white; }
+
+    .no-print { text-align: center; padding: 14px 0 18px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+    .no-print button { padding: 9px 28px; background: #1e40af; color: white; border: none; border-radius: 20px; cursor: pointer; font-size: 14px; font-family: inherit; font-weight: 600; }
+
+    .page-wrap { padding: 10mm 14mm 14mm 14mm; }
+
+    /* ── Masthead ── */
+    .masthead { background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color: white; padding: 14px 18px; border-radius: 10px; margin-bottom: 20px; display: flex; align-items: center; gap: 14px; }
+    .masthead img { height: 54px; border-radius: 8px; background: white; padding: 3px; flex-shrink: 0; }
+    .masthead .mh { flex: 1; }
+    .masthead .mh h1 { font-size: 16px; font-weight: 700; margin-bottom: 3px; }
+    .masthead .mh p  { font-size: 11px; opacity: 0.80; }
+
+    /* ── Section header ── */
+    .ph { text-align: center; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 3px solid #2563eb; }
+    .ph h2 { color: #1e3a8a; font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+    .ph p  { color: #64748b; font-size: 12px; }
+
+    /* ── Main tables ── */
+    table  { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px; }
+    th { background: #1e40af !important; color: white !important; padding: 9px 12px; text-align: right; font-weight: 600; }
+    td { padding: 7px 12px; border-bottom: 1px solid #e2e8f0; }
+    tr:nth-child(even) td { background: #eff6ff; }
+    tr:hover td { background: #dbeafe; }
+
+    /* ── Class group row (student report) ── */
+    .cr td { background: #1e40af !important; color: white !important; font-weight: 700; font-size: 13px; }
+
+    /* ── Status colours ── */
+    .ok   { color: #16a34a; font-weight: 700; }
+    .bad  { color: #dc2626; font-weight: 700; }
+    .plus { color: #2563eb; font-weight: 700; }
+
+    /* ── Teacher / book section blocks ── */
+    .tb   { margin-bottom: 20px; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
+    .tt   { background: linear-gradient(90deg, #fef3c7, #fde68a) !important; border-right: 5px solid #f59e0b; padding: 10px 14px; font-weight: 700; font-size: 13px; color: #78350f; }
+
+    /* ── Detail sub-table (teacher periods) ── */
+    .detail-tbl { font-size: 11px; border-top: 1px solid #e2e8f0; }
+    .detail-tbl th { background: #dbeafe !important; color: #1e40af !important; font-size: 11px; padding: 6px 10px; }
+    .detail-tbl td { padding: 5px 10px; }
+    .detail-tbl tr:nth-child(even) td { background: #f0f9ff; }
+    .no-detail { color: #94a3b8; font-size: 12px; padding: 8px 14px; background: #f8fafc; }
+</style>
+</head>
+<body>
+<div class="no-print">
+    <button onclick="window.print()">${isUr ? '⬇ PDF محفوظ کریں' : '⬇ حفظ كـ PDF'}</button>
+</div>
+<div class="page-wrap">
+    <div class="masthead">
+        <img src="${_pdfLogoUrl}" onerror="this.style.display='none'" alt="logo">
+        <div class="mh">
+            <h1>${_pdfCollegeName}</h1>
+            <p>${title}${showDates ? ` &nbsp;—&nbsp; ${_pdfStartDate} ${isUr ? 'سے' : 'إلى'} ${_pdfEndDate}` : ` &nbsp;—&nbsp; ${isUr ? 'موجودہ سیشن' : 'الجلسة الحالية'}`}</p>
+        </div>
+    </div>
+    ${bodyHtml}
+</div>
+<script>window.addEventListener('load', function(){ setTimeout(function(){ window.print(); }, 400); });<\/script>
+</body>
+</html>`);
+    win.document.close();
+}
+
+function downloadStudentPDF() {
+    const isUr = _pdfLang === 'ur';
+    let rows = '';
+    Object.keys(_pdfGroupedReport).forEach(className => {
+        const students = _pdfGroupedReport[className];
+        const avg = Math.round(students.reduce((acc, s) => acc + s.percentage, 0) / students.length);
+        rows += `<tr class="cr"><td colspan="4">${className} — ${students.length} ${isUr ? 'طلباء' : 'طالب'} — ${isUr ? 'اوسط حاضری' : 'متوسط الحضور'}: ${avg}%</td></tr>`;
+        students.forEach(s => {
+            rows += `<tr><td>${s.name}</td><td style="text-align:center">${s.total_days}</td><td style="text-align:center">${s.present_days}</td><td style="text-align:center" class="${s.percentage >= 80 ? 'ok' : 'bad'}">${s.percentage}%</td></tr>`;
+        });
+    });
+    _openPrintWindow(`
+        <div class="ph"><h2>${isUr ? 'کلاس وار طلباء کی حاضری' : 'حضور الطلاب حسب الصف'}</h2></div>
+        <table><thead><tr>
+            <th>${isUr ? 'طالب کا نام' : 'اسم الطالب'}</th>
+            <th style="text-align:center">${isUr ? 'کل دن' : 'إجمالي الأيام'}</th>
+            <th style="text-align:center">${isUr ? 'حاضر دن' : 'أيام الحضور'}</th>
+            <th style="text-align:center">${isUr ? 'فیصد' : 'النسبة'}</th>
+        </tr></thead><tbody>${rows}</tbody></table>`,
+        isUr ? 'کلاس وار طلباء کی حاضری' : 'حضور الطلاب حسب الصف',
+        `student_attendance_${_pdfStartDate}_to_${_pdfEndDate}`);
+}
+
+function downloadTeacherPDF() {
+    const isUr = _pdfLang === 'ur';
+    const dayNamesUr = { Monday:'پیر', Tuesday:'منگل', Wednesday:'بدھ', Thursday:'جمعرات', Friday:'جمعہ', Saturday:'ہفتہ', Sunday:'اتوار' };
+    const dayNamesAr = { Monday:'الاثنين', Tuesday:'الثلاثاء', Wednesday:'الأربعاء', Thursday:'الخميس', Friday:'الجمعة', Saturday:'السبت', Sunday:'الأحد' };
+    const localDay = en => isUr ? (dayNamesUr[en] || en) : (dayNamesAr[en] || en);
+
+    let sections = '';
+    _pdfTeachersReport.forEach(tr => {
+        let statusHtml;
+        if (tr.difference === 0)    statusHtml = `<span class="ok">✓ ${isUr ? 'بروقت' : 'في الوقت'}</span>`;
+        else if (tr.difference > 0) statusHtml = `<span class="plus">▲ ${isUr ? 'اضافی' : 'إضافي'} (+${tr.difference})</span>`;
+        else                         statusHtml = `<span class="bad">▼ ${isUr ? 'کمی' : 'نقص'} (${tr.difference})</span>`;
+
+        let detailHtml = '';
+        if (tr.detail && tr.detail.length > 0) {
+            let detailRows = '';
+            tr.detail.forEach(day => {
+                day.classes.forEach(cls => {
+                    let clsStatus;
+                    if (cls.taken === null)             clsStatus = `<span style="color:#6c757d">${isUr ? 'درج نہیں' : 'غير مسجل'}</span>`;
+                    else if (cls.taken === 0)           clsStatus = `<span class="bad">${isUr ? 'غیر حاضر' : 'غائب'} 0/${cls.scheduled}</span>`;
+                    else if (cls.taken >= cls.scheduled) clsStatus = `<span class="ok">${cls.taken}/${cls.scheduled}</span>`;
+                    else                                clsStatus = `<span class="plus">${cls.taken}/${cls.scheduled}</span>`;
+                    detailRows += `<tr>
+                        <td>${day.date_str}</td>
+                        <td>${localDay(day.day_name)}</td>
+                        <td style="font-weight:500">${cls.class_name}</td>
+                        <td style="text-align:center">${clsStatus}</td>
+                    </tr>`;
+                });
+            });
+            detailHtml = `<table class="detail-tbl">
+                <thead><tr>
+                    <th>${isUr ? 'تاریخ' : 'التاريخ'}</th>
+                    <th>${isUr ? 'دن' : 'اليوم'}</th>
+                    <th>${isUr ? 'کلاس' : 'الصف'}</th>
+                    <th style="text-align:center">${isUr ? 'اسباق' : 'الحصص'}</th>
+                </tr></thead>
+                <tbody>${detailRows}</tbody>
+            </table>`;
+        } else {
+            detailHtml = `<p class="no-detail">${isUr ? 'اس مدت میں کوئی ریکارڈ نہیں' : 'لا توجد سجلات في هذه الفترة'}</p>`;
+        }
+
+        sections += `<div class="tb">
+            <div class="tt">${tr.name}
+                <div style="font-weight:normal;font-size:12px;color:#6c757d;margin-top:4px;">
+                    ${isUr ? 'اسباق / کتب' : 'المقررات / الكتب'}: <b>${tr.books_list}</b>
+                </div>
+                <span style="font-weight:normal;font-size:12px;margin-right:12px">
+                    ${isUr ? 'مطلوب' : 'مطلوب'}: <b>${tr.required}</b>
+                    &nbsp;|&nbsp; ${isUr ? 'لیے گئے' : 'منجز'}: <b>${tr.taken}</b>
+                    &nbsp;|&nbsp; ${statusHtml}
+                </span>
+            </div>
+            ${detailHtml}
+        </div>`;
+    });
+
+    _openPrintWindow(`
+        <div class="ph"><h2>${isUr ? 'اساتذہ کی حاضری اور اسباق کی رپورٹ' : 'تقرير حضور المعلمين والحصص'}</h2></div>
+        ${sections}`,
+        isUr ? 'اساتذہ کی حاضری اور اسباق کی رپورٹ' : 'تقرير حضور المعلمين والحصص',
+        `teacher_attendance_${_pdfStartDate}_to_${_pdfEndDate}`);
+}
+
+function downloadBooksPDF() {
+    const isUr = _pdfLang === 'ur';
+    const byTeacher = {};
+    _pdfTeacherProgress.forEach(tp => {
+        if (!byTeacher[tp.teacher_name]) byTeacher[tp.teacher_name] = [];
+        byTeacher[tp.teacher_name].push(tp);
+    });
+    let sections = '';
+    Object.keys(byTeacher).forEach(teacherName => {
+        const bookRows = byTeacher[teacherName].map(b => {
+            const cls = b.percentage >= 75 ? 'ok' : b.percentage >= 40 ? '' : 'bad';
+            return `<tr><td>${b.book_title}</td><td>${b.class_name || ''}</td><td style="text-align:center">ص ${b.current_page}</td><td style="text-align:center" class="${cls}">${b.percentage}%</td><td style="text-align:center;font-size:11px">${b.lastUpdatedStr || (isUr ? 'نہیں' : 'لا يوجد')}</td></tr>`;
+        }).join('');
+        sections += `<div class="tb"><div class="tt">${teacherName}</div>
+            <table><thead><tr>
+                <th>${isUr ? 'کتاب' : 'الكتاب'}</th>
+                <th>${isUr ? 'کلاس' : 'الصف'}</th>
+                <th style="text-align:center">${isUr ? 'موجودہ صفحہ' : 'الصفحة الحالية'}</th>
+                <th style="text-align:center">${isUr ? 'پیشرفت' : 'التقدم'}</th>
+                <th style="text-align:center">${isUr ? 'آخری اپڈیٹ' : 'آخر تحديث'}</th>
+            </tr></thead><tbody>${bookRows}</tbody></table></div>`;
+    });
+    _openPrintWindow(`
+        <div class="ph"><h2>${isUr ? 'کتابوں کی پیشرفت رپورٹ — استاد کے مطابق' : 'تقرير تقدم الكتب — حسب المعلم'}</h2></div>
+        ${sections}`,
+        isUr ? 'کتابوں کی پیشرفت رپورٹ' : 'تقرير تقدم الكتب',
+        'books_progress_by_teacher', false);
+}
+</script>
+
+<%- include('partials/footer') %>

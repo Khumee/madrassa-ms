@@ -1,0 +1,145 @@
+<%- include('partials/header') %>
+
+<div class="row mb-5">
+    <div class="col-md-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/reports"><%= __('Reports_Stats_Title') %></a></li>
+                <li class="breadcrumb-item active"><%= __('Teacher_Report') %></li>
+            </ol>
+        </nav>
+        <h1 class="fw-bold text-primary"><%= __('Teacher_Progress_Report_For') %> <%= teacher.name %></h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <% 
+            const bookTitles = [...new Set(progress.map(p => p.book_title))];
+        %>
+
+        <% bookTitles.forEach((title, index) => { %>
+            <div class="card shadow-sm border-0 rounded-4 mb-5">
+                <div class="card-header bg-white p-4 border-0">
+                    <h5 class="fw-bold mb-0 text-success">
+                        <i class="bi bi-graph-up-arrow me-2"></i><%= __('Book_Progress_Analysis_For') %> <%= title %>
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div style="height: 300px;">
+                        <canvas id="chart_<%= index %>"></canvas>
+                    </div>
+                </div>
+            </div>
+        <% }) %>
+        
+        <hr class="my-5">
+        
+        <h4 class="fw-bold mb-4"><%= __('Historical_Achievement_Log') %></h4>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle text-end">
+                <thead class="table-light">
+                    <tr>
+                        <th class="px-4"><%= __('Date') %></th>
+                        <th><%= __('Book') %></th>
+                        <th><%= __('Current_Page_Number') %></th>
+                        <th><%= __('Assigned_Range') %></th>
+                        <th class="px-4 text-center"><%= __('Percentage') %></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% progress.forEach(row => { 
+                        const total = row.end_page - row.start_page;
+                        const completed = row.page_number - row.start_page;
+                        const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+                    %>
+                        <tr>
+                            <td class="px-4 text-muted"><%= row.date instanceof Date ? row.date.toISOString().split('T')[0] : String(row.date).split('T')[0] %></td>
+                            <td class="fw-bold"><%= row.book_title %></td>
+                            <td><span class="badge bg-light text-primary border px-3"><%= row.page_number %></span></td>
+                            <td><small class="text-muted"><%= __('From_Page') %> <%= row.start_page %> <%= __('To_Page') %> <%= row.end_page %></small></td>
+                            <td class="px-4 text-center">
+                                <div class="d-flex align-items-center justify-content-center gap-2">
+                                    <div class="progress flex-grow-1" style="height: 6px; width: 80px;">
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: <%= percentage %>%"></div>
+                                    </div>
+                                    <span class="small fw-bold"><%= percentage %>%</span>
+                                </div>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const rawData = <%- JSON.stringify(progress) %>;
+
+// Group data by book
+const booksData = {};
+rawData.forEach(d => {
+    const title = d.book_title;
+    if (!booksData[title]) booksData[title] = [];
+    booksData[title].push({ 
+        x: d.date.split('T')[0], 
+        y: d.page_number 
+    });
+});
+
+const colors = ['#0d6efd', '#198754', '#dc3545', '#ffc107', '#0dcaf0', '#6610f2', '#6f42c1', '#d63384'];
+
+const userLang = '<%= lang %>';
+const labelDate = (userLang === 'ur') ? 'تاریخ' : 'التاريخ';
+const labelPage = (userLang === 'ur') ? 'صفحہ نمبر' : 'رقم الصفحة';
+
+Object.keys(booksData).forEach((title, index) => {
+    const canvasId = `chart_${index}`;
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            datasets: [{
+                label: title,
+                data: booksData[title],
+                borderColor: colors[index % colors.length],
+                backgroundColor: colors[index % colors.length] + '22',
+                tension: 0.3,
+                fill: true,
+                pointRadius: 5,
+                pointHoverRadius: 8,
+                borderWidth: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    rtl: true,
+                    bodyFont: { family: 'inherit' },
+                    titleFont: { family: 'inherit' }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    title: { display: true, text: labelDate, font: { weight: 'bold' } }
+                },
+                y: {
+                    beginAtZero: false,
+                    title: { display: true, text: labelPage, font: { weight: 'bold' } }
+                }
+            }
+        }
+    });
+});
+</script>
+
+<%- include('partials/footer') %>

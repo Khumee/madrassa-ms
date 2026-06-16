@@ -1,0 +1,118 @@
+<%- include('partials/header') %>
+
+<div class="row mb-5">
+    <div class="col-md-12">
+        <h1 class="fw-bold text-primary"><%= __('Manage_Students') %></h1>
+        <p class="text-muted"><%= __('Manage_Students_Sub') %></p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 text-end">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-4"><%= __('Roll_No') %></th>
+                                <th><%= __('Full_Name') %></th>
+                                <th><%= __('Current_Class') %></th>
+                                <th class="px-4 text-center"><%= __('Actions') %></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% students.forEach(student => { %>
+                                <tr>
+                                    <td class="px-4">
+                                        <span class="badge bg-light text-primary border rounded-pill px-3">
+                                            <%= student.roll_number %>
+                                        </span>
+                                    </td>
+                                    <td class="fw-bold"><%= student.name %></td>
+                                    <td>
+                                        <span class="badge bg-info text-white rounded-pill px-3">
+                                            <%= __(student.class_name) %>
+                                        </span>
+                                    </td>
+                                    <td class="px-4 text-center">
+                                        <button class="btn btn-sm btn-primary rounded-pill px-3" 
+                                                onclick="openEditModal(<%= JSON.stringify(student) %>, <%= JSON.stringify(classes) %>)" title="<%= __('Edit') %>">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
+                                        <a href="/students/delete/<%= student.id %>" 
+                                           class="btn btn-sm btn-outline-danger rounded-pill px-3 ms-2"
+                                           onclick="return confirm('<%= __('Confirm_Delete_Student') %>')" title="<%= __('Delete') %>">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Student Modal -->
+<div class="modal fade" id="editStudentModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <div class="modal-header bg-primary text-white rounded-top-4">
+                <h5 class="modal-title"><%= __('Edit_Student_Data') %></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form action="" id="editStudentForm" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><%= __('Roll_Number_Readonly') %></label>
+                        <input type="text" id="editRollNumber" class="form-control bg-light" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><%= __('Student_Full_Name') %></label>
+                        <input type="text" name="name" id="editName" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><%= __('Current_Class') %></label>
+                        <select name="classId" id="editClassId" class="form-select" required>
+                            <!-- Classes will be injected by JS -->
+                        </select>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary rounded-pill py-2"><%= __('Save_Changes') %></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let editModal;
+document.addEventListener('DOMContentLoaded', () => {
+    editModal = new bootstrap.Modal(document.getElementById('editStudentModal'));
+});
+
+function openEditModal(student, classes) {
+    document.getElementById('editStudentForm').action = `/students/edit/${student.id}`;
+    document.getElementById('editRollNumber').value = student.roll_number;
+    document.getElementById('editName').value = student.name;
+    
+    const classSelect = document.getElementById('editClassId');
+    classSelect.innerHTML = '';
+    const userLang = '<%= lang %>';
+    classes.forEach(cls => {
+        const opt = document.createElement('option');
+        opt.value = cls.id;
+        opt.text = (userLang === 'en') ? (cls.name_en || cls.name_ar) : cls.name_ar;
+        opt.selected = (cls.id === student.class_id);
+        classSelect.appendChild(opt);
+    });
+    
+    editModal.show();
+}
+</script>
+
+<%- include('partials/footer') %>
