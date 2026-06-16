@@ -1,37 +1,192 @@
 <%- include('partials/header') %>
 
 <div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card shadow-sm border-0 rounded-4">
-            <div class="card-header bg-primary text-white p-4 rounded-top-4">
+    <div class="col-md-10">
+        <div class="card shadow-sm border-0 rounded-4 mb-5">
+            <div class="card-header bg-primary text-white p-4 rounded-top-4 d-flex align-items-center">
+                <i class="bi bi-person-plus-fill fs-3 me-3"></i>
                 <h2 class="fw-bold mb-0"><%= __('Add_Student') %></h2>
             </div>
-            <div class="card-body p-4">
-                <form action="/students/add" method="POST">
-                    <div class="mb-4">
-                        <label class="form-label fw-bold"><%= __('Student_Full_Name') %></label>
-                        <input type="text" name="name" class="form-control form-control-lg rounded-3" required>
-                        <div class="form-text"><%= __('Auto_Create_Account_Help') %></div>
-                    </div>
+            <div class="card-body p-5">
+                <form action="/students/add" method="POST" enctype="multipart/form-data">
                     
-                    <div class="mb-4">
-                        <label class="form-label fw-bold"><%= __('Current_Class') %></label>
-                        <select name="classId" class="form-select form-select-lg rounded-3" required>
-                            <option value=""><%= __('Choose_Class_Placeholder') %></option>
-                            <% classes.forEach(cls => { %>
-                                <option value="<%= cls.id %>"><%= __(cls.name_ar) %></option>
-                            <% }) %>
-                        </select>
+                    <!-- Section 1: Academic & Photo Details -->
+                    <div class="card border-0 bg-light rounded-4 p-4 mb-4">
+                        <h4 class="fw-bold text-primary mb-4 border-bottom pb-2">
+                            <i class="bi bi-mortarboard-fill me-2"></i><%= __('Academic_Details') %>
+                        </h4>
+                        <div class="row g-3">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold"><%= __('Student_Full_Name') %></label>
+                                <input type="text" name="name" class="form-control form-control-lg rounded-3" required>
+                                <div class="form-text"><%= __('Auto_Create_Account_Help') %></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold"><%= __('Current_Class') %></label>
+                                <select name="classId" class="form-select form-select-lg rounded-3" required>
+                                    <option value=""><%= __('Choose_Class_Placeholder') %></option>
+                                    <% classes.forEach(cls => { %>
+                                        <option value="<%= cls.id %>"><%= __(cls.name_ar) %></option>
+                                    <% }) %>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold"><%= __('Admission_Year') %></label>
+                                <input type="number" name="admissionYear" class="form-control form-control-lg rounded-3" value="<%= new Date().getFullYear() %>">
+                            </div>
+                            <div class="col-md-6 mb-3 d-flex flex-column align-items-center justify-content-center">
+                                <label class="form-label fw-bold align-self-start"><%= __('Student_Photo') %></label>
+                                <div class="position-relative" onclick="document.getElementById('studentPhotoInput').click()" style="cursor: pointer;">
+                                    <img id="photoPreview" src="/images/default_student.png" onerror="this.src='/logo.jpg'" class="rounded-3 border shadow-sm" style="width: 100px; height: 100px; object-fit: cover;">
+                                    <div class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-2 shadow-sm d-flex align-items-center justify-content-center" style="width: 30px; height: 30px; transform: translate(25%, 25%);">
+                                        <i class="bi bi-camera-fill" style="font-size: 0.8rem;"></i>
+                                    </div>
+                                </div>
+                                <input type="file" name="photo" id="studentPhotoInput" accept="image/*" style="display: none;" onchange="previewImage(this)">
+                                <div class="form-text mt-2 text-center text-muted" style="font-size: 0.8rem;"><%= __('Click_Photo_To_Upload') %></div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="alert alert-info border-0 rounded-3">
-                        <i class="bi bi-info-circle me-2"></i>
-                        <%= __('Auto_Roll_No_Help') %>
+                    <!-- Section 2: Personal & Contact Details -->
+                    <div class="card border-0 bg-light rounded-4 p-4 mb-4">
+                        <h4 class="fw-bold text-primary mb-4 border-bottom pb-2">
+                            <i class="bi bi-person-fill me-2"></i><%= __('Contact_Details') %>
+                        </h4>
+                        <div class="row g-3">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold"><%= __('Father_Name') %></label>
+                                <input type="text" name="fatherName" class="form-control rounded-3">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold"><%= __('Date_Of_Birth') %></label>
+                                <input type="date" name="dob" class="form-control rounded-3">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold"><%= __('CNIC_BForm') %></label>
+                                <input type="text" name="cnic" placeholder="xxxxx-xxxxxxx-x" class="form-control rounded-3">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold"><%= __('Identification_Mark') %></label>
+                                <input type="text" name="identificationMark" class="form-control rounded-3">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold"><%= __('Residential_Phone') %></label>
+                                <input type="text" name="phone" class="form-control rounded-3">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold"><%= __('Mobile_Number') %></label>
+                                <input type="text" name="mobile" class="form-control rounded-3">
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-bold"><%= __('Email_Address') %></label>
+                                <input type="email" name="email" class="form-control rounded-3">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold"><%= __('Current_Address') %></label>
+                                <textarea name="currentAddress" rows="3" class="form-control rounded-3"></textarea>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold"><%= __('Permanent_Address') %></label>
+                                <textarea name="permanentAddress" rows="3" class="form-control rounded-3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Guardian Details -->
+                    <div class="card border-0 bg-light rounded-4 p-4 mb-4">
+                        <h4 class="fw-bold text-primary mb-4 border-bottom pb-2">
+                            <i class="bi bi-shield-fill-check me-2"></i><%= __('Guardian_Details') %>
+                        </h4>
+                        <div class="row g-3">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold"><%= __('Guardian_Name') %></label>
+                                <input type="text" name="guardianName" class="form-control rounded-3">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold"><%= __('Guardian_Father_Name') %></label>
+                                <input type="text" name="guardianFatherName" class="form-control rounded-3">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold"><%= __('Relationship_To_Guardian') %></label>
+                                <input type="text" name="relationshipToGuardian" class="form-control rounded-3">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold"><%= __('Guardian_CNIC') %></label>
+                                <input type="text" name="guardianCnic" placeholder="xxxxx-xxxxxxx-x" class="form-control rounded-3">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold"><%= __('Residential_Phone') %> (<%= __('Guardian_Info') %>)</label>
+                                <input type="text" name="guardianPhone" class="form-control rounded-3">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold"><%= __('Mobile_Number') %> (<%= __('Guardian_Info') %>)</label>
+                                <input type="text" name="guardianMobile" class="form-control rounded-3">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 4: Educational History & Referral Details -->
+                    <div class="card border-0 bg-light rounded-4 p-4 mb-4">
+                        <h4 class="fw-bold text-primary mb-4 border-bottom pb-2">
+                            <i class="bi bi-journal-bookmark-fill me-2"></i><%= __('Educational_Details') || 'Educational & Referral Details' %>
+                        </h4>
+                        <div class="row g-3">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold"><%= __('Religious_Education') %></label>
+                                <input type="text" name="religiousEducation" class="form-control rounded-3">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold"><%= __('Religious_Institution') %></label>
+                                <input type="text" name="religiousInstitution" class="form-control rounded-3">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold"><%= __('Contemporary_Education') %></label>
+                                <input type="text" name="contemporaryEducation" class="form-control rounded-3">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold"><%= __('Contemporary_Board') %></label>
+                                <input type="text" name="contemporaryBoard" class="form-control rounded-3">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold"><%= __('Wifaq_Registration') %></label>
+                                <select name="wifaqRegistration" id="wifaqRegistrationSelect" class="form-select rounded-3" onchange="toggleWifaqRegField()">
+                                    <option value="no"><%= __('No') %></option>
+                                    <option value="yes"><%= __('Yes') %></option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3" id="wifaqRegNumContainer" style="display: none;">
+                                <label class="form-label fw-bold"><%= __('Wifaq_Reg_Number') %></label>
+                                <input type="text" name="wifaqRegNumber" class="form-control rounded-3">
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold"><%= __('Previous_Madrasa') %></label>
+                                <textarea name="previousMadrasa" rows="2" class="form-control rounded-3"></textarea>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold"><%= __('Referral_Source') %></label>
+                                <select name="referralSource" class="form-select rounded-3">
+                                    <option value=""><%= __('Choose_Class_Placeholder') %></option>
+                                    <option value="Personal"><%= __('Personal_Reference') %></option>
+                                    <option value="Social Media"><%= __('Social_Media') %></option>
+                                    <option value="Other"><%= __('Other_Source') %></option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info border-0 rounded-3 d-flex align-items-center">
+                        <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+                        <div>
+                            <%= __('Auto_Roll_No_Help') %>
+                        </div>
                     </div>
 
                     <div class="d-grid mt-5">
-                        <button type="submit" class="btn btn-primary btn-lg rounded-pill py-3 fw-bold">
-                            <%= __('Save_Data_Btn') %>
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill py-3 fw-bold shadow-sm">
+                            <i class="bi bi-check-circle-fill me-2"></i><%= __('Save_Data_Btn') %>
                         </button>
                     </div>
                 </form>
@@ -39,5 +194,27 @@
         </div>
     </div>
 </div>
+
+<script>
+function toggleWifaqRegField() {
+    const wifaqSelect = document.getElementById('wifaqRegistrationSelect');
+    const regNumContainer = document.getElementById('wifaqRegNumContainer');
+    if (wifaqSelect.value === 'yes') {
+        regNumContainer.style.display = 'block';
+    } else {
+        regNumContainer.style.display = 'none';
+    }
+}
+
+function previewImage(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('photoPreview').src = e.target.result;
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
 
 <%- include('partials/footer') %>

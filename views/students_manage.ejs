@@ -7,6 +7,36 @@
     </div>
 </div>
 
+<!-- Search & Filter Card -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm border-0 rounded-4 p-3 bg-light">
+            <form method="GET" action="/students/manage" class="row g-3 align-items-center">
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-start-0 rounded-end-3"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" name="search" class="form-control border-end-0 rounded-start-3 text-end" placeholder="<%= __('Search_Placeholder') || 'ابحث عن بالاسم، رول نمبر، شناختی کارڈ...' %>" value="<%= search %>">
+                    </div>
+                </div>
+                <% if (!crClassId) { %>
+                <div class="col-md-4">
+                    <select name="classId" class="form-select rounded-3 text-end">
+                        <option value=""><%= __('All_Classes') %></option>
+                        <% classes.forEach(cls => { %>
+                            <option value="<%= cls.id %>" <%= filterClassId == cls.id ? 'selected' : '' %>><%= __(cls.name_ar) %></option>
+                        <% }) %>
+                    </select>
+                </div>
+                <% } %>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary rounded-3 px-4 fw-bold"><%= __('Filter_Label') %></button>
+                    <a href="/students/manage" class="btn btn-outline-secondary rounded-3 px-3"><%= __('Cancel') %></a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <div class="col-md-12">
         <div class="card shadow-sm border-0 rounded-4">
@@ -36,7 +66,10 @@
                                         </span>
                                     </td>
                                     <td class="px-4 text-center">
-                                        <button class="btn btn-sm btn-primary rounded-pill px-3" 
+                                        <a href="/students/view/<%= student.id %>" class="btn btn-sm btn-outline-info rounded-pill px-3" title="<%= __('View') || 'View' %>">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <button class="btn btn-sm btn-primary rounded-pill px-3 ms-2" 
                                                 onclick="openEditModal(<%= JSON.stringify(student) %>, <%= JSON.stringify(classes) %>)" title="<%= __('Edit') %>">
                                             <i class="bi bi-pencil-square"></i>
                                         </button>
@@ -48,9 +81,41 @@
                                     </td>
                                 </tr>
                             <% }) %>
+                            <% if (students.length === 0) { %>
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-muted"><%= __('No_Records_Found') || 'لا توجد نتائج مطابقة' %></td>
+                                </tr>
+                            <% } %>
                         </tbody>
                     </table>
                 </div>
+                
+                <!-- Pagination Footer -->
+                <% if (totalPages > 1) { %>
+                <div class="card-footer bg-white border-0 py-3 rounded-bottom-4">
+                    <nav>
+                        <ul class="pagination justify-content-center mb-0">
+                            <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                                <a class="page-link rounded-start-pill px-3" href="/students/manage?page=<%= currentPage - 1 %>&search=<%= encodeURIComponent(search) %>&classId=<%= filterClassId %>">
+                                    <%= __('Prev_Btn') %>
+                                </a>
+                            </li>
+                            
+                            <% for (let i = 1; i <= totalPages; i++) { %>
+                                <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                                    <a class="page-link px-3" href="/students/manage?page=<%= i %>&search=<%= encodeURIComponent(search) %>&classId=<%= filterClassId %>"><%= i %></a>
+                                </li>
+                            <% } %>
+                            
+                            <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                                <a class="page-link rounded-end-pill px-3" href="/students/manage?page=<%= currentPage + 1 %>&search=<%= encodeURIComponent(search) %>&classId=<%= filterClassId %>">
+                                    <%= __('Next_Btn') %>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <% } %>
             </div>
         </div>
     </div>
@@ -58,30 +123,176 @@
 
 <!-- Edit Student Modal -->
 <div class="modal fade" id="editStudentModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 rounded-4 shadow">
             <div class="modal-header bg-primary text-white rounded-top-4">
-                <h5 class="modal-title"><%= __('Edit_Student_Data') %></h5>
+                <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i><%= __('Edit_Student_Data') %></h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body p-4">
-                <form action="" id="editStudentForm" method="POST">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold"><%= __('Roll_Number_Readonly') %></label>
-                        <input type="text" id="editRollNumber" class="form-control bg-light" readonly>
+            <div class="modal-body p-4" style="max-height: 80vh; overflow-y: auto;">
+                <form action="" id="editStudentForm" method="POST" enctype="multipart/form-data">
+                    
+                    <!-- Section 1: Academic & Photo -->
+                    <div class="border-bottom pb-3 mb-3">
+                        <h6 class="fw-bold text-primary"><i class="bi bi-mortarboard me-2"></i><%= __('Academic_Details') %></h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold"><%= __('Roll_Number_Readonly') %></label>
+                                <input type="text" id="editRollNumber" class="form-control bg-light" readonly>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold"><%= __('Student_Full_Name') %></label>
+                                <input type="text" name="name" id="editName" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold"><%= __('Current_Class') %></label>
+                                <select name="classId" id="editClassId" class="form-select" required>
+                                    <!-- Options injected by JS -->
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold"><%= __('Admission_Year') %></label>
+                                <input type="number" name="admissionYear" id="editAdmissionYear" class="form-control">
+                            </div>
+                            <div class="col-md-12 mb-3 d-flex align-items-center">
+                                <div class="position-relative me-3" onclick="document.getElementById('editStudentPhotoInput').click()" style="cursor: pointer;">
+                                    <img id="editPhotoPreview" src="/images/default_student.png" class="rounded-circle border shadow-sm" style="width: 80px; height: 80px; object-fit: cover;">
+                                    <div class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-1 shadow-sm d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; transform: translate(15%, 15%);">
+                                        <i class="bi bi-camera-fill" style="font-size: 0.75rem;"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <label class="form-label fw-bold mb-1"><%= __('Student_Photo') %></label>
+                                    <input type="file" name="photo" id="editStudentPhotoInput" accept="image/*" style="display: none;" onchange="previewEditImage(this)">
+                                    <div class="form-text mt-1 text-muted" style="font-size: 0.8rem;"><%= __('Click_Photo_To_Upload') %></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold"><%= __('Student_Full_Name') %></label>
-                        <input type="text" name="name" id="editName" class="form-control" required>
+
+                    <!-- Section 2: Contact Info -->
+                    <div class="border-bottom pb-3 mb-3">
+                        <h6 class="fw-bold text-primary"><i class="bi bi-person me-2"></i><%= __('Contact_Details') %></h6>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold"><%= __('Father_Name') %></label>
+                                <input type="text" name="fatherName" id="editFatherName" class="form-control">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold"><%= __('Date_Of_Birth') %></label>
+                                <input type="date" name="dob" id="editDob" class="form-control">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold"><%= __('CNIC_BForm') %></label>
+                                <input type="text" name="cnic" id="editCnic" placeholder="xxxxx-xxxxxxx-x" class="form-control">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold"><%= __('Identification_Mark') %></label>
+                                <input type="text" name="identificationMark" id="editIdentificationMark" class="form-control">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold"><%= __('Residential_Phone') %></label>
+                                <input type="text" name="phone" id="editPhone" class="form-control">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold"><%= __('Mobile_Number') %></label>
+                                <input type="text" name="mobile" id="editMobile" class="form-control">
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-bold"><%= __('Email_Address') %></label>
+                                <input type="email" name="email" id="editEmail" class="form-control">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold"><%= __('Current_Address') %></label>
+                                <textarea name="currentAddress" id="editCurrentAddress" rows="2" class="form-control"></textarea>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold"><%= __('Permanent_Address') %></label>
+                                <textarea name="permanentAddress" id="editPermanentAddress" rows="2" class="form-control"></textarea>
+                            </div>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold"><%= __('Current_Class') %></label>
-                        <select name="classId" id="editClassId" class="form-select" required>
-                            <!-- Classes will be injected by JS -->
-                        </select>
+
+                    <!-- Section 3: Guardian Details -->
+                    <div class="border-bottom pb-3 mb-3">
+                        <h6 class="fw-bold text-primary"><i class="bi bi-shield-check me-2"></i><%= __('Guardian_Details') %></h6>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold"><%= __('Guardian_Name') %></label>
+                                <input type="text" name="guardianName" id="editGuardianName" class="form-control">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold"><%= __('Guardian_Father_Name') %></label>
+                                <input type="text" name="guardianFatherName" id="editGuardianFatherName" class="form-control">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold"><%= __('Relationship_To_Guardian') %></label>
+                                <input type="text" name="relationshipToGuardian" id="editRelationshipToGuardian" class="form-control">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold"><%= __('Guardian_CNIC') %></label>
+                                <input type="text" name="guardianCnic" id="editGuardianCnic" placeholder="xxxxx-xxxxxxx-x" class="form-control">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold"><%= __('Residential_Phone') %> (<%= __('Guardian_Info') %>)</label>
+                                <input type="text" name="guardianPhone" id="editGuardianPhone" class="form-control">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold"><%= __('Mobile_Number') %> (<%= __('Guardian_Info') %>)</label>
+                                <input type="text" name="guardianMobile" id="editGuardianMobile" class="form-control">
+                            </div>
+                        </div>
                     </div>
+
+                    <!-- Section 4: Academic History & Referral -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-primary"><i class="bi bi-journal-check me-2"></i><%= __('Educational_Details') || 'Educational & Referral Details' %></h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold"><%= __('Religious_Education') %></label>
+                                <input type="text" name="religiousEducation" id="editReligiousEducation" class="form-control">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold"><%= __('Religious_Institution') %></label>
+                                <input type="text" name="religiousInstitution" id="editReligiousInstitution" class="form-control">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold"><%= __('Contemporary_Education') %></label>
+                                <input type="text" name="contemporaryEducation" id="editContemporaryEducation" class="form-control">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold"><%= __('Contemporary_Board') %></label>
+                                <input type="text" name="contemporaryBoard" id="editContemporaryBoard" class="form-control">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold"><%= __('Wifaq_Registration') %></label>
+                                <select name="wifaqRegistration" id="editWifaqRegistrationSelect" class="form-select" onchange="toggleEditWifaqRegField()">
+                                    <option value="no"><%= __('No') %></option>
+                                    <option value="yes"><%= __('Yes') %></option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3" id="editWifaqRegNumContainer" style="display: none;">
+                                <label class="form-label fw-bold"><%= __('Wifaq_Reg_Number') %></label>
+                                <input type="text" name="wifaqRegNumber" id="editWifaqRegNumber" class="form-control">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold"><%= __('Previous_Madrasa') %></label>
+                                <textarea name="previousMadrasa" id="editPreviousMadrasa" rows="2" class="form-control"></textarea>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold"><%= __('Referral_Source') %></label>
+                                <select name="referralSource" id="editReferralSource" class="form-select">
+                                    <option value=""><%= __('Choose_Class_Placeholder') %></option>
+                                    <option value="Personal"><%= __('Personal_Reference') %></option>
+                                    <option value="Social Media"><%= __('Social_Media') %></option>
+                                    <option value="Other"><%= __('Other_Source') %></option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary rounded-pill py-2"><%= __('Save_Changes') %></button>
+                        <button type="submit" class="btn btn-primary rounded-pill py-2 fw-bold"><%= __('Save_Changes') %></button>
                     </div>
                 </form>
             </div>
@@ -95,11 +306,70 @@ document.addEventListener('DOMContentLoaded', () => {
     editModal = new bootstrap.Modal(document.getElementById('editStudentModal'));
 });
 
+function toggleEditWifaqRegField() {
+    const wifaqSelect = document.getElementById('editWifaqRegistrationSelect');
+    const regNumContainer = document.getElementById('editWifaqRegNumContainer');
+    if (wifaqSelect.value === 'yes') {
+        regNumContainer.style.display = 'block';
+    } else {
+        regNumContainer.style.display = 'none';
+    }
+}
+
 function openEditModal(student, classes) {
     document.getElementById('editStudentForm').action = `/students/edit/${student.id}`;
-    document.getElementById('editRollNumber').value = student.roll_number;
-    document.getElementById('editName').value = student.name;
+    document.getElementById('editRollNumber').value = student.roll_number || '';
+    document.getElementById('editName').value = student.name || '';
+    document.getElementById('editAdmissionYear').value = student.admission_year || '';
     
+    // Photo preview
+    const preview = document.getElementById('editPhotoPreview');
+    preview.src = student.photo_url || '/images/default_student.png';
+    
+    // Personal details
+    document.getElementById('editFatherName').value = student.father_name || '';
+    
+    // DOB formatting
+    if (student.dob) {
+        const dobDate = new Date(student.dob);
+        const yyyy = dobDate.getFullYear();
+        const mm = String(dobDate.getMonth() + 1).padStart(2, '0');
+        const dd = String(dobDate.getDate()).padStart(2, '0');
+        document.getElementById('editDob').value = `${yyyy}-${mm}-${dd}`;
+    } else {
+        document.getElementById('editDob').value = '';
+    }
+    
+    document.getElementById('editCnic').value = student.cnic || '';
+    document.getElementById('editIdentificationMark').value = student.identification_mark || '';
+    document.getElementById('editPhone').value = student.phone || '';
+    document.getElementById('editMobile').value = student.mobile || '';
+    document.getElementById('editEmail').value = student.email || '';
+    document.getElementById('editCurrentAddress').value = student.current_address || '';
+    document.getElementById('editPermanentAddress').value = student.permanent_address || '';
+    
+    // Guardian details
+    document.getElementById('editGuardianName').value = student.guardian_name || '';
+    document.getElementById('editGuardianFatherName').value = student.guardian_father_name || '';
+    document.getElementById('editRelationshipToGuardian').value = student.guardian_relationship || '';
+    document.getElementById('editGuardianCnic').value = student.guardian_cnic || '';
+    document.getElementById('editGuardianPhone').value = student.guardian_phone || '';
+    document.getElementById('editGuardianMobile').value = student.guardian_mobile || '';
+    
+    // Education & referral
+    document.getElementById('editReligiousEducation').value = student.religious_education || '';
+    document.getElementById('editReligiousInstitution').value = student.religious_institution || '';
+    document.getElementById('editContemporaryEducation').value = student.contemporary_education || '';
+    document.getElementById('editContemporaryBoard').value = student.contemporary_board || '';
+    
+    const wifaqSelect = document.getElementById('editWifaqRegistrationSelect');
+    wifaqSelect.value = student.is_wifaq_registered ? 'yes' : 'no';
+    toggleEditWifaqRegField();
+    document.getElementById('editWifaqRegNumber').value = student.wifaq_reg_number || '';
+    
+    document.getElementById('editPreviousMadrasa').value = student.previous_madrasa_details || '';
+    document.getElementById('editReferralSource').value = student.referral_source || '';
+
     const classSelect = document.getElementById('editClassId');
     classSelect.innerHTML = '';
     const userLang = '<%= lang %>';
@@ -112,6 +382,16 @@ function openEditModal(student, classes) {
     });
     
     editModal.show();
+}
+
+function previewEditImage(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('editPhotoPreview').src = e.target.result;
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
 }
 </script>
 

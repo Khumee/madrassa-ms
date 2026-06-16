@@ -9,7 +9,7 @@
 </style>
 
 <!-- Page Header -->
-<div class="row mb-3 align-items-center">
+<div class="row mb-3 align-items-center no-print">
     <div class="col">
         <h1 class="fw-bold text-primary mb-0">
             <i class="bi bi-person-lines-fill me-2"></i>
@@ -21,15 +21,41 @@
                 : 'عدد الأيام التي سُجِّل فيها حضور الطلاب وحضور الأساتذة لكل فصل — أسماء العرفاء للإشارة فقط' %>
         </p>
     </div>
-    <div class="col-auto">
+    <div class="col-auto d-flex gap-2 align-items-center">
         <span class="badge bg-primary-subtle text-primary border rounded-pill px-3 py-2">
             <i class="bi bi-calendar3 me-1"></i><%= startDate %> ← <%= endDate %>
         </span>
+        <button onclick="window.print()" class="btn btn-outline-primary rounded-pill px-3 py-1 btn-sm">
+            <i class="bi bi-printer me-1"></i><%= locals.lang === 'ur' ? 'پرنٹ' : 'طباعة' %>
+        </button>
+        <button onclick="downloadAreefPDF()" class="btn btn-success rounded-pill px-3 py-1 btn-sm">
+            <i class="bi bi-file-earmark-pdf-fill me-1"></i><%= locals.lang === 'ur' ? 'PDF ڈاؤن لوڈ' : 'تحميل PDF' %>
+        </button>
     </div>
 </div>
 
+<style>
+    @media print {
+        .no-print, nav, #toastContainer, footer, .btn, .btn-group, .input-group, .card-footer { display: none !important; }
+        body { background: white !important; margin: 0 !important; padding: 1.5cm !important; }
+        .card { border: 1px solid #dee2e6 !important; box-shadow: none !important; }
+    }
+</style>
+
 <!-- Date Filter -->
 <%- include('partials/date_filter') %>
+
+<script>
+function downloadAreefPDF() {
+    if (typeof showPdfLoader === 'function') showPdfLoader();
+    const url = new URL(window.location.origin + '/reports/areef-standards/pdf');
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.forEach((value, key) => {
+        url.searchParams.set(key, value);
+    });
+    window.location.href = url.pathname + url.search;
+}
+</script>
 
 <!-- Summary Row -->
 <div class="row g-3 mb-4">

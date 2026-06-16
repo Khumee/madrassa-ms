@@ -414,21 +414,52 @@ exports.showCRDashboard = async (req, res) => {
 
 exports.showStudentsManage = async (req, res) => {
     try {
-        let studentsQuery = 'SELECT s.*, c.name_ar as class_name FROM students s JOIN classes c ON s.class_id = c.id AND c.tenant_id = s.tenant_id WHERE s.tenant_id = ?';
-        let queryParams = [req.tenant.id];
-        let crClassId = null;
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10;
+        const offset = (page - 1) * limit;
+        const search = (req.query.search || '').trim();
+        const filterClassId = req.query.classId || '';
 
+        let crClassId = null;
         if (['عريف', 'عریف'].includes(req.session.role)) {
             crClassId = await getCRClassId(req.session.userId, req.tenant.id);
             if (!crClassId) return res.status(403).send('CR class not found');
-            studentsQuery = 'SELECT s.*, c.name_ar as class_name FROM students s JOIN classes c ON s.class_id = c.id AND c.tenant_id = s.tenant_id WHERE s.class_id = ? AND s.tenant_id = ?';
-            queryParams = [crClassId, req.tenant.id];
-        } else {
-            studentsQuery += ' ORDER BY s.class_id, s.name';
         }
 
-        const [students] = await db.execute(studentsQuery, queryParams);
+        let studentsQuery = `
+            SELECT s.*, c.name_ar as class_name 
+            FROM students s 
+            JOIN classes c ON s.class_id = c.id AND c.tenant_id = s.tenant_id 
+            WHERE s.tenant_id = ?
+        `;
+        let queryParams = [req.tenant.id];
 
+        if (crClassId) {
+            studentsQuery += ' AND s.class_id = ?';
+            queryParams.push(crClassId);
+        } else if (filterClassId) {
+            studentsQuery += ' AND s.class_id = ?';
+            queryParams.push(filterClassId);
+        }
+
+        if (search) {
+            studentsQuery += ' AND (s.name LIKE ? OR s.roll_number LIKE ? OR s.cnic LIKE ?)';
+            queryParams.push(`%${search}%`, `%${search}%`, `%${search}%`);
+        }
+
+        // Count total records for pagination
+        const countQuery = `SELECT COUNT(*) as count FROM (${studentsQuery}) as temp`;
+        const [countResult] = await db.execute(countQuery, queryParams);
+        const totalRecords = countResult[0].count;
+        const totalPages = Math.ceil(totalRecords / limit) || 1;
+
+        // Apply order, limit & offset
+        studentsQuery += ' ORDER BY s.class_id, s.name LIMIT ? OFFSET ?';
+        queryParams.push(limit, offset);
+
+        const [students] = await db.query(studentsQuery, queryParams);
+
+        // Fetch classes list for filter/dropdown
         let classesQuery = 'SELECT * FROM classes WHERE tenant_id = ?';
         let classParams = [req.tenant.id];
         if (crClassId) {
@@ -437,7 +468,16 @@ exports.showStudentsManage = async (req, res) => {
         }
         const [classes] = await db.execute(classesQuery, classParams);
 
-        res.render('students_manage', { students, classes, role: req.session.role, crClassId });
+        res.render('students_manage', { 
+            students, 
+            classes, 
+            role: req.session.role, 
+            crClassId,
+            currentPage: page,
+            totalPages,
+            search,
+            filterClassId
+        });
     } catch (err) {
         console.error(err);
         res.status(500).send('Error loading management page');
@@ -459,7 +499,14 @@ exports.showStudentsAdd = async (req, res) => {
 const { checkQuota } = require('../utils/quota');
 
 exports.addStudent = async (req, res) => {
-    const { name, classId } = req.body;
+    const { 
+        name, classId, admissionYear, dob, fatherName, currentAddress, permanentAddress, cnic, 
+        identificationMark, phone, mobile, email, guardianName, guardianFatherName, 
+        relationshipToGuardian, guardianCnic, guardianPhone, guardianMobile, 
+        religiousEducation, religiousInstitution, contemporaryEducation, contemporaryBoard,
+        wifaqRegistration, wifaqRegNumber, previousMadrasa, referralSource 
+    } = req.body;
+
     try {
         const quota = await checkQuota(req.tenant.id, 'students');
         if (!quota.allowed) {
@@ -476,7 +523,50 @@ exports.addStudent = async (req, res) => {
         const [userResult] = await db.execute('INSERT INTO users (username, password, role, tenant_id) VALUES (?, ?, ?, ?)', [username, password, 'طالب', req.tenant.id]);
         const userId = userResult.insertId;
 
-        const [studentResult] = await db.execute('INSERT INTO students (name, class_id, user_id, tenant_id) VALUES (?, ?, ?, ?)', [name, classId, userId, req.tenant.id]);
+        let photoUrl = '/images/default_student.png';
+        if (req.file) {
+            photoUrl = '/uploads/students/' + req.file.filename;
+        }
+
+        const [studentResult] = await db.execute(
+            `INSERT INTO students (
+                name, class_id, user_id, tenant_id, admission_year, dob, father_name, 
+                current_address, permanent_address, cnic, identification_mark, phone, mobile, email, 
+                guardian_name, guardian_father_name, guardian_relationship, guardian_cnic, 
+                guardian_phone, guardian_mobile, religious_education, religious_institution, 
+                contemporary_education, contemporary_board, photo_url, is_wifaq_registered, 
+                wifaq_reg_number, previous_madrasa_details, referral_source
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                name, classId, userId, req.tenant.id,
+                admissionYear ? parseInt(admissionYear) : null,
+                dob || null,
+                fatherName || null,
+                currentAddress || null,
+                permanentAddress || null,
+                cnic || null,
+                identificationMark || null,
+                phone || null,
+                mobile || null,
+                email || null,
+                guardianName || null,
+                guardianFatherName || null,
+                relationshipToGuardian || null,
+                guardianCnic || null,
+                guardianPhone || null,
+                guardianMobile || null,
+                religiousEducation || null,
+                religiousInstitution || null,
+                contemporaryEducation || null,
+                contemporaryBoard || null,
+                photoUrl,
+                wifaqRegistration === 'yes' ? 1 : 0,
+                wifaqRegNumber || null,
+                previousMadrasa || null,
+                referralSource || null
+            ]
+        );
+
         const studentId = studentResult.insertId;
         const year = new Date().getFullYear().toString().slice(-2);
         const rollNumber = `S-${year}-${1000 + studentId}`;
@@ -505,7 +595,14 @@ exports.addStudent = async (req, res) => {
 
 exports.editStudent = async (req, res) => {
     const { id } = req.params;
-    const { name, classId } = req.body;
+    const { 
+        name, classId, admissionYear, dob, fatherName, currentAddress, permanentAddress, cnic, 
+        identificationMark, phone, mobile, email, guardianName, guardianFatherName, 
+        relationshipToGuardian, guardianCnic, guardianPhone, guardianMobile, 
+        religiousEducation, religiousInstitution, contemporaryEducation, contemporaryBoard,
+        wifaqRegistration, wifaqRegNumber, previousMadrasa, referralSource 
+    } = req.body;
+
     try {
         if (['عريف', 'عریف'].includes(req.session.role)) {
             const crClassId = await getCRClassId(req.session.userId, req.tenant.id);
@@ -514,7 +611,55 @@ exports.editStudent = async (req, res) => {
                 return res.status(403).send('Unauthorized to edit this student or change to this class');
             }
         }
-        await db.execute('UPDATE students SET name = ?, class_id = ? WHERE id = ? AND tenant_id = ?', [name, classId, id, req.tenant.id]);
+
+        let photoQuery = '';
+        let queryParams = [
+            name, classId, 
+            admissionYear ? parseInt(admissionYear) : null,
+            dob || null,
+            fatherName || null,
+            currentAddress || null,
+            permanentAddress || null,
+            cnic || null,
+            identificationMark || null,
+            phone || null,
+            mobile || null,
+            email || null,
+            guardianName || null,
+            guardianFatherName || null,
+            relationshipToGuardian || null,
+            guardianCnic || null,
+            guardianPhone || null,
+            guardianMobile || null,
+            religiousEducation || null,
+            religiousInstitution || null,
+            contemporaryEducation || null,
+            contemporaryBoard || null,
+            wifaqRegistration === 'yes' ? 1 : 0,
+            wifaqRegNumber || null,
+            previousMadrasa || null,
+            referralSource || null
+        ];
+
+        if (req.file) {
+            photoQuery = ', photo_url = ?';
+            queryParams.push('/uploads/students/' + req.file.filename);
+        }
+
+        queryParams.push(id, req.tenant.id);
+
+        await db.execute(
+            `UPDATE students SET 
+                name = ?, class_id = ?, admission_year = ?, dob = ?, father_name = ?, 
+                current_address = ?, permanent_address = ?, cnic = ?, identification_mark = ?, phone = ?, mobile = ?, email = ?, 
+                guardian_name = ?, guardian_father_name = ?, guardian_relationship = ?, guardian_cnic = ?, 
+                guardian_phone = ?, guardian_mobile = ?, religious_education = ?, religious_institution = ?, 
+                contemporary_education = ?, contemporary_board = ?, is_wifaq_registered = ?, 
+                wifaq_reg_number = ?, previous_madrasa_details = ?, referral_source = ?
+                ${photoQuery}
+             WHERE id = ? AND tenant_id = ?`,
+            queryParams
+        );
         
         const [activeSessions] = await db.execute('SELECT id FROM sessions WHERE is_active = TRUE AND tenant_id = ? LIMIT 1', [req.tenant.id]);
         if (activeSessions.length > 0) {
@@ -608,5 +753,102 @@ exports.saveAttendance = async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ success: false });
+    }
+};
+
+const { exec } = require('child_process');
+const fs = require('fs');
+const path = require('path');
+const ejs = require('ejs');
+
+exports.showStudentView = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const [student] = await db.execute(
+            `SELECT s.*, c.name_ar as class_name 
+             FROM students s 
+             JOIN classes c ON s.class_id = c.id AND c.tenant_id = s.tenant_id 
+             WHERE s.id = ? AND s.tenant_id = ?`,
+            [id, req.tenant.id]
+        );
+        if (!student.length) {
+            return res.status(404).send('Student not found');
+        }
+        res.render('student_view', { student: student[0], lang: req.getLocale ? req.getLocale() : 'ur' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error loading student profile');
+    }
+};
+
+exports.exportStudentPdf = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const [student] = await db.execute(
+            `SELECT s.*, c.name_ar as class_name 
+             FROM students s 
+             JOIN classes c ON s.class_id = c.id AND c.tenant_id = s.tenant_id 
+             WHERE s.id = ? AND s.tenant_id = ?`,
+            [id, req.tenant.id]
+        );
+        if (!student.length) {
+            return res.status(404).send('Student not found');
+        }
+
+        const templatePath = path.join(__dirname, '../views/student_view.ejs');
+        const lang = req.getLocale ? req.getLocale() : 'ur';
+        
+        // Render EJS to HTML string
+        const html = await ejs.renderFile(templatePath, {
+            student: student[0],
+            tenant: req.tenant,
+            lang: lang,
+            __: res.__ || (key => key)
+        });
+
+        // Ensure scratch directory exists
+        const scratchDir = path.join(__dirname, '../scratch');
+        if (!fs.existsSync(scratchDir)) {
+            fs.mkdirSync(scratchDir, { recursive: true });
+        }
+
+        const tempHtmlPath = path.join(scratchDir, `student_${id}.html`);
+        const tempPdfPath = path.join(scratchDir, `student_${id}.pdf`);
+
+        fs.writeFileSync(tempHtmlPath, html, 'utf8');
+
+        // Compile PDF using the python playwright script
+        const scriptPath = process.env.PDF_SCRIPT_PATH || path.join(__dirname, '../utils/html_to_pdf.py');
+        const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
+        const cmd = `${pythonCmd} "${scriptPath}" -i "${tempHtmlPath}" -o "${tempPdfPath}" -w 2000`;
+
+        console.log(`[PDF Generator] Compiling HTML to PDF: ${cmd}`);
+        
+        exec(cmd, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`[PDF Generator] Execution failed: ${error.message}`);
+                console.error(`stderr: ${stderr}`);
+                // Fallback to client-side print
+                return res.send(`
+                    <script>
+                        alert('On-the-fly PDF generation is configuring on server. Printing locally instead.');
+                        window.location.href = '/students/view/${id}';
+                    </script>
+                `);
+            }
+            console.log(`[PDF Generator] Success: ${stdout}`);
+            res.download(tempPdfPath, `student-${student[0].roll_number || 'profile'}.pdf`, (err) => {
+                // Clean up temp files
+                try {
+                    if (fs.existsSync(tempHtmlPath)) fs.unlinkSync(tempHtmlPath);
+                    if (fs.existsSync(tempPdfPath)) fs.unlinkSync(tempPdfPath);
+                } catch (cleanErr) {
+                    console.error('Temp cleanup failed:', cleanErr);
+                }
+            });
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error compiling PDF');
     }
 };
