@@ -84,10 +84,15 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 const rawData = <%- JSON.stringify(progress) %>;
+const selectedBook = <%- JSON.stringify(locals.selectedBook || null) %>;
+
+const filteredData = selectedBook 
+    ? rawData.filter(d => d.book_title === selectedBook)
+    : rawData;
 
 const booksLabels = {};
 const booksValues = {};
-rawData.forEach(d => {
+filteredData.forEach(d => {
     const title = d.book_title;
     if (!booksLabels[title]) booksLabels[title] = [];
     if (!booksValues[title]) booksValues[title] = [];
