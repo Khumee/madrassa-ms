@@ -85,15 +85,15 @@
 <script>
 const rawData = <%- JSON.stringify(progress) %>;
 
-// Group data by book
-const booksData = {};
+const booksLabels = {};
+const booksValues = {};
 rawData.forEach(d => {
     const title = d.book_title;
-    if (!booksData[title]) booksData[title] = [];
-    booksData[title].push({ 
-        x: d.date.split('T')[0], 
-        y: d.page_number 
-    });
+    if (!booksLabels[title]) booksLabels[title] = [];
+    if (!booksValues[title]) booksValues[title] = [];
+    
+    booksLabels[title].push(d.date.split('T')[0]);
+    booksValues[title].push(d.page_number);
 });
 
 const colors = ['#0d6efd', '#198754', '#dc3545', '#ffc107', '#0dcaf0', '#6610f2', '#6f42c1', '#d63384'];
@@ -102,7 +102,7 @@ const userLang = '<%= lang %>';
 const labelDate = (userLang === 'ur') ? 'تاریخ' : 'التاريخ';
 const labelPage = (userLang === 'ur') ? 'صفحہ نمبر' : 'رقم الصفحة';
 
-Object.keys(booksData).forEach((title, index) => {
+Object.keys(booksLabels).forEach((title, index) => {
     const canvasId = `chart_${index}`;
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
@@ -111,9 +111,10 @@ Object.keys(booksData).forEach((title, index) => {
     new Chart(ctx, {
         type: 'line',
         data: {
+            labels: booksLabels[title],
             datasets: [{
                 label: title,
-                data: booksData[title],
+                data: booksValues[title],
                 borderColor: colors[index % colors.length],
                 backgroundColor: colors[index % colors.length] + '22',
                 tension: 0.3,
