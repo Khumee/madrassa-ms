@@ -15,7 +15,10 @@
 <div class="row">
     <div class="col-md-12">
         <% 
-            const bookTitles = [...new Set(progress.map(p => p.book_title))];
+            let bookTitles = [...new Set(progress.map(p => p.book_title))];
+            if (locals.selectedBook) {
+                bookTitles = bookTitles.filter(title => title === selectedBook);
+            }
         %>
 
         <% bookTitles.forEach((title, index) => { %>
@@ -48,7 +51,11 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <% progress.forEach(row => { 
+                    <% 
+                    const filteredProgress = locals.selectedBook 
+                        ? progress.filter(p => p.book_title === selectedBook) 
+                        : progress;
+                    filteredProgress.forEach(row => { 
                         const total = row.end_page - row.start_page;
                         const completed = row.page_number - row.start_page;
                         const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;

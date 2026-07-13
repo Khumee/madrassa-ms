@@ -203,6 +203,7 @@ exports.showReports = async (req, res) => {
 
 exports.showTeacherProgressReport = async (req, res) => {
     const { teacherId } = req.params;
+    const selectedBook = req.query.book || null;
     try {
         const [teacher] = await db.execute('SELECT * FROM teachers WHERE id = ? AND tenant_id = ?', [teacherId, req.tenant.id]);
         const [progress] = await db.execute(
@@ -214,7 +215,7 @@ exports.showTeacherProgressReport = async (req, res) => {
              ORDER BY bp.date ASC`,
             [teacherId, req.tenant.id]
         );
-        res.render('report_teacher_progress', { teacher: teacher[0], progress });
+        res.render('report_teacher_progress', { teacher: teacher[0], progress, selectedBook });
     } catch (err) {
         console.error(err);
         res.status(500).send('Error loading teacher report');
