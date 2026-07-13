@@ -443,7 +443,8 @@
                         <div class="card-body p-4 pt-2">
                             <%
                             let _teacherSchedMap = {};
-                            let _teacherStateMap = {};
+                            let _periodStateMap = {};
+                            let _teacherPeriodsCount = {};
                             %>
                             <% if (todayPeriods.length === 0) { %>
                                 <div class="text-center py-5 border rounded-4 bg-light my-3">
@@ -454,18 +455,28 @@
                                 <div class="timeline-container d-flex flex-column gap-3 mt-3">
                                     <%
                                     _teacherSchedMap = {};
-                                    _teacherStateMap = {};
+                                    _periodStateMap = {};
+                                    _teacherPeriodsCount = {};
                                     todayPeriods.forEach(p => {
                                         _teacherSchedMap[p.teacher_id] = (_teacherSchedMap[p.teacher_id] || 0) + 1;
                                     });
                                     todayPeriods.forEach(p => {
-                                        if (!(p.teacher_id in _teacherStateMap)) {
-                                            const ta = teacherAttendance.find(a => a.teacher_id === p.teacher_id);
-                                            _teacherStateMap[p.teacher_id] = !ta ? null : ta.classes_taken > 0 ? 'present' : 'absent';
+                                        const ta = teacherAttendance.find(a => a.teacher_id === p.teacher_id);
+                                        if (!ta) {
+                                            _periodStateMap[p.id] = null;
+                                        } else {
+                                            const taken = ta.classes_taken || 0;
+                                            _teacherPeriodsCount[p.teacher_id] = (_teacherPeriodsCount[p.teacher_id] || 0) + 1;
+                                            const currentIdx = _teacherPeriodsCount[p.teacher_id];
+                                            if (currentIdx <= taken) {
+                                                _periodStateMap[p.id] = 'present';
+                                            } else {
+                                                _periodStateMap[p.id] = 'absent';
+                                            }
                                         }
                                     });
                                     todayPeriods.forEach(period => {
-                                        const _state = _teacherStateMap[period.teacher_id];
+                                        const _state = _periodStateMap[period.id];
                                     %>
                                         <div class="timeline-card border rounded-4 bg-white shadow-xs overflow-hidden <%=
                                              _state === 'present' ? 'timeline-card-active' :
@@ -493,12 +504,12 @@
                                                 <div class="btn-group btn-group-sm" role="group" id="tbtngroup_<%= period.id %>">
                                                     <button type="button"
                                                             class="btn rounded-start-pill fw-semibold px-3 <%= _state === 'present' ? 'btn-success' : 'btn-outline-success' %>"
-                                                            onclick="setTeacherState(<%= period.teacher_id %>, 'present')">
+                                                            onclick="setTeacherState(<%= period.id %>, <%= period.teacher_id %>, 'present')">
                                                         <i class="bi bi-check-lg me-1"></i><%= locals.lang === 'ur' ? 'حاضر' : 'حاضر' %>
                                                     </button>
                                                     <button type="button"
                                                             class="btn rounded-end-pill fw-semibold px-3 <%= _state === 'absent' ? 'btn-danger' : 'btn-outline-danger' %>"
-                                                            onclick="setTeacherState(<%= period.teacher_id %>, 'absent')">
+                                                            onclick="setTeacherState(<%= period.id %>, <%= period.teacher_id %>, 'absent')">
                                                         <i class="bi bi-x-lg me-1"></i><%= locals.lang === 'ur' ? 'غیر حاضر' : 'غائب' %>
                                                     </button>
                                                 </div>
@@ -840,7 +851,8 @@
 <script>
     const classId = <%= classId %>;
     const todayDate = '<%= todayDate %>';
-    const teacherStates = <%- JSON.stringify(_teacherStateMap || {}) %>;
+    const periodStates = <%- JSON.stringify(_periodStateMap || {}) %>;
+    const periodTeachers = <%- JSON.stringify(todayPeriods.reduce((acc, p) => { acc[p.id] = p.teacher_id; return acc; }, {})) %>;
     const teacherScheduledCounts = <%- JSON.stringify(_teacherSchedMap || {}) %>;
     const _statusLabels = {
         present:   '<%= __("Status_Present") %>',
@@ -967,66 +979,73 @@
         }
     }
 
-    function _updateTeacherCards(teacherId, state) {
-        document.querySelectorAll(`.teacher-period-card[data-teacher-id="${teacherId}"]`).forEach(card => {
-            const tcard    = card.closest('.timeline-card');
-            const periodId = tcard.id.replace('tcard_', '');
-            const btnGroup = document.getElementById(`tbtngroup_${periodId}`);
-            const tstatus  = document.getElementById(`tstatus_${periodId}`);
+    function _updatePeriodCard(periodId, state) {
+        const tcard = document.getElementById(`tcard_${periodId}`);
+        if (!tcard) return;
+        
+        const btnGroup = document.getElementById(`tbtngroup_${periodId}`);
+        const tstatus  = document.getElementById(`tstatus_${periodId}`);
 
-            tcard.classList.remove('timeline-card-active', 'timeline-card-absent');
-            if (state === 'present') tcard.classList.add('timeline-card-active');
-            if (state === 'absent')  tcard.classList.add('timeline-card-absent');
+        tcard.classList.remove('timeline-card-active', 'timeline-card-absent');
+        if (state === 'present') tcard.classList.add('timeline-card-active');
+        if (state === 'absent')  tcard.classList.add('timeline-card-absent');
 
-            if (btnGroup) {
-                const [pBtn, aBtn] = btnGroup.querySelectorAll('button');
-                pBtn.className = `btn rounded-start-pill fw-semibold px-3 ${state === 'present' ? 'btn-success' : 'btn-outline-success'}`;
-                aBtn.className = `btn rounded-end-pill fw-semibold px-3 ${state === 'absent'  ? 'btn-danger'  : 'btn-outline-danger'}`;
+        if (btnGroup) {
+            const [pBtn, aBtn] = btnGroup.querySelectorAll('button');
+            pBtn.className = `btn rounded-start-pill fw-semibold px-3 ${state === 'present' ? 'btn-success' : 'btn-outline-success'}`;
+            aBtn.className = `btn rounded-end-pill fw-semibold px-3 ${state === 'absent'  ? 'btn-danger'  : 'btn-outline-danger'}`;
+        }
+
+        if (tstatus) {
+            if (state === 'present') {
+                tstatus.innerHTML = `<span class="text-success fw-semibold"><i class="bi bi-check-circle-fill me-1"></i> ${_statusLabels.present}</span>`;
+            } else if (state === 'absent') {
+                tstatus.innerHTML = `<span class="text-danger fw-semibold"><i class="bi bi-x-circle-fill me-1"></i> ${_statusLabels.absent}</span>`;
+            } else {
+                tstatus.innerHTML = `<span class="text-secondary fw-semibold"><i class="bi bi-dash-circle me-1"></i> ${_statusLabels.notMarked}</span>`;
             }
-
-            if (tstatus) {
-                if (state === 'present') {
-                    tstatus.innerHTML = `<span class="text-success fw-semibold"><i class="bi bi-check-circle-fill me-1"></i> ${_statusLabels.present}</span>`;
-                } else if (state === 'absent') {
-                    tstatus.innerHTML = `<span class="text-danger fw-semibold"><i class="bi bi-x-circle-fill me-1"></i> ${_statusLabels.absent}</span>`;
-                } else {
-                    tstatus.innerHTML = `<span class="text-secondary fw-semibold"><i class="bi bi-dash-circle me-1"></i> ${_statusLabels.notMarked}</span>`;
-                }
-            }
-        });
+        }
     }
 
-    async function setTeacherState(teacherId, newState) {
-        const prev  = teacherStates[teacherId] || null;
+    async function setTeacherState(periodId, teacherId, newState) {
+        const prev = periodStates[periodId] || null;
         const final = prev === newState ? null : newState; // tap active btn → deselect back to درج نہیں
 
-        teacherStates[teacherId] = final;
-        _updateTeacherCards(teacherId, final);
+        periodStates[periodId] = final;
+        _updatePeriodCard(periodId, final);
+
+        // Find all periods of this teacher to compute classes_taken
+        const teacherPeriods = Object.keys(periodStates).filter(pId => periodTeachers[pId] === teacherId);
+        
+        // Count how many are present, absent, or null
+        const presentCount = teacherPeriods.filter(pId => periodStates[pId] === 'present').length;
+        const markedCount = teacherPeriods.filter(pId => periodStates[pId] !== null).length;
 
         let body;
-        if (final === null) {
+        if (markedCount === 0) {
+            // All periods of this teacher are deselected (null), so delete the record
             body = { date: todayDate, classId, teacherId: String(teacherId), deleteRecord: true };
         } else {
-            const classesTaken = final === 'present' ? (teacherScheduledCounts[teacherId] || 0) : 0;
-            body = { date: todayDate, classId, attendance: { [teacherId]: classesTaken } };
+            // We have at least one period marked for this teacher
+            body = { date: todayDate, classId, attendance: { [teacherId]: presentCount } };
         }
 
         try {
-            const res  = await fetch('/attendance/teachers/save', {
+            const res = await fetch('/attendance/teachers/save', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
             });
             const data = await res.json();
             if (!data.success) {
-                teacherStates[teacherId] = prev;
-                _updateTeacherCards(teacherId, prev);
+                periodStates[periodId] = prev;
+                _updatePeriodCard(periodId, prev);
                 alert('فشل حفظ الحضور');
             }
         } catch (err) {
             console.error(err);
-            teacherStates[teacherId] = prev;
-            _updateTeacherCards(teacherId, prev);
+            periodStates[periodId] = prev;
+            _updatePeriodCard(periodId, prev);
         }
     }
 

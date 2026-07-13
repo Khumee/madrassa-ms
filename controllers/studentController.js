@@ -253,9 +253,14 @@ exports.showCRDashboard = async (req, res) => {
             );
             b.previous_page = lastProgress.length > 0 ? lastProgress[0].page_number : b.start_page;
 
-            // Fetch recent progress history for graph
+            // Fetch recent progress history for graph (latest 15 entries sorted chronologically)
             const [progHistory] = await db.execute(
-                'SELECT date, page_number FROM book_progress WHERE assignment_id = ? AND tenant_id = ? ORDER BY date ASC LIMIT 15',
+                `SELECT date, page_number FROM (
+                    SELECT date, page_number, id FROM book_progress 
+                    WHERE assignment_id = ? AND tenant_id = ? 
+                    ORDER BY date DESC, id DESC LIMIT 15
+                 ) sub 
+                 ORDER BY date ASC, id ASC`,
                 [b.assignment_id, req.tenant.id]
             );
             b.progress_history = progHistory.map(ph => ({
