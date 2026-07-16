@@ -412,7 +412,11 @@ async function seedDemoForTenant(tenantId = 1) {
             const classAssignments = assignmentsByClass[cls.id] || [];
             if(classAssignments.length > 0) {
                 const assign = classAssignments[0];
-                const [epRes] = await db.execute('INSERT INTO exam_papers (exam_id, class_id, subject, teacher_id, status, max_marks) VALUES (?, ?, ?, ?, ?, ?)', [examId, cls.id, assign.subject, assign.teacherId, 'approved', 100]);
+                
+                const [tRow] = await db.execute('SELECT user_id FROM teachers WHERE id = ?', [assign.teacherId]);
+                const actualUserId = (tRow.length > 0 && tRow[0].user_id) ? tRow[0].user_id : adminId; // fallback to admin if null
+
+                const [epRes] = await db.execute('INSERT INTO exam_papers (exam_id, class_id, subject, teacher_id, status, max_marks) VALUES (?, ?, ?, ?, ?, ?)', [examId, cls.id, assign.subject, actualUserId, 'approved', 100]);
                 const paperId = epRes.insertId;
 
                 await db.execute('INSERT INTO questions (paper_id, question_text, marks, section) VALUES (?, ?, ?, ?)', [paperId, 'سوال 1: تفصیل سے بیان کریں', 40, 'الف']);
@@ -421,7 +425,7 @@ async function seedDemoForTenant(tenantId = 1) {
                 const studentList = studentsByClass[cls.id] || [];
                 for(const studentId of studentList) {
                     const marks = Math.floor(Math.random() * (100 - 35 + 1)) + 35; // 35 to 100
-                    await db.execute('INSERT INTO student_results (paper_id, student_id, obtained_marks, marked_by, status) VALUES (?, ?, ?, ?, ?)', [paperId, studentId, marks, assign.teacherId, 'final']);
+                    await db.execute('INSERT INTO student_results (paper_id, student_id, obtained_marks, marked_by, status) VALUES (?, ?, ?, ?, ?)', [paperId, studentId, marks, actualUserId, 'final']);
                 }
             }
         }
