@@ -405,7 +405,7 @@ async function seedDemoForTenant(tenantId = 1) {
         const [adminUser] = await db.execute('SELECT id FROM users WHERE role = "ناظم" LIMIT 1');
         const adminId = adminUser.length ? adminUser[0].id : null;
         
-        const [examRes] = await db.execute('INSERT INTO exams (name, status, created_by) VALUES (?, ?, ?)', ['امتحان السنوي 2026', 'published', adminId]);
+        const [examRes] = await db.execute('INSERT INTO exams (name, status, created_by) VALUES (?, ?, ?)', ['امتحان ششماہی 2026', 'published', adminId]);
         const examId = examRes.insertId;
 
         for (const cls of classes) {
