@@ -60,6 +60,18 @@
                         <a href="/periods/full" class="btn btn-outline-primary rounded-pill px-3">
                             <i class="bi bi-calendar3 me-1"></i> <%= __('Timetable') %>
                         </a>
+                        <% if (session.role === 'مدير' || session.role === 'ناظم') { %>
+                            <a href="/exams" class="btn btn-outline-info rounded-pill px-3">
+                                <i class="bi bi-journal-text me-1"></i> Exams
+                            </a>
+                            <a href="/papers/approvals" class="btn btn-outline-info rounded-pill px-3">
+                                <i class="bi bi-check2-all me-1"></i> Approvals
+                            </a>
+                        <% } else if (session.role === 'أستاذ') { %>
+                            <a href="/papers/my-tasks" class="btn btn-outline-info rounded-pill px-3">
+                                <i class="bi bi-pencil-square me-1"></i> My Papers
+                            </a>
+                        <% } %>
                         <% if (session.role === 'مدير') { %>
                             <a href="/permissions/manage" class="btn btn-outline-warning rounded-pill px-3 fw-semibold">
                                 <i class="bi bi-shield-lock me-1"></i> <%= __('Permissions') %>
