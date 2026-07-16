@@ -9,7 +9,7 @@
                 <th><%= __('Subject') %></th>
                 <th><%= __('Teacher') %></th>
                 <th><%= __('Status') %></th>
-                <th>Action</th>
+                <th><%= __('Actions') %></th>
             </tr>
         </thead>
         <tbody>
@@ -21,6 +21,7 @@
                     <td><%= p.teacher_name %></td>
                     <td><%= p.status %></td>
                     <td>
+                        <a href="/papers/<%= p.id %>/view" class="btn btn-sm btn-info text-white"><%= __('View_Paper') || 'View Paper' %></a>
                         <form action="/papers/<%= p.id %>/approve" method="POST" style="display:inline;">
                             <input type="hidden" name="status" value="approved">
                             <button type="submit" class="btn btn-sm btn-success"><%= __('Approve') %></button>
