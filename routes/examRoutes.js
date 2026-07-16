@@ -3,10 +3,10 @@ const router = express.Router();
 const db = require('../db');
 
 const isAdmin = (req, res, next) => { 
-    if (req.session.user && ['admin', 'مدير', 'ناظم'].includes(req.session.user.role)) next(); 
+    if (req.session.role && ['admin', 'مدير', 'ناظم'].includes(req.session.role)) next(); 
     else res.status(403).send('Access Denied'); 
 };
-const isTeacher = (req, res, next) => { if (req.session.user) next(); else res.redirect('/login'); };
+const isTeacher = (req, res, next) => { if (req.session.userId) next(); else res.redirect('/login'); };
 
 // ADMIN: List Exams
 router.get('/exams', isAdmin, async (req, res) => {
@@ -16,7 +16,7 @@ router.get('/exams', isAdmin, async (req, res) => {
 
 // ADMIN: Create Exam
 router.post('/exams', isAdmin, async (req, res) => {
-    await db.execute('INSERT INTO exams (name, created_by) VALUES (?, ?)', [req.body.name, req.session.user.id]);
+    await db.execute('INSERT INTO exams (name, created_by) VALUES (?, ?)', [req.body.name, req.session.userId]);
     res.redirect('/exams');
 });
 
@@ -36,13 +36,13 @@ router.post('/exams/:id/assign', isAdmin, async (req, res) => {
 
 // TEACHER: My Tasks
 router.get('/papers/my-tasks', isTeacher, async (req, res) => {
-    const [papers] = await db.execute(`SELECT ep.*, e.name as exam_name, c.name_ar as class_name FROM exam_papers ep JOIN exams e ON ep.exam_id = e.id JOIN classes c ON ep.class_id = c.id WHERE ep.teacher_id = ?`, [req.session.user.id]);
+    const [papers] = await db.execute(`SELECT ep.*, e.name as exam_name, c.name_ar as class_name FROM exam_papers ep JOIN exams e ON ep.exam_id = e.id JOIN classes c ON ep.class_id = c.id WHERE ep.teacher_id = ?`, [req.session.userId]);
     res.render('exams/teacher_tasks', { papers });
 });
 
 // TEACHER: Paper Builder
 router.get('/papers/:id/build', isTeacher, async (req, res) => {
-    const [paper] = await db.execute('SELECT * FROM exam_papers WHERE id = ? AND teacher_id = ?', [req.params.id, req.session.user.id]);
+    const [paper] = await db.execute('SELECT * FROM exam_papers WHERE id = ? AND teacher_id = ?', [req.params.id, req.session.userId]);
     if (!paper.length) return res.status(403).send('Not authorized');
     const [questions] = await db.execute('SELECT * FROM questions WHERE paper_id = ?', [req.params.id]);
     res.render('exams/paper_builder', { paper: paper[0], questions });
@@ -71,7 +71,7 @@ router.post('/papers/:id/approve', isAdmin, async (req, res) => {
 
 // TEACHER: Mark Paper
 router.get('/papers/:id/mark', isTeacher, async (req, res) => {
-    const [paper] = await db.execute('SELECT * FROM exam_papers WHERE id = ? AND teacher_id = ?', [req.params.id, req.session.user.id]);
+    const [paper] = await db.execute('SELECT * FROM exam_papers WHERE id = ? AND teacher_id = ?', [req.params.id, req.session.userId]);
     if (!paper.length) return res.status(403).send('Not authorized');
     const [students] = await db.execute('SELECT * FROM students WHERE class_id = ?', [paper[0].class_id]);
     res.render('exams/mark_paper', { paper: paper[0], students });
@@ -79,7 +79,7 @@ router.get('/papers/:id/mark', isTeacher, async (req, res) => {
 
 router.post('/papers/:id/mark', isTeacher, async (req, res) => {
     const { student_id, obtained_marks } = req.body;
-    await db.execute('INSERT INTO student_results (paper_id, student_id, obtained_marks, marked_by) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE obtained_marks = ?', [req.params.id, student_id, obtained_marks, req.session.user.id, obtained_marks]);
+    await db.execute('INSERT INTO student_results (paper_id, student_id, obtained_marks, marked_by) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE obtained_marks = ?', [req.params.id, student_id, obtained_marks, req.session.userId, obtained_marks]);
     res.redirect(`/papers/${req.params.id}/mark`);
 });
 
