@@ -14,6 +14,18 @@ router.get('/exams', isAdmin, async (req, res) => {
     res.render('exams/list', { exams });
 });
 
+// ADMIN: View Results
+router.get('/exams/:id/results', isAdmin, async (req, res) => {
+    const [students] = await db.execute(`
+        SELECT DISTINCT s.id, s.name, c.name_ar as class_name 
+        FROM students s 
+        JOIN classes c ON s.class_id = c.id 
+        JOIN exam_papers ep ON ep.class_id = c.id 
+        WHERE ep.exam_id = ?
+    `, [req.params.id]);
+    res.render('exams/results', { students, exam_id: req.params.id });
+});
+
 // ADMIN: Create Exam
 router.post('/exams', isAdmin, async (req, res) => {
     await db.execute('INSERT INTO exams (name, created_by) VALUES (?, ?)', [req.body.name, req.session.userId]);

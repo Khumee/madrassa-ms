@@ -20,8 +20,7 @@
                         <td><%= s.name %></td>
                         <td><%= s.class_name %></td>
                         <td>
-                            <!-- The exam_id would typically come from context, assume it's passed or just mock for demo -->
-                            <a href="/exams/1/student/<%= s.id %>/report-card" class="btn btn-sm btn-primary">View Report Card</a>
+                            <a href="/exams/<%= exam_id %>/student/<%= s.id %>/report-card" class="btn btn-sm btn-primary">View Report Card</a>
                         </td>
                     </tr>
                 <% }) %>
