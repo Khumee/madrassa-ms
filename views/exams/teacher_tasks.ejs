@@ -1,14 +1,14 @@
-<%- include('../partials/header', { title: 'My Exam Tasks' }) %>
+<%- include('../partials/header', { title: __('My_Exam_Tasks') }) %>
 <div class="container mt-4">
     <h2>My Exam Papers</h2>
     <table class="table table-bordered mt-3">
         <thead class="table-dark">
             <tr>
-                <th>Exam</th>
-                <th>Class</th>
-                <th>Subject</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th><%= __('Exam') %></th>
+                <th><%= __('Class') %></th>
+                <th><%= __('Subject') %></th>
+                <th><%= __('Status') %></th>
+                <th><%= __('Actions') %></th>
             </tr>
         </thead>
         <tbody>
@@ -19,9 +19,9 @@
                     <td><%= p.subject %></td>
                     <td><span class="badge bg-secondary"><%= p.status %></span></td>
                     <td>
-                        <a href="/papers/<%= p.id %>/build" class="btn btn-sm btn-primary">Build Paper</a>
+                        <a href="/papers/<%= p.id %>/build" class="btn btn-sm btn-primary"><%= __('Build_Paper') %></a>
                         <% if (p.status === 'approved') { %>
-                            <a href="/papers/<%= p.id %>/mark" class="btn btn-sm btn-success">Mark Students</a>
+                            <a href="/papers/<%= p.id %>/mark" class="btn btn-sm btn-success"><%= __('Mark_Students') %></a>
                         <% } %>
                     </td>
                 </tr>

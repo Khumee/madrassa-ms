@@ -83,8 +83,10 @@ CREATE TABLE IF NOT EXISTS exams (
     name VARCHAR(255) NOT NULL,
     status ENUM('draft', 'published', 'completed') DEFAULT 'draft',
     created_by INT,
+    tenant_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
 );
 
 -- Exam Papers
@@ -96,10 +98,12 @@ CREATE TABLE IF NOT EXISTS exam_papers (
     teacher_id INT,
     status ENUM('assigned', 'draft', 'submitted', 'approved', 'rejected') DEFAULT 'assigned',
     max_marks INT DEFAULT 100,
+    tenant_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (exam_id) REFERENCES exams(id) ON DELETE CASCADE,
     FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE,
-    FOREIGN KEY (teacher_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (teacher_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
 );
 
 -- Questions in a Paper
@@ -109,7 +113,9 @@ CREATE TABLE IF NOT EXISTS questions (
     question_text TEXT NOT NULL,
     marks INT NOT NULL,
     section VARCHAR(50) DEFAULT 'A',
-    FOREIGN KEY (paper_id) REFERENCES exam_papers(id) ON DELETE CASCADE
+    tenant_id INT NOT NULL,
+    FOREIGN KEY (paper_id) REFERENCES exam_papers(id) ON DELETE CASCADE,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
 );
 
 -- Student Results for a Paper
@@ -117,15 +123,16 @@ CREATE TABLE IF NOT EXISTS student_results (
     id INT AUTO_INCREMENT PRIMARY KEY,
     paper_id INT,
     student_id INT,
-    total_marks INT NOT NULL DEFAULT 100,
-    obtained_marks INT NOT NULL,
-    status ENUM('draft', 'final') DEFAULT 'draft',
+    obtained_marks INT DEFAULT 0,
     marked_by INT,
+    status ENUM('draft', 'final') DEFAULT 'draft',
+    tenant_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (paper_id) REFERENCES exam_papers(id) ON DELETE CASCADE,
     FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
     FOREIGN KEY (marked_by) REFERENCES users(id) ON DELETE SET NULL,
-    UNIQUE KEY student_paper (student_id, paper_id)
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_student_paper (paper_id, student_id)
 );
 
 -- Question Level Marks

@@ -9,9 +9,9 @@
         <table class="table table-bordered text-center">
             <thead class="table-dark">
                 <tr>
-                    <th>Subject</th>
-                    <th>Max Marks</th>
-                    <th>Obtained Marks</th>
+                    <th><%= __('Subject') %></th>
+                    <th><%= __('Max_Marks') %></th>
+                    <th><%= __('Obtained_Marks') %></th>
                 </tr>
             </thead>
             <tbody>
@@ -23,7 +23,7 @@
                     </tr>
                 <% }) %>
                 <tr class="table-secondary fw-bold">
-                    <td>Total</td>
+                    <td><%= __('Total') %></td>
                     <td><%= totalMax %></td>
                     <td><%= totalObtained %></td>
                 </tr>

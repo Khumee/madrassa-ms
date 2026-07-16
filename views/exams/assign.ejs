@@ -1,4 +1,4 @@
-<%- include('../partials/header', { title: 'Assign Papers' }) %>
+<%- include('../partials/header', { title: __('Assign_Papers') }) %>
 
 <div class="container mt-4">
     <div class="mb-4">
@@ -14,29 +14,29 @@
                 <div class="card-body">
                     <form action="/exams/<%= exam.id %>/assign" method="POST">
                         <div class="mb-3">
-                            <label class="form-label">Class</label>
+                            <label class="form-label"><%= __('Class') %></label>
                             <select name="class_id" class="form-select" required>
-                                <option value="">Select Class</option>
+                                <option value=""><%= __('Select_Class') %></option>
                                 <% classes.forEach(c => { %>
                                     <option value="<%= c.id %>"><%= c.name_ar %> - <%= c.name_en %></option>
                                 <% }) %>
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Subject</label>
+                            <label class="form-label"><%= __('Subject') %></label>
                             <input type="text" name="subject" class="form-control" required placeholder="e.g. Fiqh, Hadith">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Teacher</label>
+                            <label class="form-label"><%= __('Teacher') %></label>
                             <select name="teacher_id" class="form-select" required>
-                                <option value="">Select Teacher</option>
+                                <option value=""><%= __('Select_Teacher') %></option>
                                 <% teachers.forEach(t => { %>
                                     <option value="<%= t.id %>"><%= t.username %></option>
                                 <% }) %>
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Max Marks</label>
+                            <label class="form-label"><%= __('Max_Marks') %></label>
                             <input type="number" name="max_marks" class="form-control" value="100" required>
                         </div>
                         <button type="submit" class="btn btn-primary w-100">Assign Paper</button>
@@ -48,16 +48,16 @@
         <!-- Assigned Papers List -->
         <div class="col-md-8">
             <div class="card shadow-sm">
-                <div class="card-header bg-dark text-white">Assigned Papers</div>
+                <div class="card-header bg-dark text-white"><%= __('Assigned_Papers') %></div>
                 <div class="card-body">
                     <table class="table table-bordered">
                         <thead>
                             <tr>
-                                <th>Class</th>
-                                <th>Subject</th>
+                                <th><%= __('Class') %></th>
+                                <th><%= __('Subject') %></th>
                                 <th>Assigned Teacher</th>
-                                <th>Max Marks</th>
-                                <th>Status</th>
+                                <th><%= __('Max_Marks') %></th>
+                                <th><%= __('Status') %></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -72,7 +72,7 @@
                                     </tr>
                                 <% }) %>
                             <% } else { %>
-                                <tr><td colspan="5" class="text-center">No papers assigned yet.</td></tr>
+                                <tr><td colspan="5" class="text-center"><%= __('No_papers_assigned_yet') %></td></tr>
                             <% } %>
                         </tbody>
                     </table>

@@ -1,12 +1,12 @@
-<%- include('../partials/header', { title: 'Mark Paper' }) %>
+<%- include('../partials/header', { title: __('Mark_Paper') }) %>
 <div class="container mt-4">
     <h2>Mark Paper: <%= paper.subject %></h2>
     <table class="table table-bordered mt-3">
         <thead class="table-dark">
             <tr>
-                <th>Student ID</th>
-                <th>Name</th>
-                <th>Roll Number</th>
+                <th><%= __('Student_ID') %></th>
+                <th><%= __('Name') %></th>
+                <th><%= __('Roll_Number') %></th>
                 <th>Marks (out of <%= paper.max_marks %>)</th>
                 <th>Action</th>
             </tr>

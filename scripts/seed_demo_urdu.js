@@ -405,7 +405,7 @@ async function seedDemoForTenant(tenantId = 1) {
         const [adminUser] = await db.execute('SELECT id FROM users WHERE role = "ناظم" LIMIT 1');
         const adminId = adminUser.length ? adminUser[0].id : null;
         
-        const [examRes] = await db.execute('INSERT INTO exams (name, status, created_by) VALUES (?, ?, ?)', ['امتحان ششماہی 2026', 'published', adminId]);
+        const [examRes] = await db.execute('INSERT INTO exams (name, status, created_by, tenant_id) VALUES (?, ?, ?, ?)', ['امتحان ششماہی 2026', 'published', adminId, tenantId]);
         const examId = examRes.insertId;
 
         for (const cls of classes) {
@@ -416,16 +416,16 @@ async function seedDemoForTenant(tenantId = 1) {
                 const [tRow] = await db.execute('SELECT user_id FROM teachers WHERE id = ?', [assign.teacherId]);
                 const actualUserId = (tRow.length > 0 && tRow[0].user_id) ? tRow[0].user_id : adminId; // fallback to admin if null
 
-                const [epRes] = await db.execute('INSERT INTO exam_papers (exam_id, class_id, subject, teacher_id, status, max_marks) VALUES (?, ?, ?, ?, ?, ?)', [examId, cls.id, assign.subject, actualUserId, 'approved', 100]);
+                const [epRes] = await db.execute('INSERT INTO exam_papers (exam_id, class_id, subject, teacher_id, status, max_marks, tenant_id) VALUES (?, ?, ?, ?, ?, ?, ?)', [examId, cls.id, assign.subject, actualUserId, 'approved', 100, tenantId]);
                 const paperId = epRes.insertId;
 
-                await db.execute('INSERT INTO questions (paper_id, question_text, marks, section) VALUES (?, ?, ?, ?)', [paperId, 'سوال 1: تفصیل سے بیان کریں', 40, 'الف']);
-                await db.execute('INSERT INTO questions (paper_id, question_text, marks, section) VALUES (?, ?, ?, ?)', [paperId, 'سوال 2: مختصر جواب دیں', 60, 'ب']);
+                await db.execute('INSERT INTO questions (paper_id, question_text, marks, section, tenant_id) VALUES (?, ?, ?, ?, ?)', [paperId, 'سوال 1: تفصیل سے بیان کریں', 40, 'الف', tenantId]);
+                await db.execute('INSERT INTO questions (paper_id, question_text, marks, section, tenant_id) VALUES (?, ?, ?, ?, ?)', [paperId, 'سوال 2: مختصر جواب دیں', 60, 'ب', tenantId]);
 
                 const studentList = studentsByClass[cls.id] || [];
                 for(const studentId of studentList) {
                     const marks = Math.floor(Math.random() * (100 - 35 + 1)) + 35; // 35 to 100
-                    await db.execute('INSERT INTO student_results (paper_id, student_id, obtained_marks, marked_by, status) VALUES (?, ?, ?, ?, ?)', [paperId, studentId, marks, actualUserId, 'final']);
+                    await db.execute('INSERT INTO student_results (paper_id, student_id, obtained_marks, marked_by, status, tenant_id) VALUES (?, ?, ?, ?, ?, ?)', [paperId, studentId, marks, actualUserId, 'final', tenantId]);
                 }
             }
         }

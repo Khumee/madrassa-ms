@@ -1,4 +1,4 @@
-<%- include('../partials/header', { title: 'Build Paper' }) %>
+<%- include('../partials/header', { title: __('Build_Paper') }) %>
 <div class="container mt-4">
     <h2>Build Paper: <%= paper.subject %> (Max Marks: <%= paper.max_marks %>)</h2>
     <form action="/papers/<%= paper.id %>/submit" method="POST" class="mb-4">
@@ -6,13 +6,13 @@
     </form>
     
     <div class="card mb-4">
-        <div class="card-header">Add Question</div>
+        <div class="card-header"><%= __('Add_Question') %></div>
         <div class="card-body">
             <form action="/papers/<%= paper.id %>/questions" method="POST">
                 <input type="text" name="question_text" class="form-control mb-2" placeholder="Question Text" required>
                 <input type="number" name="marks" class="form-control mb-2" placeholder="Marks" required>
                 <input type="text" name="section" class="form-control mb-2" placeholder="Section (Optional)">
-                <button type="submit" class="btn btn-primary">Add Question</button>
+                <button type="submit" class="btn btn-primary"><%= __('Add_Question') %></button>
             </form>
         </div>
     </div>
@@ -22,7 +22,9 @@
         <% questions.forEach(q => { %>
             <li class="list-group-item d-flex justify-content-between">
                 <span>[Sec: <%= q.section %>] <%= q.question_text %></span>
-                <span class="badge bg-dark"><%= q.marks %> Marks</span>
+                <span class="badge bg-dark"><%= q.marks %>
+<%= __('Marks') %>
+</span>
             </li>
         <% }) %>
     </ul>

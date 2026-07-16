@@ -1,21 +1,21 @@
-<%- include('../partials/header', { title: 'Manage Exams' }) %>
+<%- include('../partials/header', { title: __('Manage_Exams') }) %>
 
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Exams</h2>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newExamModal">Create New Exam</button>
+        <h2><%= __('Exams') %></h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newExamModal"><%= __('Create_New_Exam') %></button>
     </div>
 
     <div class="table-responsive">
         <table class="table table-bordered table-striped">
             <thead class="table-dark">
                 <tr>
-                    <th>ID</th>
-                    <th>Exam Name</th>
-                    <th>Status</th>
-                    <th>Created By</th>
-                    <th>Date Created</th>
-                    <th>Actions</th>
+                    <th><%= __('ID') %></th>
+                    <th><%= __('Exam_Name') %></th>
+                    <th><%= __('Status') %></th>
+                    <th><%= __('Created_By') %></th>
+                    <th><%= __('Date_Created') %></th>
+                    <th><%= __('Actions') %></th>
                 </tr>
             </thead>
             <tbody>
@@ -28,14 +28,14 @@
                             <td><%= exam.creator_name %></td>
                             <td><%= new Date(exam.created_at).toLocaleDateString() %></td>
                             <td>
-                                <a href="/exams/<%= exam.id %>/assign" class="btn btn-sm btn-info">Assign Papers</a>
-                                <a href="/exams/<%= exam.id %>/results" class="btn btn-sm btn-success">View Results</a>
+                                <a href="/exams/<%= exam.id %>/assign" class="btn btn-sm btn-info"><%= __('Assign_Papers') %></a>
+                                <a href="/exams/<%= exam.id %>/results" class="btn btn-sm btn-success"><%= __('View_Results') %></a>
                             </td>
                         </tr>
                     <% }) %>
                 <% } else { %>
                     <tr>
-                        <td colspan="6" class="text-center">No exams found.</td>
+                        <td colspan="6" class="text-center"><%= __('No_exams_found') %></td>
                     </tr>
                 <% } %>
             </tbody>
@@ -48,17 +48,17 @@
     <div class="modal-dialog">
         <form action="/exams" method="POST" class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Create New Exam</h5>
+                <h5 class="modal-title"><%= __('Create_New_Exam') %></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div class="mb-3">
-                    <label class="form-label">Exam Name</label>
+                    <label class="form-label"><%= __('Exam_Name') %></label>
                     <input type="text" name="name" class="form-control" required placeholder="e.g. Final Exams 2026">
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><%= __('Cancel') %></button>
                 <button type="submit" class="btn btn-primary">Create Exam</button>
             </div>
         </form>
