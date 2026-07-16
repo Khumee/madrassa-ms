@@ -2,7 +2,10 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
-const isAdmin = (req, res, next) => { if (req.session.user && req.session.user.role === 'admin') next(); else res.status(403).send('Access Denied'); };
+const isAdmin = (req, res, next) => { 
+    if (req.session.user && ['admin', 'مدير', 'ناظم'].includes(req.session.user.role)) next(); 
+    else res.status(403).send('Access Denied'); 
+};
 const isTeacher = (req, res, next) => { if (req.session.user) next(); else res.redirect('/login'); };
 
 // ADMIN: List Exams
