@@ -2,8 +2,8 @@
 <div class="container mt-4">
     <div class="card shadow-lg p-4" style="max-width: 600px; margin: auto;">
         <div class="text-center mb-4">
-            <h2>Madrassa Result Card</h2>
-            <h4><%= student.name %> (Roll: <%= student.roll_number %>)</h4>
+            <h2><%= __('Student_Report_Card') %></h2>
+            <h4><%= student.name %> (<%= __('Roll_Number') %>: <%= student.roll_number %>)</h4>
         </div>
         
         <table class="table table-bordered text-center">
@@ -31,12 +31,12 @@
         </table>
         
         <div class="alert alert-<%= gradeClass %> text-center fs-4 mt-3">
-            <strong>Final Grade:</strong> <%= grade %> <br>
-            <small>(<%= percentage %>%)</small>
+            <strong><%= __('Grade') %>:</strong> <%= grade %> <br>
+            <small>(<%= percentage %>% <%= __('Percentage') %>)</small>
         </div>
         
         <div class="text-center mt-3">
-            <button onclick="window.print()" class="btn btn-dark">Print Result Card</button>
+            <button onclick="window.print()" class="btn btn-dark"><%= __('Print_Report_Card') %></button>
         </div>
     </div>
 </div>

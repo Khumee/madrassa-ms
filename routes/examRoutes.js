@@ -98,6 +98,11 @@ router.post('/papers/:id/mark', isTeacher, async (req, res) => {
 // ADMIN/STUDENT: Report Card
 router.get('/exams/:exam_id/student/:student_id/report-card', async (req, res) => {
     const [student] = await db.execute('SELECT * FROM students WHERE id = ? AND tenant_id = ?', [req.params.student_id, req.tenant.id]);
+    
+    if (!student || student.length === 0) {
+        return res.status(404).send('Student not found');
+    }
+
     const [results] = await db.execute('SELECT sr.*, ep.subject, ep.max_marks FROM student_results sr JOIN exam_papers ep ON sr.paper_id = ep.id WHERE sr.student_id = ? AND ep.exam_id = ? AND sr.tenant_id = ?', [req.params.student_id, req.params.exam_id, req.tenant.id]);
     
     let totalObtained = 0, totalMax = 0;
