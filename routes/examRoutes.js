@@ -37,8 +37,9 @@ router.get('/exams/:id/assign', isAdmin, async (req, res) => {
     const [exam] = await db.execute('SELECT * FROM exams WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
     const [classes] = await db.execute('SELECT * FROM classes WHERE tenant_id = ?', [req.tenant.id]);
     const [teachers] = await db.execute('SELECT * FROM users WHERE role = "أستاذ" AND tenant_id = ?', [req.tenant.id]);
+    const [books] = await db.execute('SELECT id, title, class_id FROM books WHERE tenant_id = ?', [req.tenant.id]);
     const [assignedPapers] = await db.execute(`SELECT ep.*, c.name_ar as class_name, u.username as teacher_name FROM exam_papers ep JOIN classes c ON ep.class_id = c.id JOIN users u ON ep.teacher_id = u.id WHERE ep.exam_id = ? AND ep.tenant_id = ?`, [req.params.id, req.tenant.id]);
-    res.render('exams/assign', { exam: exam[0], classes, teachers, assignedPapers });
+    res.render('exams/assign', { exam: exam[0], classes, teachers, assignedPapers, books });
 });
 
 router.post('/exams/:id/assign', isAdmin, async (req, res) => {

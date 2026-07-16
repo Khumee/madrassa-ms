@@ -453,5 +453,13 @@
     "Grade": "گریڈ",
     "Print_Report_Card": "رپورٹ کارڈ پرنٹ کریں",
     "No_students_found": "کوئی طالب علم نہیں ملا۔",
-    "View_Paper": "پرچہ دیکھیں"
+    "View_Paper": "پرچہ دیکھیں",
+    "draft": "مسودہ",
+    "published": "شائع شدہ",
+    "completed": "مکمل",
+    "Back_to_Exams": "امتحانات پر واپس جائیں",
+    "Assign_New_Paper": "نیا پرچہ تفویض کریں",
+    "Assign_Paper": "پرچہ تفویض کریں",
+    "Assigned_Teacher": "تفویض کردہ استاد",
+    "Select_Subject": "مضمون منتخب کریں"
 }

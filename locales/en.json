@@ -453,5 +453,13 @@
     "Grade": "Grade",
     "Print_Report_Card": "Print Report Card",
     "No_students_found": "No students found.",
-    "View_Paper": "View Paper"
+    "View_Paper": "View Paper",
+    "draft": "Draft",
+    "published": "Published",
+    "completed": "Completed",
+    "Back_to_Exams": "Back to Exams",
+    "Assign_New_Paper": "Assign New Paper",
+    "Assign_Paper": "Assign Paper",
+    "Assigned_Teacher": "Assigned Teacher",
+    "Select_Subject": "Select Subject"
 }

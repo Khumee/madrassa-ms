@@ -13,7 +13,6 @@
                     <th><%= __('ID') %></th>
                     <th><%= __('Exam_Name') %></th>
                     <th><%= __('Status') %></th>
-                    <th><%= __('Created_By') %></th>
                     <th><%= __('Date_Created') %></th>
                     <th><%= __('Actions') %></th>
                 </tr>
@@ -24,8 +23,7 @@
                         <tr>
                             <td><%= exam.id %></td>
                             <td><%= exam.name %></td>
-                            <td><span class="badge bg-<%= exam.status === 'published' ? 'success' : (exam.status === 'completed' ? 'secondary' : 'warning') %>"><%= exam.status %></span></td>
-                            <td><%= exam.creator_name %></td>
+                            <td><span class="badge bg-<%= exam.status === 'published' ? 'success' : (exam.status === 'completed' ? 'secondary' : 'warning') %>"><%= __(exam.status) %></span></td>
                             <td><%= new Date(exam.created_at).toLocaleDateString() %></td>
                             <td>
                                 <a href="/exams/<%= exam.id %>/assign" class="btn btn-sm btn-info"><%= __('Assign_Papers') %></a>
@@ -35,7 +33,7 @@
                     <% }) %>
                 <% } else { %>
                     <tr>
-                        <td colspan="6" class="text-center"><%= __('No_exams_found') %></td>
+                        <td colspan="5" class="text-center"><%= __('No_exams_found') %></td>
                     </tr>
                 <% } %>
             </tbody>
@@ -59,7 +57,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><%= __('Cancel') %></button>
-                <button type="submit" class="btn btn-primary">Create Exam</button>
+                <button type="submit" class="btn btn-primary"><%= __('Create_New_Exam') %></button>
             </div>
         </form>
     </div>

@@ -453,5 +453,13 @@
     "Grade": "الدرجة",
     "Print_Report_Card": "طباعة بطاقة النتيجة",
     "No_students_found": "لم يتم العثور على طلاب.",
-    "View_Paper": "عرض الورقة"
+    "View_Paper": "عرض الورقة",
+    "draft": "مسودة",
+    "published": "منشور",
+    "completed": "مكتمل",
+    "Back_to_Exams": "العودة إلى الامتحانات",
+    "Assign_New_Paper": "تعيين ورقة جديدة",
+    "Assign_Paper": "تعيين ورقة",
+    "Assigned_Teacher": "المعلم المعين",
+    "Select_Subject": "اختر الموضوع"
 }
