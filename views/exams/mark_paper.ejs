@@ -1,0 +1,32 @@
+<%- include('../partials/header', { title: 'Mark Paper' }) %>
+<div class="container mt-4">
+    <h2>Mark Paper: <%= paper.subject %></h2>
+    <table class="table table-bordered mt-3">
+        <thead class="table-dark">
+            <tr>
+                <th>Student ID</th>
+                <th>Name</th>
+                <th>Roll Number</th>
+                <th>Marks (out of <%= paper.max_marks %>)</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% students.forEach(s => { %>
+                <tr>
+                    <td><%= s.id %></td>
+                    <td><%= s.name %></td>
+                    <td><%= s.roll_number %></td>
+                    <td>
+                        <form action="/papers/<%= paper.id %>/mark" method="POST" class="d-flex">
+                            <input type="hidden" name="student_id" value="<%= s.id %>">
+                            <input type="number" name="obtained_marks" class="form-control form-control-sm me-2" max="<%= paper.max_marks %>" required>
+                            <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                        </form>
+                    </td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+</div>
+<%- include('../partials/footer') %>

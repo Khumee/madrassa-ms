@@ -99,6 +99,7 @@ const teacherRoutes = require('./routes/teacherRoutes');
 const periodRoutes = require('./routes/periodRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const superAdminRoutes = require('./routes/superAdminRoutes');
+const examRoutes = require('./routes/examRoutes');
 
 // Register Routers
 app.use(authRoutes);
@@ -107,6 +108,7 @@ app.use(teacherRoutes);
 app.use(periodRoutes);
 app.use(reportRoutes);
 app.use(superAdminRoutes);
+app.use(examRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);

@@ -1,0 +1,32 @@
+<%- include('../partials/header', { title: 'My Exam Tasks' }) %>
+<div class="container mt-4">
+    <h2>My Exam Papers</h2>
+    <table class="table table-bordered mt-3">
+        <thead class="table-dark">
+            <tr>
+                <th>Exam</th>
+                <th>Class</th>
+                <th>Subject</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% papers.forEach(p => { %>
+                <tr>
+                    <td><%= p.exam_name %></td>
+                    <td><%= p.class_name %></td>
+                    <td><%= p.subject %></td>
+                    <td><span class="badge bg-secondary"><%= p.status %></span></td>
+                    <td>
+                        <a href="/papers/<%= p.id %>/build" class="btn btn-sm btn-primary">Build Paper</a>
+                        <% if (p.status === 'approved') { %>
+                            <a href="/papers/<%= p.id %>/mark" class="btn btn-sm btn-success">Mark Students</a>
+                        <% } %>
+                    </td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+</div>
+<%- include('../partials/footer') %>

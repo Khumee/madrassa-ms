@@ -1,0 +1,38 @@
+<%- include('../partials/header', { title: 'Approvals' }) %>
+<div class="container mt-4">
+    <h2>Paper Approvals</h2>
+    <table class="table table-bordered mt-3">
+        <thead class="table-dark">
+            <tr>
+                <th>Exam</th>
+                <th>Class</th>
+                <th>Subject</th>
+                <th>Teacher</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% papers.forEach(p => { %>
+                <tr>
+                    <td><%= p.exam_name %></td>
+                    <td><%= p.class_name %></td>
+                    <td><%= p.subject %></td>
+                    <td><%= p.teacher_name %></td>
+                    <td><%= p.status %></td>
+                    <td>
+                        <form action="/papers/<%= p.id %>/approve" method="POST" style="display:inline;">
+                            <input type="hidden" name="status" value="approved">
+                            <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                        </form>
+                        <form action="/papers/<%= p.id %>/approve" method="POST" style="display:inline;">
+                            <input type="hidden" name="status" value="rejected">
+                            <button type="submit" class="btn btn-sm btn-danger">Reject</button>
+                        </form>
+                    </td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+</div>
+<%- include('../partials/footer') %>

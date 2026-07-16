@@ -1,0 +1,30 @@
+<%- include('../partials/header', { title: 'Build Paper' }) %>
+<div class="container mt-4">
+    <h2>Build Paper: <%= paper.subject %> (Max Marks: <%= paper.max_marks %>)</h2>
+    <form action="/papers/<%= paper.id %>/submit" method="POST" class="mb-4">
+        <button type="submit" class="btn btn-success">Submit Paper for Approval</button>
+    </form>
+    
+    <div class="card mb-4">
+        <div class="card-header">Add Question</div>
+        <div class="card-body">
+            <form action="/papers/<%= paper.id %>/questions" method="POST">
+                <input type="text" name="question_text" class="form-control mb-2" placeholder="Question Text" required>
+                <input type="number" name="marks" class="form-control mb-2" placeholder="Marks" required>
+                <input type="text" name="section" class="form-control mb-2" placeholder="Section (Optional)">
+                <button type="submit" class="btn btn-primary">Add Question</button>
+            </form>
+        </div>
+    </div>
+    
+    <h4>Current Questions</h4>
+    <ul class="list-group">
+        <% questions.forEach(q => { %>
+            <li class="list-group-item d-flex justify-content-between">
+                <span>[Sec: <%= q.section %>] <%= q.question_text %></span>
+                <span class="badge bg-dark"><%= q.marks %> Marks</span>
+            </li>
+        <% }) %>
+    </ul>
+</div>
+<%- include('../partials/footer') %>
