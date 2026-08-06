@@ -83,7 +83,7 @@ function downloadSessionPDF() {
 <!-- Print Header -->
 <div class="print-only-header w-100 text-center flex-column gap-2 no-print">
     <div class="d-flex align-items-center justify-content-center gap-4">
-        <img src="/logo.jpg" alt="Logo" style="width: 80px; height: 80px; object-fit: contain; border-radius: 50%;">
+        <img src="<%= typeof baseUrl !== 'undefined' ? baseUrl : '' %>/logo.jpg" alt="Logo" style="width: 80px; height: 80px; object-fit: contain; border-radius: 50%;">
         <div>
             <h1 class="fw-bold mb-1" style="color: #198754;"><%= tenant && tenant.name ? tenant.name : (locals.lang === 'ur' ? 'مدرسہ انتظامی نظام' : 'Madrassa System') %></h1>
             <h3 class="fw-bold text-dark mb-0"><%= locals.lang === 'ur' ? 'مکمل سیشن رپورٹ' : 'تقرير الجلسة الكاملة' %></h3>

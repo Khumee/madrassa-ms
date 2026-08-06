@@ -294,11 +294,14 @@ exports.showSessionReports = async (req, res) => {
             groupedTeacherProgress[className].push(tp);
         });
 
+        const baseUrl = req.protocol + '://' + req.get('host');
+
         res.render('report_session', { 
             groupedReport: sortObjectByClassRank(groupedReport), 
             groupedTeacherProgress: sortObjectByClassRank(groupedTeacherProgress),
             startDate: sessionStartDate, 
-            endDate 
+            endDate,
+            baseUrl 
         });
     } catch (err) {
         console.error(err);
@@ -378,12 +381,14 @@ exports.exportSessionReportsPdf = async (req, res) => {
 
         const templatePath = path.join(__dirname, '../views/report_session.ejs');
         const lang = req.getLocale ? req.getLocale() : 'ur';
+        const baseUrl = req.protocol + '://' + req.get('host');
 
         const html = await ejs.renderFile(templatePath, {
             groupedReport: sortObjectByClassRank(groupedReport),
             groupedTeacherProgress: sortObjectByClassRank(groupedTeacherProgress),
             startDate: sessionStartDate,
             endDate,
+            baseUrl,
             tenant: req.tenant,
             lang: lang,
             session: req.session,
