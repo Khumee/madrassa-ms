@@ -23,8 +23,6 @@ function downloadSessionPDF() {
 </script>
 
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&display=swap');
-
     @media print {
         .no-print, nav, #toastContainer, footer, .btn, .btn-group, .input-group, .filter-trigger-btn { display: none !important; }
         .collapse { display: block !important; height: auto !important; visibility: visible !important; }
@@ -32,7 +30,8 @@ function downloadSessionPDF() {
             background: white !important; 
             margin: 0 !important; 
             padding: 1.5cm !important; 
-            font-family: 'Noto Nastaliq Urdu', serif !important;
+            /* Best fonts for Urdu/Arabic shaping in headless PDF generation */
+            font-family: 'Jameel Noori Nastaleeq', 'Nafees Web Naskh', 'Amiri', 'Tahoma', 'Arial', sans-serif !important;
         }
         .card { border: 1px solid #dee2e6 !important; box-shadow: none !important; }
         .accordion-button::after { display: none !important; }
