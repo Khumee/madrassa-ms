@@ -201,6 +201,81 @@ exports.showReports = async (req, res) => {
     }
 };
 
+exports.showSessionReports = async (req, res) => {
+    try {
+        const now = DateTime.now().setZone('Asia/Karachi');
+
+        // Get active session ID and start_date to scope report
+        const [sessionRows] = await db.execute('SELECT id, start_date FROM sessions WHERE is_active = TRUE AND tenant_id = ? LIMIT 1', [req.tenant.id]);
+        const activeSessionId = sessionRows.length > 0 ? sessionRows[0].id : null;
+        let sessionStartDate = sessionRows.length > 0 && sessionRows[0].start_date ? sessionRows[0].start_date : '2026-08-01';
+        
+        // ensure it's in string format if it came as a Date object
+        if (sessionStartDate instanceof Date) {
+            sessionStartDate = sessionStartDate.toISOString().split('T')[0];
+        }
+        
+        const endDate = now.toISODate(); // up to today
+
+        // 1. Class wise attendance Progress
+        const [attendanceRows] = await db.execute(`
+            SELECT s.name, c.name_ar as class_name,
+            COUNT(a.id) as total_days,
+            SUM(CASE WHEN a.status = 'present' OR a.status = 'online' THEN 1 ELSE 0 END) as present_days
+            FROM students s
+            JOIN student_enrollments se ON s.id = se.student_id AND se.tenant_id = s.tenant_id
+            JOIN classes c ON se.class_id = c.id AND c.tenant_id = s.tenant_id
+            LEFT JOIN attendance_students a ON s.id = a.student_id AND a.tenant_id = s.tenant_id
+                AND a.date >= ?
+            WHERE se.session_id = ? AND s.tenant_id = ?
+            GROUP BY s.id, c.id, s.name, c.name_ar
+        `, [sessionStartDate, activeSessionId, req.tenant.id]);
+
+        const groupedReport = {};
+        attendanceRows.forEach(row => {
+            if (!groupedReport[row.class_name]) groupedReport[row.class_name] = [];
+            row.percentage = row.total_days > 0 ? Math.round((row.present_days / row.total_days) * 100) : 0;
+            groupedReport[row.class_name].push(row);
+        });
+
+        // 2. Class wise Subject Progress
+        const [teacherProgress] = await db.execute(`
+            SELECT tb.id as assignment_id, t.id as teacher_id, t.name as teacher_name, b.title as book_title, tb.start_page, tb.end_page, tb.current_page, c.name_ar as class_name,
+            (SELECT bp.updated_at FROM book_progress bp WHERE bp.assignment_id = tb.id AND bp.tenant_id = tb.tenant_id ORDER BY bp.id DESC LIMIT 1) as last_updated_at,
+            (SELECT bp.page_number FROM book_progress bp WHERE bp.assignment_id = tb.id AND bp.tenant_id = tb.tenant_id ORDER BY bp.id DESC LIMIT 1) as last_page_number
+            FROM teacher_books tb
+            JOIN teachers t ON tb.teacher_id = t.id AND t.tenant_id = tb.tenant_id
+            JOIN books b ON tb.book_id = b.id AND b.tenant_id = tb.tenant_id
+            JOIN sessions s ON tb.session_id = s.id AND s.tenant_id = tb.tenant_id
+            LEFT JOIN classes c ON tb.class_id = c.id AND c.tenant_id = tb.tenant_id
+            WHERE s.is_active = TRUE AND tb.tenant_id = ?
+        `, [req.tenant.id]);
+
+        const luxonLocale = req.getLocale() === 'ur' ? 'ur' : req.getLocale() === 'en' ? 'en' : 'ar';
+        teacherProgress.forEach(tp => {
+            const total = tp.end_page - tp.start_page;
+            const completed = tp.current_page - tp.start_page;
+            tp.percentage = total > 0 ? Math.min(100, Math.max(0, Math.round((completed / total) * 100))) : 0;
+
+            if (tp.last_updated_at) {
+                tp.lastUpdatedStr = DateTime.fromJSDate(new Date(tp.last_updated_at)).setLocale(luxonLocale).toFormat('dd MMMM yyyy, hh:mm a');
+            } else {
+                tp.lastUpdatedStr = '';
+            }
+        });
+
+        res.render('report_session', { 
+            groupedReport, 
+            teacherProgress, 
+            startDate: sessionStartDate, 
+            endDate 
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error generating session reports');
+    }
+};
+
 exports.showTeacherProgressReport = async (req, res) => {
     const { teacherId } = req.params;
     const selectedBook = req.query.book || null;

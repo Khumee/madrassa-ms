@@ -1,0 +1,162 @@
+<%- include('partials/header') %>
+
+<div class="row mb-4 align-items-center no-print">
+    <div class="col-md-8">
+        <h1 class="fw-bold text-primary mb-0"><%= __('Reports_Stats_Title') %> - <%= locals.lang === 'ur' ? 'مکمل سیشن رپورٹ' : 'تقرير الجلسة الكاملة' %></h1>
+        <p class="text-muted"><%= __('Start_Date') %>: <span class="badge bg-light text-primary border"><%= startDate %></span> <%= __('End_Date') %>: <span class="badge bg-light text-primary border"><%= endDate %></span></p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="/reports" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm fw-bold">
+            <i class="bi bi-arrow-left me-2"></i><%= locals.lang === 'ur' ? 'واپس جائیں' : 'العودة' %>
+        </a>
+    </div>
+</div>
+
+<style>
+    @media print {
+        .no-print, nav, #toastContainer, footer, .btn, .btn-group, .input-group, .filter-trigger-btn { display: none !important; }
+        .collapse { display: block !important; height: auto !important; visibility: visible !important; }
+        body { background: white !important; margin: 0 !important; padding: 1.5cm !important; }
+        .card { border: 1px solid #dee2e6 !important; box-shadow: none !important; }
+        .accordion-button::after { display: none !important; }
+        .accordion-button { background-color: #f8fafc !important; color: #1e293b !important; }
+    }
+</style>
+
+<!-- Student Attendance Section (Top) -->
+<div class="row mb-5">
+    <div class="col-md-12">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <h3 class="fw-bold mb-0 text-primary"><%= __('Student_Attendance_By_Class') %> - <%= locals.lang === 'ur' ? 'سیشن' : 'جلسة' %></h3>
+            </div>
+            
+            <div class="card-body p-4">
+                <div class="accordion accordion-flush" id="attendanceAccordion">
+                    <% Object.keys(groupedReport).forEach((className, index) => { 
+                        const students = groupedReport[className];
+                        const avg = Math.round(students.reduce((acc, s) => acc + s.percentage, 0) / (students.length || 1));
+                    %>
+                        <div class="accordion-item border rounded-4 mb-3 overflow-hidden student-class-card" data-class-name="<%= className %>">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed p-4 bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_<%= index %>">
+                                    <div class="d-flex justify-content-between align-items-center w-100 me-3">
+                                        <span class="fw-bold text-dark fs-5"><%= className %></span>
+                                        <div class="d-flex gap-3 text-muted small">
+                                            <span class="badge bg-white border text-primary rounded-pill px-3"><%= students.length %> <%= __('Students') %></span>
+                                            <span class="badge bg-white border text-success rounded-pill px-3"><%= __('Average_Attendance') %> <%= avg %>%</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </h2>
+                            <div id="collapse_<%= index %>" class="accordion-collapse collapse" data-bs-parent="#attendanceAccordion">
+                                <div class="accordion-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0 text-end">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th class="px-4"><%= __('Student_Name') %></th>
+                                                    <th><%= __('Total_Days') %></th>
+                                                    <th><%= __('Present_Days') %></th>
+                                                    <th class="px-4 text-center"><%= __('Percentage') %></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <% students.forEach(student => { %>
+                                                    <tr class="student-row" data-name="<%= student.name.toLowerCase() %>">
+                                                        <td class="px-4"><%= student.name %></td>
+                                                        <td><%= student.total_days %></td>
+                                                        <td><%= student.present_days %></td>
+                                                        <td class="px-4 text-center">
+                                                            <div class="d-flex align-items-center justify-content-center gap-2">
+                                                                <div class="progress flex-grow-1" style="height: 8px; width: 100px;">
+                                                                    <div class="progress-bar bg-<%= student.percentage >= 80 ? 'success' : 'danger' %>" 
+                                                                         role="progressbar" style="width: <%= student.percentage %>%"></div>
+                                                                </div>
+                                                                <span class="fw-bold"><%= student.percentage %>%</span>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                <% }) %>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Teacher Book Progress Section -->
+<div class="row mb-5">
+    <div class="col-md-12">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <h3 class="fw-bold mb-0 text-success"><%= __('Book_Completion_Report') %> - <%= locals.lang === 'ur' ? 'سیشن' : 'جلسة' %></h3>
+                    <p class="text-muted mb-0 small"><%= locals.lang === 'ur' ? 'موجودہ سیشن — اب تک کی مکمل پیشرفت' : 'الجلسة الحالية — التقدم الإجمالي حتى الآن' %></p>
+                </div>
+            </div>
+            
+            <div class="card-body p-4">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 text-end">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-4"><%= __('Teacher') %></th>
+                                <th><%= __('Book') %></th>
+                                <th><%= __('Class') %></th>
+                                <th><%= __('Progress') %></th>
+                                <th class="px-4 text-center"><%= __('Action') %></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% teacherProgress.forEach(tp => { %>
+                                <tr class="teacher-book-row" data-teacher="<%= tp.teacher_name.toLowerCase() %>" data-book="<%= tp.book_title.toLowerCase() %>" data-class="<%= tp.class_name || '' %>">
+                                    <td class="px-4 fw-bold">
+                                        <a href="/reports/teacher/<%= tp.teacher_id %>" class="text-decoration-none text-success hover-underline">
+                                            <i class="bi bi-person-fill me-1"></i><%= tp.teacher_name %>
+                                        </a>
+                                    </td>
+                                    <td><%= tp.book_title %></td>
+                                    <td><span class="badge bg-primary-subtle text-primary rounded-pill"><%= tp.class_name %></span></td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2 mb-1">
+                                            <div class="progress flex-grow-1" style="height: 8px; width: 100px;">
+                                                <div class="progress-bar bg-success" role="progressbar" style="width: <%= tp.percentage %>%"></div>
+                                            </div>
+                                            <span class="small text-muted">ص <%= tp.current_page %> (<%= tp.percentage %>%)</span>
+                                        </div>
+                                        <% if (tp.last_updated_at) { %>
+                                            <small class="text-muted d-block" style="font-size: 0.72rem;">
+                                                <i class="bi bi-clock-history me-1"></i><%= __('Last_Updated') %>: <%= tp.lastUpdatedStr %>
+                                            </small>
+                                        <% } else { %>
+                                            <small class="text-muted d-block" style="font-size: 0.72rem;">
+                                                <%= __('No_Updates_Yet') %>
+                                            </small>
+                                        <% } %>
+                                    </td>
+                                    <td class="px-4 text-center">
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <a href="/reports/teacher/<%= tp.teacher_id %>?book=<%= encodeURIComponent(tp.book_title) %>" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                                                <i class="bi bi-graph-up me-1"></i><%= __('Chart') %>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

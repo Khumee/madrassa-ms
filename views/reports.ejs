@@ -6,6 +6,9 @@
         <p class="text-muted"><%= __('Start_Date') %>: <span class="badge bg-light text-primary border"><%= startDate %></span> <%= __('End_Date') %>: <span class="badge bg-light text-primary border"><%= endDate %></span></p>
     </div>
     <div class="col-md-6 text-start">
+        <a href="/reports/session" class="btn btn-outline-primary rounded-pill px-4 shadow-sm fw-bold me-2">
+            <i class="bi bi-calendar-range me-2"></i><%= locals.lang === 'ur' ? 'سیشن رپورٹ' : 'تقرير الجلسة' %>
+        </a>
         <button onclick="downloadServerPDF()" class="btn btn-success rounded-pill px-4 shadow-sm fw-bold">
             <i class="bi bi-file-earmark-pdf-fill me-2"></i><%= locals.lang === 'ur' ? 'مکمل رپورٹ PDF ڈاؤن لوڈ کریں' : 'تحميل التقرير الكامل كـ PDF' %>
         </button>

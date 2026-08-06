@@ -4,6 +4,7 @@ const reportController = require('../controllers/reportController');
 const { hasRole, hasPermission } = require('../middleware/auth');
 
 router.get('/reports', hasPermission('reports'), reportController.showReports);
+router.get('/reports/session', hasPermission('reports'), reportController.showSessionReports);
 router.get('/reports/pdf', hasPermission('reports'), reportController.exportReportsPdf);
 router.get('/reports/areef-standards', hasPermission('reports'), reportController.showAreefStandardsReport);
 router.get('/reports/areef-standards/pdf', hasPermission('reports'), reportController.exportAreefStandardsReportPdf);
