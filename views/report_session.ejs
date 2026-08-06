@@ -6,11 +6,21 @@
         <p class="text-muted"><%= __('Start_Date') %>: <span class="badge bg-light text-primary border"><%= startDate %></span> <%= __('End_Date') %>: <span class="badge bg-light text-primary border"><%= endDate %></span></p>
     </div>
     <div class="col-md-4 text-end">
+        <button onclick="downloadSessionPDF()" class="btn btn-danger rounded-pill px-4 shadow-sm fw-bold me-2">
+            <i class="bi bi-file-earmark-pdf-fill me-2"></i><%= locals.lang === 'ur' ? 'PDF ڈاؤن لوڈ کریں' : 'تحميل PDF' %>
+        </button>
         <a href="/reports" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm fw-bold">
             <i class="bi bi-arrow-left me-2"></i><%= locals.lang === 'ur' ? 'واپس جائیں' : 'العودة' %>
         </a>
     </div>
 </div>
+
+<script>
+function downloadSessionPDF() {
+    if (typeof showPdfLoader === 'function') showPdfLoader();
+    window.location.href = '/reports/session/pdf';
+}
+</script>
 
 <style>
     @media print {
@@ -104,55 +114,77 @@
             </div>
             
             <div class="card-body p-4">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0 text-end">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="px-4"><%= __('Teacher') %></th>
-                                <th><%= __('Book') %></th>
-                                <th><%= __('Class') %></th>
-                                <th><%= __('Progress') %></th>
-                                <th class="px-4 text-center"><%= __('Action') %></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% teacherProgress.forEach(tp => { %>
-                                <tr class="teacher-book-row" data-teacher="<%= tp.teacher_name.toLowerCase() %>" data-book="<%= tp.book_title.toLowerCase() %>" data-class="<%= tp.class_name || '' %>">
-                                    <td class="px-4 fw-bold">
-                                        <a href="/reports/teacher/<%= tp.teacher_id %>" class="text-decoration-none text-success hover-underline">
-                                            <i class="bi bi-person-fill me-1"></i><%= tp.teacher_name %>
-                                        </a>
-                                    </td>
-                                    <td><%= tp.book_title %></td>
-                                    <td><span class="badge bg-primary-subtle text-primary rounded-pill"><%= tp.class_name %></span></td>
-                                    <td>
-                                        <div class="d-flex align-items-center gap-2 mb-1">
-                                            <div class="progress flex-grow-1" style="height: 8px; width: 100px;">
-                                                <div class="progress-bar bg-success" role="progressbar" style="width: <%= tp.percentage %>%"></div>
-                                            </div>
-                                            <span class="small text-muted">ص <%= tp.current_page %> (<%= tp.percentage %>%)</span>
+                <div class="accordion accordion-flush" id="bookProgressAccordion">
+                    <% Object.keys(groupedTeacherProgress).forEach((className, index) => { 
+                        const progressList = groupedTeacherProgress[className];
+                        const avg = Math.round(progressList.reduce((acc, p) => acc + p.percentage, 0) / (progressList.length || 1));
+                    %>
+                        <div class="accordion-item border rounded-4 mb-3 overflow-hidden book-class-card" data-class-name="<%= className %>">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed p-4 bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#book_collapse_<%= index %>">
+                                    <div class="d-flex justify-content-between align-items-center w-100 me-3">
+                                        <span class="fw-bold text-dark fs-5"><%= className %></span>
+                                        <div class="d-flex gap-3 text-muted small">
+                                            <span class="badge bg-white border text-primary rounded-pill px-3"><%= progressList.length %> <%= __('Books') %></span>
+                                            <span class="badge bg-white border text-success rounded-pill px-3"><%= __('Average_Progress') || 'Average Progress' %> <%= avg %>%</span>
                                         </div>
-                                        <% if (tp.last_updated_at) { %>
-                                            <small class="text-muted d-block" style="font-size: 0.72rem;">
-                                                <i class="bi bi-clock-history me-1"></i><%= __('Last_Updated') %>: <%= tp.lastUpdatedStr %>
-                                            </small>
-                                        <% } else { %>
-                                            <small class="text-muted d-block" style="font-size: 0.72rem;">
-                                                <%= __('No_Updates_Yet') %>
-                                            </small>
-                                        <% } %>
-                                    </td>
-                                    <td class="px-4 text-center">
-                                        <div class="d-flex justify-content-center gap-2">
-                                            <a href="/reports/teacher/<%= tp.teacher_id %>?book=<%= encodeURIComponent(tp.book_title) %>" class="btn btn-sm btn-outline-success rounded-pill px-3">
-                                                <i class="bi bi-graph-up me-1"></i><%= __('Chart') %>
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <% }) %>
-                        </tbody>
-                    </table>
+                                    </div>
+                                </button>
+                            </h2>
+                            <div id="book_collapse_<%= index %>" class="accordion-collapse collapse" data-bs-parent="#bookProgressAccordion">
+                                <div class="accordion-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0 text-end">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th class="px-4"><%= __('Teacher') %></th>
+                                                    <th><%= __('Book') %></th>
+                                                    <th><%= __('Progress') %></th>
+                                                    <th class="px-4 text-center"><%= __('Action') %></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <% progressList.forEach(tp => { %>
+                                                    <tr class="teacher-book-row" data-teacher="<%= tp.teacher_name.toLowerCase() %>" data-book="<%= tp.book_title.toLowerCase() %>">
+                                                        <td class="px-4 fw-bold">
+                                                            <a href="/reports/teacher/<%= tp.teacher_id %>" class="text-decoration-none text-success hover-underline">
+                                                                <i class="bi bi-person-fill me-1"></i><%= tp.teacher_name %>
+                                                            </a>
+                                                        </td>
+                                                        <td><%= tp.book_title %></td>
+                                                        <td>
+                                                            <div class="d-flex align-items-center gap-2 mb-1">
+                                                                <div class="progress flex-grow-1" style="height: 8px; width: 100px;">
+                                                                    <div class="progress-bar bg-success" role="progressbar" style="width: <%= tp.percentage %>%"></div>
+                                                                </div>
+                                                                <span class="small text-muted">ص <%= tp.current_page %> (<%= tp.percentage %>%)</span>
+                                                            </div>
+                                                            <% if (tp.last_updated_at) { %>
+                                                                <small class="text-muted d-block" style="font-size: 0.72rem;">
+                                                                    <i class="bi bi-clock-history me-1"></i><%= __('Last_Updated') %>: <%= tp.lastUpdatedStr %>
+                                                                </small>
+                                                            <% } else { %>
+                                                                <small class="text-muted d-block" style="font-size: 0.72rem;">
+                                                                    <%= __('No_Updates_Yet') %>
+                                                                </small>
+                                                            <% } %>
+                                                        </td>
+                                                        <td class="px-4 text-center">
+                                                            <div class="d-flex justify-content-center gap-2">
+                                                                <a href="/reports/teacher/<%= tp.teacher_id %>?book=<%= encodeURIComponent(tp.book_title) %>" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                                                                    <i class="bi bi-graph-up me-1"></i><%= __('Chart') %>
+                                                                </a>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                <% }) %>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
                 </div>
             </div>
         </div>
