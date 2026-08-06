@@ -2,6 +2,29 @@ const db = require('../config/db');
 const bcrypt = require('bcryptjs');
 const { DateTime } = require('luxon');
 
+const getClassRank = (name) => {
+    if (!name) return 999;
+    const n = name.trim();
+    if (n.includes('اولى') || n.includes('الأولى') || n.includes('الاولى')) return 1;
+    if (n.includes('ثاني')) return 2;
+    if (n.includes('ثالث')) return 3;
+    if (n.includes('رابع')) return 4;
+    if (n.includes('خامس')) return 5;
+    if (n.includes('سادس')) return 6;
+    if (n.includes('سابع')) return 7;
+    if (n.includes('حديث')) return 8;
+    return 999;
+};
+
+const sortObjectByClassRank = (obj) => {
+    return Object.keys(obj)
+        .sort((a, b) => getClassRank(a) - getClassRank(b))
+        .reduce((res, key) => {
+            res[key] = obj[key];
+            return res;
+        }, {});
+};
+
 exports.showReports = async (req, res) => {
     try {
         const now = DateTime.now().setZone('Asia/Karachi');
@@ -272,8 +295,8 @@ exports.showSessionReports = async (req, res) => {
         });
 
         res.render('report_session', { 
-            groupedReport, 
-            groupedTeacherProgress,
+            groupedReport: sortObjectByClassRank(groupedReport), 
+            groupedTeacherProgress: sortObjectByClassRank(groupedTeacherProgress),
             startDate: sessionStartDate, 
             endDate 
         });
@@ -357,8 +380,8 @@ exports.exportSessionReportsPdf = async (req, res) => {
         const lang = req.getLocale ? req.getLocale() : 'ur';
 
         const html = await ejs.renderFile(templatePath, {
-            groupedReport,
-            groupedTeacherProgress,
+            groupedReport: sortObjectByClassRank(groupedReport),
+            groupedTeacherProgress: sortObjectByClassRank(groupedTeacherProgress),
             startDate: sessionStartDate,
             endDate,
             tenant: req.tenant,
