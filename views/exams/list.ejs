@@ -10,7 +10,6 @@
         <table class="table table-bordered table-striped">
             <thead class="table-dark">
                 <tr>
-                    <th><%= __('ID') %></th>
                     <th><%= __('Exam_Name') %></th>
                     <th><%= __('Status') %></th>
                     <th><%= __('Date_Created') %></th>
@@ -21,13 +20,17 @@
                 <% if (exams && exams.length > 0) { %>
                     <% exams.forEach(exam => { %>
                         <tr>
-                            <td><%= exam.id %></td>
                             <td><%= exam.name %></td>
                             <td><span class="badge bg-<%= exam.status === 'published' ? 'success' : (exam.status === 'completed' ? 'secondary' : 'warning') %>"><%= __(exam.status) %></span></td>
                             <td><%= new Date(exam.created_at).toLocaleDateString() %></td>
                             <td>
-                                <a href="/exams/<%= exam.id %>/assign" class="btn btn-sm btn-info"><%= __('Assign_Papers') %></a>
-                                <a href="/exams/<%= exam.id %>/results" class="btn btn-sm btn-success"><%= __('View_Results') %></a>
+                                <div class="d-flex gap-1">
+                                    <a href="/exams/<%= exam.id %>/assign" class="btn btn-sm btn-info"><%= __('Assign_Papers') %></a>
+                                    <a href="/exams/<%= exam.id %>/results" class="btn btn-sm btn-success"><%= __('View_Results') %></a>
+                                    <form action="/exams/<%= exam.id %>/delete" method="POST" onsubmit="return confirm('<%= __('Are_you_sure_you_want_to_delete_this_exam') %>?');" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-danger"><%= __('Delete') %></button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     <% }) %>

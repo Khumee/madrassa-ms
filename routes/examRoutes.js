@@ -28,8 +28,61 @@ router.get('/exams/:id/results', isAdmin, async (req, res) => {
 
 // ADMIN: Create Exam
 router.post('/exams', isAdmin, async (req, res) => {
-    await db.execute('INSERT INTO exams (name, created_by, tenant_id) VALUES (?, ?, ?)', [req.body.name, req.session.userId, req.tenant.id]);
-    res.redirect('/exams');
+    try {
+        const [result] = await db.execute('INSERT INTO exams (name, created_by, tenant_id) VALUES (?, ?, ?)', [req.body.name, req.session.userId, req.tenant.id]);
+        const examId = result.insertId;
+
+        // Auto-assign papers based on active assignments
+        const [assignments] = await db.execute(`
+            SELECT tb.class_id, tb.teacher_id, b.title as subject
+            FROM teacher_books tb
+            JOIN books b ON tb.book_id = b.id AND b.tenant_id = tb.tenant_id
+            JOIN sessions s ON tb.session_id = s.id AND s.tenant_id = tb.tenant_id
+            WHERE s.is_active = TRUE AND tb.tenant_id = ?
+        `, [req.tenant.id]);
+
+        for (const a of assignments) {
+            const [paperResult] = await db.execute(
+                'INSERT INTO exam_papers (exam_id, class_id, subject, teacher_id, max_marks, tenant_id) VALUES (?, ?, ?, ?, ?, ?)', 
+                [examId, a.class_id, a.subject, a.teacher_id, 100, req.tenant.id]
+            );
+            const paperId = paperResult.insertId;
+
+            // Generate default template: 3 questions, 2 parts each (total 100 marks)
+            const templateQuestions = [
+                { text: 'Question 1 Part A', marks: 17, section: 'Q1' },
+                { text: 'Question 1 Part B', marks: 16, section: 'Q1' },
+                { text: 'Question 2 Part A', marks: 17, section: 'Q2' },
+                { text: 'Question 2 Part B', marks: 16, section: 'Q2' },
+                { text: 'Question 3 Part A', marks: 17, section: 'Q3' },
+                { text: 'Question 3 Part B', marks: 17, section: 'Q3' }
+            ];
+
+            for (const tq of templateQuestions) {
+                await db.execute(
+                    'INSERT INTO questions (paper_id, question_text, marks, section, tenant_id) VALUES (?, ?, ?, ?, ?)', 
+                    [paperId, tq.text, tq.marks, tq.section, req.tenant.id]
+                );
+            }
+        }
+        res.redirect('/exams');
+    } catch (error) {
+        console.error('Error creating exam:', error);
+        res.status(500).send('Error creating exam and auto-assigning papers.');
+    }
+});
+
+// ADMIN: Delete Exam
+router.post('/exams/:id/delete', isAdmin, async (req, res) => {
+    try {
+        // Due to foreign key constraints, related exam_papers and questions should cascade or be deleted.
+        // Assuming ON DELETE CASCADE is set up for exam_papers. If not, we might need to delete them manually.
+        await db.execute('DELETE FROM exams WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
+        res.redirect('/exams');
+    } catch (error) {
+        console.error('Error deleting exam:', error);
+        res.status(500).send('Error deleting exam');
+    }
 });
 
 // ADMIN: Assign Papers
