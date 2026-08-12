@@ -1,9 +1,7 @@
 <%- include('../partials/header', { title: __('Build_Paper') }) %>
 <div class="container mt-4">
     <h2>Build Paper: <%= paper.subject %> (Max Marks: <%= paper.max_marks %>)</h2>
-    <form action="/papers/<%= paper.id %>/submit" method="POST" class="mb-4">
-        <button type="submit" class="btn btn-success">Submit Paper for Approval</button>
-    </form>
+    
     
     <div class="card mb-4">
         <div class="card-header"><%= __('Add_Question') %></div>

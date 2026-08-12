@@ -58,7 +58,6 @@
                             <th class="px-4 py-3"><%= __('Subject') %></th>
                             <th class="px-4 py-3"><%= __('Teacher') %></th>
                             <th class="px-4 py-3 text-center"><%= __('Max_Marks') %></th>
-                            <th class="px-4 py-3 text-center"><%= __('Status') %></th>
                             <th class="px-4 py-3 text-end"><%= __('Actions') %></th>
                         </tr>
                     </thead>
@@ -70,11 +69,6 @@
                                     <td class="px-4 align-middle"><%= p.subject %></td>
                                     <td class="px-4 align-middle"><%= p.teacher_name %></td>
                                     <td class="px-4 align-middle text-center"><%= p.max_marks %></td>
-                                    <td class="px-4 align-middle text-center">
-                                        <span class="badge rounded-pill px-3 py-2 bg-<%= p.status === 'approved' ? 'success' : (p.status === 'submitted' ? 'info' : (p.status === 'rejected' ? 'danger' : 'secondary')) %>">
-                                            <%= __(p.status) || p.status %>
-                                        </span>
-                                    </td>
                                     <td class="px-4 align-middle text-end">
                                         <a href="/papers/<%= p.id %>/view" class="btn btn-sm btn-outline-primary rounded-pill px-3"><i class="bi bi-eye me-1"></i><%= __('View_Paper') || 'View Paper' %></a>
                                     </td>

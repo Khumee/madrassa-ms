@@ -7,7 +7,6 @@
                 <th><%= __('Exam') %></th>
                 <th><%= __('Class') %></th>
                 <th><%= __('Subject') %></th>
-                <th><%= __('Status') %></th>
                 <th><%= __('Actions') %></th>
             </tr>
         </thead>
@@ -17,12 +16,9 @@
                     <td><%= p.exam_name %></td>
                     <td><%= p.class_name %></td>
                     <td><%= p.subject %></td>
-                    <td><span class="badge bg-secondary"><%= p.status %></span></td>
                     <td>
                         <a href="/papers/<%= p.id %>/build" class="btn btn-sm btn-primary"><%= __('Build_Paper') %></a>
-                        <% if (p.status === 'approved') { %>
-                            <a href="/papers/<%= p.id %>/mark" class="btn btn-sm btn-success"><%= __('Mark_Students') %></a>
-                        <% } %>
+                        <a href="/papers/<%= p.id %>/mark" class="btn btn-sm btn-success"><%= __('Mark_Students') %></a>
                     </td>
                 </tr>
             <% }) %>

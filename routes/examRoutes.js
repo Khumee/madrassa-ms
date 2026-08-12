@@ -132,12 +132,6 @@ router.post('/questions/:id/delete', isTeacher, async (req, res) => {
     await db.execute('DELETE FROM questions WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
     res.redirect('back');
 });
-
-router.post('/papers/:id/submit', isTeacher, async (req, res) => {
-    await db.execute('UPDATE exam_papers SET status = "submitted" WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
-    res.redirect('/papers/my-tasks');
-});
-
 // ADMIN: All Papers for an Exam
 router.get('/exams/:id/papers', isAdmin, async (req, res) => {
     let query = 'SELECT ep.*, e.name as exam_name, c.name_ar as class_name, u.username as teacher_name FROM exam_papers ep JOIN exams e ON ep.exam_id = e.id JOIN classes c ON ep.class_id = c.id JOIN users u ON ep.teacher_id = u.id WHERE ep.exam_id = ? AND ep.tenant_id = ?';
@@ -169,25 +163,12 @@ router.get('/exams/:id/papers', isAdmin, async (req, res) => {
         selectedTeacherId: req.query.teacherId || '' 
     });
 });
-
-// ADMIN: Approvals
-router.get('/papers/approvals', isAdmin, async (req, res) => {
-    const [papers] = await db.execute('SELECT ep.*, e.name as exam_name, c.name_ar as class_name, u.username as teacher_name FROM exam_papers ep JOIN exams e ON ep.exam_id = e.id JOIN classes c ON ep.class_id = c.id JOIN users u ON ep.teacher_id = u.id WHERE ep.status IN ("submitted", "approved", "rejected") AND ep.tenant_id = ?', [req.tenant.id]);
-    res.render('exams/approvals', { papers });
-});
-
 router.get('/papers/:id/view', isAdmin, async (req, res) => {
     const [paper] = await db.execute('SELECT ep.*, e.name as exam_name, c.name_ar as class_name, u.username as teacher_name FROM exam_papers ep JOIN exams e ON ep.exam_id = e.id JOIN classes c ON ep.class_id = c.id JOIN users u ON ep.teacher_id = u.id WHERE ep.id = ? AND ep.tenant_id = ?', [req.params.id, req.tenant.id]);
     if (!paper.length) return res.status(404).send('Paper not found');
     const [questions] = await db.execute('SELECT * FROM questions WHERE paper_id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
     res.render('exams/view_paper', { paper: paper[0], questions });
 });
-
-router.post('/papers/:id/approve', isAdmin, async (req, res) => {
-    await db.execute('UPDATE exam_papers SET status = ? WHERE id = ? AND tenant_id = ?', [req.body.status, req.params.id, req.tenant.id]);
-    res.redirect('/papers/approvals');
-});
-
 // TEACHER: Mark Paper
 router.get('/papers/:id/mark', isTeacher, async (req, res) => {
     const [paper] = await db.execute('SELECT * FROM exam_papers WHERE id = ? AND teacher_id = ? AND tenant_id = ?', [req.params.id, req.session.userId, req.tenant.id]);
