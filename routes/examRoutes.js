@@ -124,6 +124,12 @@ router.post('/papers/:id/submit', isTeacher, async (req, res) => {
     res.redirect('/papers/my-tasks');
 });
 
+// ADMIN: All Papers
+router.get('/papers/all', isAdmin, async (req, res) => {
+    const [papers] = await db.execute('SELECT ep.*, e.name as exam_name, c.name_ar as class_name, u.username as teacher_name FROM exam_papers ep JOIN exams e ON ep.exam_id = e.id JOIN classes c ON ep.class_id = c.id JOIN users u ON ep.teacher_id = u.id WHERE ep.tenant_id = ? ORDER BY e.created_at DESC, ep.id DESC', [req.tenant.id]);
+    res.render('exams/all_papers', { papers });
+});
+
 // ADMIN: Approvals
 router.get('/papers/approvals', isAdmin, async (req, res) => {
     const [papers] = await db.execute('SELECT ep.*, e.name as exam_name, c.name_ar as class_name, u.username as teacher_name FROM exam_papers ep JOIN exams e ON ep.exam_id = e.id JOIN classes c ON ep.class_id = c.id JOIN users u ON ep.teacher_id = u.id WHERE ep.status IN ("submitted", "approved", "rejected") AND ep.tenant_id = ?', [req.tenant.id]);
