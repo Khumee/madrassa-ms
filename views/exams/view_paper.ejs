@@ -14,6 +14,28 @@
         </div>
     </div>
 
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><%= __('Add_Question') || 'Add Question' %></h5>
+        </div>
+        <div class="card-body">
+            <form action="/papers/<%= paper.id %>/questions" method="POST" class="row g-2 align-items-center">
+                <div class="col-md-5">
+                    <input type="text" name="question_text" class="form-control" placeholder="<%= __('Question') || 'Question' %>" required>
+                </div>
+                <div class="col-md-2">
+                    <input type="number" name="marks" class="form-control" placeholder="<%= __('Marks') || 'Marks' %>" required>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" name="section" class="form-control" placeholder="<%= __('Section') || 'Section' %>">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-lg"></i> <%= __('Add') || 'Add' %></button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <h4 class="mb-3"><%= __('Questions') %></h4>
     <div class="list-group mb-4">
         <% if (questions && questions.length > 0) { %>
@@ -24,11 +46,48 @@
                         <br>
                         <small class="text-muted"><%= __('Section') %>: <%= q.section %></small>
                     </div>
-                    <span class="badge bg-primary rounded-pill"><%= q.marks %> <%= __('Marks') %></span>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-primary rounded-pill me-3"><%= q.marks %> <%= __('Marks') %></span>
+                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editQuestionModal<%= q.id %>"><%= __('Edit') || 'Edit' %></button>
+                        <form action="/questions/<%= q.id %>/delete" method="POST" class="m-0" onsubmit="event.preventDefault(); const form = this; showConfirm('<%= __('Are_you_sure_you_want_to_delete_this') || 'Are you sure?' %>').then(c => { if(c) form.submit(); });">
+                            <button type="submit" class="btn btn-sm btn-outline-danger"><%= __('Delete') || 'Delete' %></button>
+                        </form>
+                    </div>
                 </div>
+
+                <!-- Edit Modal for Question <%= q.id %> -->
+                <div class="modal fade" id="editQuestionModal<%= q.id %>" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form action="/questions/<%= q.id %>/edit" method="POST">
+                                <div class="modal-header">
+                                    <h5 class="modal-title"><%= __('Edit_Question') || 'Edit Question' %></h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label class="form-label"><%= __('Question') || 'Question' %></label>
+                                        <input type="text" name="question_text" class="form-control" value="<%= q.question_text %>" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label"><%= __('Marks') || 'Marks' %></label>
+                                        <input type="number" name="marks" class="form-control" value="<%= q.marks %>" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label"><%= __('Section') || 'Section' %></label>
+                                        <input type="text" name="section" class="form-control" value="<%= q.section %>">
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><%= __('Cancel') || 'Cancel' %></button>
+                                    <button type="submit" class="btn btn-primary"><%= __('Save_Changes') || 'Save Changes' %></button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
             <% }) %>
         <% } else { %>
-            <div class="alert alert-warning"><%= __('No_questions_added_yet') %></div>
+            <div class="alert alert-warning"><%= __('No_questions_added_yet') || 'No questions added yet.' %></div>
         <% } %>
     </div>
 
