@@ -51,13 +51,15 @@ router.post('/exams', isAdmin, async (req, res) => {
             const paperId = paperResult.insertId;
 
             // Generate default template: 3 questions, 2 parts each (total 100 marks)
+            const qStr = req.__ ? req.__('Question') : 'Question';
+            const pStr = req.__ ? req.__('Part') : 'Part';
             const templateQuestions = [
-                { text: 'Question 1 Part A', marks: 17, section: 'Q1' },
-                { text: 'Question 1 Part B', marks: 16, section: 'Q1' },
-                { text: 'Question 2 Part A', marks: 17, section: 'Q2' },
-                { text: 'Question 2 Part B', marks: 16, section: 'Q2' },
-                { text: 'Question 3 Part A', marks: 17, section: 'Q3' },
-                { text: 'Question 3 Part B', marks: 17, section: 'Q3' }
+                { text: `${qStr} 1 ${pStr} A`, marks: 17, section: 'Q1' },
+                { text: `${qStr} 1 ${pStr} B`, marks: 16, section: 'Q1' },
+                { text: `${qStr} 2 ${pStr} A`, marks: 17, section: 'Q2' },
+                { text: `${qStr} 2 ${pStr} B`, marks: 16, section: 'Q2' },
+                { text: `${qStr} 3 ${pStr} A`, marks: 17, section: 'Q3' },
+                { text: `${qStr} 3 ${pStr} B`, marks: 17, section: 'Q3' }
             ];
 
             for (const tq of templateQuestions) {
@@ -119,6 +121,16 @@ router.get('/papers/:id/build', isTeacher, async (req, res) => {
 router.post('/papers/:id/questions', isTeacher, async (req, res) => {
     await db.execute('INSERT INTO questions (paper_id, question_text, marks, section, tenant_id) VALUES (?, ?, ?, ?, ?)', [req.params.id, req.body.question_text, req.body.marks, req.body.section || 'A', req.tenant.id]);
     res.redirect(`/papers/${req.params.id}/build`);
+});
+
+router.post('/questions/:id/edit', isTeacher, async (req, res) => {
+    await db.execute('UPDATE questions SET question_text = ?, marks = ?, section = ? WHERE id = ? AND tenant_id = ?', [req.body.question_text, req.body.marks, req.body.section, req.params.id, req.tenant.id]);
+    res.redirect('back');
+});
+
+router.post('/questions/:id/delete', isTeacher, async (req, res) => {
+    await db.execute('DELETE FROM questions WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
+    res.redirect('back');
 });
 
 router.post('/papers/:id/submit', isTeacher, async (req, res) => {
