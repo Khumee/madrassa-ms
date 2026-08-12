@@ -3,7 +3,8 @@ const router = express.Router();
 const db = require('../db');
 
 const isAdmin = (req, res, next) => { 
-    if (req.session.role && ['admin', 'مدير', 'ناظم'].includes(req.session.role)) next(); 
+    if (!req.session.userId || !req.session.role) return res.redirect('/login');
+    if (['admin', 'مدير', 'ناظم'].includes(req.session.role)) next(); 
     else res.status(403).send('Access Denied'); 
 };
 const isTeacher = (req, res, next) => { if (req.session.userId) next(); else res.redirect('/login'); };
