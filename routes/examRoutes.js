@@ -68,7 +68,7 @@ router.post('/exams', isAdmin, async (req, res) => {
         res.redirect('/exams');
     } catch (error) {
         console.error('Error creating exam:', error);
-        res.status(500).send('Error creating exam and auto-assigning papers.');
+        res.status(500).send('Error creating exam and auto-assigning papers. Details: ' + error.message + '<br><pre>' + error.stack + '</pre>');
     }
 });
 
