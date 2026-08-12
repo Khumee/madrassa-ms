@@ -39,6 +39,7 @@ router.post('/exams', isAdmin, async (req, res) => {
             FROM teacher_books tb
             JOIN books b ON tb.book_id = b.id AND b.tenant_id = tb.tenant_id
             JOIN sessions s ON tb.session_id = s.id AND s.tenant_id = tb.tenant_id
+            JOIN users u ON tb.teacher_id = u.id AND u.tenant_id = tb.tenant_id
             WHERE s.is_active = TRUE AND tb.tenant_id = ?
         `, [req.tenant.id]);
 
