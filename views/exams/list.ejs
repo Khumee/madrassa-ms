@@ -25,6 +25,7 @@
                             <td><%= new Date(exam.created_at).toLocaleDateString() %></td>
                             <td>
                                 <div class="d-flex gap-1">
+                                    <a href="/exams/<%= exam.id %>/papers" class="btn btn-sm btn-secondary"><i class="bi bi-list-task"></i> <%= __('All_Papers') || 'All Papers' %></a>
                                     <a href="/exams/<%= exam.id %>/assign" class="btn btn-sm btn-info"><%= __('Assign_Papers') %></a>
                                     <a href="/exams/<%= exam.id %>/results" class="btn btn-sm btn-success"><%= __('View_Results') %></a>
                                     <form action="/exams/<%= exam.id %>/delete" method="POST" onsubmit="event.preventDefault(); const form = this; showConfirm('<%= __('Are_you_sure_you_want_to_delete_this_exam') %>?').then(c => { if(c) form.submit(); });" style="display:inline;">

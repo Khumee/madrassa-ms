@@ -124,10 +124,36 @@ router.post('/papers/:id/submit', isTeacher, async (req, res) => {
     res.redirect('/papers/my-tasks');
 });
 
-// ADMIN: All Papers
-router.get('/papers/all', isAdmin, async (req, res) => {
-    const [papers] = await db.execute('SELECT ep.*, e.name as exam_name, c.name_ar as class_name, u.username as teacher_name FROM exam_papers ep JOIN exams e ON ep.exam_id = e.id JOIN classes c ON ep.class_id = c.id JOIN users u ON ep.teacher_id = u.id WHERE ep.tenant_id = ? ORDER BY e.created_at DESC, ep.id DESC', [req.tenant.id]);
-    res.render('exams/all_papers', { papers });
+// ADMIN: All Papers for an Exam
+router.get('/exams/:id/papers', isAdmin, async (req, res) => {
+    let query = 'SELECT ep.*, e.name as exam_name, c.name_ar as class_name, u.username as teacher_name FROM exam_papers ep JOIN exams e ON ep.exam_id = e.id JOIN classes c ON ep.class_id = c.id JOIN users u ON ep.teacher_id = u.id WHERE ep.exam_id = ? AND ep.tenant_id = ?';
+    const params = [req.params.id, req.tenant.id];
+
+    if (req.query.classId) {
+        query += ' AND ep.class_id = ?';
+        params.push(req.query.classId);
+    }
+    if (req.query.teacherId) {
+        query += ' AND ep.teacher_id = ?';
+        params.push(req.query.teacherId);
+    }
+    query += ' ORDER BY c.name_ar ASC, u.username ASC';
+
+    const [papers] = await db.execute(query, params);
+    const [exam] = await db.execute('SELECT * FROM exams WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
+    
+    // Fetch unique classes and teachers for filters (based on this exam's papers)
+    const [classes] = await db.execute('SELECT DISTINCT c.id, c.name_ar FROM classes c JOIN exam_papers ep ON c.id = ep.class_id WHERE ep.exam_id = ? AND ep.tenant_id = ? ORDER BY c.name_ar ASC', [req.params.id, req.tenant.id]);
+    const [teachers] = await db.execute('SELECT DISTINCT u.id, u.username as name FROM users u JOIN exam_papers ep ON u.id = ep.teacher_id WHERE ep.exam_id = ? AND ep.tenant_id = ? ORDER BY u.username ASC', [req.params.id, req.tenant.id]);
+
+    res.render('exams/exam_papers', { 
+        papers, 
+        exam: exam[0], 
+        classes, 
+        teachers, 
+        selectedClassId: req.query.classId || '', 
+        selectedTeacherId: req.query.teacherId || '' 
+    });
 });
 
 // ADMIN: Approvals
