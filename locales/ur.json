@@ -275,8 +275,8 @@
     "Complete_Assignment_Btn": "تفویض مکمل کریں",
     "Current_Assignments_List": "موجودہ تقسیم کی فہرست",
     "Filter_Label": "فلٹر",
-    "Filter_By_Teacher": "استاد کے لحاظ سے فلٹر",
-    "Filter_By_Class": "کلاس کے لحاظ سے فلٹر",
+    "Filter_By_Teacher": "استاد کے لحاظ سے فلٹر کریں",
+    "Filter_By_Class": "کلاس کے لحاظ سے فلٹر کریں",
     "Teacher_Prefix_Label": "استاد",
     "Range_Pages": "حد (صفحات)",
     "Cancel_Assignment": "تفویض منسوخ کریں",
@@ -462,5 +462,7 @@
     "Assign_Paper": "پرچہ تفویض کریں",
     "Assigned_Teacher": "تفویض کردہ استاد",
     "Select_Subject": "مضمون منتخب کریں",
-    "Are_you_sure_you_want_to_delete_this_exam": "کیا آپ واقعی اس امتحان کو حذف کرنا چاہتے ہیں"
+    "Are_you_sure_you_want_to_delete_this_exam": "کیا آپ واقعی اس امتحان کو حذف کرنا چاہتے ہیں",
+    "All_Papers": "تمام پرچے",
+    "No_papers_found": "کوئی پرچے نہیں ملے"
 }

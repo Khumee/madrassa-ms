@@ -35,12 +35,12 @@ router.post('/exams', isAdmin, async (req, res) => {
 
         // Auto-assign papers based on active assignments
         const [assignments] = await db.execute(`
-            SELECT tb.class_id, tb.teacher_id, b.title as subject
+            SELECT tb.class_id, t.user_id as teacher_id, b.title as subject
             FROM teacher_books tb
+            JOIN teachers t ON tb.teacher_id = t.id AND t.tenant_id = tb.tenant_id
             JOIN books b ON tb.book_id = b.id AND b.tenant_id = tb.tenant_id
             JOIN sessions s ON tb.session_id = s.id AND s.tenant_id = tb.tenant_id
-            JOIN users u ON tb.teacher_id = u.id AND u.tenant_id = tb.tenant_id
-            WHERE s.is_active = TRUE AND tb.tenant_id = ?
+            WHERE s.is_active = TRUE AND tb.tenant_id = ? AND t.user_id IS NOT NULL
         `, [req.tenant.id]);
 
         for (const a of assignments) {
