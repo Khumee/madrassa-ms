@@ -1,0 +1,197 @@
+<%- include('../partials/header', { title: 'Enter Marks - ' + paper.subject }) %>
+
+<div class="container mt-4 mb-5" dir="rtl" text-align="right">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><i class="bi bi-journal-check me-2"></i> نمبرات درج کریں</h2>
+            <p class="text-muted mb-0">امتحان: <%= paper.exam_name %> | درجہ: <%= paper.class_name %> | مضمون: <%= paper.subject %></p>
+        </div>
+        <div>
+            <% if (isAdmin) { %>
+                <form action="/papers/<%= paper.id %>/toggle-lock" method="POST" class="d-inline-block me-2">
+                    <button type="submit" class="btn <%= paper.is_locked ? 'btn-danger' : 'btn-success' %> rounded-pill px-3">
+                        <i class="bi <%= paper.is_locked ? 'bi-lock-fill' : 'bi-unlock-fill' %> me-1"></i>
+                        <%= paper.is_locked ? 'نمبرات مقفل ہیں (کھولیں)' : 'نمبرات مقفل کریں' %>
+                    </button>
+                </form>
+            <% } %>
+            <a href="/exams/<%= paper.exam_id %>/papers" class="btn btn-outline-secondary rounded-pill px-3"><i class="bi bi-arrow-left"></i> واپس</a>
+        </div>
+    </div>
+
+    <% if (paper.is_locked) { %>
+        <div class="alert alert-warning shadow-sm border-0 rounded-4">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> یہ پرچہ مقفل ہو چکا ہے۔ اب نمبرات میں تبدیلی نہیں کی جا سکتی۔
+        </div>
+    <% } %>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 text-center">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="py-3 px-4 text-end">رول نمبر</th>
+                            <th class="py-3 px-4 text-end">طالب علم کا نام</th>
+                            <th class="py-3 px-3">غیر حاضر</th>
+                            <% 
+                                // Group questions into pairs (or single if not paired)
+                                let groupedQuestions = [];
+                                for (let i = 0; i < questions.length; i += 2) {
+                                    groupedQuestions.push({
+                                        q1: questions[i],
+                                        q2: i + 1 < questions.length ? questions[i+1] : null,
+                                        maxMarks: Math.max(questions[i].marks, i + 1 < questions.length ? questions[i+1].marks : 0)
+                                    });
+                                }
+                            %>
+                            <% groupedQuestions.forEach((gq, index) => { %>
+                                <th class="py-3 px-2">
+                                    سوال <%= index + 1 %><br>
+                                    <small class="text-muted">(<%= gq.maxMarks %>)</small>
+                                </th>
+                            <% }) %>
+                            <th class="py-3 px-3">کل نمبرات</th>
+                            <th class="py-3 px-4">ایکشن</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (students && students.length > 0) { %>
+                            <% students.forEach(s => { 
+                                const isAbsent = resultsByStudent[s.id] && resultsByStudent[s.id].is_absent ? true : false;
+                                const totalObtained = resultsByStudent[s.id] ? resultsByStudent[s.id].total_marks_obtained : 0;
+                            %>
+                                <tr id="row-<%= s.id %>" class="<%= isAbsent ? 'table-secondary opacity-75' : '' %>">
+                                    <td class="px-4 text-end fw-bold text-muted"><%= s.roll_number %></td>
+                                    <td class="px-4 text-end fw-bold"><%= s.name %></td>
+                                    
+                                    <!-- Form logic is handled via JS -->
+                                    <td class="px-3">
+                                        <div class="form-check form-switch d-flex justify-content-center">
+                                            <input class="form-check-input absent-toggle" type="checkbox" id="absent-<%= s.id %>" <%= isAbsent ? 'checked' : '' %> <%= paper.is_locked ? 'disabled' : '' %> onchange="toggleAbsent('<%= s.id %>')">
+                                        </div>
+                                    </td>
+
+                                    <% groupedQuestions.forEach(gq => { 
+                                        const markVal = marksByStudent[s.id] && marksByStudent[s.id][gq.q1.id] !== undefined ? marksByStudent[s.id][gq.q1.id] : '';
+                                    %>
+                                        <td class="px-2" style="width: 100px;">
+                                            <input type="number" class="form-control text-center mark-input student-<%= s.id %>" 
+                                                   data-qid="<%= gq.q1.id %>" 
+                                                   data-max="<%= gq.maxMarks %>"
+                                                   value="<%= markVal %>" 
+                                                   min="0" max="<%= gq.maxMarks %>"
+                                                   <%= (isAbsent || paper.is_locked) ? 'disabled' : '' %>
+                                                   oninput="validateMarks(this)">
+                                        </td>
+                                    <% }) %>
+
+                                    <td class="px-3 fw-bold fs-5 text-primary" id="total-<%= s.id %>">
+                                        <%= totalObtained %>
+                                    </td>
+
+                                    <td class="px-4">
+                                        <% if (!paper.is_locked) { %>
+                                            <button class="btn btn-sm btn-primary rounded-pill px-3" onclick="saveStudentMarks('<%= s.id %>')" id="btn-<%= s.id %>">
+                                                <i class="bi bi-save me-1"></i> محفوظ کریں
+                                            </button>
+                                        <% } else { %>
+                                            <span class="badge bg-secondary"><i class="bi bi-lock-fill"></i></span>
+                                        <% } %>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="<%= 5 + groupedQuestions.length %>" class="text-center py-5 text-muted">
+                                    اس درجہ میں کوئی طالب علم موجود نہیں۔
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleAbsent(studentId) {
+        const isAbsent = document.getElementById('absent-' + studentId).checked;
+        const inputs = document.querySelectorAll('.student-' + studentId);
+        
+        const row = document.getElementById('row-' + studentId);
+        if (isAbsent) {
+            row.classList.add('table-secondary', 'opacity-75');
+            inputs.forEach(i => { i.disabled = true; i.value = ''; });
+            document.getElementById('total-' + studentId).innerText = '0';
+        } else {
+            row.classList.remove('table-secondary', 'opacity-75');
+            inputs.forEach(i => { i.disabled = false; });
+        }
+    }
+
+    function validateMarks(input) {
+        const max = parseFloat(input.getAttribute('data-max'));
+        const val = parseFloat(input.value);
+        if (val > max) input.value = max;
+        if (val < 0) input.value = 0;
+    }
+
+    async function saveStudentMarks(studentId) {
+        const btn = document.getElementById('btn-' + studentId);
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        btn.disabled = true;
+
+        const isAbsent = document.getElementById('absent-' + studentId).checked;
+        const inputs = document.querySelectorAll('.student-' + studentId);
+        
+        let marksData = {};
+        inputs.forEach(input => {
+            const qid = input.getAttribute('data-qid');
+            marksData[qid] = input.value;
+        });
+
+        try {
+            const response = await fetch(`/papers/<%= paper.id %>/save-marks-row`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    student_id: studentId,
+                    is_absent: isAbsent,
+                    marks: marksData
+                })
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                // Update total on screen
+                document.getElementById('total-' + studentId).innerText = data.totalObtained;
+                
+                // Show success feedback
+                btn.innerHTML = '<i class="bi bi-check-lg"></i> محفوظ ہو گیا';
+                btn.classList.replace('btn-primary', 'btn-success');
+                setTimeout(() => {
+                    btn.innerHTML = originalHtml;
+                    btn.classList.replace('btn-success', 'btn-primary');
+                    btn.disabled = false;
+                }, 2000);
+            } else {
+                alert('Error: ' + data.message);
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Network Error');
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+        }
+    }
+</script>
+
+<%- include('../partials/footer') %>

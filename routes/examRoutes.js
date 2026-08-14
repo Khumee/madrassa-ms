@@ -171,18 +171,111 @@ router.get('/papers/:id/view', isAdmin, async (req, res) => {
     const [questions] = await db.execute('SELECT * FROM questions WHERE paper_id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
     res.render('exams/view_paper', { paper: paper[0], questions });
 });
-// TEACHER: Mark Paper
-router.get('/papers/:id/mark', isTeacher, async (req, res) => {
-    const [paper] = await db.execute('SELECT * FROM exam_papers WHERE id = ? AND teacher_id = ? AND tenant_id = ?', [req.params.id, req.session.userId, req.tenant.id]);
-    if (!paper.length) return res.status(403).send('Not authorized');
-    const [students] = await db.execute('SELECT * FROM students WHERE class_id = ? AND tenant_id = ?', [paper[0].class_id, req.tenant.id]);
-    res.render('exams/mark_paper', { paper: paper[0], students });
+// ENTER MARKS (Question level)
+router.get('/papers/:id/enter-marks', isTeacher, async (req, res) => {
+    // Both Admin and the assigned Teacher can enter marks
+    const [paper] = await db.execute('SELECT ep.*, e.name as exam_name, c.name_ar as class_name FROM exam_papers ep JOIN exams e ON ep.exam_id = e.id JOIN classes c ON ep.class_id = c.id WHERE ep.id = ? AND ep.tenant_id = ?', [req.params.id, req.tenant.id]);
+    if (!paper.length) return res.status(404).send('Paper not found');
+    
+    // Auth check: Must be Admin OR the teacher assigned to the paper
+    const isAdminUser = ['admin', 'مدير', 'ناظم'].includes(req.session.role);
+    if (!isAdminUser && paper[0].teacher_id !== req.session.userId) {
+        return res.status(403).send('Not authorized to mark this paper');
+    }
+
+    // Get all students enrolled in this class
+    const [students] = await db.execute(`
+        SELECT s.id, s.name, s.roll_number 
+        FROM students s
+        WHERE s.class_id = ? AND s.tenant_id = ? AND s.status = 'active'
+        ORDER BY s.roll_number ASC, s.name ASC
+    `, [paper[0].class_id, req.tenant.id]);
+
+    // Get all questions for this paper, ordered by id
+    const [questions] = await db.execute('SELECT * FROM questions WHERE paper_id = ? AND tenant_id = ? ORDER BY id ASC', [req.params.id, req.tenant.id]);
+
+    // Get existing marks per question
+    const [marksRows] = await db.execute('SELECT * FROM student_marks WHERE paper_id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
+    const marksByStudent = {};
+    marksRows.forEach(m => {
+        if (!marksByStudent[m.student_id]) marksByStudent[m.student_id] = {};
+        marksByStudent[m.student_id][m.question_id] = m.marks_obtained;
+    });
+
+    // Get existing paper results (totals and attendance)
+    const [resultsRows] = await db.execute('SELECT * FROM student_paper_results WHERE paper_id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
+    const resultsByStudent = {};
+    resultsRows.forEach(r => {
+        resultsByStudent[r.student_id] = r;
+    });
+
+    res.render('exams/enter_marks', { 
+        paper: paper[0], 
+        students, 
+        questions, 
+        marksByStudent, 
+        resultsByStudent,
+        isAdmin: isAdminUser
+    });
 });
 
-router.post('/papers/:id/mark', isTeacher, async (req, res) => {
-    const { student_id, obtained_marks } = req.body;
-    await db.execute('INSERT INTO student_results (paper_id, student_id, obtained_marks, marked_by, tenant_id) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE obtained_marks = ?', [req.params.id, student_id, obtained_marks, req.session.userId, req.tenant.id, obtained_marks]);
-    res.redirect(`/papers/${req.params.id}/mark`);
+router.post('/papers/:id/save-marks-row', isTeacher, async (req, res) => {
+    const paperId = req.params.id;
+    const { student_id, is_absent, marks } = req.body;
+    
+    try {
+        const [paper] = await db.execute('SELECT is_locked FROM exam_papers WHERE id = ? AND tenant_id = ?', [paperId, req.tenant.id]);
+        if (paper.length > 0 && paper[0].is_locked) {
+            return res.status(403).json({ success: false, message: 'Paper is locked. Marks cannot be modified.' });
+        }
+
+        let totalObtained = 0;
+        const isAbsent = is_absent === 'true' || is_absent === true;
+
+        if (!isAbsent && marks) {
+            // Upsert each question mark
+            for (const [questionId, marksObtained] of Object.entries(marks)) {
+                const val = Number(marksObtained) || 0;
+                totalObtained += val;
+                
+                await db.execute(`
+                    INSERT INTO student_marks (tenant_id, paper_id, student_id, question_id, marks_obtained) 
+                    VALUES (?, ?, ?, ?, ?) 
+                    ON DUPLICATE KEY UPDATE marks_obtained = ?
+                `, [req.tenant.id, paperId, student_id, questionId, val, val]);
+            }
+        }
+
+        if (isAbsent) totalObtained = 0;
+
+        // Upsert the total result
+        await db.execute(`
+            INSERT INTO student_paper_results (tenant_id, paper_id, student_id, total_marks_obtained, is_absent) 
+            VALUES (?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE total_marks_obtained = ?, is_absent = ?
+        `, [req.tenant.id, paperId, student_id, totalObtained, isAbsent ? 1 : 0, totalObtained, isAbsent ? 1 : 0]);
+
+        res.json({ success: true, totalObtained, isAbsent });
+    } catch (err) {
+        console.error('Error saving marks:', err);
+        res.status(500).json({ success: false, message: 'Database error' });
+    }
+});
+
+// ADMIN: Lock/Unlock Paper
+router.post('/papers/:id/toggle-lock', isAdmin, async (req, res) => {
+    try {
+        const [paper] = await db.execute('SELECT is_locked FROM exam_papers WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
+        if (!paper.length) return res.status(404).send('Paper not found');
+        
+        const newLockState = paper[0].is_locked ? 0 : 1;
+        await db.execute('UPDATE exam_papers SET is_locked = ? WHERE id = ? AND tenant_id = ?', [newLockState, req.params.id, req.tenant.id]);
+        
+        res.redirect(`/papers/${req.params.id}/enter-marks`);
+    } catch (err) {
+        console.error('Error toggling lock:', err);
+        res.status(500).send('Database error');
+    }
 });
 
 // ADMIN/STUDENT: Report Card
