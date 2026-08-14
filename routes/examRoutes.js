@@ -51,15 +51,13 @@ router.post('/exams', isAdmin, async (req, res) => {
             const paperId = paperResult.insertId;
 
             // Generate default template: 3 questions, 2 parts each (total 100 marks)
-            const qStr = req.__ ? req.__('Question') : 'Question';
-            const pStr = req.__ ? req.__('Part') : 'Part';
             const templateQuestions = [
-                { text: `${qStr} 1 ${pStr} A`, marks: 17, section: 'Q1' },
-                { text: `${qStr} 1 ${pStr} B`, marks: 16, section: 'Q1' },
-                { text: `${qStr} 2 ${pStr} A`, marks: 17, section: 'Q2' },
-                { text: `${qStr} 2 ${pStr} B`, marks: 16, section: 'Q2' },
-                { text: `${qStr} 3 ${pStr} A`, marks: 17, section: 'Q3' },
-                { text: `${qStr} 3 ${pStr} B`, marks: 17, section: 'Q3' }
+                { text: '', marks: 17, section: 'الف' },
+                { text: '', marks: 16, section: 'ب' },
+                { text: '', marks: 17, section: 'الف' },
+                { text: '', marks: 16, section: 'ب' },
+                { text: '', marks: 17, section: 'الف' },
+                { text: '', marks: 17, section: 'ب' }
             ];
 
             for (const tq of templateQuestions) {
@@ -79,8 +77,10 @@ router.post('/exams', isAdmin, async (req, res) => {
 // ADMIN: Delete Exam
 router.post('/exams/:id/delete', isAdmin, async (req, res) => {
     try {
-        // Due to foreign key constraints, related exam_papers and questions should cascade or be deleted.
-        // Assuming ON DELETE CASCADE is set up for exam_papers. If not, we might need to delete them manually.
+        // Manual cascade deletion for exams
+        await db.execute('DELETE FROM student_results WHERE paper_id IN (SELECT id FROM exam_papers WHERE exam_id = ?) AND tenant_id = ?', [req.params.id, req.tenant.id]);
+        await db.execute('DELETE FROM questions WHERE paper_id IN (SELECT id FROM exam_papers WHERE exam_id = ?) AND tenant_id = ?', [req.params.id, req.tenant.id]);
+        await db.execute('DELETE FROM exam_papers WHERE exam_id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
         await db.execute('DELETE FROM exams WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
         res.redirect('/exams');
     } catch (error) {
