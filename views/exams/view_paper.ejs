@@ -180,12 +180,14 @@
                     let questionNum = Math.floor(index / 2) + 1;
                     let partName = (index % 2 === 0) ? 'الف' : 'ب';
                     let label = `سوال ${questionNum} (حصہ ${partName})`;
+                    const urduDigitsLocal = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+                    let qMarksUrdu = String(q.marks || 0).replace(/[0-9]/g, d => urduDigitsLocal[d]);
                 %>
 
                 <div class="question-block" id="question-<%= q.id %>">
                     <!-- View Mode -->
                     <div class="view-mode">
-                        <div class="question-text-view"><strong class="me-2"><%= label %>:</strong> <%= q.question_text ? q.question_text.trim() : '' %></div>
+                        <div class="question-text-view"><strong class="me-2"><%= label %>:</strong> <%= q.question_text ? q.question_text.trim() : '' %> <span class="ms-1">(<%= qMarksUrdu %>)</span></div>
                         
                         <!-- Empty lines for answers -->
                         <% if (!q.question_text || q.question_text.trim() === '') { %>
