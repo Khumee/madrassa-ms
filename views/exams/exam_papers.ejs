@@ -71,6 +71,7 @@
                                     <td class="px-4 align-middle text-center"><%= p.max_marks %></td>
                                     <td class="px-4 align-middle text-end">
                                         <a href="/papers/<%= p.id %>/view" class="btn btn-sm btn-outline-primary rounded-pill px-3"><i class="bi bi-eye me-1"></i><%= __('View_Paper') || 'View Paper' %></a>
+                                        <a href="/papers/<%= p.id %>/view?print=true" class="btn btn-sm btn-outline-success rounded-pill px-3 ms-1"><i class="bi bi-printer me-1"></i>پرنٹ کریں</a>
                                     </td>
                                 </tr>
                             <% }) %>
