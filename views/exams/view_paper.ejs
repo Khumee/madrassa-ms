@@ -54,12 +54,8 @@
     }
 
     .paper-meta {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
         font-size: 1.2rem;
         font-weight: bold;
-        margin-top: -60px; /* Bring it up alongside the center logo */
         position: relative;
         z-index: 10;
     }
@@ -179,30 +175,27 @@
     }
 </style>
 
-<div class="container no-print mt-2 text-end" style="max-width: 210mm;">
-    <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> <%= __('Back') || 'Back' %></a>
-    <button onclick="window.print()" class="btn btn-outline-primary btn-sm ms-2"><i class="bi bi-printer"></i> <%= __('Print_Paper') || 'Print Paper' %></button>
-</div>
-
 <div class="paper-container">
     <!-- Header aligned with the provided image -->
     <div class="paper-header">
-        <p class="bismillah">بسم الله الرحمن الرحيم</p>
-        <h1 class="madrassa-name">کلیۃ العلوم الاسلامیہ</h1>
-        <!-- Using a placeholder logo or standard logo.png -->
-        <img src="/images/logo.png" alt="Logo" class="madrassa-logo" onerror="this.src='https://via.placeholder.com/80x80?text=Logo'">
-        
-        <div class="paper-meta">
-            <div class="meta-right">
-                <span class="d-block">مجموع الدرجات ١٠٠</span>
+        <div class="row align-items-center">
+            <div class="col-4 text-end">
+                <span class="d-block fw-bold" style="font-size: 1.2rem;">مجموع الدرجات ١٠٠</span>
             </div>
-            <div class="meta-left" dir="ltr">
-                <span class="d-block text-end" style="font-family: sans-serif; font-size: 1rem;">Date: <%= new Date().toLocaleDateString('ur-PK') %></span>
-                <span class="d-block text-end">الوقت ٣ ساعات</span>
+            <div class="col-4 text-center">
+                <p class="bismillah">بسم الله الرحمن الرحيم</p>
+                <h1 class="madrassa-name">کلیۃ العلوم الاسلامیہ</h1>
+            </div>
+            <div class="col-4 text-start" dir="ltr">
+                <span class="d-block fw-bold" style="font-family: sans-serif; font-size: 1rem;">Date: <%= new Date().toLocaleDateString('ur-PK') %></span>
+                <span class="d-block fw-bold" style="font-size: 1.2rem;">الوقت ٣ ساعات</span>
             </div>
         </div>
+        <div class="text-center mt-2">
+            <img src="/logo.jpg" alt="Logo" class="madrassa-logo" onerror="this.src='https://via.placeholder.com/80x80?text=Logo'">
+        </div>
         
-        <h3 class="exam-title">الاختبار السنوي  [<%= paper.class_name %>]</h3>
+        <h3 class="exam-title mt-3">الاختبار السنوي  [<%= paper.class_name %>]</h3>
     </div>
     
     <div class="thick-line"></div>
@@ -227,7 +220,7 @@
 
                     <!-- View Mode -->
                     <div class="view-mode">
-                        <div class="question-text-view"><strong>السؤال <%= index + 1 %>:</strong> <%= q.question_text %></div>
+                        <div class="question-text-view"><%= q.question_text %></div>
                         
                         <!-- Empty lines for answers (3-4 lines as requested) -->
                         <div class="empty-lines"></div>
@@ -240,16 +233,16 @@
                     <div class="edit-mode no-print mt-3 p-3 border rounded bg-light" dir="ltr">
                         <form action="/questions/<%= q.id %>/edit" method="POST">
                             <div class="mb-3 text-end">
-                                <label class="form-label fw-bold">Question Text</label>
+                                <label class="form-label fw-bold"><%= __('Question_Text') || 'Question Text' %></label>
                                 <textarea name="question_text" class="form-control" rows="8" style="direction: rtl; font-size: 1.3rem;"><%= q.question_text %></textarea>
                             </div>
                             <div class="row mb-3 text-start">
                                 <div class="col-6">
-                                    <label class="form-label fw-bold">Marks</label>
+                                    <label class="form-label fw-bold"><%= __('Marks') || 'Marks' %></label>
                                     <input type="number" name="marks" class="form-control" value="<%= q.marks %>">
                                 </div>
                                 <div class="col-6">
-                                    <label class="form-label fw-bold">Section / Hisa (حصہ)</label>
+                                    <label class="form-label fw-bold"><%= __('Section') || 'Section / Hisa' %></label>
                                     <input type="text" name="section" class="form-control" value="<%= q.section %>" placeholder="مثلاً: حصہ الف">
                                 </div>
                             </div>
@@ -276,29 +269,11 @@
             </div>
         <% } %>
     </div>
-    
-    <!-- Add new question inline form -->
-    <div class="no-print mt-5 border pt-4 px-4 pb-3 rounded bg-light" dir="ltr">
-        <h5 class="fw-bold mb-3"><i class="bi bi-plus-circle"></i> Add New Question</h5>
-        <form action="/papers/<%= paper.id %>/questions" method="POST">
-            <div class="mb-3 text-end">
-                <textarea name="question_text" class="form-control shadow-sm" rows="4" placeholder="(حصہ الف)..." style="direction: rtl; font-size: 1.3rem;" required></textarea>
-            </div>
-            <div class="row mb-3 align-items-end text-start">
-                <div class="col-md-4">
-                    <label class="form-label">Marks</label>
-                    <input type="number" name="marks" class="form-control" value="10" required>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Section / Hisa (حصہ)</label>
-                    <input type="text" name="section" class="form-control" placeholder="مثلاً: حصہ الف">
-                </div>
-                <div class="col-md-4">
-                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-lg"></i> <%= __('Add_Question') || 'Add Question' %></button>
-                </div>
-            </div>
-        </form>
-    </div>
+</div>
+
+<div class="container no-print mt-4 mb-5 text-center" style="max-width: 210mm;">
+    <a href="javascript:history.back()" class="btn btn-outline-secondary btn-lg"><i class="bi bi-arrow-left"></i> <%= __('Back') || 'Back' %></a>
+    <button onclick="window.print()" class="btn btn-outline-primary btn-lg ms-3"><i class="bi bi-printer"></i> <%= __('Print_Paper') || 'Print Paper' %></button>
 </div>
 
 <script>
@@ -313,9 +288,9 @@
         btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Generating...';
 
         const defaultQuestions = [
-            "(حصہ الف) ________________________________________________\n\n...یا...\n\n(حصہ ب) ________________________________________________",
-            "(حصہ الف) ________________________________________________\n\n...یا...\n\n(حصہ ب) ________________________________________________",
-            "(حصہ الف) ________________________________________________\n\n...یا...\n\n(حصہ ب) ________________________________________________"
+            "السؤال الأول (حصہ الف) ________________________________________________\n\n...یا...\n\n(حصہ ب) ________________________________________________",
+            "السؤال الثاني (حصہ الف) ________________________________________________\n\n...یا...\n\n(حصہ ب) ________________________________________________",
+            "السؤال الثالث (حصہ الف) ________________________________________________\n\n...یا...\n\n(حصہ ب) ________________________________________________"
         ];
 
         // We will post these to the existing add question route one by one using fetch
