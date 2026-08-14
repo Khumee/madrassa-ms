@@ -195,7 +195,7 @@
                         <form action="/questions/<%= q.id %>/edit" method="POST">
                             <div class="mb-3 text-end" dir="rtl">
                                 <label class="form-label fw-bold"><strong class="me-2 text-primary"><%= label %>:</strong> <%= __('Question_Text') || 'Question Text' %></label>
-                                <textarea name="question_text" class="form-control" rows="4" style="direction: rtl; font-size: 1.3rem;" placeholder="Type your question here..."><%= q.question_text %></textarea>
+                                <textarea name="question_text" class="form-control" rows="4" style="direction: rtl; font-size: 1.3rem;" placeholder="<%= __('Type_your_question_here') || 'اپنا سوال یہاں لکھیں...' %>"><%= q.question_text %></textarea>
                             </div>
                             <div class="row mb-3 text-start">
                                 <div class="col-6">
