@@ -128,7 +128,19 @@
         <div class="d-flex align-items-center text-end">
             <img src="/logo.jpg" alt="Logo" style="height: 50px; margin-left: 10px;" onerror="this.style.display='none'">
             <div style="font-size: 1rem;">
-                <span class="d-block fw-bold">مجموع الدرجات ١٠٠</span>
+                <% 
+                    let calculatedTotal = 0;
+                    if (questions && questions.length > 0) {
+                        questions.forEach(q => {
+                            calculatedTotal += Number(q.marks || 0);
+                        });
+                    } else {
+                        calculatedTotal = paper.max_marks || 100;
+                    }
+                    const urduDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+                    let urduTotal = String(calculatedTotal).replace(/[0-9]/g, d => urduDigits[d]);
+                %>
+                <span class="d-block fw-bold">مجموع الدرجات <%= urduTotal %></span>
             </div>
         </div>
         
@@ -171,10 +183,7 @@
                 <div class="question-block" id="question-<%= q.id %>">
                     <!-- View Mode -->
                     <div class="view-mode">
-                        <div class="question-text-view">
-                            <strong class="me-2"><%= label %>:</strong>
-                            <%= q.question_text %>
-                        </div>
+                        <div class="question-text-view"><strong class="me-2"><%= label %>:</strong> <%= q.question_text ? q.question_text.trim() : '' %></div>
                         
                         <!-- Empty lines for answers -->
                         <% if (!q.question_text || q.question_text.trim() === '') { %>
