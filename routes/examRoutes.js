@@ -125,12 +125,14 @@ router.post('/papers/:id/questions', isTeacher, async (req, res) => {
 
 router.post('/questions/:id/edit', isTeacher, async (req, res) => {
     await db.execute('UPDATE questions SET question_text = ?, marks = ?, section = ? WHERE id = ? AND tenant_id = ?', [req.body.question_text, req.body.marks, req.body.section, req.params.id, req.tenant.id]);
-    res.redirect('back');
+    const referer = req.get('Referer');
+    res.redirect(referer ? referer : '/exams');
 });
 
 router.post('/questions/:id/delete', isTeacher, async (req, res) => {
     await db.execute('DELETE FROM questions WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
-    res.redirect('back');
+    const referer = req.get('Referer');
+    res.redirect(referer ? referer : '/exams');
 });
 // ADMIN: All Papers for an Exam
 router.get('/exams/:id/papers', isAdmin, async (req, res) => {
