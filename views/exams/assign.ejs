@@ -59,7 +59,6 @@
                                 <th><%= __('Subject') %></th>
                                 <th><%= __('Assigned_Teacher') %></th>
                                 <th><%= __('Max_Marks') %></th>
-                                <th><%= __('Status') %></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -70,11 +69,10 @@
                                         <td><%= paper.subject %></td>
                                         <td><%= paper.teacher_name %></td>
                                         <td><%= paper.max_marks %></td>
-                                        <td><span class="badge bg-<%= paper.status === 'published' ? 'success' : (paper.status === 'completed' ? 'secondary' : 'warning') %>"><%= __(paper.status) || paper.status %></span></td>
                                     </tr>
                                 <% }) %>
                             <% } else { %>
-                                <tr><td colspan="5" class="text-center"><%= __('No_papers_assigned_yet') %></td></tr>
+                                <tr><td colspan="4" class="text-center"><%= __('No_papers_assigned_yet') %></td></tr>
                             <% } %>
                         </tbody>
                     </table>
