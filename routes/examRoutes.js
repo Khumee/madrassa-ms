@@ -187,7 +187,7 @@ router.get('/papers/:id/enter-marks', isTeacher, async (req, res) => {
     const [students] = await db.execute(`
         SELECT s.id, s.name, s.roll_number 
         FROM students s
-        WHERE s.class_id = ? AND s.tenant_id = ? AND s.status = 'active'
+        WHERE s.class_id = ? AND s.tenant_id = ?
         ORDER BY s.roll_number ASC, s.name ASC
     `, [paper[0].class_id, req.tenant.id]);
 
