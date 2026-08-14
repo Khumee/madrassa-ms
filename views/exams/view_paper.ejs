@@ -1,4 +1,5 @@
 <%- include('../partials/header', { title: __('View_Paper') || 'View Paper' }) %>
+</div> <!-- Close the container from header.ejs -->
 
 <style>
     body {
@@ -65,6 +66,7 @@
         display: inline-block;
         width: 100%;
         line-height: 1.8;
+        text-align: right;
     }
 
     .empty-lines {
@@ -98,9 +100,9 @@
         body {
             background: #fff;
             margin: 0;
-            padding: 0;
+            padding: 10mm;
         }
-        .container, .navbar, .footer, .btn, .question-actions, .no-print {
+        .navbar, footer, .btn, .question-actions, .no-print {
             display: none !important;
         }
         .paper-container {
@@ -116,7 +118,7 @@
         }
         @page {
             size: A4;
-            margin: 15mm;
+            margin: 0;
         }
     }
 </style>
@@ -179,7 +181,7 @@
                 <% 
                     let questionNum = Math.floor(index / 2) + 1;
                     let partName = (index % 2 === 0) ? 'الف' : 'ب';
-                    let label = `سوال ${questionNum} (حصہ ${partName})`;
+                    let label = `سوال ${questionNum} (حصہ ${partName}):`;
                     const urduDigitsLocal = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
                     let qMarksUrdu = String(q.marks || 0).replace(/[0-9]/g, d => urduDigitsLocal[d]);
                 %>
@@ -187,7 +189,7 @@
                 <div class="question-block" id="question-<%= q.id %>">
                     <!-- View Mode -->
                     <div class="view-mode">
-                        <div class="question-text-view"><strong class="me-2"><%= label %>:</strong> <%= q.question_text ? q.question_text.trim() : '' %> <span class="ms-1">(<%= qMarksUrdu %>)</span></div>
+                        <div class="question-text-view"><strong class="me-2"><%= label %></strong> <%= q.question_text ? q.question_text.trim() : '' %> <span class="ms-1">(<%= qMarksUrdu %>)</span></div>
                         
                         <!-- Empty lines for answers -->
                         <% if (!q.question_text || q.question_text.trim() === '') { %>
@@ -207,15 +209,15 @@
                     <div class="edit-mode no-print mt-3 p-3 border rounded bg-light" dir="ltr">
                         <form action="/questions/<%= q.id %>/edit" method="POST">
                             <div class="mb-3 text-end" dir="rtl">
-                                <label class="form-label fw-bold"><strong class="me-2 text-primary"><%= label %>:</strong> <%= __('Question_Text') || 'Question Text' %></label>
+                                <label class="form-label fw-bold"><strong class="me-2 text-primary"><%= label %></strong> <%= __('Question_Text') || 'Question Text' %></label>
                                 <textarea name="question_text" class="form-control" rows="4" style="direction: rtl; font-size: 1.3rem;" placeholder="<%= __('Type_your_question_here') || 'اپنا سوال یہاں لکھیں...' %>"><%= q.question_text %></textarea>
                             </div>
                             <div class="row mb-3 text-start">
-                                <div class="col-6">
+                                <div class="col-md-4">
                                     <label class="form-label fw-bold"><%= __('Marks') || 'Marks' %></label>
                                     <input type="number" name="marks" class="form-control" value="<%= q.marks %>">
                                 </div>
-                                <div class="col-6">
+                                <div class="col-6 d-none">
                                     <label class="form-label fw-bold"><%= __('Section') || 'Section / Hisa' %></label>
                                     <input type="text" name="section" class="form-control" value="<%= q.section %>" placeholder="مثلاً: حصہ الف">
                                 </div>
@@ -289,4 +291,5 @@
     }
 </script>
 
+<div class="container pb-5"> <!-- Re-open the container for footer.ejs -->
 <%- include('../partials/footer') %>
