@@ -165,7 +165,7 @@
                 <% 
                     let questionNum = Math.floor(index / 2) + 1;
                     let partName = (index % 2 === 0) ? 'الف' : 'ب';
-                    let label = (index % 2 === 0) ? `سوال ${questionNum} (حصہ ${partName})` : `(حصہ ${partName})`;
+                    let label = `سوال ${questionNum} (حصہ ${partName})`;
                 %>
 
                 <div class="question-block" id="question-<%= q.id %>">
