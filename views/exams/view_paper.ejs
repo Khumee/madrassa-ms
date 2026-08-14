@@ -172,7 +172,6 @@
                     <!-- View Mode -->
                     <div class="view-mode">
                         <div class="question-text-view">
-                            <strong class="me-2"><%= label %>:</strong>
                             <%= q.question_text %>
                         </div>
                         
@@ -197,7 +196,7 @@
                     <div class="edit-mode no-print mt-3 p-3 border rounded bg-light" dir="ltr">
                         <form action="/questions/<%= q.id %>/edit" method="POST">
                             <div class="mb-3 text-end" dir="rtl">
-                                <label class="form-label fw-bold"><strong class="me-2 text-primary"><%= label %>:</strong> <%= __('Question_Text') || 'Question Text' %></label>
+                                <label class="form-label fw-bold"><%= __('Question_Text') || 'Question Text' %></label>
                                 <textarea name="question_text" class="form-control" rows="4" style="direction: rtl; font-size: 1.3rem;" placeholder="Type your question here..."><%= q.question_text %></textarea>
                             </div>
                             <div class="row mb-3 text-start">
@@ -254,13 +253,16 @@
         // Generate 6 empty questions (3 questions, 2 parts each)
         for (let i = 0; i < 6; i++) {
             let sectionName = (i % 2 === 0) ? 'الف' : 'ب';
+            let qNum = Math.floor(i / 2) + 1;
+            let initialText = (i % 2 === 0) ? `سوال ${qNum} (حصہ ${sectionName}) ` : `(حصہ ${sectionName}) `;
+            
             await fetch(`/papers/<%= paper.id %>/questions`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
                 body: new URLSearchParams({
-                    question_text: ' ',
+                    question_text: initialText,
                     marks: 10,
                     section: sectionName
                 })
