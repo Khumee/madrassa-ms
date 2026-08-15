@@ -101,7 +101,7 @@ router.get('/exams/:id/assign', isAdmin, async (req, res) => {
 
 router.post('/exams/:id/assign', isAdmin, async (req, res) => {
     await db.execute('INSERT INTO exam_papers (exam_id, class_id, subject, teacher_id, max_marks, tenant_id) VALUES (?, ?, ?, ?, ?, ?)', [req.params.id, req.body.class_id, req.body.subject, req.body.teacher_id, req.body.max_marks || 100, req.tenant.id]);
-    res.redirect(`/exams/${req.params.id}/assign`);
+    res.redirect(`/exams/${req.params.id}/papers`);
 });
 
 // TEACHER: My Tasks
@@ -156,11 +156,19 @@ router.get('/exams/:id/papers', isAdmin, async (req, res) => {
     const [classes] = await db.execute('SELECT DISTINCT c.id, c.name_ar FROM classes c JOIN exam_papers ep ON c.id = ep.class_id WHERE ep.exam_id = ? AND ep.tenant_id = ? ORDER BY c.name_ar ASC', [req.params.id, req.tenant.id]);
     const [teachers] = await db.execute('SELECT DISTINCT u.id, u.username as name FROM users u JOIN exam_papers ep ON u.id = ep.teacher_id WHERE ep.exam_id = ? AND ep.tenant_id = ? ORDER BY u.username ASC', [req.params.id, req.tenant.id]);
 
+    // Fetch all for new paper assignment
+    const [allClasses] = await db.execute('SELECT * FROM classes WHERE tenant_id = ?', [req.tenant.id]);
+    const [allTeachers] = await db.execute('SELECT * FROM users WHERE role = "أستاذ" AND tenant_id = ?', [req.tenant.id]);
+    const [books] = await db.execute('SELECT id, title, class_id FROM books WHERE tenant_id = ?', [req.tenant.id]);
+
     res.render('exams/exam_papers', { 
         papers, 
         exam: exam[0], 
         classes, 
         teachers, 
+        allClasses,
+        allTeachers,
+        books,
         selectedClassId: req.query.classId || '', 
         selectedTeacherId: req.query.teacherId || '' 
     });
