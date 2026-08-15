@@ -467,5 +467,10 @@
     "No_papers_found": "کوئی پرچے نہیں ملے",
     "Question": "سوال",
     "Part": "حصہ",
-    "Edit_Question": "سوال میں ترمیم کریں"
+    "Edit_Question": "سوال میں ترمیم کریں",
+    "Update_Paper_Date": "تاریخ اپ ڈیٹ کریں",
+    "Not_set": "درج نہیں",
+    "Are_you_sure_you_want_to_delete_this_paper": "کیا آپ واقعی اس پرچے کو حذف کرنا چاہتے ہیں؟",
+    "Save": "محفوظ کریں",
+    "Date": "تاریخ"
 }

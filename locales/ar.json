@@ -467,5 +467,10 @@
     "No_papers_found": "لم يتم العثور على أوراق",
     "Question": "السؤال",
     "Part": "الجزء",
-    "Edit_Question": "تعديل السؤال"
+    "Edit_Question": "تعديل السؤال",
+    "Update_Paper_Date": "تحديث تاريخ الورقة",
+    "Not_set": "لم يتم التعيين",
+    "Are_you_sure_you_want_to_delete_this_paper": "هل أنت متأكد أنك تريد حذف هذه الورقة؟",
+    "Save": "حفظ",
+    "Date": "تاريخ"
 }
