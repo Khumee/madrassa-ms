@@ -1,42 +1,156 @@
-<%- include('../partials/header', { title: 'Report Card' }) %>
-<div class="container mt-1">
-    <div class="card shadow-lg p-4" style="max-width: 600px; margin: auto;">
-        <div class="text-center mb-4">
-            <h2><%= __('Student_Report_Card') %></h2>
-            <h4><%= student.name %> (<%= __('Roll_Number') %>: <%= student.roll_number %>)</h4>
+<%- include('../partials/header', { title: __('Student_Report_Card') || 'Report Card' }) %>
+
+<!-- Print styling -->
+<style>
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        .printable-area, .printable-area * {
+            visibility: visible;
+        }
+        .printable-area {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+        .no-print {
+            display: none !important;
+        }
+        .card {
+            border: none !important;
+            box-shadow: none !important;
+        }
+    }
+    
+    .report-card-container {
+        max-width: 800px;
+        margin: auto;
+        border: 2px solid #2c3e50;
+        border-radius: 12px;
+        background-color: #fff;
+    }
+    
+    .watermark {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0.05;
+        z-index: 0;
+        width: 80%;
+        pointer-events: none;
+    }
+</style>
+
+<div class="container mt-4 mb-5">
+    <div class="text-end mb-3 no-print">
+        <a href="/exams/<%= exam.id %>/results" class="btn btn-outline-secondary me-2"><i class="bi bi-arrow-left"></i> <%= __('Back') || 'Back' %></a>
+        <button onclick="window.print()" class="btn btn-dark"><i class="bi bi-printer"></i> <%= __('Print_Report_Card') || 'Print' %></button>
+    </div>
+
+    <div class="card shadow-lg p-5 report-card-container printable-area position-relative">
+        <% if (locals.tenant && locals.tenant.logo_url) { %>
+            <img src="<%= tenant.logo_url %>" alt="Madrassa Logo" class="watermark">
+        <% } %>
+
+        <!-- Header Section -->
+        <div class="row mb-4 align-items-center" style="position: relative; z-index: 1;">
+            <div class="col-3 text-center">
+                <% if (locals.tenant && locals.tenant.logo_url) { %>
+                    <img src="<%= tenant.logo_url %>" alt="Logo" style="max-height: 100px; max-width: 100%;">
+                <% } %>
+            </div>
+            <div class="col-6 text-center">
+                <h1 class="fw-bold text-dark mb-1"><%= locals.tenant ? tenant.school_name : 'Madrassa' %></h1>
+                <h4 class="text-secondary mb-2"><%= exam.name %></h4>
+                <h5 class="fw-bold bg-dark text-white d-inline-block px-4 py-1 rounded-pill"><%= __('Student_Report_Card') || 'Report Card' %></h5>
+            </div>
+            <div class="col-3 text-center">
+                <!-- Optional placeholder for student photo or QR -->
+            </div>
         </div>
+
+        <hr style="border-top: 2px solid #2c3e50; opacity: 1;" class="mb-4">
         
-        <table class="table table-bordered text-center">
-            <thead class="table-dark">
-                <tr>
-                    <th><%= __('Subject') %></th>
-                    <th><%= __('Max_Marks') %></th>
-                    <th><%= __('Obtained_Marks') %></th>
-                </tr>
-            </thead>
-            <tbody>
-                <% results.forEach(r => { %>
+        <!-- Student Details -->
+        <div class="row mb-4" style="position: relative; z-index: 1;">
+            <div class="col-md-6">
+                <table class="table table-sm table-borderless mb-0">
                     <tr>
-                        <td><%= r.subject %></td>
-                        <td><%= r.max_marks %></td>
-                        <td><%= r.obtained_marks %></td>
+                        <th width="40%" class="text-muted"><%= __('Name') %>:</th>
+                        <td class="fw-bold fs-5"><%= student.name %></td>
                     </tr>
-                <% }) %>
-                <tr class="table-secondary fw-bold">
-                    <td><%= __('Total') %></td>
-                    <td><%= totalMax %></td>
-                    <td><%= totalObtained %></td>
-                </tr>
-            </tbody>
-        </table>
-        
-        <div class="alert alert-<%= gradeClass %> text-center fs-4 mt-3">
-            <strong><%= __('Grade') %>:</strong> <%= grade %> <br>
-            <small>(<%= percentage %>% <%= __('Percentage') %>)</small>
+                    <tr>
+                        <th class="text-muted"><%= __('Roll_Number') %>:</th>
+                        <td class="fw-bold"><%= student.roll_number %></td>
+                    </tr>
+                </table>
+            </div>
         </div>
         
-        <div class="text-center mt-3">
-            <button onclick="window.print()" class="btn btn-dark"><%= __('Print_Report_Card') %></button>
+        <!-- Results Table -->
+        <div style="position: relative; z-index: 1;">
+            <table class="table table-bordered text-center align-middle border-dark">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="py-3"><%= __('Subject') %></th>
+                        <th class="py-3"><%= __('Max_Marks') %></th>
+                        <th class="py-3"><%= __('Obtained_Marks') %></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% results.forEach(r => { %>
+                        <tr>
+                            <td class="fw-semibold text-start px-4"><%= r.subject %></td>
+                            <td><%= r.max_marks %></td>
+                            <% if (r.is_absent) { %>
+                                <td class="text-danger fw-bold"><%= __('Absent') || 'Absent' %></td>
+                            <% } else if (r.marks_obtained !== null) { %>
+                                <td class="fw-bold <%= r.marks_obtained < (r.max_marks * 0.4) ? 'text-danger' : '' %>"><%= r.marks_obtained %></td>
+                            <% } else { %>
+                                <td class="text-muted fst-italic">-</td>
+                            <% } %>
+                        </tr>
+                    <% }) %>
+                    <tr class="table-secondary border-dark fs-5">
+                        <td class="fw-bold text-start px-4"><%= __('Total') %></td>
+                        <td class="fw-bold"><%= totalMax %></td>
+                        <td class="fw-bold"><%= allPapersUnmarked ? '-' : totalObtained %></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Grading Section -->
+        <div class="mt-4 p-4 rounded bg-light border" style="position: relative; z-index: 1;">
+            <div class="row align-items-center text-center">
+                <div class="col-md-6 border-end">
+                    <h5 class="text-muted mb-2"><%= __('Percentage') %></h5>
+                    <h2 class="fw-bold mb-0 <%= allPapersUnmarked ? 'text-muted' : '' %>"><%= allPapersUnmarked ? '-' : percentage + '%' %></h2>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="text-muted mb-2"><%= __('Grade') %></h5>
+                    <% if (allPapersUnmarked) { %>
+                        <h4 class="fw-bold text-muted mb-0"><%= __('Papers_not_marked') || 'Papers not marked yet' %></h4>
+                    <% } else { %>
+                        <h2 class="fw-bold text-<%= gradeClass %> mb-0"><%= grade %></h2>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Signatures -->
+        <div class="row mt-5 pt-5 text-center" style="position: relative; z-index: 1;">
+            <div class="col-6">
+                <hr style="width: 60%; margin: 0 auto 10px auto; border-top: 1px solid #000; opacity: 1;">
+                <strong><%= __('Class_Teacher') || 'Class Teacher' %></strong>
+            </div>
+            <div class="col-6">
+                <hr style="width: 60%; margin: 0 auto 10px auto; border-top: 1px solid #000; opacity: 1;">
+                <strong><%= __('Principal') || 'Principal' %></strong>
+            </div>
         </div>
     </div>
 </div>

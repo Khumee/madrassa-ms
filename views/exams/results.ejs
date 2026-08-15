@@ -1,33 +1,74 @@
 <%- include('../partials/header', { title: __('Exam_Results') }) %>
 <div class="container mt-1">
-    <h2><%= __('Exam_Results') %></h2>
-    <p>Generate individual report cards for students.</p>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><%= __('Exam_Results') %> - <%= exam.name %></h2>
+            <p class="text-muted"><%= __('Generate_individual_report_cards_for_students') || 'Generate individual report cards for students.' %></p>
+        </div>
+        <a href="/exams" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> <%= __('Back') || 'Back' %></a>
+    </div>
+
+    <!-- Filters -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body bg-light rounded">
+            <form method="GET" action="/exams/<%= exam.id %>/results" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold"><%= __('Class') %></label>
+                    <select name="classId" class="form-select">
+                        <option value=""><%= __('All_Classes') || 'All Classes' %></option>
+                        <% classes.forEach(c => { %>
+                            <option value="<%= c.id %>" <%= selectedClassId == c.id ? 'selected' : '' %>><%= c.name_ar %></option>
+                        <% }) %>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-filter"></i> <%= __('Filter') || 'Filter' %></button>
+                </div>
+                <% if (selectedClassId) { %>
+                    <div class="col-md-2">
+                        <a href="/exams/<%= exam.id %>/results" class="btn btn-outline-secondary w-100"><%= __('Clear') || 'Clear' %></a>
+                    </div>
+                <% } %>
+            </form>
+        </div>
+    </div>
     
-    <table class="table table-bordered mt-3">
-        <thead class="table-dark">
-            <tr>
-                <th><%= __('Student_ID') %></th>
-                <th><%= __('Name') %></th>
-                <th><%= __('Class') %></th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% if (typeof students !== 'undefined') { %>
-                <% students.forEach(s => { %>
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped mb-0 text-center">
+                <thead class="table-dark">
                     <tr>
-                        <td><%= s.id %></td>
-                        <td><%= s.name %></td>
-                        <td><%= s.class_name %></td>
-                        <td>
-                            <a href="/exams/<%= exam_id %>/student/<%= s.id %>/report-card" class="btn btn-sm btn-primary"><%= __('View_Report_Card') %></a>
-                        </td>
+                        <th><%= __('Student_ID') %></th>
+                        <th><%= __('Name') %></th>
+                        <th><%= __('Class') %></th>
+                        <th><%= __('Actions') || 'Actions' %></th>
                     </tr>
-                <% }) %>
-            <% } else { %>
-                <tr><td colspan="4" class="text-center">Please enter an exam ID to view students.</td></tr>
-            <% } %>
-        </tbody>
-    </table>
+                </thead>
+                <tbody>
+                    <% if (typeof students !== 'undefined' && students.length > 0) { %>
+                        <% students.forEach(s => { %>
+                            <tr>
+                                <td class="align-middle"><%= s.id %></td>
+                                <td class="align-middle text-start fw-semibold text-primary"><%= s.name %></td>
+                                <td class="align-middle"><%= s.class_name %></td>
+                                <td class="align-middle">
+                                    <a href="/exams/<%= exam.id %>/student/<%= s.id %>/report-card" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                        <i class="bi bi-card-text me-1"></i> <%= __('View_Report_Card') %>
+                                    </a>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-muted">
+                                <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                                <%= __('No_students_found') || 'No students found for this filter.' %>
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 <%- include('../partials/footer') %>

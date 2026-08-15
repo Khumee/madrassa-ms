@@ -17,14 +17,33 @@ router.get('/exams', isAdmin, async (req, res) => {
 
 // ADMIN: View Results
 router.get('/exams/:id/results', isAdmin, async (req, res) => {
-    const [students] = await db.execute(`
+    let query = `
         SELECT DISTINCT s.id, s.name, c.name_ar as class_name 
         FROM students s 
         JOIN classes c ON s.class_id = c.id 
         JOIN exam_papers ep ON ep.class_id = c.id 
         WHERE ep.exam_id = ? AND ep.tenant_id = ?
-    `, [req.params.id, req.tenant.id]);
-    res.render('exams/results', { students, exam_id: req.params.id });
+    `;
+    const params = [req.params.id, req.tenant.id];
+    
+    if (req.query.classId) {
+        query += ' AND s.class_id = ?';
+        params.push(req.query.classId);
+    }
+    
+    query += ' ORDER BY c.name_ar ASC, s.name ASC';
+
+    const [students] = await db.execute(query, params);
+    
+    const [exam] = await db.execute('SELECT * FROM exams WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
+    const [classes] = await db.execute('SELECT DISTINCT c.id, c.name_ar FROM classes c JOIN exam_papers ep ON c.id = ep.class_id WHERE ep.exam_id = ? AND ep.tenant_id = ? ORDER BY c.name_ar ASC', [req.params.id, req.tenant.id]);
+
+    res.render('exams/results', { 
+        students, 
+        exam: exam[0], 
+        classes,
+        selectedClassId: req.query.classId || ''
+    });
 });
 
 // ADMIN: Create Exam
@@ -319,19 +338,54 @@ router.get('/exams/:exam_id/student/:student_id/report-card', async (req, res) =
         return res.status(404).send('Student not found');
     }
 
-    const [results] = await db.execute('SELECT sr.*, ep.subject, ep.max_marks FROM student_results sr JOIN exam_papers ep ON sr.paper_id = ep.id WHERE sr.student_id = ? AND ep.exam_id = ? AND sr.tenant_id = ?', [req.params.student_id, req.params.exam_id, req.tenant.id]);
+    const [exam] = await db.execute('SELECT name FROM exams WHERE id = ? AND tenant_id = ?', [req.params.exam_id, req.tenant.id]);
+
+    const [results] = await db.execute(`
+        SELECT 
+            ep.id as paper_id, 
+            ep.subject, 
+            ep.max_marks,
+            spr.marks_obtained,
+            spr.is_absent
+        FROM exam_papers ep
+        LEFT JOIN student_paper_results spr ON ep.id = spr.paper_id AND spr.student_id = ?
+        WHERE ep.exam_id = ? AND ep.class_id = ? AND ep.tenant_id = ?
+        ORDER BY ep.subject ASC
+    `, [req.params.student_id, req.params.exam_id, student[0].class_id, req.tenant.id]);
     
     let totalObtained = 0, totalMax = 0;
-    results.forEach(r => { totalObtained += r.obtained_marks; totalMax += r.max_marks; });
-    const percentage = totalMax > 0 ? (totalObtained / totalMax) * 100 : 0;
+    let markedCount = 0;
+    
+    results.forEach(r => { 
+        totalMax += r.max_marks;
+        if (r.marks_obtained !== null) {
+            totalObtained += r.marks_obtained; 
+            markedCount++;
+        }
+    });
+    
+    const allPapersUnmarked = markedCount === 0;
+    const percentage = totalMax > 0 && !allPapersUnmarked ? (totalObtained / totalMax) * 100 : 0;
     
     let grade = 'F (Rasib)', gradeClass = 'danger';
-    if (percentage >= 80) { grade = 'A+ (Mumtaz)'; gradeClass = 'success'; }
-    else if (percentage >= 60) { grade = 'A (Jaid Jiddan)'; gradeClass = 'primary'; }
-    else if (percentage >= 50) { grade = 'B (Jaid)'; gradeClass = 'info'; }
-    else if (percentage >= 40) { grade = 'C (Maqbool)'; gradeClass = 'warning'; }
+    if (!allPapersUnmarked) {
+        if (percentage >= 80) { grade = 'A+ (Mumtaz)'; gradeClass = 'success'; }
+        else if (percentage >= 60) { grade = 'A (Jaid Jiddan)'; gradeClass = 'primary'; }
+        else if (percentage >= 50) { grade = 'B (Jaid)'; gradeClass = 'info'; }
+        else if (percentage >= 40) { grade = 'C (Maqbool)'; gradeClass = 'warning'; }
+    }
 
-    res.render('exams/report_card', { student: student[0], results, totalObtained, totalMax, percentage: percentage.toFixed(2), grade, gradeClass });
+    res.render('exams/report_card', { 
+        student: student[0], 
+        exam: exam[0],
+        results, 
+        totalObtained, 
+        totalMax, 
+        percentage: percentage.toFixed(2), 
+        grade, 
+        gradeClass,
+        allPapersUnmarked
+    });
 });
 
 module.exports = router;
