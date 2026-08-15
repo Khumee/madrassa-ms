@@ -87,7 +87,7 @@
                                         <a href="/papers/<%= p.id %>/view" class="btn btn-sm btn-outline-primary rounded-pill px-3"><i class="bi bi-eye me-1"></i><%= __('View_Paper') || 'View Paper' %></a>
                                         <a href="/papers/<%= p.id %>/view?print=true" class="btn btn-sm btn-outline-success rounded-pill px-3 ms-1"><i class="bi bi-printer me-1"></i>پرنٹ کریں</a>
                                         <a href="/papers/<%= p.id %>/enter-marks" class="btn btn-sm btn-outline-warning rounded-pill px-3 ms-1"><i class="bi bi-pencil-square me-1"></i>نمبرات درج کریں</a>
-                                        <form action="/papers/<%= p.id %>/delete" method="POST" onsubmit="event.preventDefault(); const form = this; showConfirm('<%= __('Are_you_sure_you_want_to_delete_this_paper') || \'کیا آپ واقعی اس پرچے کو حذف کرنا چاہتے ہیں؟\' %>').then(c => { if(c) form.submit(); });" style="display:inline-block;">
+                                        <form action="/papers/<%= p.id %>/delete" method="POST" onsubmit="event.preventDefault(); const form = this; showConfirm('<%= __('Are_you_sure_you_want_to_delete_this_paper') || "کیا آپ واقعی اس پرچے کو حذف کرنا چاہتے ہیں؟" %>').then(c => { if(c) form.submit(); });" style="display:inline-block;">
                                             <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3 ms-1"><i class="bi bi-trash me-1"></i><%= __('Delete') || 'حذف کریں' %></button>
                                         </form>
                                     </td>
