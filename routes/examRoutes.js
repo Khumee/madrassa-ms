@@ -97,6 +97,22 @@ router.post('/exams/:id/assign', isAdmin, async (req, res) => {
     res.redirect(`/exams/${req.params.id}/papers`);
 });
 
+// ADMIN: Delete Paper
+router.post('/papers/:id/delete', isAdmin, async (req, res) => {
+    try {
+        await db.execute('DELETE FROM student_results WHERE paper_id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
+        await db.execute('DELETE FROM student_marks WHERE paper_id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
+        await db.execute('DELETE FROM student_paper_results WHERE paper_id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
+        await db.execute('DELETE FROM questions WHERE paper_id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
+        await db.execute('DELETE FROM exam_papers WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
+        const referer = req.get('Referer');
+        res.redirect(referer ? referer : '/exams');
+    } catch (err) {
+        console.error('Error deleting paper:', err);
+        res.status(500).send('Database error');
+    }
+});
+
 // TEACHER: My Tasks
 router.get('/papers/my-tasks', isTeacher, async (req, res) => {
     const [papers] = await db.execute(`SELECT ep.*, e.name as exam_name, c.name_ar as class_name FROM exam_papers ep JOIN exams e ON ep.exam_id = e.id JOIN classes c ON ep.class_id = c.id WHERE ep.teacher_id = ? AND ep.tenant_id = ?`, [req.session.userId, req.tenant.id]);
