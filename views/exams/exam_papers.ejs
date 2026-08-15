@@ -79,7 +79,7 @@
                                         <% if (p.paper_date) { %>
                                             <%= new Date(p.paper_date).toLocaleDateString('ur-PK') %>
                                         <% } else { %>
-                                            <span class="text-muted small">Not set</span>
+                                            <span class="text-muted small"><%= __('Not_set') || 'درج نہیں' %></span>
                                         <% } %>
                                         <button class="btn btn-sm btn-link text-decoration-none ms-2 p-0" onclick="openDateModal('<%= p.id %>', '<%= p.paper_date ? new Date(p.paper_date - (new Date(p.paper_date).getTimezoneOffset() * 60000)).toISOString().split('T')[0] : '' %>')" title="Edit Date"><i class="bi bi-pencil-square text-secondary"></i></button>
                                     </td>
