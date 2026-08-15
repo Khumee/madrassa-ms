@@ -338,7 +338,7 @@ router.get('/exams/:exam_id/student/:student_id/report-card', async (req, res) =
         return res.status(404).send('Student not found');
     }
 
-    const [exam] = await db.execute('SELECT name FROM exams WHERE id = ? AND tenant_id = ?', [req.params.exam_id, req.tenant.id]);
+    const [exam] = await db.execute('SELECT id, name FROM exams WHERE id = ? AND tenant_id = ?', [req.params.exam_id, req.tenant.id]);
 
     const [results] = await db.execute(`
         SELECT 
