@@ -472,5 +472,11 @@
     "Not_set": "درج نہیں",
     "Are_you_sure_you_want_to_delete_this_paper": "کیا آپ واقعی اس پرچے کو حذف کرنا چاہتے ہیں؟",
     "Save": "محفوظ کریں",
-    "Date": "تاریخ"
+    "Date": "تاریخ",
+    "Generate_individual_report_cards_for_students": "طلباء کے انفرادی رپورٹ کارڈز تیار کریں",
+    "Papers_not_marked": "پرچوں کے نمبر نہیں لگائے گئے",
+    "Class_Teacher": "کلاس ٹیچر / انچارج",
+    "Principal": "مہتمم / پرنسپل",
+    "Back": "واپس",
+    "Clear": "صاف کریں"
 }

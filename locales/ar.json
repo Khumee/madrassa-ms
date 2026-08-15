@@ -472,5 +472,11 @@
     "Not_set": "لم يتم التعيين",
     "Are_you_sure_you_want_to_delete_this_paper": "هل أنت متأكد أنك تريد حذف هذه الورقة؟",
     "Save": "حفظ",
-    "Date": "تاريخ"
+    "Date": "تاريخ",
+    "Generate_individual_report_cards_for_students": "إنشاء بطاقات تقرير فردية للطلاب",
+    "Papers_not_marked": "لم يتم تصحيح الأوراق بعد",
+    "Class_Teacher": "معلم الصف",
+    "Principal": "المدير",
+    "Back": "رجوع",
+    "Clear": "مسح"
 }
