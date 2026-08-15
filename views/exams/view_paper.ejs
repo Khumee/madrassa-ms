@@ -157,7 +157,7 @@
         
         <!-- Left side (Time/Date) -->
         <div class="text-start" style="font-size: 1rem;">
-            <span class="d-block fw-bold">تاریخ: <%= new Date().toLocaleDateString('ur-PK') %></span>
+            <span class="d-block fw-bold">تاریخ: <%= paper.paper_date ? new Date(paper.paper_date).toLocaleDateString('ur-PK') : new Date().toLocaleDateString('ur-PK') %></span>
             <span class="d-block fw-bold">الوقت ٣ ساعات</span>
         </div>
     </div>

@@ -278,6 +278,22 @@ router.post('/papers/:id/toggle-lock', isAdmin, async (req, res) => {
     }
 });
 
+// ADMIN: Update Paper Date
+router.post('/papers/:id/update-date', isAdmin, async (req, res) => {
+    try {
+        let { paper_date } = req.body;
+        if (!paper_date) {
+            paper_date = null;
+        }
+        await db.execute('UPDATE exam_papers SET paper_date = ? WHERE id = ? AND tenant_id = ?', [paper_date, req.params.id, req.tenant.id]);
+        const referer = req.get('Referer');
+        res.redirect(referer ? referer : '/exams');
+    } catch (err) {
+        console.error('Error updating paper date:', err);
+        res.status(500).send('Database error');
+    }
+});
+
 // ADMIN/STUDENT: Report Card
 router.get('/exams/:exam_id/student/:student_id/report-card', async (req, res) => {
     const [student] = await db.execute('SELECT * FROM students WHERE id = ? AND tenant_id = ?', [req.params.student_id, req.tenant.id]);
