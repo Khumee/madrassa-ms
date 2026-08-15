@@ -46,7 +46,7 @@
 
 <div class="container mt-4 mb-5">
     <div class="text-end mb-3 no-print">
-        <a href="/exams/<%= exam.id %>/results" class="btn btn-outline-secondary me-2"><i class="bi bi-arrow-left"></i> <%= __('Back') || 'Back' %></a>
+        <a href="/exams/<%= exam.id %>/results" class="btn btn-outline-secondary me-2"><i class="bi bi-arrow-left"></i> <%= __('Back') || 'واپس' %></a>
         <button onclick="window.print()" class="btn btn-dark"><i class="bi bi-printer"></i> <%= __('Print_Report_Card') || 'Print' %></button>
     </div>
 
@@ -63,7 +63,7 @@
                 <% } %>
             </div>
             <div class="col-6 text-center">
-                <h1 class="fw-bold text-dark mb-1"><%= locals.tenant ? (tenant.subdomain === 'madrassa-ms' ? __('Jamia_Habibullah_Islamabad') : (tenant.subdomain === 'kui' ? __('KUI_Production') : tenant.school_name)) : __('College_Name') %></h1>
+                <h1 class="fw-bold text-dark mb-1" style="white-space: nowrap;"><%= locals.tenant ? (tenant.subdomain === 'madrassa-ms' ? __('Jamia_Habibullah_Islamabad') : (tenant.subdomain === 'kui' ? __('KUI_Production') : tenant.school_name)) : __('College_Name') %></h1>
                 <h4 class="text-secondary mb-2"><%= exam.name %></h4>
                 <h5 class="fw-bold bg-dark text-white d-inline-block px-4 py-1 rounded-pill"><%= __('Student_Report_Card') || 'Report Card' %></h5>
             </div>
