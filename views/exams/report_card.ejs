@@ -105,10 +105,8 @@
                         <tr>
                             <td class="fw-semibold text-start px-4"><%= r.subject %></td>
                             <td><%= r.max_marks %></td>
-                            <% if (r.is_absent) { %>
-                                <td class="text-danger fw-bold"><%= __('Absent') || 'Absent' %></td>
-                            <% } else if (r.marks_obtained !== null) { %>
-                                <td class="fw-bold <%= r.marks_obtained < (r.max_marks * 0.4) ? 'text-danger' : '' %>"><%= r.marks_obtained %></td>
+                            <% if (r.obtained_marks !== null) { %>
+                                <td class="fw-bold <%= r.obtained_marks < (r.max_marks * 0.4) ? 'text-danger' : '' %>"><%= r.obtained_marks %></td>
                             <% } else { %>
                                 <td class="text-muted fst-italic">-</td>
                             <% } %>

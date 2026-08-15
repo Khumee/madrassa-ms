@@ -8,28 +8,17 @@
         <a href="/exams" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> <%= __('Back') || 'Back' %></a>
     </div>
 
-    <!-- Filters -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-body bg-light rounded">
-            <form method="GET" action="/exams/<%= exam.id %>/results" class="row g-3 align-items-end">
-                <div class="col-md-4">
-                    <label class="form-label fw-bold"><%= __('Class') %></label>
-                    <select name="classId" class="form-select">
-                        <option value=""><%= __('All_Classes') || 'All Classes' %></option>
-                        <% classes.forEach(c => { %>
-                            <option value="<%= c.id %>" <%= selectedClassId == c.id ? 'selected' : '' %>><%= c.name_ar %></option>
-                        <% }) %>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-filter"></i> <%= __('Filter') || 'Filter' %></button>
-                </div>
-                <% if (selectedClassId) { %>
-                    <div class="col-md-2">
-                        <a href="/exams/<%= exam.id %>/results" class="btn btn-outline-secondary w-100"><%= __('Clear') || 'Clear' %></a>
-                    </div>
-                <% } %>
-            </form>
+    <!-- Expandable Filter Chips -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4" style="background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px);">
+        <div class="card-body p-3">
+            <small class="text-muted d-block mb-2 fw-bold"><i class="bi bi-building me-1"></i><%= __('Filter_By_Class') || 'Filter By Class' %></small>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="/exams/<%= exam.id %>/results" class="btn btn-sm <%= !selectedClassId ? 'btn-primary' : 'btn-outline-primary' %> rounded-pill px-3"><%= __('All') || 'All' %></a>
+                <% classes.forEach(c => { %>
+                    <% const isSelected = selectedClassId == c.id; %>
+                    <a href="/exams/<%= exam.id %>/results?classId=<%= c.id %>" class="btn btn-sm <%= isSelected ? 'btn-primary active' : 'btn-outline-primary' %> rounded-pill px-3"><%= c.name_ar %></a>
+                <% }) %>
+            </div>
         </div>
     </div>
     

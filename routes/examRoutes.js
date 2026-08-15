@@ -345,10 +345,9 @@ router.get('/exams/:exam_id/student/:student_id/report-card', async (req, res) =
             ep.id as paper_id, 
             ep.subject, 
             ep.max_marks,
-            spr.marks_obtained,
-            spr.is_absent
+            sr.obtained_marks
         FROM exam_papers ep
-        LEFT JOIN student_paper_results spr ON ep.id = spr.paper_id AND spr.student_id = ?
+        LEFT JOIN student_results sr ON ep.id = sr.paper_id AND sr.student_id = ?
         WHERE ep.exam_id = ? AND ep.class_id = ? AND ep.tenant_id = ?
         ORDER BY ep.subject ASC
     `, [req.params.student_id, req.params.exam_id, student[0].class_id, req.tenant.id]);
@@ -358,8 +357,8 @@ router.get('/exams/:exam_id/student/:student_id/report-card', async (req, res) =
     
     results.forEach(r => { 
         totalMax += r.max_marks;
-        if (r.marks_obtained !== null) {
-            totalObtained += r.marks_obtained; 
+        if (r.obtained_marks !== null) {
+            totalObtained += r.obtained_marks; 
             markedCount++;
         }
     });
