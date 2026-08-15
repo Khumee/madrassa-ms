@@ -129,7 +129,7 @@ router.post('/questions/:id/delete', isTeacher, async (req, res) => {
 });
 // ADMIN: All Papers for an Exam
 router.get('/exams/:id/papers', isAdmin, async (req, res) => {
-    let query = 'SELECT ep.*, e.name as exam_name, c.name_ar as class_name, u.username as teacher_name FROM exam_papers ep JOIN exams e ON ep.exam_id = e.id JOIN classes c ON ep.class_id = c.id JOIN users u ON ep.teacher_id = u.id WHERE ep.exam_id = ? AND ep.tenant_id = ?';
+    let query = 'SELECT ep.*, e.name as exam_name, c.name_ar as class_name, COALESCE(t.name, u.username) as teacher_name FROM exam_papers ep JOIN exams e ON ep.exam_id = e.id JOIN classes c ON ep.class_id = c.id JOIN users u ON ep.teacher_id = u.id LEFT JOIN teachers t ON t.user_id = u.id AND t.tenant_id = ep.tenant_id WHERE ep.exam_id = ? AND ep.tenant_id = ?';
     const params = [req.params.id, req.tenant.id];
 
     if (req.query.classId) {
@@ -140,18 +140,18 @@ router.get('/exams/:id/papers', isAdmin, async (req, res) => {
         query += ' AND ep.teacher_id = ?';
         params.push(req.query.teacherId);
     }
-    query += ' ORDER BY c.name_ar ASC, u.username ASC';
+    query += ' ORDER BY c.name_ar ASC, teacher_name ASC';
 
     const [papers] = await db.execute(query, params);
     const [exam] = await db.execute('SELECT * FROM exams WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
     
     // Fetch unique classes and teachers for filters (based on this exam's papers)
     const [classes] = await db.execute('SELECT DISTINCT c.id, c.name_ar FROM classes c JOIN exam_papers ep ON c.id = ep.class_id WHERE ep.exam_id = ? AND ep.tenant_id = ? ORDER BY c.name_ar ASC', [req.params.id, req.tenant.id]);
-    const [teachers] = await db.execute('SELECT DISTINCT u.id, u.username as name FROM users u JOIN exam_papers ep ON u.id = ep.teacher_id WHERE ep.exam_id = ? AND ep.tenant_id = ? ORDER BY u.username ASC', [req.params.id, req.tenant.id]);
+    const [teachers] = await db.execute('SELECT DISTINCT u.id, COALESCE(t.name, u.username) as name FROM users u JOIN exam_papers ep ON u.id = ep.teacher_id LEFT JOIN teachers t ON t.user_id = u.id AND t.tenant_id = ep.tenant_id WHERE ep.exam_id = ? AND ep.tenant_id = ? ORDER BY name ASC', [req.params.id, req.tenant.id]);
 
     // Fetch all for new paper assignment
     const [allClasses] = await db.execute('SELECT * FROM classes WHERE tenant_id = ?', [req.tenant.id]);
-    const [allTeachers] = await db.execute('SELECT * FROM users WHERE role = "أستاذ" AND tenant_id = ?', [req.tenant.id]);
+    const [allTeachers] = await db.execute('SELECT u.id, COALESCE(t.name, u.username) as username FROM users u LEFT JOIN teachers t ON t.user_id = u.id AND t.tenant_id = u.tenant_id WHERE u.role = "أستاذ" AND u.tenant_id = ? ORDER BY username ASC', [req.tenant.id]);
     const [books] = await db.execute('SELECT id, title, class_id FROM books WHERE tenant_id = ?', [req.tenant.id]);
 
     res.render('exams/exam_papers', { 
@@ -167,7 +167,7 @@ router.get('/exams/:id/papers', isAdmin, async (req, res) => {
     });
 });
 router.get('/papers/:id/view', isAdmin, async (req, res) => {
-    const [paper] = await db.execute('SELECT ep.*, e.name as exam_name, c.name_ar as class_name, u.username as teacher_name FROM exam_papers ep JOIN exams e ON ep.exam_id = e.id JOIN classes c ON ep.class_id = c.id JOIN users u ON ep.teacher_id = u.id WHERE ep.id = ? AND ep.tenant_id = ?', [req.params.id, req.tenant.id]);
+    const [paper] = await db.execute('SELECT ep.*, e.name as exam_name, c.name_ar as class_name, COALESCE(t.name, u.username) as teacher_name FROM exam_papers ep JOIN exams e ON ep.exam_id = e.id JOIN classes c ON ep.class_id = c.id JOIN users u ON ep.teacher_id = u.id LEFT JOIN teachers t ON t.user_id = u.id AND t.tenant_id = ep.tenant_id WHERE ep.id = ? AND ep.tenant_id = ?', [req.params.id, req.tenant.id]);
     if (!paper.length) return res.status(404).send('Paper not found');
     const [questions] = await db.execute('SELECT * FROM questions WHERE paper_id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
     res.render('exams/view_paper', { paper: paper[0], questions });
