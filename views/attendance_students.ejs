@@ -33,32 +33,42 @@
     </div>
 </div>
 
-<% if (session.role === 'عريف') { %>
-<!-- Areef View: Student Attendance Marking List -->
-<div class="row mb-5">
+<!-- Student Attendance List -->
+<div class="row mb-5" id="attendanceListSection">
     <div class="col-md-12">
         <div class="card shadow-sm border-0 rounded-4 p-4">
-            <h4 class="fw-bold text-dark mb-4"><i class="bi bi-people me-2"></i><%= __('Student_List') || 'طلباء کی فہرست' %></h4>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="fw-bold text-dark mb-0"><i class="bi bi-people me-2"></i><%= __('Student_List') || 'طلباء کی فہرست' %> (<%= date %>)</h4>
+            </div>
             
             <div class="list-group list-group-flush">
                 <% students.forEach(student => { %>
                     <div class="list-group-item d-flex justify-content-between align-items-center py-3 student-item" data-id="<%= student.id %>" style="border-bottom: 1px solid #f1f5f9;">
                         <span class="fw-bold text-dark"><%= student.name %></span>
                         <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-outline-success btn-sm px-3 status-btn <%= student.status === 'present' ? 'active' : '' %>" data-status="present">ح</button>
-                            <button type="button" class="btn btn-outline-danger btn-sm px-3 status-btn <%= student.status === 'absent' ? 'active' : '' %>" data-status="absent">غ</button>
-                            <button type="button" class="btn btn-outline-warning btn-sm px-3 status-btn <%= student.status === 'leave' ? 'active' : '' %>" data-status="leave">ر</button>
-                            <button type="button" class="btn btn-outline-info btn-sm px-3 status-btn <%= student.status === 'online' ? 'active' : '' %>" data-status="online">ن</button>
+                            <% if (session.role === 'عريف') { %>
+                                <button type="button" class="btn btn-outline-success btn-sm px-3 status-btn <%= student.status === 'present' ? 'active' : '' %>" data-status="present">ح</button>
+                                <button type="button" class="btn btn-outline-danger btn-sm px-3 status-btn <%= student.status === 'absent' ? 'active' : '' %>" data-status="absent">غ</button>
+                                <button type="button" class="btn btn-outline-warning btn-sm px-3 status-btn <%= student.status === 'leave' ? 'active' : '' %>" data-status="leave">ر</button>
+                                <button type="button" class="btn btn-outline-info btn-sm px-3 status-btn <%= student.status === 'online' ? 'active' : '' %>" data-status="online">ن</button>
+                            <% } else { %>
+                                <% if (student.status === 'present') { %> <span class="badge bg-success px-3 py-2 rounded-pill"><i class="bi bi-check-circle me-1"></i>حاضر (ح)</span> <% } %>
+                                <% if (student.status === 'absent') { %> <span class="badge bg-danger px-3 py-2 rounded-pill"><i class="bi bi-x-circle me-1"></i>غیر حاضر (غ)</span> <% } %>
+                                <% if (student.status === 'leave') { %> <span class="badge bg-warning text-dark px-3 py-2 rounded-pill"><i class="bi bi-dash-circle me-1"></i>رخصت (ر)</span> <% } %>
+                                <% if (student.status === 'online') { %> <span class="badge bg-info text-dark px-3 py-2 rounded-pill"><i class="bi bi-laptop me-1"></i>آن لائن (ن)</span> <% } %>
+                                <% if (!student.status) { %> <span class="badge bg-secondary px-3 py-2 rounded-pill">کوئی ریکارڈ نہیں</span> <% } %>
+                            <% } %>
                         </div>
                     </div>
                 <% }) %>
             </div>
 
+            <% if (session.role === 'عريف') { %>
             <button id="saveBtn" class="btn btn-teal rounded-pill w-100 py-2 mt-4 fw-bold"><i class="bi bi-cloud-arrow-up-fill me-1"></i><%= __('Save_Attendance_Btn') %></button>
+            <% } %>
         </div>
     </div>
 </div>
-<% } %>
 
 <!-- Weekly Attendance Log (Shown to both, but is the ONLY focus for Mudeer/Nazim) -->
 <div class="row">
@@ -79,9 +89,7 @@
                                 <th class="p-4 text-center text-danger">غ (غیر حاضر)</th>
                                 <th class="p-4 text-center text-warning">ر (رخصت)</th>
                                 <th class="p-4 text-center text-info">ن (آن لائن)</th>
-                                <% if (session.role === 'مدير' || session.role === 'ناظم') { %>
                                 <th class="p-4 text-center"><%= __('Action') %></th>
-                                <% } %>
                             </tr>
                         </thead>
                         <tbody>
@@ -100,13 +108,16 @@
                                         <td class="p-4 text-center fw-bold text-danger"><%= day.absent %></td>
                                         <td class="p-4 text-center fw-bold text-warning"><%= day.leave_count %></td>
                                         <td class="p-4 text-center fw-bold text-info"><%= day.online %></td>
-                                        <% if (session.role === 'مدير' || session.role === 'ناظم') { %>
-                                        <td class="p-4 text-center">
-                                            <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="showConfirm('<%= __('Confirm_Delete_Attendance_Day') %>', () => window.location.href='/attendance/delete-day/<%= classInfo.id %>/<%= day.date_str %>')">
+                                        <td class="p-4 text-center text-nowrap">
+                                            <a href="?date=<%= day.date_str %>" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                                                <i class="bi bi-eye me-1"></i><%= __('View') || 'دیکھیں' %>
+                                            </a>
+                                            <% if (session.role === 'مدير' || session.role === 'ناظم') { %>
+                                            <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3 ms-1" onclick="showConfirm('<%= __('Confirm_Delete_Attendance_Day') %>', () => window.location.href='/attendance/delete-day/<%= classInfo.id %>/<%= day.date_str %>')">
                                                 <i class="bi bi-trash3 me-1"></i><%= __('Delete') %>
                                             </button>
+                                            <% } %>
                                         </td>
-                                        <% } %>
                                     </tr>
                                 <% }) %>
                             <% } %>
