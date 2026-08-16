@@ -80,3 +80,28 @@ exports.rejectLeave = async (req, res) => {
         res.status(500).send('Error rejecting leave');
     }
 };
+
+exports.deleteLeave = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const [leaveRows] = await db.execute('SELECT * FROM student_leaves WHERE id = ? AND tenant_id = ?', [id, req.tenant.id]);
+        if (!leaveRows[0]) return res.status(404).send('Leave request not found');
+        const leave = leaveRows[0];
+
+        // If it was approved, we should remove the 'leave' attendance records
+        if (leave.status === 'approved') {
+            const startDate = DateTime.fromJSDate(new Date(leave.start_date)).toISODate();
+            const endDate = DateTime.fromJSDate(new Date(leave.end_date)).toISODate();
+            await db.execute(
+                "DELETE FROM attendance_students WHERE student_id = ? AND date >= ? AND date <= ? AND status = 'leave' AND tenant_id = ?",
+                [leave.student_id, startDate, endDate, req.tenant.id]
+            );
+        }
+
+        await db.execute('DELETE FROM student_leaves WHERE id = ? AND tenant_id = ?', [id, req.tenant.id]);
+        res.redirect('/leaves/manage');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error deleting leave request');
+    }
+};

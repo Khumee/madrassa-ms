@@ -493,5 +493,6 @@
     "No_Leave_Requests": "لا توجد طلبات إجازة معلقة",
     "Action_Taken": "تم اتخاذ الإجراء",
     "Submit": "إرسال",
-    "Student": "طالب"
+    "Student": "طالب",
+    "Confirm_Delete": "هل أنت متأكد أنك تريد حذف هذا؟"
 }

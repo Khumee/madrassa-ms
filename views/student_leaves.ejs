@@ -58,12 +58,13 @@
                                 <th class="p-3"><%= __('End_Date') || 'ختم کی تاریخ' %></th>
                                 <th class="p-3"><%= __('Reason') || 'وجہ' %></th>
                                 <th class="p-3"><%= __('Status') || 'حالت' %></th>
+                                <th class="p-3 text-end"><%= __('Actions') || 'عمل' %></th>
                             </tr>
                         </thead>
                         <tbody>
                             <% if (leaves.length === 0) { %>
                                 <tr>
-                                    <td colspan="4" class="text-center py-4 text-muted"><%= __('No_Records') || 'کوئی ریکارڈ نہیں' %></td>
+                                    <td colspan="5" class="text-center py-4 text-muted"><%= __('No_Records') || 'کوئی ریکارڈ نہیں' %></td>
                                 </tr>
                             <% } else { %>
                                 <% leaves.forEach(leave => { %>
@@ -78,6 +79,17 @@
                                                 <span class="badge bg-success px-3 py-2 rounded-pill"><%= __('Approved') || 'منظور شدہ' %></span>
                                             <% } else { %>
                                                 <span class="badge bg-danger px-3 py-2 rounded-pill"><%= __('Rejected') || 'مسترد شدہ' %></span>
+                                            <% } %>
+                                        </td>
+                                        <td class="p-3 text-end">
+                                            <% if (leave.status === 'pending') { %>
+                                                <form action="/student/leaves/delete/<%= leave.id %>" method="POST" class="d-inline" onsubmit="return confirm('<%= __('Confirm_Delete') || 'کیا آپ واقعی اس درخواست کو حذف کرنا چاہتے ہیں؟' %>');">
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3" title="Delete">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            <% } else { %>
+                                                <span class="text-muted small">-</span>
                                             <% } %>
                                         </td>
                                     </tr>

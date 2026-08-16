@@ -485,5 +485,6 @@
     "No_Leave_Requests": "No pending leave requests",
     "Action_Taken": "Action Taken",
     "Submit": "Submit",
-    "Student": "Student"
+    "Student": "Student",
+    "Confirm_Delete": "Are you sure you want to delete this?"
 }

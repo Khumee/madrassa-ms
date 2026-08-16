@@ -68,13 +68,18 @@
                                                     </button>
                                                 </form>
                                                 <form action="/leaves/reject/<%= leave.id %>" method="POST" class="d-inline">
-                                                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3 me-2">
                                                         <i class="bi bi-x-circle me-1"></i><%= __('Reject') || 'مسترد کریں' %>
                                                     </button>
                                                 </form>
                                             <% } else { %>
-                                                <span class="text-muted small"><%= __('Action_Taken') || 'کارروائی مکمل ہو گئی' %></span>
+                                                <span class="text-muted small me-2"><%= __('Action_Taken') || 'کارروائی مکمل ہو گئی' %></span>
                                             <% } %>
+                                            <form action="/leaves/delete/<%= leave.id %>" method="POST" class="d-inline" onsubmit="return confirm('<%= __('Confirm_Delete') || 'کیا آپ واقعی اس درخواست کو حذف کرنا چاہتے ہیں؟' %>');">
+                                                <button type="submit" class="btn btn-danger btn-sm rounded-pill px-3" title="Delete">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
                                         </td>
                                     </tr>
                                 <% }) %>

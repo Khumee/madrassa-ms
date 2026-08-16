@@ -786,6 +786,26 @@ exports.showStudentView = async (req, res) => {
     }
 };
 
+exports.deleteLeaveRequest = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const [studentRows] = await db.execute('SELECT id FROM students WHERE user_id = ? AND tenant_id = ?', [req.session.userId, req.tenant.id]);
+        if (!studentRows[0]) return res.status(404).send('Student not found');
+        const studentId = studentRows[0].id;
+
+        // Ensure it belongs to the student and is pending
+        const [leaveRows] = await db.execute('SELECT status FROM student_leaves WHERE id = ? AND student_id = ? AND tenant_id = ?', [id, studentId, req.tenant.id]);
+        if (!leaveRows[0]) return res.status(404).send('Leave request not found');
+        if (leaveRows[0].status !== 'pending') return res.status(403).send('Only pending leave requests can be deleted');
+
+        await db.execute('DELETE FROM student_leaves WHERE id = ? AND tenant_id = ?', [id, req.tenant.id]);
+        res.redirect('/student/leaves');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error deleting leave request');
+    }
+};
+
 exports.exportStudentPdf = async (req, res) => {
     const { id } = req.params;
     try {

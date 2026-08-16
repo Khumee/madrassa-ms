@@ -42,6 +42,7 @@ router.get('/dashboard/cr', hasRole(['عريف']), studentController.showCRDashb
 // Leave application routes
 router.get('/student/leaves', hasRole(['طالب']), studentController.showStudentLeaves);
 router.post('/student/leaves/apply', hasRole(['طالب']), studentController.applyLeave);
+router.post('/student/leaves/delete/:id', hasRole(['طالب']), studentController.deleteLeaveRequest);
 
 router.get('/students/manage', hasPermission('students_manage'), studentController.showStudentsManage);
 router.get('/students/add', hasPermission('students_manage'), studentController.showStudentsAdd);
