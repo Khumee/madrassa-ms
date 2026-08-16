@@ -77,7 +77,7 @@
     "Current_Timetable": "الجدول الحالي",
     "Group_By_Day": "حسب اليوم",
     "Group_By_Teacher": "حسب الأستاذ",
-    "Actions": "الإجراءات",
+    "Actions": "إجراءات",
     "Edit_Period": "تعديل الحصة",
     "Edit": "تعديل",
     "Delete": "حذف",
@@ -86,7 +86,7 @@
     "No_Periods_Registered": "لا توجد حصص مسجلة حالياً",
     "Confirm_Delete_Period": "هل أنت متأكد من حذف هذه الحصة؟",
     "Delete_Error": "حدث خطأ أثناء الحذف",
-    "Class": "الصف",
+    "Class": "صف",
     "Book_Subject": "الكتاب / المادة",
     "Not_Specified": "غير محدد",
     "Extra_Period": "حصة إضافية",
@@ -408,7 +408,7 @@
     "Create_New_Exam": "إنشاء امتحان جديد",
     "ID": "المعرف",
     "Exam_Name": "اسم الامتحان",
-    "Status": "الحالة",
+    "Status": "حالة",
     "Created_By": "تم الإنشاء بواسطة",
     "Date_Created": "تاريخ الإنشاء",
     "Assign_Papers": "تعيين الأوراق",
@@ -492,5 +492,6 @@
     "Rejected": "مرفوض",
     "No_Leave_Requests": "لا توجد طلبات إجازة معلقة",
     "Action_Taken": "تم اتخاذ الإجراء",
-    "Submit": "إرسال"
+    "Submit": "إرسال",
+    "Student": "طالب"
 }

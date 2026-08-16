@@ -77,7 +77,7 @@
     "Current_Timetable": "موجودہ ٹائم ٹیبل",
     "Group_By_Day": "دن کے لحاظ سے",
     "Group_By_Teacher": "استاد کے لحاظ سے",
-    "Actions": "اختیارات",
+    "Actions": "عمل",
     "Edit_Period": "پیریڈ کی ترمیم",
     "Edit": "ترمیم",
     "Delete": "حذف کریں",
@@ -492,5 +492,6 @@
     "Rejected": "مسترد شدہ",
     "No_Leave_Requests": "کوئی درخواست زیر التواء نہیں ہے",
     "Action_Taken": "کارروائی مکمل ہو گئی",
-    "Submit": "جمع کروائیں"
+    "Submit": "جمع کروائیں",
+    "Student": "طالب علم"
 }
