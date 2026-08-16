@@ -10,7 +10,10 @@
                             <h2 class="fw-bold mb-0"><%= __('Welcome_Greeting') %> <%= student.name %></h2>
                             <p class="text-muted"><%= __('Student_Dashboard_Sub') %></p>
                         </div>
-                        <a href="/profile/change-password" class="btn btn-outline-primary rounded-pill"><%= __('Change_Password') %></a>
+                        <div class="d-flex gap-2">
+                            <a href="/student/leaves" class="btn btn-outline-warning rounded-pill"><i class="bi bi-calendar-event me-2"></i><%= __('Apply_Leave') || 'رخصت کی درخواست' %></a>
+                            <a href="/profile/change-password" class="btn btn-outline-primary rounded-pill"><%= __('Change_Password') %></a>
+                        </div>
                     </div>
 
                     <!-- Daily Engagement & Live Portal Bar -->

@@ -47,10 +47,13 @@
                         <span class="fw-bold text-dark"><%= student.name %></span>
                         <div class="btn-group" role="group">
                             <% if (session.role === 'عريف') { %>
-                                <button type="button" class="btn btn-outline-success btn-sm px-3 status-btn <%= student.status === 'present' ? 'active' : '' %>" data-status="present">ح</button>
-                                <button type="button" class="btn btn-outline-danger btn-sm px-3 status-btn <%= student.status === 'absent' ? 'active' : '' %>" data-status="absent">غ</button>
-                                <button type="button" class="btn btn-outline-warning btn-sm px-3 status-btn <%= student.status === 'leave' ? 'active' : '' %>" data-status="leave">ر</button>
-                                <button type="button" class="btn btn-outline-info btn-sm px-3 status-btn <%= student.status === 'online' ? 'active' : '' %>" data-status="online">ن</button>
+                                <% if (student.status === 'leave') { %>
+                                    <span class="badge bg-warning text-dark px-3 py-2 rounded-pill leave-status"><i class="bi bi-dash-circle me-1"></i>رخصت (ر)</span>
+                                <% } else { %>
+                                    <button type="button" class="btn btn-outline-success btn-sm px-3 status-btn <%= student.status === 'present' ? 'active' : '' %>" data-status="present">ح</button>
+                                    <button type="button" class="btn btn-outline-danger btn-sm px-3 status-btn <%= student.status === 'absent' ? 'active' : '' %>" data-status="absent">غ</button>
+                                    <button type="button" class="btn btn-outline-info btn-sm px-3 status-btn <%= student.status === 'online' ? 'active' : '' %>" data-status="online">ن</button>
+                                <% } %>
                             <% } else { %>
                                 <% if (student.status === 'present') { %> <span class="badge bg-success px-3 py-2 rounded-pill"><i class="bi bi-check-circle me-1"></i>حاضر (ح)</span> <% } %>
                                 <% if (student.status === 'absent') { %> <span class="badge bg-danger px-3 py-2 rounded-pill"><i class="bi bi-x-circle me-1"></i>غیر حاضر (غ)</span> <% } %>
@@ -165,7 +168,12 @@
         document.querySelectorAll('.student-item').forEach(item => {
             const id = item.getAttribute('data-id');
             const activeBtn = item.querySelector('.status-btn.active');
-            const status = activeBtn ? activeBtn.getAttribute('data-status') : 'present';
+            let status = 'present';
+            if (activeBtn) {
+                status = activeBtn.getAttribute('data-status');
+            } else if (item.querySelector('.leave-status')) {
+                status = 'leave';
+            }
             attendance[id] = status;
         });
 

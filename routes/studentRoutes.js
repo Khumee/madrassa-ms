@@ -39,6 +39,10 @@ const upload = multer({
 router.get('/dashboard/student', hasRole(['طالب']), studentController.showStudentDashboard);
 router.get('/dashboard/cr', hasRole(['عريف']), studentController.showCRDashboard);
 
+// Leave application routes
+router.get('/student/leaves', hasRole(['طالب']), studentController.showStudentLeaves);
+router.post('/student/leaves/apply', hasRole(['طالب']), studentController.applyLeave);
+
 router.get('/students/manage', hasPermission('students_manage'), studentController.showStudentsManage);
 router.get('/students/add', hasPermission('students_manage'), studentController.showStudentsAdd);
 router.post('/students/add', hasPermission('students_manage'), upload.single('photo'), studentController.addStudent);

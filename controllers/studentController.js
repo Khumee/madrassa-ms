@@ -857,3 +857,38 @@ exports.exportStudentPdf = async (req, res) => {
         res.status(500).send('Error compiling PDF');
     }
 };
+
+exports.showStudentLeaves = async (req, res) => {
+    try {
+        const [student] = await db.execute('SELECT * FROM students WHERE user_id = ? AND tenant_id = ?', [req.session.userId, req.tenant.id]);
+        if (!student[0]) return res.status(404).send('Student record not found');
+
+        const [leaves] = await db.execute(
+            'SELECT * FROM student_leaves WHERE student_id = ? AND tenant_id = ? ORDER BY created_at DESC',
+            [student[0].id, req.tenant.id]
+        );
+
+        res.render('student_leaves', { student: student[0], leaves });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error loading leaves');
+    }
+};
+
+exports.applyLeave = async (req, res) => {
+    const { start_date, end_date, reason } = req.body;
+    try {
+        const [student] = await db.execute('SELECT * FROM students WHERE user_id = ? AND tenant_id = ?', [req.session.userId, req.tenant.id]);
+        if (!student[0]) return res.status(404).send('Student record not found');
+
+        await db.execute(
+            'INSERT INTO student_leaves (student_id, start_date, end_date, reason, status, tenant_id) VALUES (?, ?, ?, ?, ?, ?)',
+            [student[0].id, start_date, end_date, reason, 'pending', req.tenant.id]
+        );
+        res.redirect('/student/leaves');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error applying for leave');
+    }
+}; 
+ 
