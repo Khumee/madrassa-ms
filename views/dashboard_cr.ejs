@@ -387,34 +387,31 @@
                                             <%= student.name %>
                                         </div>
                                         <div class="d-flex gap-2 status-btn-group">
-                                            <button type="button"
-                                                class="status-btn"
-                                                data-status="present"
-                                                onclick="markLocalStatus(<%= student.id %>, 'present', this)"
-                                                title="<%= __('Status_Present') %>">
-                                                <i class="bi bi-check-lg"></i>
-                                            </button>
-                                            <button type="button"
-                                                class="status-btn"
-                                                data-status="absent"
-                                                onclick="markLocalStatus(<%= student.id %>, 'absent', this)"
-                                                title="<%= __('Status_Absent') %>">
-                                                <i class="bi bi-x-lg"></i>
-                                            </button>
-                                            <button type="button"
-                                                class="status-btn"
-                                                data-status="leave"
-                                                onclick="markLocalStatus(<%= student.id %>, 'leave', this)"
-                                                title="<%= __('Status_Leave') %>">
-                                                <i class="bi bi-door-open"></i>
-                                            </button>
-                                            <button type="button"
-                                                class="status-btn"
-                                                data-status="online"
-                                                onclick="markLocalStatus(<%= student.id %>, 'online', this)"
-                                                title="<%= __('Status_Online') %>">
-                                                <i class="bi bi-wifi"></i>
-                                            </button>
+                                            <% if (student.status === 'leave') { %>
+                                                <span class="badge bg-warning text-dark px-3 py-2 rounded-pill"><i class="bi bi-dash-circle me-1"></i>رخصت (ر)</span>
+                                            <% } else { %>
+                                                <button type="button"
+                                                    class="status-btn <%= student.status === 'present' ? 'active' : '' %>"
+                                                    data-status="present"
+                                                    onclick="markLocalStatus(<%= student.id %>, 'present', this)"
+                                                    title="<%= __('Status_Present') %>">
+                                                    <i class="bi bi-check-lg"></i>
+                                                </button>
+                                                <button type="button"
+                                                    class="status-btn <%= student.status === 'absent' ? 'active' : '' %>"
+                                                    data-status="absent"
+                                                    onclick="markLocalStatus(<%= student.id %>, 'absent', this)"
+                                                    title="<%= __('Status_Absent') %>">
+                                                    <i class="bi bi-x-lg"></i>
+                                                </button>
+                                                <button type="button"
+                                                    class="status-btn <%= student.status === 'online' ? 'active' : '' %>"
+                                                    data-status="online"
+                                                    onclick="markLocalStatus(<%= student.id %>, 'online', this)"
+                                                    title="<%= __('Status_Online') %>">
+                                                    <i class="bi bi-wifi"></i>
+                                                </button>
+                                            <% } %>
                                         </div>
                                     </div>
                                 <% }) %>
