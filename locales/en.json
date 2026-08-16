@@ -470,5 +470,18 @@
     "Edit_Question": "Edit Question",
     "Update_Paper_Date": "Update Paper Date",
     "Not_set": "Not set",
-    "Are_you_sure_you_want_to_delete_this_paper": "Are you sure you want to delete this paper?"
+    "Are_you_sure_you_want_to_delete_this_paper": "Are you sure you want to delete this paper?",
+    "Leave_Requests": "Leave Requests",
+    "Leave_Requests_Sub": "View and make decisions on leave requests received from students.",
+    "Apply_Leave": "Apply for Leave",
+    "Apply_Leave_Sub": "You can apply for your leave from here.",
+    "New_Leave_Request": "New Request",
+    "Reason": "Reason",
+    "Leave_History": "Leave History",
+    "No_Records": "No Records",
+    "Pending": "Pending",
+    "Approved": "Approved",
+    "Rejected": "Rejected",
+    "No_Leave_Requests": "No pending leave requests",
+    "Action_Taken": "Action Taken"
 }

@@ -478,5 +478,18 @@
     "Class_Teacher": "معلم الصف",
     "Principal": "المدير",
     "Back": "رجوع",
-    "Clear": "مسح"
+    "Clear": "مسح",
+    "Leave_Requests": "طلبات الإجازة",
+    "Leave_Requests_Sub": "عرض واتخاذ قرارات بشأن طلبات الإجازة المستلمة من الطلاب.",
+    "Apply_Leave": "طلب إجازة",
+    "Apply_Leave_Sub": "يمكنك تقديم طلب إجازتك من هنا.",
+    "New_Leave_Request": "طلب جديد",
+    "Reason": "السبب",
+    "Leave_History": "سجل الإجازات",
+    "No_Records": "لا توجد سجلات",
+    "Pending": "قيد الانتظار",
+    "Approved": "مقبول",
+    "Rejected": "مرفوض",
+    "No_Leave_Requests": "لا توجد طلبات إجازة معلقة",
+    "Action_Taken": "تم اتخاذ الإجراء"
 }
