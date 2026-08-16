@@ -491,5 +491,6 @@
     "Approved": "مقبول",
     "Rejected": "مرفوض",
     "No_Leave_Requests": "لا توجد طلبات إجازة معلقة",
-    "Action_Taken": "تم اتخاذ الإجراء"
+    "Action_Taken": "تم اتخاذ الإجراء",
+    "Submit": "إرسال"
 }
