@@ -38,8 +38,9 @@
             background-color: #2c3e50 !important;
             color: #fff !important;
         }
-        .datesheet-table .date-group-start td {
-            border-top: 3px solid #2c3e50 !important;
+        .datesheet-table .date-group-header td {
+            background-color: #dbe4ea !important;
+            color: #2c3e50 !important;
         }
         @page {
             margin: 10mm;
@@ -63,6 +64,12 @@
         z-index: 0;
         width: 60%;
         pointer-events: none;
+    }
+
+    .datesheet-table .date-group-header td {
+        background-color: #dbe4ea;
+        color: #2c3e50;
+        font-size: 1rem;
     }
 
     .datesheet-table th, .datesheet-table td {
@@ -104,8 +111,6 @@
             <table class="table table-bordered table-sm text-center align-middle border-dark mb-2 datesheet-table">
                 <thead class="table-dark">
                     <tr>
-                        <th class="py-2"><%= __('Date') %></th>
-                        <th class="py-2"><%= __('Day') %></th>
                         <th class="py-2"><%= __('Class') %></th>
                         <th class="py-2"><%= __('Subject') %></th>
                         <th class="py-2"><%= __('Teacher') %></th>
@@ -113,12 +118,13 @@
                 </thead>
                 <tbody>
                     <% if (groups && groups.length > 0) { %>
-                        <% groups.forEach((g, gIdx) => { %>
+                        <% groups.forEach((g) => { %>
                             <% const dateLabel = g.date ? new Date(g.date).toLocaleDateString() : (__('Not_set') || '-'); %>
-                            <% g.rows.forEach((p, rIdx) => { %>
-                                <tr class="<%= (gIdx > 0 && rIdx === 0) ? 'date-group-start' : '' %>">
-                                    <td class="fw-bold"><%= dateLabel %></td>
-                                    <td class="fw-bold"><%= g.dayName || '-' %></td>
+                            <tr class="date-group-header">
+                                <td colspan="3" class="fw-bold text-start px-3"><%= g.dayName ? (g.dayName + ' - ') : '' %><%= dateLabel %></td>
+                            </tr>
+                            <% g.rows.forEach((p) => { %>
+                                <tr>
                                     <td><%= p.class_name %></td>
                                     <td class="text-start px-3"><%= p.subject %></td>
                                     <td><%= p.teacher_name %></td>
@@ -127,7 +133,7 @@
                         <% }) %>
                     <% } else { %>
                         <tr>
-                            <td colspan="5" class="text-center text-muted"><%= __('No_Papers_Found') || 'No papers found' %></td>
+                            <td colspan="3" class="text-center text-muted"><%= __('No_Papers_Found') || 'No papers found' %></td>
                         </tr>
                     <% } %>
                 </tbody>
