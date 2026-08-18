@@ -89,7 +89,6 @@
                         <th class="py-2"><%= __('Class') %></th>
                         <th class="py-2"><%= __('Subject') %></th>
                         <th class="py-2"><%= __('Teacher') %></th>
-                        <th class="py-2"><%= __('Max_Marks') %></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -104,13 +103,12 @@
                                     <td><%= p.class_name %></td>
                                     <td class="text-start px-3"><%= p.subject %></td>
                                     <td><%= p.teacher_name %></td>
-                                    <td><%= p.max_marks %></td>
                                 </tr>
                             <% }) %>
                         <% }) %>
                     <% } else { %>
                         <tr>
-                            <td colspan="6" class="text-center text-muted"><%= __('No_Papers_Found') || 'No papers found' %></td>
+                            <td colspan="5" class="text-center text-muted"><%= __('No_Papers_Found') || 'No papers found' %></td>
                         </tr>
                     <% } %>
                 </tbody>
