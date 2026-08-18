@@ -469,6 +469,8 @@
     "Part": "Part",
     "Edit_Question": "Edit Question",
     "Update_Paper_Date": "Update Paper Date",
+    "Date_Sheet": "Date Sheet",
+    "No_Papers_Found": "No papers found",
     "Not_set": "Not set",
     "Are_you_sure_you_want_to_delete_this_paper": "Are you sure you want to delete this paper?",
     "Leave_Requests": "Leave Requests",

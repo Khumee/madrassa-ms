@@ -330,6 +330,41 @@ router.post('/papers/:id/update-date', isAdmin, async (req, res) => {
     }
 });
 
+// ALL USERS: Date Sheet (printable)
+router.get('/exams/:id/datesheet', isTeacher, async (req, res) => {
+    const [exam] = await db.execute('SELECT * FROM exams WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
+    if (!exam.length) return res.status(404).send('Exam not found');
+
+    const [papers] = await db.execute(`
+        SELECT ep.id, ep.subject, ep.paper_date, ep.max_marks, c.name_ar as class_name, COALESCE(t.name, u.username) as teacher_name
+        FROM exam_papers ep
+        JOIN classes c ON ep.class_id = c.id
+        JOIN users u ON ep.teacher_id = u.id
+        LEFT JOIN teachers t ON t.user_id = u.id AND t.tenant_id = ep.tenant_id
+        WHERE ep.exam_id = ? AND ep.tenant_id = ?
+        ORDER BY (ep.paper_date IS NULL) ASC, ep.paper_date ASC, c.name_ar ASC, ep.subject ASC
+    `, [req.params.id, req.tenant.id]);
+
+    const weekdays = ['اتوار', 'پیر', 'منگل', 'بدھ', 'جمعرات', 'جمعہ', 'ہفتہ'];
+    const groups = [];
+    const groupsByKey = {};
+    for (const p of papers) {
+        const key = p.paper_date ? new Date(p.paper_date).toISOString().split('T')[0] : 'unset';
+        if (!groupsByKey[key]) {
+            const group = {
+                date: p.paper_date,
+                dayName: p.paper_date ? weekdays[new Date(p.paper_date).getUTCDay()] : null,
+                rows: []
+            };
+            groupsByKey[key] = group;
+            groups.push(group);
+        }
+        groupsByKey[key].rows.push(p);
+    }
+
+    res.render('exams/datesheet', { exam: exam[0], groups });
+});
+
 // ADMIN/STUDENT: Report Card
 router.get('/exams/:exam_id/student/:student_id/report-card', async (req, res) => {
     const [student] = await db.execute('SELECT * FROM students WHERE id = ? AND tenant_id = ?', [req.params.student_id, req.tenant.id]);

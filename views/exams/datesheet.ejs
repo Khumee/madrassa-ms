@@ -1,0 +1,121 @@
+<%- include('../partials/header', { title: __('Date_Sheet') || 'Date Sheet' }) %>
+
+<!-- Print styling -->
+<style>
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        .printable-area, .printable-area * {
+            visibility: visible;
+        }
+        .printable-area {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+        .no-print {
+            display: none !important;
+        }
+        .card {
+            border: none !important;
+            box-shadow: none !important;
+        }
+        @page {
+            margin: 12mm;
+        }
+    }
+
+    .datesheet-container {
+        max-width: 900px;
+        margin: auto;
+        border: 2px solid #2c3e50;
+        border-radius: 12px;
+        background-color: #fff;
+    }
+
+    .watermark {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0.05;
+        z-index: 0;
+        width: 60%;
+        pointer-events: none;
+    }
+
+    .datesheet-table th, .datesheet-table td {
+        vertical-align: middle;
+    }
+</style>
+
+<div class="container mt-4 mb-5">
+    <div class="text-end mb-3 no-print">
+        <a href="<%= (locals.session && ['مدير', 'ناظم'].includes(session.role)) ? '/exams/' + exam.id + '/papers' : '/' %>" class="btn btn-outline-secondary me-2"><i class="bi bi-arrow-left"></i> <%= __('Back') || 'واپس' %></a>
+        <button onclick="window.print()" class="btn btn-dark"><i class="bi bi-printer"></i> <%= __('Print') || 'پرنٹ' %></button>
+    </div>
+
+    <div class="card shadow-lg p-3 p-md-4 datesheet-container printable-area position-relative">
+        <% if (locals.tenant && locals.tenant.logo_url) { %>
+            <img src="<%= tenant.logo_url %>" alt="Madrassa Logo" class="watermark">
+        <% } %>
+
+        <!-- Header Section -->
+        <div class="row mb-2 align-items-center" style="position: relative; z-index: 1;">
+            <div class="col-3 text-center">
+                <% if (locals.tenant && locals.tenant.logo_url) { %>
+                    <img src="<%= tenant.logo_url %>" alt="Logo" style="max-height: 70px; max-width: 100%;">
+                <% } %>
+            </div>
+            <div class="col-6 text-center">
+                <h2 class="fw-bold text-dark mb-1" style="white-space: nowrap;"><%= locals.tenant ? (tenant.subdomain === 'madrassa-ms' ? __('Jamia_Habibullah_Islamabad') : (tenant.subdomain === 'kui' ? __('KUI_Production') : tenant.school_name)) : __('College_Name') %></h2>
+                <h5 class="text-secondary mb-2"><%= exam.name %></h5>
+                <h6 class="fw-bold bg-dark text-white d-inline-block px-3 py-1 rounded-pill mb-0"><%= __('Date_Sheet') || 'Date Sheet' %></h6>
+            </div>
+            <div class="col-3 text-center"></div>
+        </div>
+
+        <hr style="border-top: 2px solid #2c3e50; opacity: 1;" class="my-2">
+
+        <!-- Date Sheet Table -->
+        <div style="position: relative; z-index: 1;">
+            <table class="table table-bordered table-sm text-center align-middle border-dark mb-2 datesheet-table">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="py-2"><%= __('Date') %></th>
+                        <th class="py-2"><%= __('Day') %></th>
+                        <th class="py-2"><%= __('Class') %></th>
+                        <th class="py-2"><%= __('Subject') %></th>
+                        <th class="py-2"><%= __('Teacher') %></th>
+                        <th class="py-2"><%= __('Max_Marks') %></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (groups && groups.length > 0) { %>
+                        <% groups.forEach(g => { %>
+                            <% g.rows.forEach((p, idx) => { %>
+                                <tr>
+                                    <% if (idx === 0) { %>
+                                        <td class="fw-bold" rowspan="<%= g.rows.length %>"><%= g.date ? new Date(g.date).toLocaleDateString() : (__('Not_set') || '-') %></td>
+                                        <td class="fw-bold" rowspan="<%= g.rows.length %>"><%= g.dayName || '-' %></td>
+                                    <% } %>
+                                    <td><%= p.class_name %></td>
+                                    <td class="text-start px-3"><%= p.subject %></td>
+                                    <td><%= p.teacher_name %></td>
+                                    <td><%= p.max_marks %></td>
+                                </tr>
+                            <% }) %>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="6" class="text-center text-muted"><%= __('No_Papers_Found') || 'No papers found' %></td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<%- include('../partials/footer') %>

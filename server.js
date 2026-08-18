@@ -81,6 +81,9 @@ app.use((req, res, next) => {
     next();
 });
 
+const activeDatesheetMiddleware = require('./middleware/activeDatesheet');
+app.use(activeDatesheetMiddleware);
+
 // Set Language Route
 app.get('/set-lang/:lang', (req, res) => {
     const lang = req.params.lang;
