@@ -38,6 +38,9 @@
             background-color: #2c3e50 !important;
             color: #fff !important;
         }
+        .datesheet-table .date-group-start td {
+            border-top: 3px solid #2c3e50 !important;
+        }
         @page {
             margin: 10mm;
         }
@@ -89,12 +92,7 @@
             <div class="col-6 text-center">
                 <h2 class="fw-bold text-dark mb-1" style="white-space: nowrap;"><%= locals.tenant ? (tenant.subdomain === 'madrassa-ms' ? __('Jamia_Habibullah_Islamabad') : (tenant.subdomain === 'kui' ? __('KUI_Production') : tenant.school_name)) : __('College_Name') %></h2>
                 <h5 class="text-secondary mb-2"><%= exam.name %></h5>
-                <% const datedGroups = groups.filter(g => g.date); %>
-                <% const startDate = datedGroups.length ? datedGroups[0].date : null; %>
-                <% const endDate = datedGroups.length ? datedGroups[datedGroups.length - 1].date : null; %>
-                <h6 class="fw-bold bg-dark text-white d-inline-block px-3 py-1 rounded-pill mb-0">
-                    <%= __('Date_Sheet') || 'Date Sheet' %><% if (startDate && endDate) { %> (<%= new Date(startDate).toLocaleDateString() %> - <%= new Date(endDate).toLocaleDateString() %>)<% } %>
-                </h6>
+                <h6 class="fw-bold bg-dark text-white d-inline-block px-3 py-1 rounded-pill mb-0"><%= __('Date_Sheet') || 'Date Sheet' %></h6>
             </div>
             <div class="col-3 text-center"></div>
         </div>
@@ -115,10 +113,10 @@
                 </thead>
                 <tbody>
                     <% if (groups && groups.length > 0) { %>
-                        <% groups.forEach(g => { %>
+                        <% groups.forEach((g, gIdx) => { %>
                             <% const dateLabel = g.date ? new Date(g.date).toLocaleDateString() : (__('Not_set') || '-'); %>
-                            <% g.rows.forEach((p) => { %>
-                                <tr>
+                            <% g.rows.forEach((p, rIdx) => { %>
+                                <tr class="<%= (gIdx > 0 && rIdx === 0) ? 'date-group-start' : '' %>">
                                     <td class="fw-bold"><%= dateLabel %></td>
                                     <td class="fw-bold"><%= g.dayName || '-' %></td>
                                     <td><%= p.class_name %></td>
