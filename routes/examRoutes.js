@@ -406,9 +406,12 @@ router.get('/exams/:id/datesheet/pdf', isTeacher, async (req, res) => {
                 margin: { top: '10mm', bottom: '10mm', left: '10mm', right: '10mm' }
             });
 
+            const rawName = `${data.exam.name} Date Sheet`.replace(/["\\]/g, '').trim();
+            const asciiFallback = (rawName.replace(/[^\x20-\x7E]/g, '').trim().replace(/\s+/g, '_') || `datesheet-${data.exam.id}`) + '.pdf';
+            const utf8Name = encodeURIComponent(`${rawName}.pdf`);
             res.set({
                 'Content-Type': 'application/pdf',
-                'Content-Disposition': `attachment; filename="datesheet-${data.exam.id}.pdf"`
+                'Content-Disposition': `attachment; filename="${asciiFallback}"; filename*=UTF-8''${utf8Name}`
             });
             res.send(pdfBuffer);
         } catch (pdfErr) {
