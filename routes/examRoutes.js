@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const puppeteer = require('puppeteer');
 
 const isAdmin = (req, res, next) => { 
     if (!req.session.userId || !req.session.role) return res.redirect('/login');
@@ -330,10 +331,10 @@ router.post('/papers/:id/update-date', isAdmin, async (req, res) => {
     }
 });
 
-// ALL USERS: Date Sheet (printable)
-router.get('/exams/:id/datesheet', isTeacher, async (req, res) => {
-    const [exam] = await db.execute('SELECT * FROM exams WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
-    if (!exam.length) return res.status(404).send('Exam not found');
+// Shared data-fetching for the HTML and PDF date sheet routes
+async function loadDatesheetData(examId, tenantId) {
+    const [exam] = await db.execute('SELECT * FROM exams WHERE id = ? AND tenant_id = ?', [examId, tenantId]);
+    if (!exam.length) return null;
 
     const [papers] = await db.execute(`
         SELECT ep.id, ep.subject, ep.paper_date, ep.max_marks, c.name_ar as class_name, COALESCE(t.name, u.username) as teacher_name
@@ -343,17 +344,24 @@ router.get('/exams/:id/datesheet', isTeacher, async (req, res) => {
         LEFT JOIN teachers t ON t.user_id = u.id AND t.tenant_id = ep.tenant_id
         WHERE ep.exam_id = ? AND ep.tenant_id = ?
         ORDER BY (ep.paper_date IS NULL) ASC, ep.paper_date ASC, c.name_ar ASC, ep.subject ASC
-    `, [req.params.id, req.tenant.id]);
+    `, [examId, tenantId]);
 
     const weekdays = ['اتوار', 'پیر', 'منگل', 'بدھ', 'جمعرات', 'جمعہ', 'ہفتہ'];
+    // Use local date parts (not getUTCDay/toISOString) since mysql2 returns DATE
+    // columns as local-midnight JS Date objects; converting to UTC can shift the
+    // day backward for positive UTC-offset server timezones, mislabeling the weekday.
+    const toLocalKey = (d) => {
+        const dt = new Date(d);
+        return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+    };
     const groups = [];
     const groupsByKey = {};
     for (const p of papers) {
-        const key = p.paper_date ? new Date(p.paper_date).toISOString().split('T')[0] : 'unset';
+        const key = p.paper_date ? toLocalKey(p.paper_date) : 'unset';
         if (!groupsByKey[key]) {
             const group = {
                 date: p.paper_date,
-                dayName: p.paper_date ? weekdays[new Date(p.paper_date).getUTCDay()] : null,
+                dayName: p.paper_date ? weekdays[new Date(p.paper_date).getDay()] : null,
                 rows: []
             };
             groupsByKey[key] = group;
@@ -362,7 +370,54 @@ router.get('/exams/:id/datesheet', isTeacher, async (req, res) => {
         groupsByKey[key].rows.push(p);
     }
 
-    res.render('exams/datesheet', { exam: exam[0], groups });
+    return { exam: exam[0], groups };
+}
+
+// ALL USERS: Date Sheet (printable)
+router.get('/exams/:id/datesheet', isTeacher, async (req, res) => {
+    const data = await loadDatesheetData(req.params.id, req.tenant.id);
+    if (!data) return res.status(404).send('Exam not found');
+    res.render('exams/datesheet', data);
+});
+
+// ALL USERS: Date Sheet as a clean, server-rendered PDF (no browser print header/footer)
+router.get('/exams/:id/datesheet/pdf', isTeacher, async (req, res) => {
+    const data = await loadDatesheetData(req.params.id, req.tenant.id);
+    if (!data) return res.status(404).send('Exam not found');
+
+    res.render('exams/datesheet', data, async (err, html) => {
+        if (err) {
+            console.error('Error rendering date sheet for PDF:', err);
+            return res.status(500).send('Error generating PDF');
+        }
+
+        const origin = `${req.protocol}://${req.get('host')}`;
+        html = html.replace('<head>', `<head><base href="${origin}/">`);
+
+        let browser;
+        try {
+            browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+            const page = await browser.newPage();
+            await page.setContent(html, { waitUntil: 'networkidle0' });
+            const pdfBuffer = await page.pdf({
+                format: 'A4',
+                printBackground: true,
+                displayHeaderFooter: false,
+                margin: { top: '10mm', bottom: '10mm', left: '10mm', right: '10mm' }
+            });
+
+            res.set({
+                'Content-Type': 'application/pdf',
+                'Content-Disposition': `attachment; filename="datesheet-${data.exam.id}.pdf"`
+            });
+            res.send(pdfBuffer);
+        } catch (pdfErr) {
+            console.error('Error generating date sheet PDF:', pdfErr);
+            res.status(500).send('Error generating PDF');
+        } finally {
+            if (browser) await browser.close();
+        }
+    });
 });
 
 // ADMIN/STUDENT: Report Card

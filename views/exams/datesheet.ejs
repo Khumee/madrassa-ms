@@ -70,6 +70,7 @@
 <div class="container mt-4 mb-5">
     <div class="text-end mb-3 no-print">
         <a href="<%= (locals.session && ['مدير', 'ناظم'].includes(session.role)) ? '/exams/' + exam.id + '/papers' : '/' %>" class="btn btn-outline-secondary me-2"><i class="bi bi-arrow-left"></i> <%= __('Back') || 'واپس' %></a>
+        <a href="/exams/<%= exam.id %>/datesheet/pdf" class="btn btn-success me-2"><i class="bi bi-file-earmark-pdf me-1"></i> <%= __('Download_PDF') || 'Download PDF' %></a>
         <button onclick="window.print()" class="btn btn-dark"><i class="bi bi-printer"></i> <%= __('Print') || 'پرنٹ' %></button>
     </div>
 
@@ -88,7 +89,12 @@
             <div class="col-6 text-center">
                 <h2 class="fw-bold text-dark mb-1" style="white-space: nowrap;"><%= locals.tenant ? (tenant.subdomain === 'madrassa-ms' ? __('Jamia_Habibullah_Islamabad') : (tenant.subdomain === 'kui' ? __('KUI_Production') : tenant.school_name)) : __('College_Name') %></h2>
                 <h5 class="text-secondary mb-2"><%= exam.name %></h5>
-                <h6 class="fw-bold bg-dark text-white d-inline-block px-3 py-1 rounded-pill mb-0"><%= __('Date_Sheet') || 'Date Sheet' %></h6>
+                <% const datedGroups = groups.filter(g => g.date); %>
+                <% const startDate = datedGroups.length ? datedGroups[0].date : null; %>
+                <% const endDate = datedGroups.length ? datedGroups[datedGroups.length - 1].date : null; %>
+                <h6 class="fw-bold bg-dark text-white d-inline-block px-3 py-1 rounded-pill mb-0">
+                    <%= __('Date_Sheet') || 'Date Sheet' %><% if (startDate && endDate) { %> (<%= new Date(startDate).toLocaleDateString() %> - <%= new Date(endDate).toLocaleDateString() %>)<% } %>
+                </h6>
             </div>
             <div class="col-3 text-center"></div>
         </div>
@@ -110,12 +116,11 @@
                 <tbody>
                     <% if (groups && groups.length > 0) { %>
                         <% groups.forEach(g => { %>
-                            <% g.rows.forEach((p, idx) => { %>
+                            <% const dateLabel = g.date ? new Date(g.date).toLocaleDateString() : (__('Not_set') || '-'); %>
+                            <% g.rows.forEach((p) => { %>
                                 <tr>
-                                    <% if (idx === 0) { %>
-                                        <td class="fw-bold" rowspan="<%= g.rows.length %>"><%= g.date ? new Date(g.date).toLocaleDateString() : (__('Not_set') || '-') %></td>
-                                        <td class="fw-bold" rowspan="<%= g.rows.length %>"><%= g.dayName || '-' %></td>
-                                    <% } %>
+                                    <td class="fw-bold"><%= dateLabel %></td>
+                                    <td class="fw-bold"><%= g.dayName || '-' %></td>
                                     <td><%= p.class_name %></td>
                                     <td class="text-start px-3"><%= p.subject %></td>
                                     <td><%= p.teacher_name %></td>
