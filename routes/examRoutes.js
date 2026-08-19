@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const puppeteer = require('puppeteer');
+const { buildQuestionItems, recomputePaperTotal } = require('../lib/examMarks');
 
 const isAdmin = (req, res, next) => { 
     if (!req.session.userId || !req.session.role) return res.redirect('/login');
@@ -9,56 +10,6 @@ const isAdmin = (req, res, next) => {
     else res.status(403).send('Access Denied'); 
 };
 const isTeacher = (req, res, next) => { if (req.session.userId) next(); else res.redirect('/login'); };
-
-// Group a flat question list (each row already carries choice_group_id and
-// required_count from a LEFT JOIN with question_choice_groups) into an
-// ordered list of paper "items": either a standalone question or a choice
-// group ("answer required_count of these members") with its member questions.
-function buildQuestionItems(questions) {
-    const items = [];
-    const groupIndex = {};
-    for (const q of questions) {
-        if (q.choice_group_id) {
-            let item = groupIndex[q.choice_group_id];
-            if (!item) {
-                item = { type: 'group', groupId: q.choice_group_id, requiredCount: q.required_count || 1, members: [] };
-                groupIndex[q.choice_group_id] = item;
-                items.push(item);
-            }
-            item.members.push(q);
-        } else {
-            items.push({ type: 'single', question: q });
-        }
-    }
-    return items;
-}
-
-// Total marks for a paper = sum of standalone question marks + sum over each
-// choice group of (required_count x marks-per-question-in-group). Persisted
-// to exam_papers.max_marks so existing reads (report card, results, date
-// sheet) stay simple flat column reads.
-async function recomputePaperTotal(paperId, tenantId) {
-    const [questions] = await db.execute(
-        `SELECT q.marks, q.choice_group_id, g.required_count
-         FROM questions q
-         LEFT JOIN question_choice_groups g ON g.id = q.choice_group_id
-         WHERE q.paper_id = ? AND q.tenant_id = ?`,
-        [paperId, tenantId]
-    );
-    let total = 0;
-    const seenGroups = new Set();
-    for (const q of questions) {
-        if (q.choice_group_id) {
-            if (seenGroups.has(q.choice_group_id)) continue;
-            seenGroups.add(q.choice_group_id);
-            total += (q.required_count || 1) * Number(q.marks || 0);
-        } else {
-            total += Number(q.marks || 0);
-        }
-    }
-    await db.execute('UPDATE exam_papers SET max_marks = ? WHERE id = ? AND tenant_id = ?', [total, paperId, tenantId]);
-    return total;
-}
 
 // Default paper template: 3 either/or question numbers (2 alternatives each,
 // equal marks so the choice-group total stays well-defined) summing to 100.
@@ -207,15 +158,10 @@ router.post('/papers/:id/questions', isTeacher, async (req, res) => {
 });
 
 router.post('/questions/:id/edit', isTeacher, async (req, res) => {
-    const [rows] = await db.execute('SELECT paper_id, choice_group_id FROM questions WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
+    const [rows] = await db.execute('SELECT paper_id FROM questions WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
     if (!rows.length) return res.status(404).send('Question not found');
-    const { paper_id, choice_group_id } = rows[0];
     await db.execute('UPDATE questions SET question_text = ?, marks = ?, section = ? WHERE id = ? AND tenant_id = ?', [req.body.question_text, req.body.marks, req.body.section, req.params.id, req.tenant.id]);
-    if (choice_group_id) {
-        // Keep every alternative in a choice group worth the same marks so the group total stays well-defined.
-        await db.execute('UPDATE questions SET marks = ? WHERE choice_group_id = ? AND tenant_id = ?', [req.body.marks, choice_group_id, req.tenant.id]);
-    }
-    await recomputePaperTotal(paper_id, req.tenant.id);
+    await recomputePaperTotal(rows[0].paper_id, req.tenant.id);
     const referer = req.get('Referer');
     res.redirect(referer ? referer : '/exams');
 });
@@ -258,9 +204,6 @@ router.post('/papers/:id/choice-groups', isTeacher, async (req, res) => {
     );
     if (rows.length !== questionIds.length || rows.some(r => r.choice_group_id)) {
         return res.status(400).send('Invalid selection: questions must belong to this paper and not already be grouped');
-    }
-    if (new Set(rows.map(r => Number(r.marks))).size > 1) {
-        return res.status(400).send('All questions in a choice group must carry the same marks');
     }
     const finalRequiredCount = Math.min(requiredCount, questionIds.length);
 

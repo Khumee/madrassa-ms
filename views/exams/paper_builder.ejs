@@ -25,7 +25,6 @@
                 <%= __('Of_Them') || 'of them' %>
             </label>
             <button type="submit" form="groupForm" class="btn btn-sm btn-primary"><%= __('Group_As_Choice') || 'Group as Choice' %></button>
-            <span class="text-danger small d-none" id="groupMarksWarning"><%= __('Choice_Marks_Mismatch') || 'Selected questions must carry the same marks.' %></span>
         </div>
     </div>
 
@@ -104,22 +103,15 @@
     const groupBar = document.getElementById('groupBar');
     const countLabel = document.getElementById('groupSelectedCount');
     const requiredInput = document.getElementById('requiredCountInput');
-    const marksWarning = document.getElementById('groupMarksWarning');
 
     function refreshGroupBar() {
         const checked = Array.from(checkboxes).filter(c => c.checked);
-        const marksSet = new Set(checked.map(c => c.dataset.marks));
-
-        checkboxes.forEach(c => {
-            c.disabled = checked.length > 0 && !c.checked && marksSet.size === 1 && !marksSet.has(c.dataset.marks);
-        });
 
         if (checked.length >= 2) {
             groupBar.classList.remove('d-none');
             countLabel.textContent = checked.length;
             requiredInput.max = checked.length;
             if (Number(requiredInput.value) > checked.length) requiredInput.value = checked.length;
-            marksWarning.classList.toggle('d-none', marksSet.size <= 1);
         } else {
             groupBar.classList.add('d-none');
         }

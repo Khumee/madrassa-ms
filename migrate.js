@@ -73,6 +73,50 @@ async function migrate() {
         }
     }
     
+    // One-time backfill (not a Vxx SQL file since it needs a JS loop): the
+    // choice-group model (V20) only groups questions created through the new
+    // UI. Papers built before V20 still have their questions as a flat,
+    // ungrouped list, so they'd now render as N separate mandatory questions
+    // instead of the N/2 "answer part A or B" pairs teachers actually set up.
+    // Retroactively pair up consecutive questions (oldest id first) into real
+    // 1-of-2 choice groups, replicating the old index-based pairing display.
+    // Only touches papers with zero existing groups, so once a teacher has
+    // organized a paper with the new grouping UI this never re-touches it -
+    // and a paper that's already been backfilled naturally has groups too, so
+    // this step is safe to leave content-gated rather than only version-gated.
+    // The version number is well outside the normal Vxx sequence so it can
+    // never collide with a future migration file reusing that number.
+    const LEGACY_CHOICE_GROUP_BACKFILL_VERSION = 90000020;
+    const [backfillApplied] = await db.execute('SELECT * FROM schema_history WHERE version = ?', [LEGACY_CHOICE_GROUP_BACKFILL_VERSION]);
+    if (backfillApplied.length === 0) {
+        try {
+            const [hasTable] = await db.execute("SHOW TABLES LIKE 'question_choice_groups'");
+            if (hasTable.length > 0) {
+                console.log('Running one-time backfill: grouping legacy question pairs into choice groups...');
+                const { recomputePaperTotal } = require('./lib/examMarks');
+                const [papers] = await db.execute(`
+                    SELECT paper_id, tenant_id FROM questions
+                    GROUP BY paper_id, tenant_id
+                    HAVING SUM(CASE WHEN choice_group_id IS NOT NULL THEN 1 ELSE 0 END) = 0
+                `);
+                for (const { paper_id, tenant_id } of papers) {
+                    const [qs] = await db.execute('SELECT id FROM questions WHERE paper_id = ? AND tenant_id = ? ORDER BY id ASC', [paper_id, tenant_id]);
+                    for (let i = 0; i + 1 < qs.length; i += 2) {
+                        const [group] = await db.execute('INSERT INTO question_choice_groups (tenant_id, paper_id, required_count) VALUES (?, ?, 1)', [tenant_id, paper_id]);
+                        await db.execute('UPDATE questions SET choice_group_id = ? WHERE id IN (?, ?)', [group.insertId, qs[i].id, qs[i + 1].id]);
+                    }
+                    // Recompute regardless of whether pairing happened - a lone leftover
+                    // question's max_marks may still be stale from before this feature existed.
+                    if (qs.length > 0) await recomputePaperTotal(paper_id, tenant_id);
+                }
+                await db.execute('INSERT INTO schema_history (version, script_name) VALUES (?, ?)', [LEGACY_CHOICE_GROUP_BACKFILL_VERSION, 'JS_BACKFILL_legacy_choice_group_pairing']);
+                console.log(`Backfill complete: examined ${papers.length} paper(s).`);
+            }
+        } catch (backfillErr) {
+            console.error('Error running legacy choice-group backfill:', backfillErr.message);
+        }
+    }
+
     // Safe column check for book_progress updated_at
     try {
         const [columns] = await db.execute('SHOW COLUMNS FROM book_progress LIKE "updated_at"');
