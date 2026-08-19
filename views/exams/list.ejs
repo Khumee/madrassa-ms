@@ -27,9 +27,9 @@
 
                                     <a href="/exams/<%= exam.id %>/results" class="btn btn-sm btn-success"><%= __('View_Results') %></a>
                                     <a href="/exams/<%= exam.id %>/datesheet" class="btn btn-sm btn-info"><i class="bi bi-calendar-event"></i> <%= __('Date_Sheet') || 'Date Sheet' %></a>
-                                    <form action="/exams/<%= exam.id %>/delete" method="POST" onsubmit="event.preventDefault(); const form = this; showConfirm('<%= __('Are_you_sure_you_want_to_delete_this_exam') %>?').then(c => { if(c) form.submit(); });" style="display:inline;">
-                                        <button type="submit" class="btn btn-sm btn-danger"><%= __('Delete') %></button>
-                                    </form>
+                                    <% if (session.role === 'مدير') { %>
+                                        <button type="button" class="btn btn-sm btn-danger btn-delete-exam" data-exam-id="<%= exam.id %>" data-exam-name="<%= exam.name %>"><%= __('Delete') %></button>
+                                    <% } %>
                                 </div>
                             </td>
                         </tr>
@@ -75,5 +75,52 @@
         </form>
     </div>
 </div>
+
+<!-- Delete Exam Modal (type-to-confirm) -->
+<div class="modal fade" id="deleteExamModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form id="deleteExamForm" method="POST" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-danger"><i class="bi bi-exclamation-triangle-fill me-1"></i> <%= __('Delete_Exam') || 'Delete Exam' %></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p><%- (__('Delete_Exam_Soft_Delete_Note') || 'This will remove "%s" from your exams list. Its papers, questions, and results are NOT deleted - they stay in the database.').replace('%s', '<strong id="deleteExamNameLabel"></strong>') %></p>
+                <label class="form-label"><%= __('Type_Exam_Name_To_Confirm') || 'Type the exam name to confirm:' %></label>
+                <input type="text" name="confirm_text" id="deleteExamConfirmInput" class="form-control" autocomplete="off" required>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><%= __('Cancel') %></button>
+                <button type="submit" id="deleteExamSubmitBtn" class="btn btn-danger" disabled><%= __('Delete') %></button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const modalEl = document.getElementById('deleteExamModal');
+        const form = document.getElementById('deleteExamForm');
+        const nameLabel = document.getElementById('deleteExamNameLabel');
+        const input = document.getElementById('deleteExamConfirmInput');
+        const submitBtn = document.getElementById('deleteExamSubmitBtn');
+        let expectedName = '';
+
+        document.querySelectorAll('.btn-delete-exam').forEach(btn => {
+            btn.addEventListener('click', () => {
+                expectedName = btn.dataset.examName;
+                form.action = '/exams/' + btn.dataset.examId + '/delete';
+                nameLabel.textContent = expectedName;
+                input.value = '';
+                submitBtn.disabled = true;
+                new bootstrap.Modal(modalEl).show();
+            });
+        });
+
+        input.addEventListener('input', () => {
+            submitBtn.disabled = input.value.trim() !== expectedName;
+        });
+    })();
+</script>
 
 <%- include('../partials/footer') %>

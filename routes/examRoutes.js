@@ -12,6 +12,15 @@ const isAdmin = (req, res, next) => {
     else res.status(403).send('Access Denied');
 };
 const isTeacher = (req, res, next) => { if (req.session.userId) next(); else res.redirect('/login'); };
+// Exam deletion is destructive-adjacent (it hides an exam and every paper
+// under it) so it's restricted to مدير only, not ناظم - matching the same
+// "most sensitive actions" pattern already used for permissions/data-import
+// in reportRoutes.js.
+const isMudeer = (req, res, next) => {
+    if (!req.session.userId || !req.session.role) return res.redirect('/login');
+    if (req.session.role === 'مدير') next();
+    else res.status(403).send('Access Denied');
+};
 
 // JSON paper exports are small text files - keep them in memory rather than
 // writing to disk, unlike the student-photo/document uploads elsewhere.
@@ -31,7 +40,7 @@ async function createDefaultQuestions(paperId, tenantId) {
 
 // ADMIN: List Exams
 router.get('/exams', isAdmin, async (req, res) => {
-    const [exams] = await db.execute('SELECT * FROM exams WHERE tenant_id = ? ORDER BY created_at DESC', [req.tenant.id]);
+    const [exams] = await db.execute('SELECT * FROM exams WHERE tenant_id = ? AND deleted_at IS NULL ORDER BY created_at DESC', [req.tenant.id]);
     exams.forEach(e => { e.name = examDisplayName(e, req.getLocale()); });
     res.render('exams/list', { exams });
 });
@@ -111,14 +120,22 @@ router.post('/exams', isAdmin, async (req, res) => {
     }
 });
 
-// ADMIN: Delete Exam
-router.post('/exams/:id/delete', isAdmin, async (req, res) => {
+// ADMIN (مدير only): Delete Exam - soft delete. The exam is hidden from the
+// list but its papers/questions/results are left in the database untouched,
+// and the request must repeat the exam's exact displayed name as a typed
+// confirmation (checked here, not just client-side) before anything happens.
+router.post('/exams/:id/delete', isMudeer, async (req, res) => {
     try {
-        // Manual cascade deletion for exams
-        await db.execute('DELETE FROM student_results WHERE paper_id IN (SELECT id FROM exam_papers WHERE exam_id = ?) AND tenant_id = ?', [req.params.id, req.tenant.id]);
-        await db.execute('DELETE FROM questions WHERE paper_id IN (SELECT id FROM exam_papers WHERE exam_id = ?) AND tenant_id = ?', [req.params.id, req.tenant.id]);
-        await db.execute('DELETE FROM exam_papers WHERE exam_id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
-        await db.execute('DELETE FROM exams WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
+        const [examRows] = await db.execute('SELECT * FROM exams WHERE id = ? AND tenant_id = ? AND deleted_at IS NULL', [req.params.id, req.tenant.id]);
+        if (!examRows.length) return res.status(404).send('Exam not found');
+
+        const expectedName = examDisplayName(examRows[0], req.getLocale());
+        const confirmText = (req.body.confirm_text || '').trim();
+        if (confirmText !== expectedName) {
+            return res.status(400).send('Confirmation text did not match the exam name. Nothing was deleted.');
+        }
+
+        await db.execute('UPDATE exams SET deleted_at = NOW() WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
         res.redirect('/exams');
     } catch (error) {
         console.error('Error deleting exam:', error);
@@ -155,7 +172,7 @@ router.post('/papers/:id/delete', isAdmin, async (req, res) => {
 
 // TEACHER: My Tasks
 router.get('/papers/my-tasks', isTeacher, async (req, res) => {
-    const [papers] = await db.execute(`SELECT ep.*, e.name as exam_name, e.exam_type, e.exam_year, c.name_ar as class_name FROM exam_papers ep JOIN exams e ON ep.exam_id = e.id JOIN classes c ON ep.class_id = c.id WHERE ep.teacher_id = ? AND ep.tenant_id = ?`, [req.session.userId, req.tenant.id]);
+    const [papers] = await db.execute(`SELECT ep.*, e.name as exam_name, e.exam_type, e.exam_year, c.name_ar as class_name FROM exam_papers ep JOIN exams e ON ep.exam_id = e.id JOIN classes c ON ep.class_id = c.id WHERE ep.teacher_id = ? AND ep.tenant_id = ? AND e.deleted_at IS NULL`, [req.session.userId, req.tenant.id]);
     papers.forEach(p => { p.exam_name = examDisplayName({ name: p.exam_name, exam_type: p.exam_type, exam_year: p.exam_year }, req.getLocale()); });
     res.render('exams/teacher_tasks', { papers });
 });
