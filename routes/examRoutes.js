@@ -176,6 +176,48 @@ router.post('/papers/:id/questions', isTeacher, async (req, res) => {
     res.redirect(referer ? referer : `/papers/${req.params.id}/build`);
 });
 
+// Add a question directly as a choice group from the "Add Question" dialog:
+// one or more alternative parts, all sharing the same marks, optionally
+// grouped into "answer required_count of these" if 2+ parts were given.
+router.post('/papers/:id/questions/with-choice', isTeacher, async (req, res) => {
+    const paperId = req.params.id;
+    const referer = req.get('Referer') || `/papers/${paperId}/build`;
+
+    let texts = req.body.question_text;
+    if (!Array.isArray(texts)) texts = texts ? [texts] : [];
+    texts = texts.map(t => (t || '').trim());
+    while (texts.length > 1 && texts[texts.length - 1] === '') texts.pop();
+    if (texts.length === 0) texts = [''];
+
+    const marks = parseInt(req.body.marks, 10);
+    if (!marks || marks < 1) return res.status(400).send('Invalid marks');
+
+    // A single part keeps any custom section label the teacher typed; multiple
+    // parts (a real choice group) get auto-labeled الف/ب/ج... since one free-text
+    // field can't sensibly label N alternatives.
+    const partLabels = texts.length === 1 && req.body.section
+        ? [req.body.section]
+        : ['الف', 'ب', 'ج', 'د', 'ه', 'و', 'ز', 'ح'];
+    const insertedIds = [];
+    for (let i = 0; i < texts.length; i++) {
+        const [q] = await db.execute(
+            'INSERT INTO questions (paper_id, question_text, marks, section, tenant_id) VALUES (?, ?, ?, ?, ?)',
+            [paperId, texts[i], marks, partLabels[i] || String(i + 1), req.tenant.id]
+        );
+        insertedIds.push(q.insertId);
+    }
+
+    if (insertedIds.length >= 2) {
+        const requiredCount = Math.min(Math.max(1, parseInt(req.body.required_count, 10) || 1), insertedIds.length);
+        const [group] = await db.execute('INSERT INTO question_choice_groups (tenant_id, paper_id, required_count) VALUES (?, ?, ?)', [req.tenant.id, paperId, requiredCount]);
+        const placeholders = insertedIds.map(() => '?').join(',');
+        await db.execute(`UPDATE questions SET choice_group_id = ? WHERE id IN (${placeholders}) AND tenant_id = ?`, [group.insertId, ...insertedIds, req.tenant.id]);
+    }
+
+    await recomputePaperTotal(paperId, req.tenant.id);
+    res.redirect(referer);
+});
+
 router.post('/questions/:id/edit', isTeacher, async (req, res) => {
     const [rows] = await db.execute('SELECT paper_id FROM questions WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
     if (!rows.length) return res.status(404).send('Question not found');

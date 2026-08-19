@@ -513,7 +513,7 @@
     "Required_Count": "مطلوبہ تعداد",
     "Or": "یا",
     "Choice_Marks_Propagate_Note": "اس سے اس انتخابی گروپ کے تمام متبادل سوالات کے نمبر بھی تبدیل ہو جائیں گے۔",
-    "Group_Questions_In_Builder_Note": "انتخابی سوالات بنانے کے لیے \"Build Paper\" استعمال کریں۔",
+    "Group_Questions_In_Builder_Note": "انتخابی سوالات بنانے کے لیے \"%s\" استعمال کریں۔",
     "Type_your_question_here": "اپنا سوال یہاں لکھیں...",
     "Optional": "اختیاری",
     "Exam_Type": "امتحان کی قسم",
@@ -522,5 +522,10 @@
     "Exam_Type_Quarterly": "سہ ماہی",
     "Exam_Type_Monthly": "ماہانہ",
     "Year": "سال",
+    "Has_Choice_Toggle": "طالب علم کو متبادل میں سے انتخاب کا موقع دیں",
+    "Alternative_Part": "متبادل",
+    "Add_Alternative": "ایک اور متبادل شامل کریں",
+    "Required_Count_Short": "جواب دیں",
+    "Required_Count_Of": "میں سے",
     "Exam_Name_Auto_Note": "امتحان کا نام قسم اور سال سے خودکار طور پر بن جائے گا، دیکھنے والے کی زبان کے مطابق۔"
 }

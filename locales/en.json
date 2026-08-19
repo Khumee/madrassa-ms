@@ -505,7 +505,7 @@
     "Required_Count": "Required count",
     "Or": "or",
     "Choice_Marks_Propagate_Note": "Changing marks here updates every alternative in this choice group.",
-    "Group_Questions_In_Builder_Note": "Use \"Build Paper\" to set up choice questions.",
+    "Group_Questions_In_Builder_Note": "Use \"%s\" to set up choice questions.",
     "Type_your_question_here": "Type your question here...",
     "Optional": "Optional",
     "Exam_Type": "Exam Type",
@@ -514,5 +514,10 @@
     "Exam_Type_Quarterly": "Quarterly",
     "Exam_Type_Monthly": "Monthly",
     "Year": "Year",
+    "Has_Choice_Toggle": "Give the student a choice between alternatives",
+    "Alternative_Part": "Alternative",
+    "Add_Alternative": "Add Another Alternative",
+    "Required_Count_Short": "Answer",
+    "Required_Count_Of": "of these",
     "Exam_Name_Auto_Note": "Exam name is generated automatically from the type and year, in whichever language is active when it is viewed."
 }

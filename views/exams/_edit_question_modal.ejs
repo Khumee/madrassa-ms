@@ -10,7 +10,7 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label"><%= __('Question') || 'Question' %></label>
-                        <input type="text" name="question_text" class="form-control" value="<%= q.question_text %>" required>
+                        <textarea name="question_text" rows="3" class="form-control" required><%= q.question_text %></textarea>
                     </div>
                     <div class="mb-3">
                         <label class="form-label"><%= __('Marks') || 'Marks' %></label>

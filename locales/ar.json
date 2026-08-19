@@ -513,7 +513,7 @@
     "Required_Count": "العدد المطلوب",
     "Or": "أو",
     "Choice_Marks_Propagate_Note": "سيؤدي تغيير الدرجات هنا إلى تحديث جميع بدائل هذه المجموعة الاختيارية.",
-    "Group_Questions_In_Builder_Note": "استخدم \"Build Paper\" لإعداد الأسئلة الاختيارية.",
+    "Group_Questions_In_Builder_Note": "استخدم \"%s\" لإعداد الأسئلة الاختيارية.",
     "Type_your_question_here": "اكتب سؤالك هنا...",
     "Optional": "اختياري",
     "Exam_Type": "نوع الامتحان",
@@ -522,5 +522,10 @@
     "Exam_Type_Quarterly": "ربع سنوي",
     "Exam_Type_Monthly": "شهري",
     "Year": "السنة",
+    "Has_Choice_Toggle": "امنح الطالب خيارًا بين بدائل",
+    "Alternative_Part": "بديل",
+    "Add_Alternative": "إضافة بديل آخر",
+    "Required_Count_Short": "الإجابة عن",
+    "Required_Count_Of": "من هذه",
     "Exam_Name_Auto_Note": "يتم إنشاء اسم الامتحان تلقائيًا من النوع والسنة، حسب اللغة النشطة عند العرض."
 }

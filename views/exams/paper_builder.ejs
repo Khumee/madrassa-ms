@@ -5,17 +5,34 @@
     <div class="card mb-4">
         <div class="card-header fw-bold"><i class="bi bi-plus-circle me-1"></i> <%= __('Add_Question') %></div>
         <div class="card-body">
-            <form action="/papers/<%= paper.id %>/questions" method="POST">
-                <div class="mb-3">
-                    <label class="form-label text-muted"><%= __('Question_Text') || 'Question Text' %></label>
-                    <input type="text" name="question_text" class="form-control form-control-lg" placeholder="<%= __('Type_your_question_here') || 'Question Text' %>" required>
+            <form id="quickAddForm" action="/papers/<%= paper.id %>/questions/with-choice" method="POST">
+                <div id="quickAddParts">
+                    <div class="mb-3 quick-add-part">
+                        <label class="form-label text-muted"><%= __('Question_Text') || 'Question Text' %></label>
+                        <textarea name="question_text" rows="3" class="form-control form-control-lg" placeholder="<%= __('Type_your_question_here') || 'Question Text' %>" required></textarea>
+                    </div>
                 </div>
+
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="quickAddChoiceToggle" onchange="quickAddToggleChoice()">
+                    <label class="form-check-label" for="quickAddChoiceToggle"><%= __('Has_Choice_Toggle') || 'Give the student a choice between alternatives' %></label>
+                </div>
+
+                <div id="quickAddChoiceExtras" class="d-none mb-3">
+                    <button type="button" class="btn btn-sm btn-outline-secondary mb-2" onclick="quickAddAddAlternative()"><i class="bi bi-plus-lg me-1"></i> <%= __('Add_Alternative') || 'Add Another Alternative' %></button>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-muted small"><%= __('Required_Count_Short') || 'Answer' %></span>
+                        <input type="number" name="required_count" id="quickAddRequiredCount" class="form-control form-control-sm" style="width: 70px;" value="1" min="1">
+                        <span class="text-muted small"><%= __('Required_Count_Of') || 'of these' %></span>
+                    </div>
+                </div>
+
                 <div class="row g-2 align-items-end mb-1">
                     <div class="col-sm-3">
                         <label class="form-label text-muted"><%= __('Marks') || 'Marks' %></label>
                         <input type="number" name="marks" class="form-control form-control-lg" min="1" required>
                     </div>
-                    <div class="col-sm-4">
+                    <div class="col-sm-4" id="quickAddSectionField">
                         <label class="form-label text-muted"><%= __('Section') || 'Section' %> <span class="fw-normal">(<%= __('Optional') || 'Optional' %>)</span></label>
                         <input type="text" name="section" class="form-control form-control-lg">
                     </div>
@@ -26,6 +43,47 @@
             </form>
         </div>
     </div>
+
+    <script>
+        (function() {
+            const i18nAlternative = <%- JSON.stringify(__('Alternative_Part') || 'Alternative') %>;
+
+            window.quickAddToggleChoice = function() {
+                const on = document.getElementById('quickAddChoiceToggle').checked;
+                document.getElementById('quickAddChoiceExtras').classList.toggle('d-none', !on);
+                document.getElementById('quickAddSectionField').classList.toggle('d-none', on);
+                const parts = document.querySelectorAll('#quickAddParts .quick-add-part');
+                if (on && parts.length === 1) {
+                    quickAddAddAlternative();
+                } else if (!on) {
+                    parts.forEach((el, i) => { if (i > 0) el.remove(); });
+                }
+            };
+
+            window.quickAddAddAlternative = function() {
+                const container = document.getElementById('quickAddParts');
+                const div = document.createElement('div');
+                div.className = 'mb-3 quick-add-part';
+                div.innerHTML = '<label class="form-label text-muted">' + i18nAlternative + '</label>' +
+                    '<div class="input-group"><textarea name="question_text" rows="3" class="form-control form-control-lg"></textarea>' +
+                    '<button type="button" class="btn btn-outline-danger" onclick="quickAddRemovePart(this)"><i class="bi bi-x-lg"></i></button></div>';
+                container.appendChild(div);
+                quickAddSyncRequiredMax();
+            };
+
+            window.quickAddRemovePart = function(btn) {
+                btn.closest('.quick-add-part').remove();
+                quickAddSyncRequiredMax();
+            };
+
+            window.quickAddSyncRequiredMax = function() {
+                const count = document.querySelectorAll('#quickAddParts .quick-add-part').length;
+                const input = document.getElementById('quickAddRequiredCount');
+                input.max = count;
+                if (Number(input.value) > count) input.value = count;
+            };
+        })();
+    </script>
 
     <!-- Hidden form that the ungrouped-question checkboxes below submit into -->
     <form id="groupForm" action="/papers/<%= paper.id %>/choice-groups" method="POST"></form>
