@@ -51,8 +51,8 @@ router.get('/exams/:id/results', isAdmin, async (req, res) => {
         SELECT DISTINCT s.id, s.name, c.name_ar as class_name 
         FROM students s 
         JOIN classes c ON s.class_id = c.id 
-        JOIN exam_papers ep ON ep.class_id = c.id 
-        WHERE ep.exam_id = ? AND ep.tenant_id = ?
+        JOIN exam_papers ep ON ep.class_id = c.id
+        WHERE ep.exam_id = ? AND ep.tenant_id = ? AND ep.deleted_at IS NULL
     `;
     const params = [req.params.id, req.tenant.id];
     
@@ -67,7 +67,7 @@ router.get('/exams/:id/results', isAdmin, async (req, res) => {
     
     const [exam] = await db.execute('SELECT * FROM exams WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
     if (exam[0]) exam[0].name = examDisplayName(exam[0], req.getLocale());
-    const [classes] = await db.execute('SELECT DISTINCT c.id, c.name_ar FROM classes c JOIN exam_papers ep ON c.id = ep.class_id WHERE ep.exam_id = ? AND ep.tenant_id = ? ORDER BY c.name_ar ASC', [req.params.id, req.tenant.id]);
+    const [classes] = await db.execute('SELECT DISTINCT c.id, c.name_ar FROM classes c JOIN exam_papers ep ON c.id = ep.class_id WHERE ep.exam_id = ? AND ep.tenant_id = ? AND ep.deleted_at IS NULL ORDER BY c.name_ar ASC', [req.params.id, req.tenant.id]);
 
     res.render('exams/results', {
         students,
@@ -120,10 +120,12 @@ router.post('/exams', isAdmin, async (req, res) => {
     }
 });
 
-// ADMIN (مدير only): Delete Exam - soft delete. The exam is hidden from the
-// list but its papers/questions/results are left in the database untouched,
-// and the request must repeat the exam's exact displayed name as a typed
-// confirmation (checked here, not just client-side) before anything happens.
+// ADMIN (مدير only): Delete Exam - soft delete. The exam AND each of its
+// papers are marked deleted (hidden from every list), but questions, choice
+// groups, and results underneath those papers are left in the database
+// completely untouched. The request must repeat the exam's exact displayed
+// name as a typed confirmation (checked here, not just client-side) before
+// anything happens.
 router.post('/exams/:id/delete', isMudeer, async (req, res) => {
     try {
         const [examRows] = await db.execute('SELECT * FROM exams WHERE id = ? AND tenant_id = ? AND deleted_at IS NULL', [req.params.id, req.tenant.id]);
@@ -136,6 +138,7 @@ router.post('/exams/:id/delete', isMudeer, async (req, res) => {
         }
 
         await db.execute('UPDATE exams SET deleted_at = NOW() WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
+        await db.execute('UPDATE exam_papers SET deleted_at = NOW() WHERE exam_id = ? AND tenant_id = ? AND deleted_at IS NULL', [req.params.id, req.tenant.id]);
         res.redirect('/exams');
     } catch (error) {
         console.error('Error deleting exam:', error);
@@ -172,7 +175,7 @@ router.post('/papers/:id/delete', isAdmin, async (req, res) => {
 
 // TEACHER: My Tasks
 router.get('/papers/my-tasks', isTeacher, async (req, res) => {
-    const [papers] = await db.execute(`SELECT ep.*, e.name as exam_name, e.exam_type, e.exam_year, c.name_ar as class_name FROM exam_papers ep JOIN exams e ON ep.exam_id = e.id JOIN classes c ON ep.class_id = c.id WHERE ep.teacher_id = ? AND ep.tenant_id = ? AND e.deleted_at IS NULL`, [req.session.userId, req.tenant.id]);
+    const [papers] = await db.execute(`SELECT ep.*, e.name as exam_name, e.exam_type, e.exam_year, c.name_ar as class_name FROM exam_papers ep JOIN exams e ON ep.exam_id = e.id JOIN classes c ON ep.class_id = c.id WHERE ep.teacher_id = ? AND ep.tenant_id = ? AND e.deleted_at IS NULL AND ep.deleted_at IS NULL`, [req.session.userId, req.tenant.id]);
     papers.forEach(p => { p.exam_name = examDisplayName({ name: p.exam_name, exam_type: p.exam_type, exam_year: p.exam_year }, req.getLocale()); });
     res.render('exams/teacher_tasks', { papers });
 });
@@ -344,27 +347,21 @@ router.post('/papers/:id/generate-default', isTeacher, async (req, res) => {
     res.redirect(`/papers/${req.params.id}/view`);
 });
 
-// Export a paper's questions/choice-groups/note as a portable JSON file, so a
-// teacher can back up a paper before making risky changes and restore it via
-// the import endpoint below if something goes wrong.
-router.get('/papers/:id/export', isTeacher, async (req, res) => {
-    const [paperRows] = await db.execute('SELECT * FROM exam_papers WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
-    if (!paperRows.length) return res.status(404).send('Paper not found');
-    const paper = paperRows[0];
-
+// Shared by the single-paper and bulk exam exports below: turn one paper's
+// questions/choice-groups into the portable JSON shape used for export/import.
+// Re-keys each choice_group_id to a small sequential ref - the real database
+// id is meaningless once imported elsewhere (or back into this same paper
+// after its rows have been recreated).
+async function buildPaperExportQuestions(paperId, tenantId) {
     const [questions] = await db.execute(
         `SELECT q.question_text, q.marks, q.section, q.choice_group_id, g.required_count
          FROM questions q LEFT JOIN question_choice_groups g ON g.id = q.choice_group_id
          WHERE q.paper_id = ? AND q.tenant_id = ? ORDER BY q.id ASC`,
-        [req.params.id, req.tenant.id]
+        [paperId, tenantId]
     );
-
-    // Re-key each choice_group_id to a small sequential ref - the real
-    // database id is meaningless once imported elsewhere (or back into this
-    // same paper after its rows have been recreated).
     const groupRefs = {};
     let nextRef = 1;
-    const exportedQuestions = questions.map(q => {
+    return questions.map(q => {
         let groupRef = null;
         if (q.choice_group_id) {
             if (!(q.choice_group_id in groupRefs)) groupRefs[q.choice_group_id] = nextRef++;
@@ -378,6 +375,15 @@ router.get('/papers/:id/export', isTeacher, async (req, res) => {
             required_count: groupRef ? q.required_count : null
         };
     });
+}
+
+// Export a paper's questions/choice-groups/note as a portable JSON file, so a
+// teacher can back up a paper before making risky changes and restore it via
+// the import endpoint below if something goes wrong.
+router.get('/papers/:id/export', isTeacher, async (req, res) => {
+    const [paperRows] = await db.execute('SELECT * FROM exam_papers WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
+    if (!paperRows.length) return res.status(404).send('Paper not found');
+    const paper = paperRows[0];
 
     const payload = {
         format: 'madrassa-exam-paper',
@@ -385,11 +391,61 @@ router.get('/papers/:id/export', isTeacher, async (req, res) => {
         exported_at: new Date().toISOString(),
         subject: paper.subject,
         note_text: paper.note_text,
-        questions: exportedQuestions
+        questions: await buildPaperExportQuestions(paper.id, req.tenant.id)
     };
 
     const safeSubject = (paper.subject || 'paper').replace(/[^\w\-]+/g, '_');
     res.setHeader('Content-Disposition', `attachment; filename="paper-${paper.id}-${safeSubject}.json"`);
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.send(JSON.stringify(payload, null, 2));
+});
+
+// Export every paper under an exam (including already soft-deleted ones) as
+// a single JSON file - the bulk equivalent of the per-paper export above,
+// meant as a full backup before deleting or otherwise touching an exam.
+router.get('/exams/:id/export-papers', isAdmin, async (req, res) => {
+    const [examRows] = await db.execute('SELECT * FROM exams WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
+    if (!examRows.length) return res.status(404).send('Exam not found');
+    const exam = examRows[0];
+    const examName = examDisplayName(exam, req.getLocale());
+
+    const [papers] = await db.execute(
+        `SELECT ep.*, c.name_ar as class_name, COALESCE(t.name, u.username) as teacher_name
+         FROM exam_papers ep
+         JOIN classes c ON ep.class_id = c.id
+         JOIN users u ON ep.teacher_id = u.id
+         LEFT JOIN teachers t ON t.user_id = u.id AND t.tenant_id = ep.tenant_id
+         WHERE ep.exam_id = ? AND ep.tenant_id = ?
+         ORDER BY c.name_ar ASC, ep.subject ASC`,
+        [req.params.id, req.tenant.id]
+    );
+
+    const exportedPapers = [];
+    for (const paper of papers) {
+        exportedPapers.push({
+            format: 'madrassa-exam-paper',
+            version: 1,
+            paper_id: paper.id,
+            class_name: paper.class_name,
+            teacher_name: paper.teacher_name,
+            paper_date: paper.paper_date,
+            deleted: !!paper.deleted_at,
+            subject: paper.subject,
+            note_text: paper.note_text,
+            questions: await buildPaperExportQuestions(paper.id, req.tenant.id)
+        });
+    }
+
+    const payload = {
+        format: 'madrassa-exam-papers-bulk',
+        version: 1,
+        exported_at: new Date().toISOString(),
+        exam_name: examName,
+        papers: exportedPapers
+    };
+
+    const safeExamName = examName.replace(/[^\w\-]+/g, '_');
+    res.setHeader('Content-Disposition', `attachment; filename="exam-${exam.id}-${safeExamName}-papers.json"`);
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.send(JSON.stringify(payload, null, 2));
 });
@@ -456,7 +512,7 @@ router.post('/papers/:id/note', isTeacher, async (req, res) => {
 });
 // ADMIN: All Papers for an Exam
 router.get('/exams/:id/papers', isAdmin, async (req, res) => {
-    let query = 'SELECT ep.*, e.name as exam_name, c.name_ar as class_name, COALESCE(t.name, u.username) as teacher_name FROM exam_papers ep JOIN exams e ON ep.exam_id = e.id JOIN classes c ON ep.class_id = c.id JOIN users u ON ep.teacher_id = u.id LEFT JOIN teachers t ON t.user_id = u.id AND t.tenant_id = ep.tenant_id WHERE ep.exam_id = ? AND ep.tenant_id = ?';
+    let query = 'SELECT ep.*, e.name as exam_name, c.name_ar as class_name, COALESCE(t.name, u.username) as teacher_name FROM exam_papers ep JOIN exams e ON ep.exam_id = e.id JOIN classes c ON ep.class_id = c.id JOIN users u ON ep.teacher_id = u.id LEFT JOIN teachers t ON t.user_id = u.id AND t.tenant_id = ep.tenant_id WHERE ep.exam_id = ? AND ep.tenant_id = ? AND ep.deleted_at IS NULL';
     const params = [req.params.id, req.tenant.id];
 
     if (req.query.classId) {
@@ -474,8 +530,8 @@ router.get('/exams/:id/papers', isAdmin, async (req, res) => {
     if (exam[0]) exam[0].name = examDisplayName(exam[0], req.getLocale());
 
     // Fetch unique classes and teachers for filters (based on this exam's papers)
-    const [classes] = await db.execute('SELECT DISTINCT c.id, c.name_ar FROM classes c JOIN exam_papers ep ON c.id = ep.class_id WHERE ep.exam_id = ? AND ep.tenant_id = ? ORDER BY c.name_ar ASC', [req.params.id, req.tenant.id]);
-    const [teachers] = await db.execute('SELECT DISTINCT u.id, COALESCE(t.name, u.username) as name FROM users u JOIN exam_papers ep ON u.id = ep.teacher_id LEFT JOIN teachers t ON t.user_id = u.id AND t.tenant_id = ep.tenant_id WHERE ep.exam_id = ? AND ep.tenant_id = ? ORDER BY name ASC', [req.params.id, req.tenant.id]);
+    const [classes] = await db.execute('SELECT DISTINCT c.id, c.name_ar FROM classes c JOIN exam_papers ep ON c.id = ep.class_id WHERE ep.exam_id = ? AND ep.tenant_id = ? AND ep.deleted_at IS NULL ORDER BY c.name_ar ASC', [req.params.id, req.tenant.id]);
+    const [teachers] = await db.execute('SELECT DISTINCT u.id, COALESCE(t.name, u.username) as name FROM users u JOIN exam_papers ep ON u.id = ep.teacher_id LEFT JOIN teachers t ON t.user_id = u.id AND t.tenant_id = ep.tenant_id WHERE ep.exam_id = ? AND ep.tenant_id = ? AND ep.deleted_at IS NULL ORDER BY name ASC', [req.params.id, req.tenant.id]);
 
     // Fetch all for new paper assignment
     const [allClasses] = await db.execute('SELECT * FROM classes WHERE tenant_id = ?', [req.tenant.id]);

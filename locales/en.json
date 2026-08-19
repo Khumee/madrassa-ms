@@ -527,5 +527,6 @@
     "Import_Paper_Confirm": "This will replace all of this paper's current questions with the ones from the imported file. Continue?",
     "Delete_Exam": "Delete Exam",
     "Delete_Exam_Soft_Delete_Note": "This will remove \"%s\" from your exams list. Its papers, questions, and results are NOT deleted - they stay in the database.",
-    "Type_Exam_Name_To_Confirm": "Type the exam name to confirm:"
+    "Type_Exam_Name_To_Confirm": "Type the exam name to confirm:",
+    "Export_All_Papers": "Export All Papers"
 }

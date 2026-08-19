@@ -27,6 +27,7 @@
 
                                     <a href="/exams/<%= exam.id %>/results" class="btn btn-sm btn-success"><%= __('View_Results') %></a>
                                     <a href="/exams/<%= exam.id %>/datesheet" class="btn btn-sm btn-info"><i class="bi bi-calendar-event"></i> <%= __('Date_Sheet') || 'Date Sheet' %></a>
+                                    <a href="/exams/<%= exam.id %>/export-papers" class="btn btn-sm btn-outline-dark"><i class="bi bi-download"></i> <%= __('Export_All_Papers') || 'Export All Papers' %></a>
                                     <% if (session.role === 'مدير') { %>
                                         <button type="button" class="btn btn-sm btn-danger btn-delete-exam" data-exam-id="<%= exam.id %>" data-exam-name="<%= exam.name %>"><%= __('Delete') %></button>
                                     <% } %>
