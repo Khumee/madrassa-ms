@@ -92,6 +92,14 @@
         display: none;
     }
 
+    #note-section.editing .view-mode {
+        display: none;
+    }
+
+    #note-section.editing .edit-mode {
+        display: block;
+    }
+
     .print-only {
         display: none;
     }
@@ -155,12 +163,23 @@
     <div class="thick-line"></div>
     
     <% const hasChoiceGroups = items && items.some(it => it.type === 'group'); %>
-    <div class="note-section">
-        <% if (hasChoiceGroups) { %>
-            <p>ملحوظة: 'یا' سے جڑے سوالات میں سے مطلوبہ تعداد میں کسی کا جواب لکھیں۔ صحیح عربی میں پرچہ حل کرنے پر انشاء عربی کے پانچ نمبر ہوں گے۔</p>
-        <% } else { %>
-            <p>ملحوظة: صحیح عربی میں پرچہ حل کرنے پر انشاء عربی کے پانچ نمبر ہوں گے۔</p>
-        <% } %>
+    <% const defaultNoteText = hasChoiceGroups
+        ? `ملحوظة: 'یا' سے جڑے سوالات میں سے مطلوبہ تعداد میں کسی کا جواب لکھیں۔ صحیح عربی میں پرچہ حل کرنے پر انشاء عربی کے پانچ نمبر ہوں گے۔`
+        : `ملحوظة: صحیح عربی میں پرچہ حل کرنے پر انشاء عربی کے پانچ نمبر ہوں گے۔`; %>
+    <div class="note-section" id="note-section">
+        <div class="view-mode">
+            <p style="white-space: pre-wrap;"><%= paper.note_text || defaultNoteText %></p>
+            <button type="button" class="btn btn-sm btn-outline-secondary no-print" onclick="toggleNoteEdit()" title="<%= __('Edit_Note') || 'ملحوظة میں ترمیم کریں' %>"><i class="bi bi-pencil"></i></button>
+        </div>
+        <div class="edit-mode no-print mt-2 mb-3" dir="rtl">
+            <form action="/papers/<%= paper.id %>/note" method="POST">
+                <textarea name="note_text" class="form-control text-end" rows="3" style="direction: rtl;" placeholder="<%= __('Default_Note_Placeholder') || 'خالی چھوڑنے پر ڈیفالٹ ملحوظة دکھایا جائے گا' %>"><%= paper.note_text || '' %></textarea>
+                <div class="mt-2">
+                    <button type="submit" class="btn btn-sm btn-success"><i class="bi bi-check-lg"></i> <%= __('Save_Changes') || 'Save Changes' %></button>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="toggleNoteEdit()"><%= __('Cancel') || 'Cancel' %></button>
+                </div>
+            </form>
+        </div>
         <div class="subject-title">الورقة في مادة (<%= paper.subject %>) - المعلم: <%= paper.teacher_name %></div>
     </div>
 
@@ -349,6 +368,11 @@
 <div class="container no-print mt-4 mb-5 text-center" style="max-width: 210mm;">
     <a href="javascript:history.back()" class="btn btn-outline-secondary btn-lg"><i class="bi bi-arrow-left"></i> واپس</a>
     <button onclick="window.print()" class="btn btn-outline-primary btn-lg ms-3"><i class="bi bi-printer"></i> پرنٹ کریں</button>
+    <a href="/papers/<%= paper.id %>/export" class="btn btn-outline-dark btn-lg ms-3"><i class="bi bi-download"></i> <%= __('Export_Paper') || 'پرچہ ایکسپورٹ کریں' %></a>
+    <button type="button" class="btn btn-outline-dark btn-lg ms-3" onclick="document.getElementById('importPaperFile').click()"><i class="bi bi-upload"></i> <%= __('Import_Paper') || 'پرچہ امپورٹ کریں' %></button>
+    <form id="importPaperForm" action="/papers/<%= paper.id %>/import" method="POST" enctype="multipart/form-data" class="d-none">
+        <input type="file" name="file" id="importPaperFile" accept="application/json" onchange="onImportPaperFileChosen()">
+    </form>
 </div>
 
 <script>
@@ -362,6 +386,20 @@
     function toggleEdit(id) {
         const block = document.getElementById('question-' + id);
         block.classList.toggle('editing');
+    }
+
+    function toggleNoteEdit() {
+        document.getElementById('note-section').classList.toggle('editing');
+    }
+
+    function onImportPaperFileChosen() {
+        const input = document.getElementById('importPaperFile');
+        if (!input.files || !input.files.length) return;
+        const warning = <%- JSON.stringify(__('Import_Paper_Confirm') || 'یہ اس پرچے کے تمام موجودہ سوالات کی جگہ درآمد شدہ فائل کے سوالات لے لے گا۔ جاری رکھیں؟') %>;
+        showConfirm(warning).then(c => {
+            if (c) document.getElementById('importPaperForm').submit();
+            else input.value = '';
+        });
     }
 </script>
 

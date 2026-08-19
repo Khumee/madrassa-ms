@@ -2,25 +2,29 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const puppeteer = require('puppeteer');
+const multer = require('multer');
 const { buildQuestionItems, recomputePaperTotal } = require('../lib/examMarks');
 const { EXAM_TYPES, examDisplayName } = require('../lib/examNaming');
 
-const isAdmin = (req, res, next) => { 
+const isAdmin = (req, res, next) => {
     if (!req.session.userId || !req.session.role) return res.redirect('/login');
-    if (['admin', 'مدير', 'ناظم'].includes(req.session.role)) next(); 
-    else res.status(403).send('Access Denied'); 
+    if (['admin', 'مدير', 'ناظم'].includes(req.session.role)) next();
+    else res.status(403).send('Access Denied');
 };
 const isTeacher = (req, res, next) => { if (req.session.userId) next(); else res.redirect('/login'); };
 
-// Default paper template: 3 either/or question numbers (2 alternatives each,
-// equal marks so the choice-group total stays well-defined) summing to 100.
-async function createDefaultChoiceGroups(paperId, tenantId) {
-    const groupMarks = [34, 33, 33];
-    for (const marks of groupMarks) {
-        const [q1] = await db.execute('INSERT INTO questions (paper_id, question_text, marks, section, tenant_id) VALUES (?, ?, ?, ?, ?)', [paperId, '', marks, 'الف', tenantId]);
-        const [q2] = await db.execute('INSERT INTO questions (paper_id, question_text, marks, section, tenant_id) VALUES (?, ?, ?, ?, ?)', [paperId, '', marks, 'ب', tenantId]);
-        const [group] = await db.execute('INSERT INTO question_choice_groups (tenant_id, paper_id, required_count) VALUES (?, ?, 1)', [tenantId, paperId]);
-        await db.execute('UPDATE questions SET choice_group_id = ? WHERE id IN (?, ?) AND tenant_id = ?', [group.insertId, q1.insertId, q2.insertId, tenantId]);
+// JSON paper exports are small text files - keep them in memory rather than
+// writing to disk, unlike the student-photo/document uploads elsewhere.
+const paperImportUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 1 * 1024 * 1024 } });
+
+// Default paper template: 3 plain single questions (no either/or choice
+// groups) summing to 100. Teachers can still turn any of these into a choice
+// group afterward from "Build Paper" or the Add Question dialog.
+async function createDefaultQuestions(paperId, tenantId) {
+    const questionMarks = [34, 33, 33];
+    const sections = ['الف', 'ب', 'ج'];
+    for (let i = 0; i < questionMarks.length; i++) {
+        await db.execute('INSERT INTO questions (paper_id, question_text, marks, section, tenant_id) VALUES (?, ?, ?, ?, ?)', [paperId, '', questionMarks[i], sections[i], tenantId]);
     }
     await recomputePaperTotal(paperId, tenantId);
 }
@@ -98,7 +102,7 @@ router.post('/exams', isAdmin, async (req, res) => {
                 'INSERT INTO exam_papers (exam_id, class_id, subject, teacher_id, max_marks, tenant_id) VALUES (?, ?, ?, ?, ?, ?)',
                 [examId, a.class_id, a.subject, a.teacher_id, 0, req.tenant.id]
             );
-            await createDefaultChoiceGroups(paperResult.insertId, req.tenant.id);
+            await createDefaultQuestions(paperResult.insertId, req.tenant.id);
         }
         res.redirect('/exams');
     } catch (error) {
@@ -127,9 +131,9 @@ router.post('/exams/:id/delete', isAdmin, async (req, res) => {
 
 router.post('/exams/:id/assign', isAdmin, async (req, res) => {
     const [result] = await db.execute('INSERT INTO exam_papers (exam_id, class_id, subject, teacher_id, max_marks, tenant_id) VALUES (?, ?, ?, ?, ?, ?)', [req.params.id, req.body.class_id, req.body.subject, req.body.teacher_id, 0, req.tenant.id]);
-    // Every new paper starts with the default 3-questions-x-2-choice-parts template;
+    // Every new paper starts with the default 3-plain-questions template;
     // teachers can freely add/remove/group questions afterward from "Build Paper".
-    await createDefaultChoiceGroups(result.insertId, req.tenant.id);
+    await createDefaultQuestions(result.insertId, req.tenant.id);
     res.redirect(`/exams/${req.params.id}/papers`);
 });
 
@@ -315,11 +319,122 @@ router.post('/choice-groups/:id/edit', isTeacher, async (req, res) => {
     res.redirect(req.get('Referer') || '/exams');
 });
 
-// Recreate the default 3-choice-group / 100-mark template for an empty paper.
+// Recreate the default 3-question / 100-mark template for an empty paper.
 router.post('/papers/:id/generate-default', isTeacher, async (req, res) => {
     const [paper] = await db.execute('SELECT id FROM exam_papers WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
     if (!paper.length) return res.status(404).send('Paper not found');
-    await createDefaultChoiceGroups(req.params.id, req.tenant.id);
+    await createDefaultQuestions(req.params.id, req.tenant.id);
+    res.redirect(`/papers/${req.params.id}/view`);
+});
+
+// Export a paper's questions/choice-groups/note as a portable JSON file, so a
+// teacher can back up a paper before making risky changes and restore it via
+// the import endpoint below if something goes wrong.
+router.get('/papers/:id/export', isTeacher, async (req, res) => {
+    const [paperRows] = await db.execute('SELECT * FROM exam_papers WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
+    if (!paperRows.length) return res.status(404).send('Paper not found');
+    const paper = paperRows[0];
+
+    const [questions] = await db.execute(
+        `SELECT q.question_text, q.marks, q.section, q.choice_group_id, g.required_count
+         FROM questions q LEFT JOIN question_choice_groups g ON g.id = q.choice_group_id
+         WHERE q.paper_id = ? AND q.tenant_id = ? ORDER BY q.id ASC`,
+        [req.params.id, req.tenant.id]
+    );
+
+    // Re-key each choice_group_id to a small sequential ref - the real
+    // database id is meaningless once imported elsewhere (or back into this
+    // same paper after its rows have been recreated).
+    const groupRefs = {};
+    let nextRef = 1;
+    const exportedQuestions = questions.map(q => {
+        let groupRef = null;
+        if (q.choice_group_id) {
+            if (!(q.choice_group_id in groupRefs)) groupRefs[q.choice_group_id] = nextRef++;
+            groupRef = groupRefs[q.choice_group_id];
+        }
+        return {
+            question_text: q.question_text,
+            marks: q.marks,
+            section: q.section,
+            group_ref: groupRef,
+            required_count: groupRef ? q.required_count : null
+        };
+    });
+
+    const payload = {
+        format: 'madrassa-exam-paper',
+        version: 1,
+        exported_at: new Date().toISOString(),
+        subject: paper.subject,
+        note_text: paper.note_text,
+        questions: exportedQuestions
+    };
+
+    const safeSubject = (paper.subject || 'paper').replace(/[^\w\-]+/g, '_');
+    res.setHeader('Content-Disposition', `attachment; filename="paper-${paper.id}-${safeSubject}.json"`);
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.send(JSON.stringify(payload, null, 2));
+});
+
+// Import a previously exported JSON file into this paper, replacing its
+// current questions/choice-groups/note entirely - the standard way to
+// restore a paper from a backup taken via the export endpoint above.
+router.post('/papers/:id/import', isTeacher, paperImportUpload.single('file'), async (req, res) => {
+    const [paperRows] = await db.execute('SELECT id FROM exam_papers WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
+    if (!paperRows.length) return res.status(404).send('Paper not found');
+    if (!req.file) return res.status(400).send('No file uploaded');
+
+    let payload;
+    try {
+        payload = JSON.parse(req.file.buffer.toString('utf8'));
+    } catch (e) {
+        return res.status(400).send('Invalid JSON file');
+    }
+    if (payload.format !== 'madrassa-exam-paper' || !Array.isArray(payload.questions)) {
+        return res.status(400).send('Not a valid exam paper export file');
+    }
+
+    const paperId = req.params.id;
+    const tenantId = req.tenant.id;
+
+    // Deleting questions cascades to student_marks (fk_sm_question ON DELETE
+    // CASCADE) and clears choice_group_id on any other row via fk_question_choice_group.
+    await db.execute('DELETE FROM questions WHERE paper_id = ? AND tenant_id = ?', [paperId, tenantId]);
+    await db.execute('DELETE FROM question_choice_groups WHERE paper_id = ? AND tenant_id = ?', [paperId, tenantId]);
+
+    const groupIdByRef = {};
+    for (const q of payload.questions) {
+        let choiceGroupId = null;
+        if (q.group_ref) {
+            if (!(q.group_ref in groupIdByRef)) {
+                const requiredCount = Math.max(1, parseInt(q.required_count, 10) || 1);
+                const [group] = await db.execute('INSERT INTO question_choice_groups (tenant_id, paper_id, required_count) VALUES (?, ?, ?)', [tenantId, paperId, requiredCount]);
+                groupIdByRef[q.group_ref] = group.insertId;
+            }
+            choiceGroupId = groupIdByRef[q.group_ref];
+        }
+        await db.execute(
+            'INSERT INTO questions (paper_id, question_text, marks, section, choice_group_id, tenant_id) VALUES (?, ?, ?, ?, ?, ?)',
+            [paperId, q.question_text || '', Number(q.marks) || 0, q.section || null, choiceGroupId, tenantId]
+        );
+    }
+
+    if (typeof payload.note_text === 'string') {
+        await db.execute('UPDATE exam_papers SET note_text = ? WHERE id = ? AND tenant_id = ?', [payload.note_text || null, paperId, tenantId]);
+    }
+
+    await recomputePaperTotal(paperId, tenantId);
+    res.redirect(`/papers/${paperId}/view`);
+});
+
+// Update a paper's editable ملحوظة note. Empty text reverts to the default
+// hardcoded wording (see view_paper.ejs) rather than storing a blank string.
+router.post('/papers/:id/note', isTeacher, async (req, res) => {
+    const [paper] = await db.execute('SELECT id FROM exam_papers WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
+    if (!paper.length) return res.status(404).send('Paper not found');
+    const noteText = (req.body.note_text || '').trim();
+    await db.execute('UPDATE exam_papers SET note_text = ? WHERE id = ? AND tenant_id = ?', [noteText || null, req.params.id, req.tenant.id]);
     res.redirect(`/papers/${req.params.id}/view`);
 });
 // ADMIN: All Papers for an Exam

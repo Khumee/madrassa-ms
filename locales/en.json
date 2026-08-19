@@ -519,5 +519,10 @@
     "Add_Alternative": "Add Another Alternative",
     "Required_Count_Short": "Answer",
     "Required_Count_Of": "of these",
-    "Exam_Name_Auto_Note": "Exam name is generated automatically from the type and year, in whichever language is active when it is viewed."
+    "Exam_Name_Auto_Note": "Exam name is generated automatically from the type and year, in whichever language is active when it is viewed.",
+    "Edit_Note": "Edit note",
+    "Default_Note_Placeholder": "Leave empty to show the default note",
+    "Export_Paper": "Export Paper",
+    "Import_Paper": "Import Paper",
+    "Import_Paper_Confirm": "This will replace all of this paper's current questions with the ones from the imported file. Continue?"
 }
