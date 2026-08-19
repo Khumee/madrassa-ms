@@ -506,5 +506,6 @@
     "Or": "or",
     "Choice_Marks_Propagate_Note": "Changing marks here updates every alternative in this choice group.",
     "Group_Questions_In_Builder_Note": "Use \"Build Paper\" to set up choice questions.",
-    "Type_your_question_here": "Type your question here..."
+    "Type_your_question_here": "Type your question here...",
+    "Optional": "Optional"
 }

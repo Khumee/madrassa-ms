@@ -514,5 +514,6 @@
     "Or": "أو",
     "Choice_Marks_Propagate_Note": "سيؤدي تغيير الدرجات هنا إلى تحديث جميع بدائل هذه المجموعة الاختيارية.",
     "Group_Questions_In_Builder_Note": "استخدم \"Build Paper\" لإعداد الأسئلة الاختيارية.",
-    "Type_your_question_here": "اكتب سؤالك هنا..."
+    "Type_your_question_here": "اكتب سؤالك هنا...",
+    "Optional": "اختياري"
 }

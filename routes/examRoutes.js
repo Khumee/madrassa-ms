@@ -110,8 +110,10 @@ router.post('/exams/:id/delete', isAdmin, async (req, res) => {
 // Route removed as it's now handled by modal in exam_papers
 
 router.post('/exams/:id/assign', isAdmin, async (req, res) => {
-    // max_marks starts at 0 and is recomputed automatically as questions are added.
-    await db.execute('INSERT INTO exam_papers (exam_id, class_id, subject, teacher_id, max_marks, tenant_id) VALUES (?, ?, ?, ?, ?, ?)', [req.params.id, req.body.class_id, req.body.subject, req.body.teacher_id, 0, req.tenant.id]);
+    const [result] = await db.execute('INSERT INTO exam_papers (exam_id, class_id, subject, teacher_id, max_marks, tenant_id) VALUES (?, ?, ?, ?, ?, ?)', [req.params.id, req.body.class_id, req.body.subject, req.body.teacher_id, 0, req.tenant.id]);
+    // Every new paper starts with the default 3-questions-x-2-choice-parts template;
+    // teachers can freely add/remove/group questions afterward from "Build Paper".
+    await createDefaultChoiceGroups(result.insertId, req.tenant.id);
     res.redirect(`/exams/${req.params.id}/papers`);
 });
 

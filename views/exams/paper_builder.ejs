@@ -3,13 +3,26 @@
     <h2>Build Paper: <%= paper.subject %> (Total Marks: <span id="paperTotal"><%= paper.max_marks %></span>)</h2>
 
     <div class="card mb-4">
-        <div class="card-header"><%= __('Add_Question') %></div>
+        <div class="card-header fw-bold"><i class="bi bi-plus-circle me-1"></i> <%= __('Add_Question') %></div>
         <div class="card-body">
             <form action="/papers/<%= paper.id %>/questions" method="POST">
-                <input type="text" name="question_text" class="form-control mb-2" placeholder="Question Text" required>
-                <input type="number" name="marks" class="form-control mb-2" placeholder="Marks" min="1" required>
-                <input type="text" name="section" class="form-control mb-2" placeholder="Section (Optional)">
-                <button type="submit" class="btn btn-primary"><%= __('Add_Question') %></button>
+                <div class="mb-3">
+                    <label class="form-label text-muted"><%= __('Question_Text') || 'Question Text' %></label>
+                    <input type="text" name="question_text" class="form-control form-control-lg" placeholder="<%= __('Type_your_question_here') || 'Question Text' %>" required>
+                </div>
+                <div class="row g-2 align-items-end mb-1">
+                    <div class="col-sm-3">
+                        <label class="form-label text-muted"><%= __('Marks') || 'Marks' %></label>
+                        <input type="number" name="marks" class="form-control form-control-lg" min="1" required>
+                    </div>
+                    <div class="col-sm-4">
+                        <label class="form-label text-muted"><%= __('Section') || 'Section' %> <span class="fw-normal">(<%= __('Optional') || 'Optional' %>)</span></label>
+                        <input type="text" name="section" class="form-control form-control-lg">
+                    </div>
+                    <div class="col-sm-auto ms-sm-auto">
+                        <button type="submit" class="btn btn-primary btn-lg px-4 w-100"><i class="bi bi-plus-lg me-1"></i> <%= __('Add_Question') %></button>
+                    </div>
+                </div>
             </form>
         </div>
     </div>
