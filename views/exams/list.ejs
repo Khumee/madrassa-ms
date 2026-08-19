@@ -54,9 +54,19 @@
             </div>
             <div class="modal-body">
                 <div class="mb-3">
-                    <label class="form-label"><%= __('Exam_Name') %></label>
-                    <input type="text" name="name" class="form-control" required placeholder="e.g. Final Exams 2026">
+                    <label class="form-label"><%= __('Exam_Type') || 'Exam Type' %></label>
+                    <select name="exam_type" class="form-select" required>
+                        <option value="mid_year"><%= __('Exam_Type_MidYear') || 'Mid-Year' %></option>
+                        <option value="annual"><%= __('Exam_Type_Annual') || 'Final / Annual' %></option>
+                        <option value="quarterly"><%= __('Exam_Type_Quarterly') || 'Quarterly' %></option>
+                        <option value="monthly"><%= __('Exam_Type_Monthly') || 'Monthly' %></option>
+                    </select>
                 </div>
+                <div class="mb-3">
+                    <label class="form-label"><%= __('Year') || 'Year' %></label>
+                    <input type="number" name="exam_year" class="form-control" value="<%= new Date().getFullYear() %>" min="2000" max="2100" required>
+                </div>
+                <div class="form-text"><%= __('Exam_Name_Auto_Note') || 'Exam name is generated automatically from the type and year, in whichever language is active when it is viewed.' %></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><%= __('Cancel') %></button>

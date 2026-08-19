@@ -3,6 +3,7 @@ const router = express.Router();
 const db = require('../db');
 const puppeteer = require('puppeteer');
 const { buildQuestionItems, recomputePaperTotal } = require('../lib/examMarks');
+const { EXAM_TYPES, examDisplayName } = require('../lib/examNaming');
 
 const isAdmin = (req, res, next) => { 
     if (!req.session.userId || !req.session.role) return res.redirect('/login');
@@ -27,6 +28,7 @@ async function createDefaultChoiceGroups(paperId, tenantId) {
 // ADMIN: List Exams
 router.get('/exams', isAdmin, async (req, res) => {
     const [exams] = await db.execute('SELECT * FROM exams WHERE tenant_id = ? ORDER BY created_at DESC', [req.tenant.id]);
+    exams.forEach(e => { e.name = examDisplayName(e, req.getLocale()); });
     res.render('exams/list', { exams });
 });
 
@@ -51,11 +53,12 @@ router.get('/exams/:id/results', isAdmin, async (req, res) => {
     const [students] = await db.execute(query, params);
     
     const [exam] = await db.execute('SELECT * FROM exams WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
+    if (exam[0]) exam[0].name = examDisplayName(exam[0], req.getLocale());
     const [classes] = await db.execute('SELECT DISTINCT c.id, c.name_ar FROM classes c JOIN exam_papers ep ON c.id = ep.class_id WHERE ep.exam_id = ? AND ep.tenant_id = ? ORDER BY c.name_ar ASC', [req.params.id, req.tenant.id]);
 
-    res.render('exams/results', { 
-        students, 
-        exam: exam[0], 
+    res.render('exams/results', {
+        students,
+        exam: exam[0],
         classes,
         selectedClassId: req.query.classId || ''
     });
@@ -64,7 +67,20 @@ router.get('/exams/:id/results', isAdmin, async (req, res) => {
 // ADMIN: Create Exam
 router.post('/exams', isAdmin, async (req, res) => {
     try {
-        const [result] = await db.execute('INSERT INTO exams (name, created_by, tenant_id) VALUES (?, ?, ?)', [req.body.name, req.session.userId, req.tenant.id]);
+        if (!EXAM_TYPES.includes(req.body.exam_type)) {
+            return res.status(400).send('Invalid exam type');
+        }
+        const examType = req.body.exam_type;
+        const examYear = parseInt(req.body.exam_year, 10) || new Date().getFullYear();
+        // Store a plain-text snapshot too (in the request's current locale) so the
+        // exam still has a readable name even outside the type+year-aware routes;
+        // examDisplayName() regenerates the locale-correct name from type+year
+        // wherever an exam is actually displayed.
+        const fallbackName = examDisplayName({ exam_type: examType, exam_year: examYear }, req.getLocale());
+        const [result] = await db.execute(
+            'INSERT INTO exams (name, exam_type, exam_year, created_by, tenant_id) VALUES (?, ?, ?, ?, ?)',
+            [fallbackName, examType, examYear, req.session.userId, req.tenant.id]
+        );
         const examId = result.insertId;
 
         // Auto-assign papers based on active assignments
@@ -135,7 +151,8 @@ router.post('/papers/:id/delete', isAdmin, async (req, res) => {
 
 // TEACHER: My Tasks
 router.get('/papers/my-tasks', isTeacher, async (req, res) => {
-    const [papers] = await db.execute(`SELECT ep.*, e.name as exam_name, c.name_ar as class_name FROM exam_papers ep JOIN exams e ON ep.exam_id = e.id JOIN classes c ON ep.class_id = c.id WHERE ep.teacher_id = ? AND ep.tenant_id = ?`, [req.session.userId, req.tenant.id]);
+    const [papers] = await db.execute(`SELECT ep.*, e.name as exam_name, e.exam_type, e.exam_year, c.name_ar as class_name FROM exam_papers ep JOIN exams e ON ep.exam_id = e.id JOIN classes c ON ep.class_id = c.id WHERE ep.teacher_id = ? AND ep.tenant_id = ?`, [req.session.userId, req.tenant.id]);
+    papers.forEach(p => { p.exam_name = examDisplayName({ name: p.exam_name, exam_type: p.exam_type, exam_year: p.exam_year }, req.getLocale()); });
     res.render('exams/teacher_tasks', { papers });
 });
 
@@ -280,7 +297,8 @@ router.get('/exams/:id/papers', isAdmin, async (req, res) => {
 
     const [papers] = await db.execute(query, params);
     const [exam] = await db.execute('SELECT * FROM exams WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
-    
+    if (exam[0]) exam[0].name = examDisplayName(exam[0], req.getLocale());
+
     // Fetch unique classes and teachers for filters (based on this exam's papers)
     const [classes] = await db.execute('SELECT DISTINCT c.id, c.name_ar FROM classes c JOIN exam_papers ep ON c.id = ep.class_id WHERE ep.exam_id = ? AND ep.tenant_id = ? ORDER BY c.name_ar ASC', [req.params.id, req.tenant.id]);
     const [teachers] = await db.execute('SELECT DISTINCT u.id, COALESCE(t.name, u.username) as name FROM users u JOIN exam_papers ep ON u.id = ep.teacher_id LEFT JOIN teachers t ON t.user_id = u.id AND t.tenant_id = ep.tenant_id WHERE ep.exam_id = ? AND ep.tenant_id = ? ORDER BY name ASC', [req.params.id, req.tenant.id]);
@@ -316,9 +334,10 @@ router.get('/papers/:id/view', isAdmin, async (req, res) => {
 // ENTER MARKS (Question level)
 router.get('/papers/:id/enter-marks', isTeacher, async (req, res) => {
     // Both Admin and the assigned Teacher can enter marks
-    const [paper] = await db.execute('SELECT ep.*, e.name as exam_name, c.name_ar as class_name FROM exam_papers ep JOIN exams e ON ep.exam_id = e.id JOIN classes c ON ep.class_id = c.id WHERE ep.id = ? AND ep.tenant_id = ?', [req.params.id, req.tenant.id]);
+    const [paper] = await db.execute('SELECT ep.*, e.name as exam_name, e.exam_type, e.exam_year, c.name_ar as class_name FROM exam_papers ep JOIN exams e ON ep.exam_id = e.id JOIN classes c ON ep.class_id = c.id WHERE ep.id = ? AND ep.tenant_id = ?', [req.params.id, req.tenant.id]);
     if (!paper.length) return res.status(404).send('Paper not found');
-    
+    paper[0].exam_name = examDisplayName({ name: paper[0].exam_name, exam_type: paper[0].exam_type, exam_year: paper[0].exam_year }, req.getLocale());
+
     // Auth check: Must be Admin OR the teacher assigned to the paper
     const isAdminUser = ['admin', 'مدير', 'ناظم'].includes(req.session.role);
     if (!isAdminUser && paper[0].teacher_id !== req.session.userId) {
@@ -509,6 +528,7 @@ async function loadDatesheetData(examId, tenantId) {
 router.get('/exams/:id/datesheet', isTeacher, async (req, res) => {
     const data = await loadDatesheetData(req.params.id, req.tenant.id);
     if (!data) return res.status(404).send('Exam not found');
+    data.exam.name = examDisplayName(data.exam, req.getLocale());
     res.render('exams/datesheet', data);
 });
 
@@ -516,6 +536,7 @@ router.get('/exams/:id/datesheet', isTeacher, async (req, res) => {
 router.get('/exams/:id/datesheet/pdf', isTeacher, async (req, res) => {
     const data = await loadDatesheetData(req.params.id, req.tenant.id);
     if (!data) return res.status(404).send('Exam not found');
+    data.exam.name = examDisplayName(data.exam, req.getLocale());
 
     res.render('exams/datesheet', data, async (err, html) => {
         if (err) {
@@ -563,7 +584,8 @@ router.get('/exams/:exam_id/student/:student_id/report-card', async (req, res) =
         return res.status(404).send('Student not found');
     }
 
-    const [exam] = await db.execute('SELECT id, name FROM exams WHERE id = ? AND tenant_id = ?', [req.params.exam_id, req.tenant.id]);
+    const [exam] = await db.execute('SELECT id, name, exam_type, exam_year FROM exams WHERE id = ? AND tenant_id = ?', [req.params.exam_id, req.tenant.id]);
+    if (exam[0]) exam[0].name = examDisplayName(exam[0], req.getLocale());
 
     const [results] = await db.execute(`
         SELECT 

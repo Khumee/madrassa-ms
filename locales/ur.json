@@ -515,5 +515,12 @@
     "Choice_Marks_Propagate_Note": "اس سے اس انتخابی گروپ کے تمام متبادل سوالات کے نمبر بھی تبدیل ہو جائیں گے۔",
     "Group_Questions_In_Builder_Note": "انتخابی سوالات بنانے کے لیے \"Build Paper\" استعمال کریں۔",
     "Type_your_question_here": "اپنا سوال یہاں لکھیں...",
-    "Optional": "اختیاری"
+    "Optional": "اختیاری",
+    "Exam_Type": "امتحان کی قسم",
+    "Exam_Type_MidYear": "نصف سالانہ",
+    "Exam_Type_Annual": "سالانہ",
+    "Exam_Type_Quarterly": "سہ ماہی",
+    "Exam_Type_Monthly": "ماہانہ",
+    "Year": "سال",
+    "Exam_Name_Auto_Note": "امتحان کا نام قسم اور سال سے خودکار طور پر بن جائے گا، دیکھنے والے کی زبان کے مطابق۔"
 }
