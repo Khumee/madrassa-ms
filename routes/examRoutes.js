@@ -513,7 +513,10 @@ async function loadDatesheetData(examId, tenantId) {
         ORDER BY (ep.paper_date IS NULL) ASC, ep.paper_date ASC, c.name_ar ASC, ep.subject ASC
     `, [examId, tenantId]);
 
-    const weekdays = ['اتوار', 'پیر', 'منگل', 'بدھ', 'جمعرات', 'جمعہ', 'ہفتہ'];
+    // English day-name keys (index matches Date.getDay()) so the template can
+    // translate them via __() into whatever locale the request is in, instead
+    // of a language baked into the server-side array.
+    const weekdayKeys = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     // Use local date parts (not getUTCDay/toISOString) since mysql2 returns DATE
     // columns as local-midnight JS Date objects; converting to UTC can shift the
     // day backward for positive UTC-offset server timezones, mislabeling the weekday.
@@ -528,7 +531,7 @@ async function loadDatesheetData(examId, tenantId) {
         if (!groupsByKey[key]) {
             const group = {
                 date: p.paper_date,
-                dayName: p.paper_date ? weekdays[new Date(p.paper_date).getDay()] : null,
+                dayNameKey: p.paper_date ? weekdayKeys[new Date(p.paper_date).getDay()] : null,
                 rowsByClass: {},
                 rows: []
             };

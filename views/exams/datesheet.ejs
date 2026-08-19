@@ -121,7 +121,7 @@
                         <% groups.forEach((g) => { %>
                             <% const dateLabel = g.date ? new Date(g.date).toLocaleDateString() : (__('Not_set') || '-'); %>
                             <tr class="date-group-header">
-                                <td colspan="3" class="fw-bold text-start px-3"><%= g.dayName ? (g.dayName + ' - ') : '' %><%= dateLabel %></td>
+                                <td colspan="3" class="fw-bold text-start px-3"><%= g.dayNameKey ? (__(g.dayNameKey) + ' - ') : '' %><%= dateLabel %></td>
                             </tr>
                             <% g.rows.forEach((p) => { %>
                                 <tr>
