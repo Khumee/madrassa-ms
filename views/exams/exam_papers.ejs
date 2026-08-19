@@ -62,7 +62,7 @@
                             <th class="px-4 py-3"><%= __('Class') %></th>
                             <th class="px-4 py-3"><%= __('Subject') %></th>
                             <th class="px-4 py-3"><%= __('Teacher') %></th>
-                            <th class="px-4 py-3 text-center"><%= __('Max_Marks') %></th>
+                            <th class="px-4 py-3 text-center"><%= __('Total_Marks') || __('Max_Marks') %></th>
                             <th class="px-4 py-3 text-center"><%= __('Date') || 'Date' %></th>
                             <th class="px-4 py-3 text-end"><%= __('Actions') %></th>
                         </tr>
@@ -166,9 +166,8 @@
                             <% }) %>
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label"><%= __('Max_Marks') %></label>
-                        <input type="number" name="max_marks" class="form-control" value="100" required>
+                    <div class="form-text mb-3">
+                        <%= __('Total_Marks_Auto_Note') || 'Total marks are calculated automatically from the questions you add to the paper.' %>
                     </div>
                 </div>
                 <div class="modal-footer">

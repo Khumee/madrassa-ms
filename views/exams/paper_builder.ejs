@@ -1,69 +1,131 @@
 <%- include('../partials/header', { title: __('Build_Paper') }) %>
 <div class="container mt-1">
-    <h2>Build Paper: <%= paper.subject %> (Max Marks: <%= paper.max_marks %>)</h2>
-    
-    
+    <h2>Build Paper: <%= paper.subject %> (Total Marks: <span id="paperTotal"><%= paper.max_marks %></span>)</h2>
+
     <div class="card mb-4">
         <div class="card-header"><%= __('Add_Question') %></div>
         <div class="card-body">
             <form action="/papers/<%= paper.id %>/questions" method="POST">
                 <input type="text" name="question_text" class="form-control mb-2" placeholder="Question Text" required>
-                <input type="number" name="marks" class="form-control mb-2" placeholder="Marks" required>
+                <input type="number" name="marks" class="form-control mb-2" placeholder="Marks" min="1" required>
                 <input type="text" name="section" class="form-control mb-2" placeholder="Section (Optional)">
                 <button type="submit" class="btn btn-primary"><%= __('Add_Question') %></button>
             </form>
         </div>
     </div>
-    
-    <h4>Current Questions</h4>
-    <ul class="list-group">
-        <% questions.forEach(q => { %>
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                <div>
-                    <span class="badge bg-secondary me-2"><%= __('Section') || 'Sec' %>: <%= q.section %></span>
-                    <span><%= q.question_text %></span>
-                </div>
-                <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-dark"><%= q.marks %> <%= __('Marks') %></span>
-                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editQuestionModal<%= q.id %>"><%= __('Edit') || 'Edit' %></button>
-                    <form action="/questions/<%= q.id %>/delete" method="POST" class="m-0" onsubmit="event.preventDefault(); const form = this; showConfirm('<%= __('Are_you_sure_you_want_to_delete_this') || 'Are you sure?' %>').then(c => { if(c) form.submit(); });">
-                        <button type="submit" class="btn btn-sm btn-outline-danger"><%= __('Delete') || 'Delete' %></button>
-                    </form>
-                </div>
-            </li>
 
-            <!-- Edit Modal for Question <%= q.id %> -->
-            <div class="modal fade" id="editQuestionModal<%= q.id %>" tabindex="-1">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <form action="/questions/<%= q.id %>/edit" method="POST">
-                            <div class="modal-header">
-                                <h5 class="modal-title"><%= __('Edit_Question') || 'Edit Question' %></h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-                            <div class="modal-body">
-                                <div class="mb-3">
-                                    <label class="form-label"><%= __('Question') || 'Question' %></label>
-                                    <input type="text" name="question_text" class="form-control" value="<%= q.question_text %>" required>
+    <!-- Hidden form that the ungrouped-question checkboxes below submit into -->
+    <form id="groupForm" action="/papers/<%= paper.id %>/choice-groups" method="POST"></form>
+
+    <div class="card mb-4 border-primary d-none" id="groupBar">
+        <div class="card-body d-flex align-items-center gap-3 flex-wrap">
+            <strong><span id="groupSelectedCount">0</span> <%= __('Questions_Selected') || 'question(s) selected' %></strong>
+            <label class="mb-0"><%= __('Answer_Any') || 'Student must answer' %>
+                <input type="number" name="required_count" form="groupForm" id="requiredCountInput" class="form-control d-inline-block" style="width: 70px;" value="1" min="1">
+                <%= __('Of_Them') || 'of them' %>
+            </label>
+            <button type="submit" form="groupForm" class="btn btn-sm btn-primary"><%= __('Group_As_Choice') || 'Group as Choice' %></button>
+            <span class="text-danger small d-none" id="groupMarksWarning"><%= __('Choice_Marks_Mismatch') || 'Selected questions must carry the same marks.' %></span>
+        </div>
+    </div>
+
+    <h4><%= __('Current_Questions') || 'Current Questions' %></h4>
+    <div class="d-flex flex-column gap-2">
+        <% items.forEach(item => { %>
+            <% if (item.type === 'single') { %>
+                <% const q = item.question; %>
+                <ul class="list-group">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="checkbox" class="form-check-input group-checkbox" name="question_ids" form="groupForm" value="<%= q.id %>" data-marks="<%= q.marks %>">
+                            <span class="badge bg-secondary"><%= __('Section') || 'Sec' %>: <%= q.section %></span>
+                            <span><%= q.question_text %></span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-dark"><%= q.marks %> <%= __('Marks') %></span>
+                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editQuestionModal<%= q.id %>"><%= __('Edit') || 'Edit' %></button>
+                            <form action="/questions/<%= q.id %>/delete" method="POST" class="m-0" onsubmit="event.preventDefault(); const form = this; showConfirm('<%= __('Are_you_sure_you_want_to_delete_this') || 'Are you sure?' %>').then(c => { if(c) form.submit(); });">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"><%= __('Delete') || 'Delete' %></button>
+                            </form>
+                        </div>
+                    </li>
+                </ul>
+                <%- include('_edit_question_modal', { q }) %>
+            <% } else { %>
+                <div class="card border-info">
+                    <div class="card-header bg-info-subtle d-flex justify-content-between align-items-center py-1">
+                        <small class="fw-bold">
+                            <%= __('Choice_Group') || 'Choice group' %> —
+                            <%= (__('Answer_N_Of_M') || 'Answer any {n} of {m}').replace('{n}', item.requiredCount).replace('{m}', item.members.length) %>
+                        </small>
+                        <form action="/choice-groups/<%= item.groupId %>/ungroup" method="POST" class="m-0">
+                            <button type="submit" class="btn btn-sm btn-outline-secondary py-0"><%= __('Ungroup') || 'Ungroup' %></button>
+                        </form>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <% item.members.forEach((q, idx) => { %>
+                            <% if (idx > 0) { %>
+                                <li class="list-group-item text-center text-muted py-1 fst-italic small">— <%= __('Or') || 'or' %> —</li>
+                            <% } %>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="badge bg-secondary me-2"><%= __('Section') || 'Sec' %>: <%= q.section %></span>
+                                    <span><%= q.question_text %></span>
                                 </div>
-                                <div class="mb-3">
-                                    <label class="form-label"><%= __('Marks') || 'Marks' %></label>
-                                    <input type="number" name="marks" class="form-control" value="<%= q.marks %>" required>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-dark"><%= q.marks %> <%= __('Marks') %></span>
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editQuestionModal<%= q.id %>"><%= __('Edit') || 'Edit' %></button>
+                                    <form action="/questions/<%= q.id %>/delete" method="POST" class="m-0" onsubmit="event.preventDefault(); const form = this; showConfirm('<%= __('Are_you_sure_you_want_to_delete_this') || 'Are you sure?' %>').then(c => { if(c) form.submit(); });">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"><%= __('Delete') || 'Delete' %></button>
+                                    </form>
                                 </div>
-                                <div class="mb-3">
-                                    <label class="form-label"><%= __('Section') || 'Section' %></label>
-                                    <input type="text" name="section" class="form-control" value="<%= q.section %>">
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><%= __('Cancel') || 'Cancel' %></button>
-                                <button type="submit" class="btn btn-primary"><%= __('Save_Changes') || 'Save Changes' %></button>
-                            </div>
+                            </li>
+                            <%- include('_edit_question_modal', { q }) %>
+                        <% }) %>
+                    </ul>
+                    <div class="card-footer py-1 text-end">
+                        <form action="/choice-groups/<%= item.groupId %>/edit" method="POST" class="d-inline-flex align-items-center gap-2 m-0">
+                            <label class="small mb-0"><%= __('Required_Count') || 'Required count' %></label>
+                            <input type="number" name="required_count" class="form-control form-control-sm" style="width: 60px;" value="<%= item.requiredCount %>" min="1" max="<%= item.members.length %>">
+                            <button type="submit" class="btn btn-sm btn-outline-secondary"><%= __('Save_Changes') || 'Save' %></button>
                         </form>
                     </div>
                 </div>
-            </div>
+            <% } %>
         <% }) %>
-    </ul>
+        <% if (!items.length) { %>
+            <div class="text-muted"><%= __('No_Questions_Yet') || 'No questions yet. Add one above.' %></div>
+        <% } %>
+    </div>
 </div>
+
+<script>
+    const checkboxes = document.querySelectorAll('.group-checkbox');
+    const groupBar = document.getElementById('groupBar');
+    const countLabel = document.getElementById('groupSelectedCount');
+    const requiredInput = document.getElementById('requiredCountInput');
+    const marksWarning = document.getElementById('groupMarksWarning');
+
+    function refreshGroupBar() {
+        const checked = Array.from(checkboxes).filter(c => c.checked);
+        const marksSet = new Set(checked.map(c => c.dataset.marks));
+
+        checkboxes.forEach(c => {
+            c.disabled = checked.length > 0 && !c.checked && marksSet.size === 1 && !marksSet.has(c.dataset.marks);
+        });
+
+        if (checked.length >= 2) {
+            groupBar.classList.remove('d-none');
+            countLabel.textContent = checked.length;
+            requiredInput.max = checked.length;
+            if (Number(requiredInput.value) > checked.length) requiredInput.value = checked.length;
+            marksWarning.classList.toggle('d-none', marksSet.size <= 1);
+        } else {
+            groupBar.classList.add('d-none');
+        }
+    }
+
+    checkboxes.forEach(c => c.addEventListener('change', refreshGroupBar));
+</script>
+
 <%- include('../partials/footer') %>

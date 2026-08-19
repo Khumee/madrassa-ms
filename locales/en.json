@@ -489,5 +489,22 @@
     "Action_Taken": "Action Taken",
     "Submit": "Submit",
     "Student": "Student",
-    "Confirm_Delete": "Are you sure you want to delete this?"
+    "Confirm_Delete": "Are you sure you want to delete this?",
+    "Total_Marks": "Total Marks",
+    "Total_Marks_Auto_Note": "Total marks are calculated automatically from the questions you add to the paper.",
+    "Current_Questions": "Current Questions",
+    "No_Questions_Yet": "No questions yet. Add one above.",
+    "Questions_Selected": "question(s) selected",
+    "Answer_Any": "Student must answer",
+    "Of_Them": "of them",
+    "Group_As_Choice": "Group as Choice",
+    "Choice_Marks_Mismatch": "Selected questions must carry the same marks.",
+    "Choice_Group": "Choice group",
+    "Answer_N_Of_M": "Answer any {n} of {m}",
+    "Ungroup": "Ungroup",
+    "Required_Count": "Required count",
+    "Or": "or",
+    "Choice_Marks_Propagate_Note": "Changing marks here updates every alternative in this choice group.",
+    "Group_Questions_In_Builder_Note": "Use \"Build Paper\" to set up choice questions.",
+    "Type_your_question_here": "Type your question here..."
 }

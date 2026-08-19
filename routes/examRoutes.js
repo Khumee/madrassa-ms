@@ -10,6 +10,69 @@ const isAdmin = (req, res, next) => {
 };
 const isTeacher = (req, res, next) => { if (req.session.userId) next(); else res.redirect('/login'); };
 
+// Group a flat question list (each row already carries choice_group_id and
+// required_count from a LEFT JOIN with question_choice_groups) into an
+// ordered list of paper "items": either a standalone question or a choice
+// group ("answer required_count of these members") with its member questions.
+function buildQuestionItems(questions) {
+    const items = [];
+    const groupIndex = {};
+    for (const q of questions) {
+        if (q.choice_group_id) {
+            let item = groupIndex[q.choice_group_id];
+            if (!item) {
+                item = { type: 'group', groupId: q.choice_group_id, requiredCount: q.required_count || 1, members: [] };
+                groupIndex[q.choice_group_id] = item;
+                items.push(item);
+            }
+            item.members.push(q);
+        } else {
+            items.push({ type: 'single', question: q });
+        }
+    }
+    return items;
+}
+
+// Total marks for a paper = sum of standalone question marks + sum over each
+// choice group of (required_count x marks-per-question-in-group). Persisted
+// to exam_papers.max_marks so existing reads (report card, results, date
+// sheet) stay simple flat column reads.
+async function recomputePaperTotal(paperId, tenantId) {
+    const [questions] = await db.execute(
+        `SELECT q.marks, q.choice_group_id, g.required_count
+         FROM questions q
+         LEFT JOIN question_choice_groups g ON g.id = q.choice_group_id
+         WHERE q.paper_id = ? AND q.tenant_id = ?`,
+        [paperId, tenantId]
+    );
+    let total = 0;
+    const seenGroups = new Set();
+    for (const q of questions) {
+        if (q.choice_group_id) {
+            if (seenGroups.has(q.choice_group_id)) continue;
+            seenGroups.add(q.choice_group_id);
+            total += (q.required_count || 1) * Number(q.marks || 0);
+        } else {
+            total += Number(q.marks || 0);
+        }
+    }
+    await db.execute('UPDATE exam_papers SET max_marks = ? WHERE id = ? AND tenant_id = ?', [total, paperId, tenantId]);
+    return total;
+}
+
+// Default paper template: 3 either/or question numbers (2 alternatives each,
+// equal marks so the choice-group total stays well-defined) summing to 100.
+async function createDefaultChoiceGroups(paperId, tenantId) {
+    const groupMarks = [34, 33, 33];
+    for (const marks of groupMarks) {
+        const [q1] = await db.execute('INSERT INTO questions (paper_id, question_text, marks, section, tenant_id) VALUES (?, ?, ?, ?, ?)', [paperId, '', marks, 'الف', tenantId]);
+        const [q2] = await db.execute('INSERT INTO questions (paper_id, question_text, marks, section, tenant_id) VALUES (?, ?, ?, ?, ?)', [paperId, '', marks, 'ب', tenantId]);
+        const [group] = await db.execute('INSERT INTO question_choice_groups (tenant_id, paper_id, required_count) VALUES (?, ?, 1)', [tenantId, paperId]);
+        await db.execute('UPDATE questions SET choice_group_id = ? WHERE id IN (?, ?) AND tenant_id = ?', [group.insertId, q1.insertId, q2.insertId, tenantId]);
+    }
+    await recomputePaperTotal(paperId, tenantId);
+}
+
 // ADMIN: List Exams
 router.get('/exams', isAdmin, async (req, res) => {
     const [exams] = await db.execute('SELECT * FROM exams WHERE tenant_id = ? ORDER BY created_at DESC', [req.tenant.id]);
@@ -65,27 +128,10 @@ router.post('/exams', isAdmin, async (req, res) => {
 
         for (const a of assignments) {
             const [paperResult] = await db.execute(
-                'INSERT INTO exam_papers (exam_id, class_id, subject, teacher_id, max_marks, tenant_id) VALUES (?, ?, ?, ?, ?, ?)', 
-                [examId, a.class_id, a.subject, a.teacher_id, 100, req.tenant.id]
+                'INSERT INTO exam_papers (exam_id, class_id, subject, teacher_id, max_marks, tenant_id) VALUES (?, ?, ?, ?, ?, ?)',
+                [examId, a.class_id, a.subject, a.teacher_id, 0, req.tenant.id]
             );
-            const paperId = paperResult.insertId;
-
-            // Generate default template: 3 questions, 2 parts each (total 100 marks)
-            const templateQuestions = [
-                { text: '', marks: 17, section: 'الف' },
-                { text: '', marks: 16, section: 'ب' },
-                { text: '', marks: 17, section: 'الف' },
-                { text: '', marks: 16, section: 'ب' },
-                { text: '', marks: 17, section: 'الف' },
-                { text: '', marks: 17, section: 'ب' }
-            ];
-
-            for (const tq of templateQuestions) {
-                await db.execute(
-                    'INSERT INTO questions (paper_id, question_text, marks, section, tenant_id) VALUES (?, ?, ?, ?, ?)', 
-                    [paperId, tq.text, tq.marks, tq.section, req.tenant.id]
-                );
-            }
+            await createDefaultChoiceGroups(paperResult.insertId, req.tenant.id);
         }
         res.redirect('/exams');
     } catch (error) {
@@ -113,7 +159,8 @@ router.post('/exams/:id/delete', isAdmin, async (req, res) => {
 // Route removed as it's now handled by modal in exam_papers
 
 router.post('/exams/:id/assign', isAdmin, async (req, res) => {
-    await db.execute('INSERT INTO exam_papers (exam_id, class_id, subject, teacher_id, max_marks, tenant_id) VALUES (?, ?, ?, ?, ?, ?)', [req.params.id, req.body.class_id, req.body.subject, req.body.teacher_id, req.body.max_marks || 100, req.tenant.id]);
+    // max_marks starts at 0 and is recomputed automatically as questions are added.
+    await db.execute('INSERT INTO exam_papers (exam_id, class_id, subject, teacher_id, max_marks, tenant_id) VALUES (?, ?, ?, ?, ?, ?)', [req.params.id, req.body.class_id, req.body.subject, req.body.teacher_id, 0, req.tenant.id]);
     res.redirect(`/exams/${req.params.id}/papers`);
 });
 
@@ -143,25 +190,133 @@ router.get('/papers/my-tasks', isTeacher, async (req, res) => {
 router.get('/papers/:id/build', isTeacher, async (req, res) => {
     const [paper] = await db.execute('SELECT * FROM exam_papers WHERE id = ? AND teacher_id = ? AND tenant_id = ?', [req.params.id, req.session.userId, req.tenant.id]);
     if (!paper.length) return res.status(403).send('Not authorized');
-    const [questions] = await db.execute('SELECT * FROM questions WHERE paper_id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
-    res.render('exams/paper_builder', { paper: paper[0], questions });
+    const [questions] = await db.execute(
+        `SELECT q.*, g.required_count
+         FROM questions q LEFT JOIN question_choice_groups g ON g.id = q.choice_group_id
+         WHERE q.paper_id = ? AND q.tenant_id = ? ORDER BY q.id ASC`,
+        [req.params.id, req.tenant.id]
+    );
+    res.render('exams/paper_builder', { paper: paper[0], questions, items: buildQuestionItems(questions) });
 });
 
 router.post('/papers/:id/questions', isTeacher, async (req, res) => {
     await db.execute('INSERT INTO questions (paper_id, question_text, marks, section, tenant_id) VALUES (?, ?, ?, ?, ?)', [req.params.id, req.body.question_text, req.body.marks, req.body.section || 'A', req.tenant.id]);
-    res.redirect(`/papers/${req.params.id}/build`);
+    await recomputePaperTotal(req.params.id, req.tenant.id);
+    const referer = req.get('Referer');
+    res.redirect(referer ? referer : `/papers/${req.params.id}/build`);
 });
 
 router.post('/questions/:id/edit', isTeacher, async (req, res) => {
+    const [rows] = await db.execute('SELECT paper_id, choice_group_id FROM questions WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
+    if (!rows.length) return res.status(404).send('Question not found');
+    const { paper_id, choice_group_id } = rows[0];
     await db.execute('UPDATE questions SET question_text = ?, marks = ?, section = ? WHERE id = ? AND tenant_id = ?', [req.body.question_text, req.body.marks, req.body.section, req.params.id, req.tenant.id]);
+    if (choice_group_id) {
+        // Keep every alternative in a choice group worth the same marks so the group total stays well-defined.
+        await db.execute('UPDATE questions SET marks = ? WHERE choice_group_id = ? AND tenant_id = ?', [req.body.marks, choice_group_id, req.tenant.id]);
+    }
+    await recomputePaperTotal(paper_id, req.tenant.id);
     const referer = req.get('Referer');
     res.redirect(referer ? referer : '/exams');
 });
 
 router.post('/questions/:id/delete', isTeacher, async (req, res) => {
+    const [rows] = await db.execute('SELECT paper_id, choice_group_id FROM questions WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
+    if (!rows.length) return res.redirect(req.get('Referer') || '/exams');
+    const { paper_id, choice_group_id } = rows[0];
     await db.execute('DELETE FROM questions WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
+    if (choice_group_id) {
+        // A choice group with 0 or 1 remaining member no longer expresses a real choice - dissolve it.
+        const [remaining] = await db.execute('SELECT id FROM questions WHERE choice_group_id = ? AND tenant_id = ?', [choice_group_id, req.tenant.id]);
+        if (remaining.length <= 1) {
+            await db.execute('UPDATE questions SET choice_group_id = NULL WHERE choice_group_id = ? AND tenant_id = ?', [choice_group_id, req.tenant.id]);
+            await db.execute('DELETE FROM question_choice_groups WHERE id = ? AND tenant_id = ?', [choice_group_id, req.tenant.id]);
+        }
+    }
+    await recomputePaperTotal(paper_id, req.tenant.id);
     const referer = req.get('Referer');
     res.redirect(referer ? referer : '/exams');
+});
+
+// Group 2+ ungrouped questions of this paper into a choice group ("answer required_count of these").
+router.post('/papers/:id/choice-groups', isTeacher, async (req, res) => {
+    const paperId = req.params.id;
+    let questionIds = req.body.question_ids;
+    if (!Array.isArray(questionIds)) questionIds = questionIds ? [questionIds] : [];
+    questionIds = [...new Set(questionIds.map(Number).filter(n => Number.isInteger(n) && n > 0))];
+    const requiredCount = Math.max(1, parseInt(req.body.required_count, 10) || 1);
+    const referer = req.get('Referer') || `/papers/${paperId}/build`;
+
+    if (questionIds.length < 2) {
+        return res.status(400).send('Select at least 2 questions to group');
+    }
+
+    const placeholders = questionIds.map(() => '?').join(',');
+    const [rows] = await db.execute(
+        `SELECT id, marks, choice_group_id FROM questions WHERE id IN (${placeholders}) AND paper_id = ? AND tenant_id = ?`,
+        [...questionIds, paperId, req.tenant.id]
+    );
+    if (rows.length !== questionIds.length || rows.some(r => r.choice_group_id)) {
+        return res.status(400).send('Invalid selection: questions must belong to this paper and not already be grouped');
+    }
+    if (new Set(rows.map(r => Number(r.marks))).size > 1) {
+        return res.status(400).send('All questions in a choice group must carry the same marks');
+    }
+    const finalRequiredCount = Math.min(requiredCount, questionIds.length);
+
+    const conn = await db.getConnection();
+    try {
+        await conn.beginTransaction();
+        const [group] = await conn.execute(
+            'INSERT INTO question_choice_groups (tenant_id, paper_id, required_count) VALUES (?, ?, ?)',
+            [req.tenant.id, paperId, finalRequiredCount]
+        );
+        await conn.execute(
+            `UPDATE questions SET choice_group_id = ? WHERE id IN (${placeholders}) AND tenant_id = ?`,
+            [group.insertId, ...questionIds, req.tenant.id]
+        );
+        await conn.commit();
+    } catch (err) {
+        await conn.rollback();
+        conn.release();
+        console.error('Error creating choice group:', err);
+        return res.status(500).send('Database error');
+    }
+    conn.release();
+
+    await recomputePaperTotal(paperId, req.tenant.id);
+    res.redirect(referer);
+});
+
+// Dissolve a choice group back into standalone questions.
+router.post('/choice-groups/:id/ungroup', isTeacher, async (req, res) => {
+    const [rows] = await db.execute('SELECT paper_id FROM question_choice_groups WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
+    if (!rows.length) return res.status(404).send('Group not found');
+    const paperId = rows[0].paper_id;
+    await db.execute('UPDATE questions SET choice_group_id = NULL WHERE choice_group_id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
+    await db.execute('DELETE FROM question_choice_groups WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
+    await recomputePaperTotal(paperId, req.tenant.id);
+    res.redirect(req.get('Referer') || '/exams');
+});
+
+// Change how many members of a choice group the student must answer.
+router.post('/choice-groups/:id/edit', isTeacher, async (req, res) => {
+    const [rows] = await db.execute('SELECT paper_id FROM question_choice_groups WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
+    if (!rows.length) return res.status(404).send('Group not found');
+    const paperId = rows[0].paper_id;
+    const [members] = await db.execute('SELECT id FROM questions WHERE choice_group_id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
+    const requiredCount = Math.min(Math.max(1, parseInt(req.body.required_count, 10) || 1), members.length || 1);
+    await db.execute('UPDATE question_choice_groups SET required_count = ? WHERE id = ? AND tenant_id = ?', [requiredCount, req.params.id, req.tenant.id]);
+    await recomputePaperTotal(paperId, req.tenant.id);
+    res.redirect(req.get('Referer') || '/exams');
+});
+
+// Recreate the default 3-choice-group / 100-mark template for an empty paper.
+router.post('/papers/:id/generate-default', isTeacher, async (req, res) => {
+    const [paper] = await db.execute('SELECT id FROM exam_papers WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
+    if (!paper.length) return res.status(404).send('Paper not found');
+    await createDefaultChoiceGroups(req.params.id, req.tenant.id);
+    res.redirect(`/papers/${req.params.id}/view`);
 });
 // ADMIN: All Papers for an Exam
 router.get('/exams/:id/papers', isAdmin, async (req, res) => {
@@ -205,8 +360,13 @@ router.get('/exams/:id/papers', isAdmin, async (req, res) => {
 router.get('/papers/:id/view', isAdmin, async (req, res) => {
     const [paper] = await db.execute('SELECT ep.*, e.name as exam_name, c.name_ar as class_name, COALESCE(t.name, u.username) as teacher_name FROM exam_papers ep JOIN exams e ON ep.exam_id = e.id JOIN classes c ON ep.class_id = c.id JOIN users u ON ep.teacher_id = u.id LEFT JOIN teachers t ON t.user_id = u.id AND t.tenant_id = ep.tenant_id WHERE ep.id = ? AND ep.tenant_id = ?', [req.params.id, req.tenant.id]);
     if (!paper.length) return res.status(404).send('Paper not found');
-    const [questions] = await db.execute('SELECT * FROM questions WHERE paper_id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
-    res.render('exams/view_paper', { paper: paper[0], questions });
+    const [questions] = await db.execute(
+        `SELECT q.*, g.required_count
+         FROM questions q LEFT JOIN question_choice_groups g ON g.id = q.choice_group_id
+         WHERE q.paper_id = ? AND q.tenant_id = ? ORDER BY q.id ASC`,
+        [req.params.id, req.tenant.id]
+    );
+    res.render('exams/view_paper', { paper: paper[0], questions, items: buildQuestionItems(questions) });
 });
 // ENTER MARKS (Question level)
 router.get('/papers/:id/enter-marks', isTeacher, async (req, res) => {
@@ -228,8 +388,14 @@ router.get('/papers/:id/enter-marks', isTeacher, async (req, res) => {
         ORDER BY s.roll_number ASC, s.name ASC
     `, [paper[0].class_id, req.tenant.id]);
 
-    // Get all questions for this paper, ordered by id
-    const [questions] = await db.execute('SELECT * FROM questions WHERE paper_id = ? AND tenant_id = ? ORDER BY id ASC', [req.params.id, req.tenant.id]);
+    // Get all questions for this paper (with their choice group, if any), ordered by id
+    const [questions] = await db.execute(
+        `SELECT q.*, g.required_count
+         FROM questions q LEFT JOIN question_choice_groups g ON g.id = q.choice_group_id
+         WHERE q.paper_id = ? AND q.tenant_id = ? ORDER BY q.id ASC`,
+        [req.params.id, req.tenant.id]
+    );
+    const items = buildQuestionItems(questions);
 
     // Get existing marks per question
     const [marksRows] = await db.execute('SELECT * FROM student_marks WHERE paper_id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
@@ -246,11 +412,12 @@ router.get('/papers/:id/enter-marks', isTeacher, async (req, res) => {
         resultsByStudent[r.student_id] = r;
     });
 
-    res.render('exams/enter_marks', { 
-        paper: paper[0], 
-        students, 
-        questions, 
-        marksByStudent, 
+    res.render('exams/enter_marks', {
+        paper: paper[0],
+        students,
+        questions,
+        items,
+        marksByStudent,
         resultsByStudent,
         isAdmin: isAdminUser
     });
@@ -362,13 +529,30 @@ async function loadDatesheetData(examId, tenantId) {
             const group = {
                 date: p.paper_date,
                 dayName: p.paper_date ? weekdays[new Date(p.paper_date).getDay()] : null,
+                rowsByClass: {},
                 rows: []
             };
             groupsByKey[key] = group;
             groups.push(group);
         }
-        groupsByKey[key].rows.push(p);
+        const group = groupsByKey[key];
+        // Merge multiple papers for the same class on the same date into one row,
+        // joining subjects (and teachers, if they differ) with "+".
+        let row = group.rowsByClass[p.class_name];
+        if (!row) {
+            row = { class_name: p.class_name, subject: p.subject, teacher_name: p.teacher_name };
+            group.rowsByClass[p.class_name] = row;
+            group.rows.push(row);
+        } else {
+            if (!row.subject.split(' + ').includes(p.subject)) {
+                row.subject += ' + ' + p.subject;
+            }
+            if (!row.teacher_name.split(' + ').includes(p.teacher_name)) {
+                row.teacher_name += ' + ' + p.teacher_name;
+            }
+        }
     }
+    groups.forEach(g => delete g.rowsByClass);
 
     return { exam: exam[0], groups };
 }

@@ -130,19 +130,9 @@
         <div class="d-flex align-items-center text-end">
             <img src="/logo.jpg" alt="Logo" style="height: 50px; margin-left: 10px;" onerror="this.style.display='none'">
             <div style="font-size: 1rem;">
-                <% 
-                    let calculatedTotal = 0;
-                    if (questions && questions.length > 0) {
-                        for (let i = 0; i < questions.length; i += 2) {
-                            let m1 = Number(questions[i].marks || 0);
-                            let m2 = (i + 1 < questions.length) ? Number(questions[i+1].marks || 0) : 0;
-                            calculatedTotal += Math.max(m1, m2);
-                        }
-                    } else {
-                        calculatedTotal = paper.max_marks || 100;
-                    }
+                <%
                     const urduDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-                    let urduTotal = String(calculatedTotal).replace(/[0-9]/g, d => urduDigits[d]);
+                    let urduTotal = String(paper.max_marks || 0).replace(/[0-9]/g, d => urduDigits[d]);
                 %>
                 <span class="d-block fw-bold">مجموع الدرجات <%= urduTotal %></span>
             </div>
@@ -164,33 +154,59 @@
     
     <div class="thick-line"></div>
     
+    <% const hasChoiceGroups = items && items.some(it => it.type === 'group'); %>
     <div class="note-section">
-        <p>ملحوظة: ہر سوال کے دو حصوں (الف اور ب) میں سے کسی ایک کا جواب لکھیں۔ صحیح عربی میں پرچہ حل کرنے پر انشاء عربی کے پانچ نمبر ہوں گے۔</p>
+        <% if (hasChoiceGroups) { %>
+            <p>ملحوظة: 'یا' سے جڑے سوالات میں سے مطلوبہ تعداد میں کسی کا جواب لکھیں۔ صحیح عربی میں پرچہ حل کرنے پر انشاء عربی کے پانچ نمبر ہوں گے۔</p>
+        <% } else { %>
+            <p>ملحوظة: صحیح عربی میں پرچہ حل کرنے پر انشاء عربی کے پانچ نمبر ہوں گے۔</p>
+        <% } %>
         <div class="subject-title">الورقة في مادة (<%= paper.subject %>) - المعلم: <%= paper.teacher_name %></div>
     </div>
 
     <!-- Questions Area -->
     <div id="questions-area">
-        <% if (questions && questions.length > 0) { %>
-            <% questions.forEach((q, index) => { %>
-                
-                <% if (index > 0 && index % 2 !== 0) { %>
+        <% if (items && items.length > 0) { %>
+            <%
+                const partLetters = ['الف', 'ب', 'ج', 'د', 'ہ', 'و', 'ز', 'ح', 'ط', 'ی'];
+                const renderEntries = [];
+                items.forEach((item, idx) => {
+                    const questionNum = idx + 1;
+                    if (item.type === 'single') {
+                        renderEntries.push({ q: item.question, label: `سوال ${questionNum}:`, orBefore: false, groupNote: null });
+                    } else if (item.requiredCount === 1) {
+                        item.members.forEach((q, mi) => {
+                            renderEntries.push({ q, label: `سوال ${questionNum} (حصہ ${partLetters[mi] || (mi + 1)}):`, orBefore: mi > 0, groupNote: null });
+                        });
+                    } else {
+                        item.members.forEach((q, mi) => {
+                            renderEntries.push({
+                                q,
+                                label: `سوال ${questionNum} (${partLetters[mi] || (mi + 1)}):`,
+                                orBefore: false,
+                                groupNote: mi === 0 ? `کسی بھی ${item.requiredCount} کا جواب دیں:` : null
+                            });
+                        });
+                    }
+                });
+                const urduDigitsLocal = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+            %>
+            <% renderEntries.forEach(entry => {
+                const q = entry.q;
+                let qMarksUrdu = String(q.marks || 0).replace(/[0-9]/g, d => urduDigitsLocal[d]);
+            %>
+                <% if (entry.orBefore) { %>
                     <div class="text-center fw-bold my-2 fs-5">...یا...</div>
                 <% } %>
-                
-                <% 
-                    let questionNum = Math.floor(index / 2) + 1;
-                    let partName = (index % 2 === 0) ? 'الف' : 'ب';
-                    let label = `سوال ${questionNum} (حصہ ${partName}):`;
-                    const urduDigitsLocal = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-                    let qMarksUrdu = String(q.marks || 0).replace(/[0-9]/g, d => urduDigitsLocal[d]);
-                %>
+                <% if (entry.groupNote) { %>
+                    <div class="fw-bold my-2"><%= entry.groupNote %></div>
+                <% } %>
 
                 <div class="question-block" id="question-<%= q.id %>">
                     <!-- View Mode -->
                     <div class="view-mode">
-                        <div class="question-text-view"><strong class="me-2"><%= label %></strong> <%= q.question_text ? q.question_text.trim() : '' %> <span class="ms-1">(<%= qMarksUrdu %>)</span></div>
-                        
+                        <div class="question-text-view"><strong class="me-2"><%= entry.label %></strong> <%= q.question_text ? q.question_text.trim() : '' %> <span class="ms-1">(<%= qMarksUrdu %>)</span></div>
+
                         <!-- Empty lines for answers -->
                         <% if (!q.question_text || q.question_text.trim() === '') { %>
                             <div class="empty-lines"></div>
@@ -198,10 +214,13 @@
                             <div class="empty-lines"></div>
                             <div class="empty-lines"></div>
                         <% } %>
-                        
+
                         <!-- Actions (Hidden in Print) -->
                         <div class="question-actions no-print text-end mt-2">
                             <button class="btn btn-sm btn-primary px-3" onclick="toggleEdit('<%= q.id %>')" title="ترمیم کریں"><i class="bi bi-pencil"></i> ترمیم کریں</button>
+                            <form action="/questions/<%= q.id %>/delete" method="POST" class="d-inline m-0" onsubmit="event.preventDefault(); const form = this; showConfirm('<%= __('Are_you_sure_you_want_to_delete_this') || 'کیا آپ واقعی حذف کرنا چاہتے ہیں؟' %>').then(c => { if(c) form.submit(); });">
+                                <button type="submit" class="btn btn-sm btn-outline-danger px-3" title="حذف کریں"><i class="bi bi-trash"></i></button>
+                            </form>
                         </div>
                     </div>
 
@@ -209,13 +228,16 @@
                     <div class="edit-mode no-print mt-3 p-3 border rounded bg-light" dir="ltr">
                         <form action="/questions/<%= q.id %>/edit" method="POST">
                             <div class="mb-3 text-end" dir="rtl">
-                                <label class="form-label fw-bold"><strong class="me-2 text-primary"><%= label %></strong> <%= __('Question_Text') || 'Question Text' %></label>
+                                <label class="form-label fw-bold"><strong class="me-2 text-primary"><%= entry.label %></strong> <%= __('Question_Text') || 'Question Text' %></label>
                                 <textarea name="question_text" class="form-control" rows="4" style="direction: rtl; font-size: 1.3rem;" placeholder="<%= __('Type_your_question_here') || 'اپنا سوال یہاں لکھیں...' %>"><%= q.question_text %></textarea>
                             </div>
                             <div class="row mb-3 text-start">
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold"><%= __('Marks') || 'Marks' %></label>
-                                    <input type="number" name="marks" class="form-control" value="<%= q.marks %>">
+                                    <input type="number" name="marks" class="form-control" value="<%= q.marks %>" min="1">
+                                    <% if (q.choice_group_id) { %>
+                                        <div class="form-text"><%= __('Choice_Marks_Propagate_Note') || 'اس سے اس choice group کے تمام متبادل سوالات کے نمبر بھی تبدیل ہو جائیں گے۔' %></div>
+                                    <% } %>
                                 </div>
                                 <div class="col-6 d-none">
                                     <label class="form-label fw-bold"><%= __('Section') || 'Section / Hisa' %></label>
@@ -236,14 +258,34 @@
                     <i class="bi bi-info-circle"></i> No questions found for this paper.
                 </div>
                 <div class="mt-3">
-                    <form action="/papers/<%= paper.id %>/generate-default" method="POST" id="generateDefaultForm">
-                        <button type="button" class="btn btn-success btn-lg shadow-sm" onclick="generateDefaultQuestions()">
+                    <form action="/papers/<%= paper.id %>/generate-default" method="POST">
+                        <button type="submit" class="btn btn-success btn-lg shadow-sm">
                             <i class="bi bi-magic"></i> Generate Default Paper Layout
                         </button>
                     </form>
                 </div>
             </div>
         <% } %>
+
+        <!-- Quick add (hidden in print) -->
+        <div class="no-print mt-4 p-3 border rounded bg-light" dir="rtl">
+            <form action="/papers/<%= paper.id %>/questions" method="POST" class="row g-2 align-items-end">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold small"><%= __('Add_Question') || 'نیا سوال شامل کریں' %></label>
+                    <input type="text" name="question_text" class="form-control" placeholder="<%= __('Type_your_question_here') || 'اپنا سوال یہاں لکھیں...' %>">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small"><%= __('Marks') || 'Marks' %></label>
+                    <input type="number" name="marks" class="form-control" min="1" required>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-lg"></i> <%= __('Add_Question') || 'شامل کریں' %></button>
+                </div>
+                <div class="col-md-2 text-muted small">
+                    <%= __('Group_Questions_In_Builder_Note') || 'انتخابی سوالات بنانے کے لیے "Build Paper" استعمال کریں۔' %>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -263,31 +305,6 @@
     function toggleEdit(id) {
         const block = document.getElementById('question-' + id);
         block.classList.toggle('editing');
-    }
-
-    async function generateDefaultQuestions() {
-        const btn = document.querySelector('button[onclick="generateDefaultQuestions()"]');
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Generating...';
-
-        // Generate 6 empty questions (3 questions, 2 parts each)
-        for (let i = 0; i < 6; i++) {
-            let sectionName = (i % 2 === 0) ? 'الف' : 'ب';
-            
-            await fetch(`/papers/<%= paper.id %>/questions`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams({
-                    question_text: '',
-                    marks: 10,
-                    section: sectionName
-                })
-            });
-        }
-        
-        window.location.reload();
     }
 </script>
 

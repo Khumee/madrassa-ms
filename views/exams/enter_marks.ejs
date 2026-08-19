@@ -34,21 +34,35 @@
                             <th class="py-3 px-4 text-end">رول نمبر</th>
                             <th class="py-3 px-4 text-end">طالب علم کا نام</th>
                             <th class="py-3 px-3">غیر حاضر</th>
-                            <% 
-                                // Group questions into pairs (or single if not paired)
-                                let groupedQuestions = [];
-                                for (let i = 0; i < questions.length; i += 2) {
-                                    groupedQuestions.push({
-                                        q1: questions[i],
-                                        q2: i + 1 < questions.length ? questions[i+1] : null,
-                                        maxMarks: Math.max(questions[i].marks, i + 1 < questions.length ? questions[i+1].marks : 0)
-                                    });
-                                }
+                            <%
+                                // Build one marks-entry column per standalone question, and either one
+                                // column (required_count == 1, the classic either/or pair) or one column
+                                // per member (required_count > 1, an overall "answer any N of these" pool)
+                                // for each choice group.
+                                const columns = [];
+                                items.forEach((item, idx) => {
+                                    const num = idx + 1;
+                                    if (item.type === 'single') {
+                                        columns.push({ qid: item.question.id, maxMarks: item.question.marks, header: `سوال ${num}`, note: null });
+                                    } else if (item.requiredCount === 1) {
+                                        const q = item.members[0];
+                                        columns.push({ qid: q.id, maxMarks: q.marks, header: `سوال ${num}`, note: null });
+                                    } else {
+                                        item.members.forEach((q, mi) => {
+                                            columns.push({
+                                                qid: q.id,
+                                                maxMarks: q.marks,
+                                                header: `سوال ${num}.${mi + 1}`,
+                                                note: mi === 0 ? `(کسی ${item.requiredCount} کا جواب لازم)` : null
+                                            });
+                                        });
+                                    }
+                                });
                             %>
-                            <% groupedQuestions.forEach((gq, index) => { %>
+                            <% columns.forEach(col => { %>
                                 <th class="py-3 px-2">
-                                    سوال <%= index + 1 %><br>
-                                    <small class="text-muted">(<%= gq.maxMarks %>)</small>
+                                    <%= col.header %><br>
+                                    <small class="text-muted">(<%= col.maxMarks %><% if (col.note) { %> <%= col.note %><% } %>)</small>
                                 </th>
                             <% }) %>
                             <th class="py-3 px-3">کل نمبرات</th>
@@ -72,15 +86,15 @@
                                         </div>
                                     </td>
 
-                                    <% groupedQuestions.forEach(gq => { 
-                                        const markVal = marksByStudent[s.id] && marksByStudent[s.id][gq.q1.id] !== undefined ? marksByStudent[s.id][gq.q1.id] : '';
+                                    <% columns.forEach(col => {
+                                        const markVal = marksByStudent[s.id] && marksByStudent[s.id][col.qid] !== undefined ? marksByStudent[s.id][col.qid] : '';
                                     %>
                                         <td class="px-2" style="width: 100px;">
-                                            <input type="number" class="form-control text-center mark-input student-<%= s.id %>" 
-                                                   data-qid="<%= gq.q1.id %>" 
-                                                   data-max="<%= gq.maxMarks %>"
-                                                   value="<%= markVal %>" 
-                                                   min="0" max="<%= gq.maxMarks %>"
+                                            <input type="number" class="form-control text-center mark-input student-<%= s.id %>"
+                                                   data-qid="<%= col.qid %>"
+                                                   data-max="<%= col.maxMarks %>"
+                                                   value="<%= markVal %>"
+                                                   min="0" max="<%= col.maxMarks %>"
                                                    <%= (isAbsent || paper.is_locked) ? 'disabled' : '' %>
                                                    oninput="validateMarks(this)">
                                         </td>
@@ -103,7 +117,7 @@
                             <% }) %>
                         <% } else { %>
                             <tr>
-                                <td colspan="<%= 5 + groupedQuestions.length %>" class="text-center py-5 text-muted">
+                                <td colspan="<%= 5 + columns.length %>" class="text-center py-5 text-muted">
                                     اس درجہ میں کوئی طالب علم موجود نہیں۔
                                 </td>
                             </tr>

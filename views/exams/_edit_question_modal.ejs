@@ -1,0 +1,34 @@
+<!-- Edit Modal for Question <%= q.id %> -->
+<div class="modal fade" id="editQuestionModal<%= q.id %>" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/questions/<%= q.id %>/edit" method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title"><%= __('Edit_Question') || 'Edit Question' %></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label"><%= __('Question') || 'Question' %></label>
+                        <input type="text" name="question_text" class="form-control" value="<%= q.question_text %>" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><%= __('Marks') || 'Marks' %></label>
+                        <input type="number" name="marks" class="form-control" value="<%= q.marks %>" min="1" required>
+                        <% if (q.choice_group_id) { %>
+                            <div class="form-text"><%= __('Choice_Marks_Propagate_Note') || 'Changing marks here updates every alternative in this choice group.' %></div>
+                        <% } %>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><%= __('Section') || 'Section' %></label>
+                        <input type="text" name="section" class="form-control" value="<%= q.section %>">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><%= __('Cancel') || 'Cancel' %></button>
+                    <button type="submit" class="btn btn-primary"><%= __('Save_Changes') || 'Save Changes' %></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

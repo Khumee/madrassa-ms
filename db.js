@@ -35,6 +35,7 @@ const tenantScopedTables = [
     'exams',
     'exam_papers',
     'questions',
+    'question_choice_groups',
     'student_results'
 ];
 

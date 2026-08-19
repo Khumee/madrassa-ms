@@ -497,5 +497,22 @@
     "Action_Taken": "کارروائی مکمل ہو گئی",
     "Submit": "جمع کروائیں",
     "Student": "طالب علم",
-    "Confirm_Delete": "کیا آپ واقعی حذف کرنا چاہتے ہیں؟"
+    "Confirm_Delete": "کیا آپ واقعی حذف کرنا چاہتے ہیں؟",
+    "Total_Marks": "کل نمبر",
+    "Total_Marks_Auto_Note": "کل نمبر خودکار طور پر پرچے میں شامل سوالات کے مطابق شمار ہوں گے۔",
+    "Current_Questions": "موجودہ سوالات",
+    "No_Questions_Yet": "ابھی تک کوئی سوال نہیں۔ اوپر سے شامل کریں۔",
+    "Questions_Selected": "سوالات منتخب کیے گئے",
+    "Answer_Any": "طالب علم کو ان میں سے جواب دینا ہوگا",
+    "Of_Them": "کا",
+    "Group_As_Choice": "انتخابی گروپ بنائیں",
+    "Choice_Marks_Mismatch": "منتخب سوالات کے نمبر برابر ہونے چاہئیں۔",
+    "Choice_Group": "انتخابی گروپ",
+    "Answer_N_Of_M": "{m} میں سے کسی بھی {n} کا جواب دیں",
+    "Ungroup": "گروپ ختم کریں",
+    "Required_Count": "مطلوبہ تعداد",
+    "Or": "یا",
+    "Choice_Marks_Propagate_Note": "اس سے اس انتخابی گروپ کے تمام متبادل سوالات کے نمبر بھی تبدیل ہو جائیں گے۔",
+    "Group_Questions_In_Builder_Note": "انتخابی سوالات بنانے کے لیے \"Build Paper\" استعمال کریں۔",
+    "Type_your_question_here": "اپنا سوال یہاں لکھیں..."
 }
