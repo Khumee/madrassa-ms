@@ -104,6 +104,62 @@
         display: none;
     }
 
+    /* Mobile: the paper is authored/printed at a fixed A4 width (210mm), which
+       overflows every phone screen and forces horizontal scrolling while
+       editing/pasting a question. Below tablet width, let the container
+       shrink to the viewport instead and tone down the print-sized type. */
+    @media (max-width: 768px) {
+        .paper-container {
+            width: 100%;
+            min-height: auto;
+            margin: 10px auto;
+            padding: 15px;
+        }
+
+        .question-block {
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        .question-text-view {
+            line-height: 1.5;
+        }
+
+        .empty-lines {
+            height: 26px;
+            margin-top: 10px;
+        }
+
+        /* Hover-to-reveal doesn't exist on touch screens - keep the
+           edit/delete actions visible so they're reachable at all. */
+        .question-actions {
+            opacity: 1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px !important;
+        }
+
+        .question-actions .btn {
+            flex: 1 1 auto;
+        }
+
+        .paper-container .d-flex.justify-content-between.align-items-center {
+            flex-wrap: wrap;
+            row-gap: 10px;
+        }
+
+        .paper-container .text-center,
+        .paper-container .text-start,
+        .paper-container .text-end {
+            text-align: center !important;
+        }
+
+        .quick-add-marks-col {
+            width: 100% !important;
+        }
+    }
+
     @media print {
         body {
             background: #fff;
@@ -309,7 +365,7 @@
                 </div>
 
                 <div class="row g-2 align-items-end">
-                    <div class="col-auto" style="width: 140px;">
+                    <div class="col-auto quick-add-marks-col" style="width: 140px;">
                         <label class="form-label text-muted"><%= __('Marks') || 'Marks' %></label>
                         <input type="number" name="marks" class="form-control form-control-lg" min="1" required>
                     </div>

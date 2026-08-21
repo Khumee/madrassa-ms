@@ -77,8 +77,10 @@ router.get('/exams/:id/results', isAdmin, async (req, res) => {
     });
 });
 
-// ADMIN: Create Exam
-router.post('/exams', isAdmin, async (req, res) => {
+// ADMIN (مدير only): Create Exam - creating an exam auto-assigns a paper to
+// every teacher with an active book assignment, so it's restricted the same
+// way as exam delete rather than left open to ناظم.
+router.post('/exams', isMudeer, async (req, res) => {
     try {
         if (!EXAM_TYPES.includes(req.body.exam_type)) {
             return res.status(400).send('Invalid exam type');
@@ -512,7 +514,15 @@ router.post('/papers/:id/note', isTeacher, async (req, res) => {
 });
 // ADMIN: All Papers for an Exam
 router.get('/exams/:id/papers', isAdmin, async (req, res) => {
-    let query = 'SELECT ep.*, e.name as exam_name, c.name_ar as class_name, COALESCE(t.name, u.username) as teacher_name FROM exam_papers ep JOIN exams e ON ep.exam_id = e.id JOIN classes c ON ep.class_id = c.id JOIN users u ON ep.teacher_id = u.id LEFT JOIN teachers t ON t.user_id = u.id AND t.tenant_id = ep.tenant_id WHERE ep.exam_id = ? AND ep.tenant_id = ? AND ep.deleted_at IS NULL';
+    // filled_question_count only counts rows with real question text - the
+    // default template inserts 3 blank placeholder rows on every new paper
+    // (see createDefaultQuestions above), so a raw COUNT(*) would show every
+    // untouched paper as "already has 3 questions" even though the teacher
+    // hasn't written anything yet.
+    let query = `SELECT ep.*, e.name as exam_name, c.name_ar as class_name, COALESCE(t.name, u.username) as teacher_name,
+        (SELECT COUNT(*) FROM questions q WHERE q.paper_id = ep.id AND q.tenant_id = ep.tenant_id) as question_count,
+        (SELECT COUNT(*) FROM questions q WHERE q.paper_id = ep.id AND q.tenant_id = ep.tenant_id AND TRIM(q.question_text) <> '') as filled_question_count
+        FROM exam_papers ep JOIN exams e ON ep.exam_id = e.id JOIN classes c ON ep.class_id = c.id JOIN users u ON ep.teacher_id = u.id LEFT JOIN teachers t ON t.user_id = u.id AND t.tenant_id = ep.tenant_id WHERE ep.exam_id = ? AND ep.tenant_id = ? AND ep.deleted_at IS NULL`;
     const params = [req.params.id, req.tenant.id];
 
     if (req.query.classId) {
@@ -522,6 +532,11 @@ router.get('/exams/:id/papers', isAdmin, async (req, res) => {
     if (req.query.teacherId) {
         query += ' AND ep.teacher_id = ?';
         params.push(req.query.teacherId);
+    }
+    if (req.query.hasQuestions === 'yes') {
+        query += ' HAVING filled_question_count > 0';
+    } else if (req.query.hasQuestions === 'no') {
+        query += ' HAVING filled_question_count = 0';
     }
     query += ' ORDER BY c.name_ar ASC, teacher_name ASC';
 
@@ -533,21 +548,35 @@ router.get('/exams/:id/papers', isAdmin, async (req, res) => {
     const [classes] = await db.execute('SELECT DISTINCT c.id, c.name_ar FROM classes c JOIN exam_papers ep ON c.id = ep.class_id WHERE ep.exam_id = ? AND ep.tenant_id = ? AND ep.deleted_at IS NULL ORDER BY c.name_ar ASC', [req.params.id, req.tenant.id]);
     const [teachers] = await db.execute('SELECT DISTINCT u.id, COALESCE(t.name, u.username) as name FROM users u JOIN exam_papers ep ON u.id = ep.teacher_id LEFT JOIN teachers t ON t.user_id = u.id AND t.tenant_id = ep.tenant_id WHERE ep.exam_id = ? AND ep.tenant_id = ? AND ep.deleted_at IS NULL ORDER BY name ASC', [req.params.id, req.tenant.id]);
 
+    // Exam-wide stats (independent of the filters above) - how many of this
+    // exam's papers actually have teacher-written questions, so the admin can
+    // see at a glance how many teachers have started their paper.
+    const [statsRows] = await db.execute(
+        `SELECT COUNT(*) as total, SUM(CASE WHEN filled_count > 0 THEN 1 ELSE 0 END) as with_questions FROM (
+            SELECT ep.id, (SELECT COUNT(*) FROM questions q WHERE q.paper_id = ep.id AND q.tenant_id = ep.tenant_id AND TRIM(q.question_text) <> '') as filled_count
+            FROM exam_papers ep WHERE ep.exam_id = ? AND ep.tenant_id = ? AND ep.deleted_at IS NULL
+        ) t`,
+        [req.params.id, req.tenant.id]
+    );
+    const paperStats = { total: statsRows[0].total || 0, withQuestions: statsRows[0].with_questions || 0 };
+
     // Fetch all for new paper assignment
     const [allClasses] = await db.execute('SELECT * FROM classes WHERE tenant_id = ?', [req.tenant.id]);
     const [allTeachers] = await db.execute('SELECT u.id, COALESCE(t.name, u.username) as username FROM users u LEFT JOIN teachers t ON t.user_id = u.id AND t.tenant_id = u.tenant_id WHERE u.role = "أستاذ" AND u.tenant_id = ? ORDER BY username ASC', [req.tenant.id]);
     const [books] = await db.execute('SELECT id, title, class_id FROM books WHERE tenant_id = ?', [req.tenant.id]);
 
-    res.render('exams/exam_papers', { 
-        papers, 
-        exam: exam[0], 
-        classes, 
-        teachers, 
+    res.render('exams/exam_papers', {
+        papers,
+        exam: exam[0],
+        classes,
+        teachers,
         allClasses,
         allTeachers,
         books,
-        selectedClassId: req.query.classId || '', 
-        selectedTeacherId: req.query.teacherId || '' 
+        paperStats,
+        selectedClassId: req.query.classId || '',
+        selectedTeacherId: req.query.teacherId || '',
+        selectedHasQuestions: req.query.hasQuestions || ''
     });
 });
 router.get('/papers/:id/view', isAdmin, async (req, res) => {

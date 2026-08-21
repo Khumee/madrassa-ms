@@ -536,5 +536,9 @@
     "Delete_Exam": "امتحان حذف کریں",
     "Delete_Exam_Soft_Delete_Note": "اس سے \"%s\" آپ کی امتحانات کی فہرست سے ہٹ جائے گا۔ اس کے پرچے، سوالات اور نتائج حذف نہیں ہوں گے - وہ ڈیٹابیس میں محفوظ رہیں گے۔",
     "Type_Exam_Name_To_Confirm": "تصدیق کے لیے امتحان کا نام لکھیں:",
-    "Export_All_Papers": "تمام پرچے ایکسپورٹ کریں"
+    "Export_All_Papers": "تمام پرچے ایکسپورٹ کریں",
+    "Filter_By_Status": "حالت کے مطابق فلٹر کریں",
+    "Questions_Added": "شامل",
+    "Not_Started": "شروع نہیں ہوا",
+    "Papers_Started_Stat": "{total} میں سے {filled} اساتذہ نے اپنے پرچے میں سوالات شامل کیے ہیں"
 }

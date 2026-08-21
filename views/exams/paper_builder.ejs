@@ -1,4 +1,25 @@
 <%- include('../partials/header', { title: __('Build_Paper') }) %>
+<style>
+    /* Mobile: each question row packs a checkbox, section badge, text, marks
+       badge, and two buttons into one line - too tight for a phone screen.
+       Stack it into a card instead of forcing horizontal scroll. */
+    @media (max-width: 576px) {
+        .question-list-item {
+            flex-direction: column;
+            align-items: flex-start !important;
+            gap: 10px;
+        }
+        .question-list-item > div {
+            width: 100%;
+        }
+        .question-list-item > div:last-child {
+            flex-wrap: wrap;
+        }
+        .question-list-item .btn {
+            flex: 1 1 auto;
+        }
+    }
+</style>
 <div class="container mt-1">
     <h2>Build Paper: <%= paper.subject %> (Total Marks: <span id="paperTotal"><%= paper.max_marks %></span>)</h2>
 
@@ -105,7 +126,7 @@
             <% if (item.type === 'single') { %>
                 <% const q = item.question; %>
                 <ul class="list-group">
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <li class="list-group-item d-flex justify-content-between align-items-center question-list-item">
                         <div class="d-flex align-items-center gap-2">
                             <input type="checkbox" class="form-check-input group-checkbox" name="question_ids" form="groupForm" value="<%= q.id %>" data-marks="<%= q.marks %>">
                             <span class="badge bg-secondary"><%= __('Section') || 'Sec' %>: <%= q.section %></span>
@@ -137,7 +158,7 @@
                             <% if (idx > 0) { %>
                                 <li class="list-group-item text-center text-muted py-1 fst-italic small">— <%= __('Or') || 'or' %> —</li>
                             <% } %>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <li class="list-group-item d-flex justify-content-between align-items-center question-list-item">
                                 <div>
                                     <span class="badge bg-secondary me-2"><%= __('Section') || 'Sec' %>: <%= q.section %></span>
                                     <span><%= q.question_text %></span>
