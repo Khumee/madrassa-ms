@@ -436,6 +436,8 @@
     "Add_New_Question": "إضافة سؤال جديد",
     "Question_Text": "نص السؤال",
     "Add_Question": "إضافة سؤال",
+    "No_Questions_Found_For_Paper": "لا توجد أسئلة لهذه الورقة.",
+    "Generate_Default_Paper_Layout": "إنشاء تخطيط ورقة افتراضي",
     "Paper_Approvals": "موافقات الأوراق",
     "Approve": "موافقة",
     "Reject": "رفض",

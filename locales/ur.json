@@ -436,6 +436,8 @@
     "Add_New_Question": "نیا سوال شامل کریں",
     "Question_Text": "سوال کی عبارت",
     "Add_Question": "سوال شامل کریں",
+    "No_Questions_Found_For_Paper": "اس پرچے میں کوئی سوال موجود نہیں ہے۔",
+    "Generate_Default_Paper_Layout": "ڈیفالٹ پرچہ ترتیب بنائیں",
     "Paper_Approvals": "پرچوں کی منظوریاں",
     "Approve": "منظور کریں",
     "Reject": "مسترد کریں",

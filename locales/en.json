@@ -436,6 +436,8 @@
     "Add_New_Question": "Add New Question",
     "Question_Text": "Question Text",
     "Add_Question": "Add Question",
+    "No_Questions_Found_For_Paper": "No questions found for this paper.",
+    "Generate_Default_Paper_Layout": "Generate Default Paper Layout",
     "Paper_Approvals": "Paper Approvals",
     "Approve": "Approve",
     "Reject": "Reject",
