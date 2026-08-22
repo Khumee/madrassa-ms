@@ -74,8 +74,8 @@
                 <div class="col-md-6">
                     <small class="text-muted d-block mb-2 fw-bold"><i class="bi bi-calendar3 me-1"></i><%= __('Filter_By_Date') || 'Filter By Date' %></small>
                     <div class="d-flex flex-wrap align-items-center gap-2">
-                        <input type="date" class="form-control form-control-sm" style="max-width: 180px;" value="<%= selectedDate %>" onchange="filterPapers('date', this.value)">
-                        <button class="btn btn-sm <%= !selectedDate ? 'btn-secondary' : 'btn-outline-secondary' %> rounded-pill px-3" onclick="filterPapers('date', '')"><%= __('All') %></button>
+                        <input type="date" class="form-control form-control-sm" style="max-width: 180px;" value="<%= selectedDate %>" onchange="filterPapers('date', this.value || 'all')">
+                        <button class="btn btn-sm <%= !selectedDate ? 'btn-secondary' : 'btn-outline-secondary' %> rounded-pill px-3" onclick="filterPapers('date', 'all')"><%= __('All') %></button>
                     </div>
                 </div>
 

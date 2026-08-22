@@ -3,8 +3,17 @@ const router = express.Router();
 const db = require('../db');
 const puppeteer = require('puppeteer');
 const multer = require('multer');
+const { DateTime } = require('luxon');
 const { buildQuestionItems, recomputePaperTotal, sumMarks } = require('../lib/examMarks');
 const { EXAM_TYPES, examDisplayName } = require('../lib/examNaming');
+
+// Papers-grid date filter: query param 'all' means "no date filter", an
+// absent param defaults to today, and anything else is used as-is (an ISO
+// date string from the grid's date picker).
+function resolveDateFilter(dateParam) {
+    if (dateParam === 'all') return '';
+    return dateParam || DateTime.now().toISODate();
+}
 
 const isAdmin = (req, res, next) => {
     if (!req.session.userId || !req.session.role) return res.redirect('/login');
@@ -533,9 +542,10 @@ router.get('/exams/:id/papers', isAdmin, async (req, res) => {
         query += ' AND ep.teacher_id = ?';
         params.push(req.query.teacherId);
     }
-    if (req.query.date) {
+    const selectedDate = resolveDateFilter(req.query.date);
+    if (selectedDate) {
         query += ' AND DATE(ep.paper_date) = ?';
-        params.push(req.query.date);
+        params.push(selectedDate);
     }
     if (req.query.hasQuestions === 'yes') {
         query += ' HAVING filled_question_count > 0';
@@ -600,7 +610,7 @@ router.get('/exams/:id/papers', isAdmin, async (req, res) => {
         paperStats,
         selectedClassId: req.query.classId || '',
         selectedTeacherId: req.query.teacherId || '',
-        selectedDate: req.query.date || '',
+        selectedDate,
         selectedHasQuestions: req.query.hasQuestions || ''
     });
 });
@@ -623,9 +633,10 @@ router.get('/exams/:id/papers/print', isAdmin, async (req, res) => {
         query += ' AND ep.teacher_id = ?';
         params.push(req.query.teacherId);
     }
-    if (req.query.date) {
+    const printSelectedDate = resolveDateFilter(req.query.date);
+    if (printSelectedDate) {
         query += ' AND DATE(ep.paper_date) = ?';
-        params.push(req.query.date);
+        params.push(printSelectedDate);
     }
     if (req.query.hasQuestions === 'yes') {
         query += ` AND EXISTS (SELECT 1 FROM questions q WHERE q.paper_id = ep.id AND q.tenant_id = ep.tenant_id AND TRIM(q.question_text) <> '')`;
