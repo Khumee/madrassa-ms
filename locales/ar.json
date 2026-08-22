@@ -467,6 +467,8 @@
     "Are_you_sure_you_want_to_delete_this_exam": "هل أنت متأكد أنك تريد حذف هذا الامتحان",
     "All_Papers": "جميع الأوراق",
     "No_papers_found": "لم يتم العثور على أوراق",
+    "Print_Filtered_Papers": "طباعة الأوراق المعروضة",
+    "Papers": "أوراق",
     "Question": "السؤال",
     "Part": "الجزء",
     "Edit_Question": "تعديل السؤال",

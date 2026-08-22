@@ -7,6 +7,9 @@
             <p class="text-muted mb-0"><%= exam.name %></p>
         </div>
         <div class="d-flex gap-2">
+            <button class="btn btn-outline-success" onclick="printFilteredPapers()">
+                <i class="bi bi-printer"></i> <%= __('Print_Filtered_Papers') || 'دکھائے گئے پرچے پرنٹ کریں' %>
+            </button>
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#assignPaperModal">
                 <i class="bi bi-plus-lg me-1"></i> <%= __('Assign_New_Paper') || 'Assign New Paper' %>
             </button>
@@ -254,6 +257,11 @@
         }
         
         window.location.href = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+    }
+
+    function printFilteredPapers() {
+        const urlParams = new URLSearchParams(window.location.search);
+        window.open('/exams/<%= exam.id %>/papers/print' + (urlParams.toString() ? '?' + urlParams.toString() : ''), '_blank');
     }
 </script>
 

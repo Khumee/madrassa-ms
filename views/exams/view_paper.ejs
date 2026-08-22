@@ -180,6 +180,26 @@
         .print-only {
             display: block;
         }
+        /* On screen the extra margin/height gives room for the edit toolbar
+           and makes blank answer space easy to see. None of that is needed
+           on paper, so tighten everything down for print to avoid leaving
+           empty gaps between questions. */
+        .question-block {
+            margin-bottom: 8px;
+        }
+        .empty-lines {
+            margin-top: 6px;
+            height: 22px;
+        }
+        .note-section {
+            margin-bottom: 8px;
+        }
+        .note-section p {
+            margin-bottom: 3px;
+        }
+        .thick-line {
+            margin: 6px 0;
+        }
         @page {
             size: A4;
             margin: 0;

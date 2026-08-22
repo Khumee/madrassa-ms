@@ -1,0 +1,87 @@
+<div class="paper-container">
+    <div class="d-flex justify-content-between align-items-center" style="margin-bottom: 5px; min-height: 50px;">
+        <div class="d-flex align-items-center text-end">
+            <img src="/logo.jpg" alt="Logo" style="height: 50px; margin-left: 10px;" onerror="this.style.display='none'">
+            <div style="font-size: 1rem;">
+                <%
+                    const urduDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+                    const urduTotal = String(paper.max_marks || 0).replace(/[0-9]/g, d => urduDigits[d]);
+                %>
+                <span class="d-block fw-bold">مجموع الدرجات <%= urduTotal %></span>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <p class="mb-0" style="font-size: 0.8rem;">بسم الله الرحمن الرحيم</p>
+            <h4 class="fw-bold mb-0" style="font-size: 1.5rem;">کلیۃ العلوم الاسلامیہ</h4>
+            <div class="fw-bold" style="font-size: 1.1rem;">الاختبار السنوي  [<%= paper.class_name %>]</div>
+        </div>
+
+        <div class="text-start" style="font-size: 1rem;">
+            <span class="d-block fw-bold">تاریخ: <%= paper.paper_date ? new Date(paper.paper_date).toLocaleDateString('ur-PK') : new Date().toLocaleDateString('ur-PK') %></span>
+            <span class="d-block fw-bold">الوقت ٣ ساعات</span>
+        </div>
+    </div>
+
+    <div class="thick-line"></div>
+
+    <% const hasChoiceGroups = items && items.some(it => it.type === 'group'); %>
+    <% const defaultNoteText = hasChoiceGroups
+        ? `ملحوظة: 'یا' سے جڑے سوالات میں سے مطلوبہ تعداد میں کسی کا جواب لکھیں۔ صحیح عربی میں پرچہ حل کرنے پر انشاء عربی کے پانچ نمبر ہوں گے۔`
+        : `ملحوظة: صحیح عربی میں پرچہ حل کرنے پر انشاء عربی کے پانچ نمبر ہوں گے۔`; %>
+    <div class="note-section">
+        <p style="white-space: pre-wrap;"><%= paper.note_text || defaultNoteText %></p>
+        <div class="subject-title">الورقة في مادة (<%= paper.subject %>) - المعلم: <%= paper.teacher_name %></div>
+    </div>
+
+    <div id="questions-area">
+        <% if (items && items.length > 0) { %>
+            <%
+                const partLetters = ['الف', 'ب', 'ج', 'د', 'ہ', 'و', 'ز', 'ح', 'ط', 'ی'];
+                const renderEntries = [];
+                items.forEach((item, idx) => {
+                    const questionNum = idx + 1;
+                    if (item.type === 'single') {
+                        renderEntries.push({ q: item.question, label: `سوال ${questionNum}:`, orBefore: false, groupNote: null });
+                    } else if (item.requiredCount === 1) {
+                        item.members.forEach((q, mi) => {
+                            renderEntries.push({ q, label: `سوال ${questionNum} (حصہ ${partLetters[mi] || (mi + 1)}):`, orBefore: mi > 0, groupNote: null });
+                        });
+                    } else {
+                        item.members.forEach((q, mi) => {
+                            renderEntries.push({
+                                q,
+                                label: `سوال ${questionNum} (${partLetters[mi] || (mi + 1)}):`,
+                                orBefore: false,
+                                groupNote: mi === 0 ? `کسی بھی ${item.requiredCount} کا جواب دیں:` : null
+                            });
+                        });
+                    }
+                });
+                const urduDigitsLocal = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+            %>
+            <% renderEntries.forEach(entry => {
+                const q = entry.q;
+                let qMarksUrdu = String(q.marks || 0).replace(/[0-9]/g, d => urduDigitsLocal[d]);
+            %>
+                <% if (entry.orBefore) { %>
+                    <div class="text-center fw-bold my-2 fs-5">...یا...</div>
+                <% } %>
+                <% if (entry.groupNote) { %>
+                    <div class="fw-bold my-2"><%= entry.groupNote %></div>
+                <% } %>
+                <div class="question-block">
+                    <div class="question-text-view"><strong class="me-2"><%= entry.label %></strong> <%= q.question_text ? q.question_text.trim() : '' %> <span class="ms-1">(<%= qMarksUrdu %>)</span></div>
+                    <% if (!q.question_text || q.question_text.trim() === '') { %>
+                        <div class="empty-lines"></div>
+                        <div class="empty-lines"></div>
+                        <div class="empty-lines"></div>
+                        <div class="empty-lines"></div>
+                    <% } %>
+                </div>
+            <% }) %>
+        <% } else { %>
+            <div class="text-center py-4 text-muted"><%= __('No_Questions_Found_For_Paper') || 'No questions found for this paper.' %></div>
+        <% } %>
+    </div>
+</div>

@@ -599,6 +599,51 @@ router.get('/exams/:id/papers', isAdmin, async (req, res) => {
         selectedHasQuestions: req.query.hasQuestions || ''
     });
 });
+
+// ADMIN: Print every paper currently matching the grid's filters (same
+// classId/teacherId/hasQuestions query params as /exams/:id/papers) as one
+// document, one paper per page, so the admin can print a whole class/teacher
+// slice at once instead of opening each paper individually.
+router.get('/exams/:id/papers/print', isAdmin, async (req, res) => {
+    let query = `SELECT ep.*, e.name as exam_name, c.name_ar as class_name, COALESCE(t.name, u.username) as teacher_name
+        FROM exam_papers ep JOIN exams e ON ep.exam_id = e.id JOIN classes c ON ep.class_id = c.id JOIN users u ON ep.teacher_id = u.id LEFT JOIN teachers t ON t.user_id = u.id AND t.tenant_id = ep.tenant_id
+        WHERE ep.exam_id = ? AND ep.tenant_id = ? AND ep.deleted_at IS NULL`;
+    const params = [req.params.id, req.tenant.id];
+
+    if (req.query.classId) {
+        query += ' AND ep.class_id = ?';
+        params.push(req.query.classId);
+    }
+    if (req.query.teacherId) {
+        query += ' AND ep.teacher_id = ?';
+        params.push(req.query.teacherId);
+    }
+    if (req.query.hasQuestions === 'yes') {
+        query += ` AND EXISTS (SELECT 1 FROM questions q WHERE q.paper_id = ep.id AND q.tenant_id = ep.tenant_id AND TRIM(q.question_text) <> '')`;
+    } else if (req.query.hasQuestions === 'no') {
+        query += ` AND NOT EXISTS (SELECT 1 FROM questions q WHERE q.paper_id = ep.id AND q.tenant_id = ep.tenant_id AND TRIM(q.question_text) <> '')`;
+    }
+    query += ' ORDER BY c.name_ar ASC, teacher_name ASC';
+
+    const [papers] = await db.execute(query, params);
+
+    for (const p of papers) {
+        const [questions] = await db.execute(
+            `SELECT q.*, g.required_count
+             FROM questions q LEFT JOIN question_choice_groups g ON g.id = q.choice_group_id
+             WHERE q.paper_id = ? AND q.tenant_id = ? ORDER BY q.id ASC`,
+            [p.id, req.tenant.id]
+        );
+        p.items = buildQuestionItems(questions);
+    }
+
+    const [exam] = await db.execute('SELECT * FROM exams WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
+    if (!exam.length) return res.status(404).send('Exam not found');
+    exam[0].name = examDisplayName(exam[0], req.getLocale());
+
+    res.render('exams/print_papers', { papers, exam: exam[0] });
+});
+
 router.get('/papers/:id/view', isAdmin, async (req, res) => {
     const [paper] = await db.execute('SELECT ep.*, e.name as exam_name, c.name_ar as class_name, COALESCE(t.name, u.username) as teacher_name FROM exam_papers ep JOIN exams e ON ep.exam_id = e.id JOIN classes c ON ep.class_id = c.id JOIN users u ON ep.teacher_id = u.id LEFT JOIN teachers t ON t.user_id = u.id AND t.tenant_id = ep.tenant_id WHERE ep.id = ? AND ep.tenant_id = ?', [req.params.id, req.tenant.id]);
     if (!paper.length) return res.status(404).send('Paper not found');

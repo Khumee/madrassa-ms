@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="<%= lang %>" dir="<%= ['ar', 'ur'].includes(lang) ? 'rtl' : 'ltr' %>">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= exam.name %> - <%= __('All_Papers') || 'All Papers' %></title>
+    <% if (['ar', 'ur'].includes(lang)) { %>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <% } else { %>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <% } %>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .paper-container {
+            direction: rtl;
+            text-align: right;
+            background: #fff;
+            width: 210mm;
+            min-height: 297mm;
+            margin: 20px auto;
+            padding: 15mm 20mm;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            position: relative;
+            color: #000;
+            line-height: 1.6;
+            page-break-after: always;
+        }
+
+        .paper-container:last-child {
+            page-break-after: auto;
+        }
+
+        .thick-line {
+            border-top: 3px solid #000;
+            border-bottom: 1px solid #000;
+            height: 6px;
+            background: transparent;
+            margin: 10px 0;
+            opacity: 1;
+        }
+
+        .note-section {
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .note-section p {
+            margin-bottom: 5px;
+        }
+
+        .subject-title {
+            font-size: 1rem;
+            font-weight: bold;
+            text-decoration: underline;
+            text-align: center;
+        }
+
+        .question-block {
+            margin-bottom: 25px;
+            font-size: 1.2rem;
+        }
+
+        .question-text-view {
+            white-space: pre-wrap;
+            display: inline-block;
+            width: 100%;
+            line-height: 1.8;
+            text-align: right;
+        }
+
+        .empty-lines {
+            margin-top: 15px;
+            border-bottom: 1px dashed #777;
+            height: 35px;
+            width: 100%;
+        }
+
+        .no-print {
+            display: block;
+        }
+
+        @media print {
+            body {
+                background: #fff;
+                margin: 0;
+                padding: 0;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .paper-container {
+                margin: 0;
+                padding: 10mm 20mm;
+                box-shadow: none;
+                width: 100%;
+                min-height: auto;
+                border: none;
+            }
+            /* Tightened so print doesn't leave large empty gaps between
+               questions - the screen sizing exists to make blank answer
+               space easy to see while editing, not needed on paper. */
+            .question-block {
+                margin-bottom: 8px;
+            }
+            .empty-lines {
+                margin-top: 6px;
+                height: 22px;
+            }
+            .note-section {
+                margin-bottom: 8px;
+            }
+            .note-section p {
+                margin-bottom: 3px;
+            }
+            .thick-line {
+                margin: 6px 0;
+            }
+            @page {
+                size: A4;
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print container text-center py-3">
+        <a href="javascript:history.back()" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> واپس</a>
+        <button onclick="window.print()" class="btn btn-outline-primary ms-2"><i class="bi bi-printer"></i> پرنٹ کریں</button>
+        <span class="text-muted ms-3"><%= papers.length %> <%= __('Papers') || 'papers' %></span>
+    </div>
+
+    <% if (papers.length === 0) { %>
+        <div class="no-print text-center py-5 text-muted"><%= __('No_papers_found') || 'No papers found' %></div>
+    <% } %>
+
+    <% papers.forEach(p => { %>
+        <%- include('_paper_print_body', { paper: p, items: p.items }) %>
+    <% }) %>
+
+    <script>
+        window.addEventListener('load', () => {
+            setTimeout(() => { window.print(); }, 500);
+        });
+    </script>
+</body>
+</html>
