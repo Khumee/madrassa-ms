@@ -542,6 +542,7 @@
     "Type_Exam_Name_To_Confirm": "تصدیق کے لیے امتحان کا نام لکھیں:",
     "Export_All_Papers": "تمام پرچے ایکسپورٹ کریں",
     "Filter_By_Status": "حالت کے مطابق فلٹر کریں",
+    "Filter_By_Date": "تاریخ کے مطابق فلٹر کریں",
     "Questions_Added": "شامل",
     "Not_Started": "شروع نہیں ہوا",
     "Papers_Started_Stat": "{total} میں سے {filled} اساتذہ نے اپنے پرچے میں سوالات شامل کیے ہیں"

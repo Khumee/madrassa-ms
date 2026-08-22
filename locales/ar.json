@@ -542,6 +542,7 @@
     "Type_Exam_Name_To_Confirm": "اكتب اسم الامتحان للتأكيد:",
     "Export_All_Papers": "تصدير جميع الأوراق",
     "Filter_By_Status": "تصفية حسب الحالة",
+    "Filter_By_Date": "تصفية حسب التاريخ",
     "Questions_Added": "مضاف",
     "Not_Started": "لم يبدأ",
     "Papers_Started_Stat": "{filled} من أصل {total} معلمين أضافوا أسئلة إلى ورقتهم"

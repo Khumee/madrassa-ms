@@ -533,6 +533,10 @@ router.get('/exams/:id/papers', isAdmin, async (req, res) => {
         query += ' AND ep.teacher_id = ?';
         params.push(req.query.teacherId);
     }
+    if (req.query.date) {
+        query += ' AND DATE(ep.paper_date) = ?';
+        params.push(req.query.date);
+    }
     if (req.query.hasQuestions === 'yes') {
         query += ' HAVING filled_question_count > 0';
     } else if (req.query.hasQuestions === 'no') {
@@ -596,6 +600,7 @@ router.get('/exams/:id/papers', isAdmin, async (req, res) => {
         paperStats,
         selectedClassId: req.query.classId || '',
         selectedTeacherId: req.query.teacherId || '',
+        selectedDate: req.query.date || '',
         selectedHasQuestions: req.query.hasQuestions || ''
     });
 });
@@ -617,6 +622,10 @@ router.get('/exams/:id/papers/print', isAdmin, async (req, res) => {
     if (req.query.teacherId) {
         query += ' AND ep.teacher_id = ?';
         params.push(req.query.teacherId);
+    }
+    if (req.query.date) {
+        query += ' AND DATE(ep.paper_date) = ?';
+        params.push(req.query.date);
     }
     if (req.query.hasQuestions === 'yes') {
         query += ` AND EXISTS (SELECT 1 FROM questions q WHERE q.paper_id = ep.id AND q.tenant_id = ep.tenant_id AND TRIM(q.question_text) <> '')`;
