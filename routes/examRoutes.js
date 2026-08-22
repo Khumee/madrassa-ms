@@ -3,7 +3,7 @@ const router = express.Router();
 const db = require('../db');
 const puppeteer = require('puppeteer');
 const multer = require('multer');
-const { buildQuestionItems, recomputePaperTotal } = require('../lib/examMarks');
+const { buildQuestionItems, recomputePaperTotal, sumMarks } = require('../lib/examMarks');
 const { EXAM_TYPES, examDisplayName } = require('../lib/examNaming');
 
 const isAdmin = (req, res, next) => {
@@ -541,6 +541,26 @@ router.get('/exams/:id/papers', isAdmin, async (req, res) => {
     query += ' ORDER BY c.name_ar ASC, teacher_name ASC';
 
     const [papers] = await db.execute(query, params);
+
+    // "کل نمبر" in the grid should reflect only questions the teacher has
+    // actually written, not exam_papers.max_marks - that column is recomputed
+    // from every question row including the blank placeholders createDefaultQuestions
+    // inserts on a new paper, so an untouched paper would otherwise show 100.
+    if (papers.length > 0) {
+        const [filledQuestions] = await db.query(
+            `SELECT q.paper_id, q.marks, q.choice_group_id, g.required_count
+             FROM questions q
+             LEFT JOIN question_choice_groups g ON g.id = q.choice_group_id
+             WHERE q.paper_id IN (?) AND q.tenant_id = ? AND TRIM(q.question_text) <> ''`,
+            [papers.map(p => p.id), req.tenant.id]
+        );
+        const byPaper = {};
+        for (const q of filledQuestions) {
+            (byPaper[q.paper_id] = byPaper[q.paper_id] || []).push(q);
+        }
+        papers.forEach(p => { p.filled_marks_total = sumMarks(byPaper[p.id] || []); });
+    }
+
     const [exam] = await db.execute('SELECT * FROM exams WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
     if (exam[0]) exam[0].name = examDisplayName(exam[0], req.getLocale());
 
