@@ -109,11 +109,10 @@ router.post('/exams', isMudeer, async (req, res) => {
         `, [req.tenant.id]);
 
         for (const a of assignments) {
-            const [paperResult] = await db.execute(
+            await db.execute(
                 'INSERT INTO exam_papers (exam_id, class_id, subject, teacher_id, max_marks, tenant_id) VALUES (?, ?, ?, ?, ?, ?)',
                 [examId, a.class_id, a.subject, a.teacher_id, 0, req.tenant.id]
             );
-            await createDefaultQuestions(paperResult.insertId, req.tenant.id);
         }
         res.redirect('/exams');
     } catch (error) {
@@ -152,10 +151,10 @@ router.post('/exams/:id/delete', isMudeer, async (req, res) => {
 // Route removed as it's now handled by modal in exam_papers
 
 router.post('/exams/:id/assign', isAdmin, async (req, res) => {
-    const [result] = await db.execute('INSERT INTO exam_papers (exam_id, class_id, subject, teacher_id, max_marks, tenant_id) VALUES (?, ?, ?, ?, ?, ?)', [req.params.id, req.body.class_id, req.body.subject, req.body.teacher_id, 0, req.tenant.id]);
-    // Every new paper starts with the default 3-plain-questions template;
-    // teachers can freely add/remove/group questions afterward from "Build Paper".
-    await createDefaultQuestions(result.insertId, req.tenant.id);
+    // Papers start empty - no default questions. A teacher can generate the
+    // 3-plain-question / 100-mark template themselves from "Build Paper" (see
+    // POST /papers/:id/generate-default) if they want a starting point.
+    await db.execute('INSERT INTO exam_papers (exam_id, class_id, subject, teacher_id, max_marks, tenant_id) VALUES (?, ?, ?, ?, ?, ?)', [req.params.id, req.body.class_id, req.body.subject, req.body.teacher_id, 0, req.tenant.id]);
     res.redirect(`/exams/${req.params.id}/papers`);
 });
 
