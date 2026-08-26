@@ -921,9 +921,9 @@ router.get('/exams/:exam_id/student/:student_id/report-card', async (req, res) =
     if (exam[0]) exam[0].name = examDisplayName(exam[0], req.getLocale());
 
     const [results] = await db.execute(`
-        SELECT 
-            ep.id as paper_id, 
-            ep.subject, 
+        SELECT
+            ep.id as paper_id,
+            ep.subject,
             ep.max_marks,
             sr.obtained_marks
         FROM exam_papers ep
@@ -931,11 +931,32 @@ router.get('/exams/:exam_id/student/:student_id/report-card', async (req, res) =
         WHERE ep.exam_id = ? AND ep.class_id = ? AND ep.tenant_id = ?
         ORDER BY ep.subject ASC
     `, [req.params.student_id, req.params.exam_id, student[0].class_id, req.tenant.id]);
-    
+
+    // Recompute each paper's max_marks live from its actually-written questions
+    // instead of trusting the stored exam_papers.max_marks column - a paper can
+    // carry leftover blank placeholder rows (see createDefaultQuestions) whose
+    // marks were never meant to count, so reading the stored column directly
+    // can overstate the total. This mirrors the filter the admin papers grid
+    // already applies for its own "کل نمبر" column.
+    if (results.length > 0) {
+        const [filledQuestions] = await db.query(
+            `SELECT q.paper_id, q.marks, q.choice_group_id, g.required_count
+             FROM questions q
+             LEFT JOIN question_choice_groups g ON g.id = q.choice_group_id
+             WHERE q.paper_id IN (?) AND q.tenant_id = ? AND TRIM(q.question_text) <> ''`,
+            [results.map(r => r.paper_id), req.tenant.id]
+        );
+        const byPaper = {};
+        for (const q of filledQuestions) {
+            (byPaper[q.paper_id] = byPaper[q.paper_id] || []).push(q);
+        }
+        results.forEach(r => { r.max_marks = sumMarks(byPaper[r.paper_id] || []); });
+    }
+
     let totalObtained = 0, totalMax = 0;
     let markedCount = 0;
-    
-    results.forEach(r => { 
+
+    results.forEach(r => {
         totalMax += r.max_marks;
         if (r.obtained_marks !== null) {
             totalObtained += r.obtained_marks; 
