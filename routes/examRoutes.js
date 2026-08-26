@@ -924,9 +924,10 @@ router.get('/exams/:exam_id/student/:student_id/report-card', async (req, res) =
             ep.id as paper_id,
             ep.subject,
             ep.max_marks,
-            sr.obtained_marks
+            spr.total_marks_obtained as obtained_marks,
+            spr.is_absent
         FROM exam_papers ep
-        LEFT JOIN student_results sr ON ep.id = sr.paper_id AND sr.student_id = ?
+        LEFT JOIN student_paper_results spr ON ep.id = spr.paper_id AND spr.student_id = ?
         WHERE ep.exam_id = ? AND ep.class_id = ? AND ep.tenant_id = ?
         ORDER BY ep.subject ASC
     `, [req.params.student_id, req.params.exam_id, student[0].class_id, req.tenant.id]);
