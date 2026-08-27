@@ -957,9 +957,13 @@ router.get('/exams/:exam_id/student/:student_id/report-card', async (req, res) =
     let markedCount = 0;
 
     results.forEach(r => {
+        // spr.total_marks_obtained is a DECIMAL column, so mysql2 returns it as a
+        // string (e.g. "32.00"). Normalize to an integer here so numeric addition
+        // below doesn't fall back to string concatenation (which produced "032.00").
+        r.obtained_marks = r.obtained_marks !== null ? Math.round(parseFloat(r.obtained_marks)) : null;
         totalMax += r.max_marks;
         if (r.obtained_marks !== null) {
-            totalObtained += r.obtained_marks; 
+            totalObtained += r.obtained_marks;
             markedCount++;
         }
     });
