@@ -38,12 +38,11 @@ async function migrate() {
         // Check if migration already applied
         const [rows] = await db.execute('SELECT * FROM schema_history WHERE version = ?', [version]);
         if (rows.length === 0) {
-            console.log(`Applying migration: ${file}`);
-            const sql = fs.readFileSync(path.join(sqlDir, file), 'utf8');
+            const sql = fs.readFileSync(path.join(sqlDir, file), 'utf8').replace(/^\uFEFF/, '');
             
             // Split by semicolon to run multiple statements
             // Note: This is a basic split and might fail with complex triggers/procs
-            const statements = sql.split(';').filter(s => s.trim() !== '');
+            const statements = sql.split(';').map(s => s.trim()).filter(s => s !== '');
             
             for (let statement of statements) {
                 console.log(`Executing statement: ${statement.trim().substring(0, 50)}...`);
