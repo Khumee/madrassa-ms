@@ -225,7 +225,6 @@
                         <th><%= __('Obtained_Marks') %></th>
                         <th><%= __('Percentage') %></th>
                         <th><%= __('Grade') %></th>
-                        <th><%= __('Status') || 'کیفیت' %></th>
                         <th class="no-print"><%= __('Actions') || 'رپورٹ کارڈ' %></th>
                     </tr>
                 </thead>
@@ -236,7 +235,7 @@
                                 <!-- Position / Rank -->
                                 <td class="align-middle">
                                     <% const rankToUse = selectedClassId ? s.classRank : (s.classRank || s.overallRank); %>
-                                    <% if (s.allPapersUnmarked) { %>
+                                    <% if (s.allPapersUnmarked || s.isRasib || !rankToUse) { %>
                                         <span class="text-muted">-</span>
                                     <% } else if (rankToUse === 1) { %>
                                         <span class="badge bg-warning text-dark border border-warning fw-bold px-2 py-1 fs-6">🥇 1st</span>
@@ -244,10 +243,8 @@
                                         <span class="badge bg-secondary text-white border border-secondary fw-bold px-2 py-1 fs-6">🥈 2nd</span>
                                     <% } else if (rankToUse === 3) { %>
                                         <span class="badge bg-danger bg-opacity-10 text-danger border border-danger fw-bold px-2 py-1 fs-6">🥉 3rd</span>
-                                    <% } else if (rankToUse) { %>
-                                        <span class="badge bg-light text-dark border px-2 py-1 fw-bold"><%= rankToUse %></span>
                                     <% } else { %>
-                                        <span class="text-muted">-</span>
+                                        <span class="badge bg-light text-dark border px-2 py-1 fw-bold"><%= rankToUse %></span>
                                     <% } %>
                                 </td>
 
@@ -270,13 +267,13 @@
                                 <td class="align-middle"><%= s.totalMax %></td>
 
                                 <!-- Obtained Marks -->
-                                <td class="align-middle fw-bold <%= s.status === 'fail' ? 'text-danger' : 'text-success' %>">
-                                    <%= s.allPapersUnmarked ? '-' : (s.status === 'absent' ? __('Absent') || 'غائب' : s.totalObtained) %>
+                                <td class="align-middle fw-bold <%= s.isRasib ? 'text-danger' : 'text-success' %>">
+                                    <%= s.allPapersUnmarked ? '-' : (s.absentCount === s.papersCount && s.papersCount > 0 ? __('Absent') || 'غائب' : s.totalObtained) %>
                                 </td>
 
                                 <!-- Percentage -->
                                 <td class="align-middle">
-                                    <% if (s.allPapersUnmarked || s.status === 'absent') { %>
+                                    <% if (s.allPapersUnmarked || (s.absentCount === s.papersCount && s.papersCount > 0)) { %>
                                         <span class="text-muted">-</span>
                                     <% } else { %>
                                         <div class="d-inline-flex align-items-center gap-1">
@@ -296,19 +293,6 @@
                                     <% } %>
                                 </td>
 
-                                <!-- Status -->
-                                <td class="align-middle">
-                                    <% if (s.status === 'pending') { %>
-                                        <span class="badge bg-light text-muted border"><%= __('Pending') || 'زیر جائزہ' %></span>
-                                    <% } else if (s.status === 'absent') { %>
-                                        <span class="badge bg-secondary text-white"><%= __('Absent') || 'غیر حاضر' %></span>
-                                    <% } else if (s.status === 'pass') { %>
-                                        <span class="badge bg-success text-white px-2 py-1"><i class="bi bi-check-lg me-1"></i><%= __('Pass') || 'کامیاب' %></span>
-                                    <% } else { %>
-                                        <span class="badge bg-danger text-white px-2 py-1"><i class="bi bi-x-lg me-1"></i><%= __('Fail') || 'راسب' %></span>
-                                    <% } %>
-                                </td>
-
                                 <!-- Action -->
                                 <td class="align-middle no-print">
                                     <a href="/exams/<%= exam.id %>/student/<%= s.id %>/report-card" class="btn btn-sm btn-outline-primary rounded-pill px-3">
@@ -319,7 +303,7 @@
                         <% }) %>
                     <% } else { %>
                         <tr>
-                            <td colspan="10" class="text-center py-5 text-muted">
+                            <td colspan="9" class="text-center py-5 text-muted">
                                 <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
                                 <%= __('No_students_found') || 'اس فلٹر کے تحت کوئی طالب علم نہیں ملا۔' %>
                             </td>

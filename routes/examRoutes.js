@@ -134,6 +134,7 @@ async function loadExamResultsData(examId, tenantId, selectedClassId, locale) {
                 if (res.is_absent) {
                     absentCount++;
                     markedCount++;
+                    failedPaperCount++;
                 } else if (res.total_marks_obtained !== null && res.total_marks_obtained !== undefined) {
                     const obt = Math.round(parseFloat(res.total_marks_obtained));
                     totalObtained += obt;
@@ -149,28 +150,26 @@ async function loadExamResultsData(examId, tenantId, selectedClassId, locale) {
         const percentage = totalMax > 0 && !allPapersUnmarked ? (totalObtained / totalMax) * 100 : 0;
 
         let gradeKey = 'Grade_Rasib', gradeClass = 'danger';
-        let status = 'pass';
+        let isRasib = false;
 
         if (allPapersUnmarked) {
-            status = 'pending';
             gradeKey = null;
             gradeClass = 'secondary';
         } else if (absentCount === classPapers.length && classPapers.length > 0) {
-            status = 'absent';
             gradeKey = 'Grade_Rasib';
             gradeClass = 'danger';
+            isRasib = true;
+        } else if (failedPaperCount > 2 || percentage < 40) {
+            // Failed in more than 2 subjects OR total percentage < 40% -> Rasib
+            gradeKey = 'Grade_Rasib';
+            gradeClass = 'danger';
+            isRasib = true;
         } else {
+            // Passed / eligible for percentage grade (failed in <= 2 subjects and percentage >= 40%)
             if (percentage >= 80) { gradeKey = 'Grade_Mumtaz'; gradeClass = 'success'; }
             else if (percentage >= 60) { gradeKey = 'Grade_Jaid_Jiddan'; gradeClass = 'primary'; }
             else if (percentage >= 50) { gradeKey = 'Grade_Jaid'; gradeClass = 'info'; }
             else if (percentage >= 40) { gradeKey = 'Grade_Maqbool'; gradeClass = 'warning'; }
-            else { gradeKey = 'Grade_Rasib'; gradeClass = 'danger'; }
-
-            if (percentage < 40 || failedPaperCount > 0) {
-                status = 'fail';
-            } else {
-                status = 'pass';
-            }
         }
 
         return {
@@ -184,15 +183,17 @@ async function loadExamResultsData(examId, tenantId, selectedClassId, locale) {
             papersCount: classPapers.length,
             markedCount,
             absentCount,
+            failedPaperCount,
             percentage: parseFloat(percentage.toFixed(2)),
             gradeKey,
             gradeClass,
-            status,
+            isRasib,
             allPapersUnmarked
         };
     });
 
     // 6. Calculate Class-wise Positions (Rank within class)
+    // NOTE: Positions are ONLY assigned to passing (non-Rasib) students!
     const byClass = {};
     studentSummaries.forEach(s => {
         (byClass[s.class_id] = byClass[s.class_id] || []).push(s);
@@ -200,19 +201,22 @@ async function loadExamResultsData(examId, tenantId, selectedClassId, locale) {
 
     Object.keys(byClass).forEach(cid => {
         const list = byClass[cid];
+        // Sort non-Rasib students first by percentage desc, totalObtained desc
         list.sort((a, b) => {
-            if (a.allPapersUnmarked && !b.allPapersUnmarked) return 1;
-            if (!a.allPapersUnmarked && b.allPapersUnmarked) return -1;
+            const aEligible = !a.allPapersUnmarked && !a.isRasib;
+            const bEligible = !b.allPapersUnmarked && !b.isRasib;
+            if (aEligible && !bEligible) return -1;
+            if (!aEligible && bEligible) return 1;
             if (b.percentage !== a.percentage) return b.percentage - a.percentage;
             return b.totalObtained - a.totalObtained;
         });
 
         let currentRank = 1;
         list.forEach((s, idx) => {
-            if (s.allPapersUnmarked || s.status === 'absent') {
-                s.classRank = null;
+            if (s.allPapersUnmarked || s.isRasib) {
+                s.classRank = null; // Do NOT assign position to Rasib
             } else {
-                if (idx > 0 && list[idx - 1].percentage === s.percentage && list[idx - 1].totalObtained === s.totalObtained) {
+                if (idx > 0 && list[idx - 1].classRank !== null && list[idx - 1].percentage === s.percentage && list[idx - 1].totalObtained === s.totalObtained) {
                     s.classRank = list[idx - 1].classRank;
                 } else {
                     s.classRank = currentRank;
@@ -223,16 +227,17 @@ async function loadExamResultsData(examId, tenantId, selectedClassId, locale) {
     });
 
     // 7. Calculate Overall Positions (Rank across entire exam)
-    const markedStudents = studentSummaries.filter(s => !s.allPapersUnmarked && s.status !== 'absent');
-    markedStudents.sort((a, b) => {
+    // NOTE: Positions are ONLY assigned to passing (non-Rasib) students!
+    const passingStudents = studentSummaries.filter(s => !s.allPapersUnmarked && !s.isRasib);
+    passingStudents.sort((a, b) => {
         if (b.percentage !== a.percentage) return b.percentage - a.percentage;
         return b.totalObtained - a.totalObtained;
     });
 
     let overallRank = 1;
-    markedStudents.forEach((s, idx) => {
-        if (idx > 0 && markedStudents[idx - 1].percentage === s.percentage && markedStudents[idx - 1].totalObtained === s.totalObtained) {
-            s.overallRank = markedStudents[idx - 1].overallRank;
+    passingStudents.forEach((s, idx) => {
+        if (idx > 0 && passingStudents[idx - 1].percentage === s.percentage && passingStudents[idx - 1].totalObtained === s.totalObtained) {
+            s.overallRank = passingStudents[idx - 1].overallRank;
         } else {
             s.overallRank = overallRank;
         }
@@ -240,7 +245,7 @@ async function loadExamResultsData(examId, tenantId, selectedClassId, locale) {
     });
 
     studentSummaries.forEach(s => {
-        if (!s.overallRank) s.overallRank = null;
+        if (s.isRasib || s.allPapersUnmarked) s.overallRank = null;
     });
 
     // 8. Filter students if a specific class is selected
@@ -254,24 +259,26 @@ async function loadExamResultsData(examId, tenantId, selectedClassId, locale) {
         if (!selectedClassId && a.class_name !== b.class_name) {
             return a.class_name.localeCompare(b.class_name);
         }
+        // Ranked students first by rank asc, then unranked by percentage desc
         if (a.classRank === null && b.classRank !== null) return 1;
         if (a.classRank !== null && b.classRank === null) return -1;
         if (a.classRank !== b.classRank) return (a.classRank || 9999) - (b.classRank || 9999);
+        if (b.percentage !== a.percentage) return b.percentage - a.percentage;
         return a.name.localeCompare(b.name);
     });
 
-    // 9. Top 3 Position Holders for the podium/announcement cards
-    const eligibleForPodium = (selectedClassId ? displayStudents : markedStudents)
-        .filter(s => s.classRank !== null && s.status !== 'absent' && !s.allPapersUnmarked)
+    // 9. Top 3 Position Holders for the podium/announcement cards (only non-Rasib with rank!)
+    const eligibleForPodium = (selectedClassId ? displayStudents : passingStudents)
+        .filter(s => s.classRank !== null && !s.isRasib && !s.allPapersUnmarked)
         .sort((a, b) => (selectedClassId ? ((a.classRank || 999) - (b.classRank || 999)) : ((a.overallRank || 999) - (b.overallRank || 999))))
         .slice(0, 3);
 
     // 10. Summary Statistics
     const totalStudentsCount = displayStudents.length;
-    const passedCount = displayStudents.filter(s => s.status === 'pass').length;
-    const failedCount = displayStudents.filter(s => s.status === 'fail').length;
-    const pendingCount = displayStudents.filter(s => s.status === 'pending').length;
-    const absentCount = displayStudents.filter(s => s.status === 'absent').length;
+    const passedCount = displayStudents.filter(s => !s.isRasib && !s.allPapersUnmarked).length;
+    const failedCount = displayStudents.filter(s => s.isRasib).length;
+    const pendingCount = displayStudents.filter(s => s.allPapersUnmarked).length;
+    const absentCount = displayStudents.filter(s => s.absentCount === s.papersCount && s.papersCount > 0).length;
     const evaluatedCount = totalStudentsCount - pendingCount;
     const passPercentage = evaluatedCount > 0 ? ((passedCount / evaluatedCount) * 100).toFixed(1) : 0;
 
@@ -1212,6 +1219,7 @@ async function loadReportCardData(examId, studentId, tenantId, locale, translate
 
     let totalObtained = 0, totalMax = 0;
     let markedCount = 0;
+    let failedPaperCount = 0;
 
     results.forEach(r => {
         r.obtained_marks = r.obtained_marks !== null ? Math.round(parseFloat(r.obtained_marks)) : null;
@@ -1219,6 +1227,9 @@ async function loadReportCardData(examId, studentId, tenantId, locale, translate
         if (r.obtained_marks !== null) {
             totalObtained += r.obtained_marks;
             markedCount++;
+            if (r.max_marks > 0 && r.obtained_marks < (r.max_marks * 0.4)) {
+                failedPaperCount++;
+            }
         }
     });
     
@@ -1227,10 +1238,22 @@ async function loadReportCardData(examId, studentId, tenantId, locale, translate
     
     let gradeKey = 'Grade_Rasib', gradeClass = 'danger';
     if (!allPapersUnmarked) {
-        if (percentage >= 80) { gradeKey = 'Grade_Mumtaz'; gradeClass = 'success'; }
-        else if (percentage >= 60) { gradeKey = 'Grade_Jaid_Jiddan'; gradeClass = 'primary'; }
-        else if (percentage >= 50) { gradeKey = 'Grade_Jaid'; gradeClass = 'info'; }
-        else if (percentage >= 40) { gradeKey = 'Grade_Maqbool'; gradeClass = 'warning'; }
+        if (failedPaperCount > 2 || percentage < 40) {
+            gradeKey = 'Grade_Rasib';
+            gradeClass = 'danger';
+        } else if (percentage >= 80) {
+            gradeKey = 'Grade_Mumtaz';
+            gradeClass = 'success';
+        } else if (percentage >= 60) {
+            gradeKey = 'Grade_Jaid_Jiddan';
+            gradeClass = 'primary';
+        } else if (percentage >= 50) {
+            gradeKey = 'Grade_Jaid';
+            gradeClass = 'info';
+        } else if (percentage >= 40) {
+            gradeKey = 'Grade_Maqbool';
+            gradeClass = 'warning';
+        }
     }
     const grade = (translateFn ? translateFn(gradeKey) : null) || gradeKey;
 
