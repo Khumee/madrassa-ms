@@ -83,13 +83,14 @@ async function loadExamResultsData(examId, tenantId, selectedClassId, locale) {
         });
     }
 
-    // 3. Get all students in classes involved in this exam
+    // 3. Get all students in classes involved in this exam (must have active linked user)
     const [allStudents] = await db.execute(
         `SELECT DISTINCT s.id, s.name, s.roll_number, s.class_id, c.name_ar as class_name 
          FROM students s 
+         JOIN users u ON s.user_id = u.id AND u.tenant_id = s.tenant_id
          JOIN classes c ON s.class_id = c.id 
          JOIN exam_papers ep ON ep.class_id = c.id
-         WHERE ep.exam_id = ? AND ep.tenant_id = ? AND ep.deleted_at IS NULL AND s.deleted_at IS NULL
+         WHERE ep.exam_id = ? AND ep.tenant_id = ? AND ep.deleted_at IS NULL AND s.deleted_at IS NULL AND u.deleted_at IS NULL
          ORDER BY c.name_ar ASC, s.name ASC`,
         [examId, tenantId]
     );
@@ -954,7 +955,8 @@ router.get('/papers/:id/enter-marks', isTeacher, async (req, res) => {
     const [students] = await db.execute(`
         SELECT s.id, s.name, s.roll_number 
         FROM students s
-        WHERE s.class_id = ? AND s.tenant_id = ? AND s.deleted_at IS NULL
+        JOIN users u ON s.user_id = u.id AND u.tenant_id = s.tenant_id
+        WHERE s.class_id = ? AND s.tenant_id = ? AND s.deleted_at IS NULL AND u.deleted_at IS NULL
         ORDER BY s.roll_number ASC, s.name ASC
     `, [paper[0].class_id, req.tenant.id]);
 

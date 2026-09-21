@@ -434,8 +434,9 @@ exports.showStudentsManage = async (req, res) => {
         let studentsQuery = `
             SELECT s.*, c.name_ar as class_name 
             FROM students s 
+            JOIN users u ON s.user_id = u.id AND u.tenant_id = s.tenant_id
             JOIN classes c ON s.class_id = c.id AND c.tenant_id = s.tenant_id 
-            WHERE s.tenant_id = ? AND s.deleted_at IS NULL
+            WHERE s.tenant_id = ? AND s.deleted_at IS NULL AND u.deleted_at IS NULL
         `;
         let queryParams = [req.tenant.id];
 
@@ -718,8 +719,9 @@ exports.showAttendance = async (req, res) => {
         const [students] = await db.execute(
             `SELECT s.*, a.status 
              FROM students s 
+             JOIN users u ON s.user_id = u.id AND u.tenant_id = s.tenant_id
              LEFT JOIN attendance_students a ON s.id = a.student_id AND a.date = ? AND a.tenant_id = s.tenant_id
-             WHERE s.class_id = ? AND s.tenant_id = ? AND s.deleted_at IS NULL`,
+             WHERE s.class_id = ? AND s.tenant_id = ? AND s.deleted_at IS NULL AND u.deleted_at IS NULL`,
             [date, classId, req.tenant.id]
         );
         console.log(`✅ Found ${students.length} students for this class.`);
@@ -731,7 +733,11 @@ exports.showAttendance = async (req, res) => {
              SUM(CASE WHEN status = 'leave' THEN 1 ELSE 0 END) as leave_count,
              SUM(CASE WHEN status = 'online' THEN 1 ELSE 0 END) as online
              FROM attendance_students 
-             WHERE student_id IN (SELECT id FROM students WHERE class_id = ? AND tenant_id = ? AND deleted_at IS NULL) AND tenant_id = ?
+             WHERE student_id IN (
+                 SELECT s2.id FROM students s2 
+                 JOIN users u2 ON s2.user_id = u2.id AND u2.tenant_id = s2.tenant_id 
+                 WHERE s2.class_id = ? AND s2.tenant_id = ? AND s2.deleted_at IS NULL AND u2.deleted_at IS NULL
+             ) AND tenant_id = ?
              GROUP BY date 
              ORDER BY date DESC LIMIT 14`,
             [classId, req.tenant.id, req.tenant.id]
@@ -779,8 +785,9 @@ exports.showStudentView = async (req, res) => {
         const [student] = await db.execute(
             `SELECT s.*, c.name_ar as class_name 
              FROM students s 
+             JOIN users u ON s.user_id = u.id AND u.tenant_id = s.tenant_id
              JOIN classes c ON s.class_id = c.id AND c.tenant_id = s.tenant_id 
-             WHERE s.id = ? AND s.tenant_id = ? AND s.deleted_at IS NULL`,
+             WHERE s.id = ? AND s.tenant_id = ? AND s.deleted_at IS NULL AND u.deleted_at IS NULL`,
             [id, req.tenant.id]
         );
         if (!student.length) {
@@ -819,8 +826,9 @@ exports.exportStudentPdf = async (req, res) => {
         const [student] = await db.execute(
             `SELECT s.*, c.name_ar as class_name 
              FROM students s 
+             JOIN users u ON s.user_id = u.id AND u.tenant_id = s.tenant_id
              JOIN classes c ON s.class_id = c.id AND c.tenant_id = s.tenant_id 
-             WHERE s.id = ? AND s.tenant_id = ? AND s.deleted_at IS NULL`,
+             WHERE s.id = ? AND s.tenant_id = ? AND s.deleted_at IS NULL AND u.deleted_at IS NULL`,
             [id, req.tenant.id]
         );
         if (!student.length) {

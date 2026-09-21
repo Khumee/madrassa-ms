@@ -47,11 +47,12 @@ exports.showReports = async (req, res) => {
             COUNT(a.id) as total_days,
             SUM(CASE WHEN a.status = 'present' OR a.status = 'online' THEN 1 ELSE 0 END) as present_days
             FROM students s
+            JOIN users u ON s.user_id = u.id AND u.tenant_id = s.tenant_id
             JOIN student_enrollments se ON s.id = se.student_id AND se.tenant_id = s.tenant_id
             JOIN classes c ON se.class_id = c.id AND c.tenant_id = s.tenant_id
             LEFT JOIN attendance_students a ON s.id = a.student_id AND a.tenant_id = s.tenant_id
                 AND a.date BETWEEN ? AND ?
-            WHERE se.session_id = ? AND s.tenant_id = ? AND s.deleted_at IS NULL
+            WHERE se.session_id = ? AND s.tenant_id = ? AND s.deleted_at IS NULL AND u.deleted_at IS NULL
             GROUP BY s.id, c.id, s.name, c.name_ar
         `, [startDate, endDate, activeSessionId, req.tenant.id]);
 
@@ -246,11 +247,12 @@ exports.showSessionReports = async (req, res) => {
             COUNT(a.id) as total_days,
             SUM(CASE WHEN a.status = 'present' OR a.status = 'online' THEN 1 ELSE 0 END) as present_days
             FROM students s
+            JOIN users u ON s.user_id = u.id AND u.tenant_id = s.tenant_id
             JOIN student_enrollments se ON s.id = se.student_id AND se.tenant_id = s.tenant_id
             JOIN classes c ON se.class_id = c.id AND c.tenant_id = s.tenant_id
             LEFT JOIN attendance_students a ON s.id = a.student_id AND a.tenant_id = s.tenant_id
                 AND a.date >= ?
-            WHERE se.session_id = ? AND s.tenant_id = ? AND s.deleted_at IS NULL
+            WHERE se.session_id = ? AND s.tenant_id = ? AND s.deleted_at IS NULL AND u.deleted_at IS NULL
             GROUP BY s.id, c.id, s.name, c.name_ar
         `, [sessionStartDate, activeSessionId, req.tenant.id]);
 
@@ -331,11 +333,12 @@ exports.exportSessionReportsPdf = async (req, res) => {
             COUNT(a.id) as total_days,
             SUM(CASE WHEN a.status = 'present' OR a.status = 'online' THEN 1 ELSE 0 END) as present_days
             FROM students s
+            JOIN users u ON s.user_id = u.id AND u.tenant_id = s.tenant_id
             JOIN student_enrollments se ON s.id = se.student_id AND se.tenant_id = s.tenant_id
             JOIN classes c ON se.class_id = c.id AND c.tenant_id = s.tenant_id
             LEFT JOIN attendance_students a ON s.id = a.student_id AND a.tenant_id = s.tenant_id
                 AND a.date >= ?
-            WHERE se.session_id = ? AND s.tenant_id = ? AND s.deleted_at IS NULL
+            WHERE se.session_id = ? AND s.tenant_id = ? AND s.deleted_at IS NULL AND u.deleted_at IS NULL
             GROUP BY s.id, c.id, s.name, c.name_ar
         `, [sessionStartDate, activeSessionId, req.tenant.id]);
 
