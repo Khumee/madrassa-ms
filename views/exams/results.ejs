@@ -31,6 +31,9 @@
             display: flex !important;
             page-break-inside: avoid;
         }
+        .print-kpis {
+            display: block !important;
+        }
         .podium-section {
             page-break-inside: avoid;
         }
@@ -41,7 +44,7 @@
         }
     }
 
-    .print-header, .print-sign-block { display: none; }
+    .print-header, .print-sign-block, .print-kpis { display: none; }
 
     .podium-card {
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -71,10 +74,6 @@
         font-size: 2.2rem;
         line-height: 1;
     }
-    .stat-kpi-card {
-        border-radius: 14px;
-        transition: all 0.2s ease;
-    }
 </style>
 
 <!-- Print Only Header -->
@@ -90,6 +89,16 @@
         <span><strong><%= __('Exam_Result_Gazette') || 'امتحانی گزٹ / میرٹ لسٹ' %></strong></span>
         <span><%= selectedClassId ? (classes.find(c => String(c.id) === String(selectedClassId)) ? classes.find(c => String(c.id) === String(selectedClassId)).name_ar : '') : (__('All') || 'تمام درجات') %></span>
         <span><%= __('Date') %>: <strong><%= new Date().toLocaleDateString(locals.lang === 'en' ? 'en-US' : 'ur-PK') %></strong></span>
+    </div>
+</div>
+
+<!-- Print-Only KPI Summary Strip (For PDF & Print Export Only) -->
+<div class="print-kpis w-100 mb-3 p-2 border border-dark rounded bg-light" style="page-break-inside: avoid;">
+    <div class="d-flex justify-content-around text-center fw-bold fs-6">
+        <div><span><%= __('Total_Students') || 'کل طلباء' %>:</span> <span class="badge text-dark border-0 p-0 fs-6"><%= stats.total %></span></div>
+        <div><span><%= __('Passed_Students') || 'کامیاب طلباء' %>:</span> <span class="badge text-dark border-0 p-0 fs-6"><%= stats.passed %></span></div>
+        <div><span><%= __('Failed_Students') || 'راسب طلباء' %>:</span> <span class="badge text-dark border-0 p-0 fs-6"><%= stats.failed %></span></div>
+        <div><span><%= __('Pass_Percentage') || 'کامیابی کا تناسب' %>:</span> <span class="badge text-dark border-0 p-0 fs-6"><%= stats.passPercentage %>%</span></div>
     </div>
 </div>
 
@@ -112,62 +121,6 @@
             <a href="/exams" class="btn btn-outline-secondary rounded-pill px-3 shadow-sm fw-bold">
                 <i class="bi bi-arrow-left me-1"></i> <%= __('Back') || 'واپس' %>
             </a>
-        </div>
-    </div>
-
-    <!-- Quick Stats KPIs -->
-    <div class="row g-3 mb-4 no-print">
-        <div class="col-6 col-md-3">
-            <div class="card stat-kpi-card shadow-sm p-3 border-start border-primary border-4 bg-white">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-muted small fw-semibold"><%= __('Total_Students') || 'کل طلباء' %></div>
-                        <h3 class="fw-bold mb-0 text-dark"><%= stats.total %></h3>
-                    </div>
-                    <div class="bg-primary bg-opacity-10 text-primary p-2 rounded-circle">
-                        <i class="bi bi-people-fill fs-4"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="card stat-kpi-card shadow-sm p-3 border-start border-success border-4 bg-white">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-muted small fw-semibold"><%= __('Passed_Students') || 'کامیاب طلباء' %></div>
-                        <h3 class="fw-bold mb-0 text-success"><%= stats.passed %></h3>
-                    </div>
-                    <div class="bg-success bg-opacity-10 text-success p-2 rounded-circle">
-                        <i class="bi bi-check-circle-fill fs-4"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="card stat-kpi-card shadow-sm p-3 border-start border-danger border-4 bg-white">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-muted small fw-semibold"><%= __('Failed_Students') || 'راسب طلباء' %></div>
-                        <h3 class="fw-bold mb-0 text-danger"><%= stats.failed %></h3>
-                    </div>
-                    <div class="bg-danger bg-opacity-10 text-danger p-2 rounded-circle">
-                        <i class="bi bi-x-circle-fill fs-4"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="card stat-kpi-card shadow-sm p-3 border-start border-warning border-4 bg-white">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-muted small fw-semibold"><%= __('Pass_Percentage') || 'کامیابی کا تناسب' %></div>
-                        <h3 class="fw-bold mb-0 text-warning"><%= stats.passPercentage %>%</h3>
-                    </div>
-                    <div class="bg-warning bg-opacity-10 text-warning p-2 rounded-circle">
-                        <i class="bi bi-percent fs-4"></i>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
