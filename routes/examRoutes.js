@@ -45,35 +45,301 @@ router.get('/exams', isAdmin, async (req, res) => {
     res.render('exams/list', { exams });
 });
 
-// ADMIN: View Results
-router.get('/exams/:id/results', isAdmin, async (req, res) => {
-    let query = `
-        SELECT DISTINCT s.id, s.name, c.name_ar as class_name 
-        FROM students s 
-        JOIN classes c ON s.class_id = c.id 
-        JOIN exam_papers ep ON ep.class_id = c.id
-        WHERE ep.exam_id = ? AND ep.tenant_id = ? AND ep.deleted_at IS NULL
-    `;
-    const params = [req.params.id, req.tenant.id];
-    
-    if (req.query.classId) {
-        query += ' AND s.class_id = ?';
-        params.push(req.query.classId);
+async function loadExamResultsData(examId, tenantId, selectedClassId, locale) {
+    const [examRows] = await db.execute('SELECT * FROM exams WHERE id = ? AND tenant_id = ?', [examId, tenantId]);
+    if (!examRows || examRows.length === 0) {
+        return null;
     }
-    
-    query += ' ORDER BY c.name_ar ASC, s.name ASC';
+    const exam = examRows[0];
+    exam.name = examDisplayName(exam, locale);
 
-    const [students] = await db.execute(query, params);
-    
-    const [exam] = await db.execute('SELECT * FROM exams WHERE id = ? AND tenant_id = ?', [req.params.id, req.tenant.id]);
-    if (exam[0]) exam[0].name = examDisplayName(exam[0], req.getLocale());
-    const [classes] = await db.execute('SELECT DISTINCT c.id, c.name_ar FROM classes c JOIN exam_papers ep ON c.id = ep.class_id WHERE ep.exam_id = ? AND ep.tenant_id = ? AND ep.deleted_at IS NULL ORDER BY c.name_ar ASC', [req.params.id, req.tenant.id]);
+    // 1. Get all classes involved in this exam
+    const [classes] = await db.execute(
+        'SELECT DISTINCT c.id, c.name_ar FROM classes c JOIN exam_papers ep ON c.id = ep.class_id WHERE ep.exam_id = ? AND ep.tenant_id = ? AND ep.deleted_at IS NULL ORDER BY c.name_ar ASC',
+        [examId, tenantId]
+    );
 
-    res.render('exams/results', {
-        students,
-        exam: exam[0],
+    // 2. Get all papers for this exam
+    const [papers] = await db.execute(
+        'SELECT ep.id, ep.class_id, ep.subject, ep.max_marks FROM exam_papers ep WHERE ep.exam_id = ? AND ep.tenant_id = ? AND ep.deleted_at IS NULL',
+        [examId, tenantId]
+    );
+
+    // Recompute paper max marks live from actual questions
+    if (papers.length > 0) {
+        const [filledQuestions] = await db.query(
+            `SELECT q.paper_id, q.marks, q.choice_group_id, g.required_count
+             FROM questions q
+             LEFT JOIN question_choice_groups g ON g.id = q.choice_group_id
+             WHERE q.paper_id IN (?) AND q.tenant_id = ? AND TRIM(q.question_text) <> ''`,
+            [papers.map(p => p.id), tenantId]
+        );
+        const byPaper = {};
+        for (const q of filledQuestions) {
+            (byPaper[q.paper_id] = byPaper[q.paper_id] || []).push(q);
+        }
+        papers.forEach(p => {
+            p.computed_max_marks = sumMarks(byPaper[p.id] || []);
+        });
+    }
+
+    // 3. Get all students in classes involved in this exam
+    const [allStudents] = await db.execute(
+        `SELECT DISTINCT s.id, s.name, s.roll_number, s.class_id, c.name_ar as class_name 
+         FROM students s 
+         JOIN classes c ON s.class_id = c.id 
+         JOIN exam_papers ep ON ep.class_id = c.id
+         WHERE ep.exam_id = ? AND ep.tenant_id = ? AND ep.deleted_at IS NULL
+         ORDER BY c.name_ar ASC, s.name ASC`,
+        [examId, tenantId]
+    );
+
+    // 4. Get all student_paper_results for this exam
+    let resultsRows = [];
+    if (papers.length > 0) {
+        const [rows] = await db.query(
+            `SELECT spr.student_id, spr.paper_id, spr.total_marks_obtained, spr.is_absent
+             FROM student_paper_results spr
+             WHERE spr.paper_id IN (?) AND spr.tenant_id = ?`,
+            [papers.map(p => p.id), tenantId]
+        );
+        resultsRows = rows;
+    }
+
+    const studentResultsMap = {};
+    resultsRows.forEach(r => {
+        if (!studentResultsMap[r.student_id]) studentResultsMap[r.student_id] = {};
+        studentResultsMap[r.student_id][r.paper_id] = r;
+    });
+
+    const classPapersMap = {};
+    papers.forEach(p => {
+        (classPapersMap[p.class_id] = classPapersMap[p.class_id] || []).push(p);
+    });
+
+    // 5. Calculate student summary for each student
+    const studentSummaries = allStudents.map(s => {
+        const classPapers = classPapersMap[s.class_id] || [];
+        let totalMax = 0;
+        let totalObtained = 0;
+        let markedCount = 0;
+        let absentCount = 0;
+        let failedPaperCount = 0;
+
+        classPapers.forEach(p => {
+            const maxM = (p.computed_max_marks !== undefined) ? p.computed_max_marks : (p.max_marks || 0);
+            totalMax += maxM;
+            const res = studentResultsMap[s.id] && studentResultsMap[s.id][p.id];
+            if (res) {
+                if (res.is_absent) {
+                    absentCount++;
+                    markedCount++;
+                } else if (res.total_marks_obtained !== null && res.total_marks_obtained !== undefined) {
+                    const obt = Math.round(parseFloat(res.total_marks_obtained));
+                    totalObtained += obt;
+                    markedCount++;
+                    if (maxM > 0 && obt < (maxM * 0.4)) {
+                        failedPaperCount++;
+                    }
+                }
+            }
+        });
+
+        const allPapersUnmarked = markedCount === 0;
+        const percentage = totalMax > 0 && !allPapersUnmarked ? (totalObtained / totalMax) * 100 : 0;
+
+        let gradeKey = 'Grade_Rasib', gradeClass = 'danger';
+        let status = 'pass';
+
+        if (allPapersUnmarked) {
+            status = 'pending';
+            gradeKey = null;
+            gradeClass = 'secondary';
+        } else if (absentCount === classPapers.length && classPapers.length > 0) {
+            status = 'absent';
+            gradeKey = 'Grade_Rasib';
+            gradeClass = 'danger';
+        } else {
+            if (percentage >= 80) { gradeKey = 'Grade_Mumtaz'; gradeClass = 'success'; }
+            else if (percentage >= 60) { gradeKey = 'Grade_Jaid_Jiddan'; gradeClass = 'primary'; }
+            else if (percentage >= 50) { gradeKey = 'Grade_Jaid'; gradeClass = 'info'; }
+            else if (percentage >= 40) { gradeKey = 'Grade_Maqbool'; gradeClass = 'warning'; }
+            else { gradeKey = 'Grade_Rasib'; gradeClass = 'danger'; }
+
+            if (percentage < 40 || failedPaperCount > 0) {
+                status = 'fail';
+            } else {
+                status = 'pass';
+            }
+        }
+
+        return {
+            id: s.id,
+            name: s.name,
+            roll_number: s.roll_number,
+            class_id: s.class_id,
+            class_name: s.class_name,
+            totalMax,
+            totalObtained,
+            papersCount: classPapers.length,
+            markedCount,
+            absentCount,
+            percentage: parseFloat(percentage.toFixed(2)),
+            gradeKey,
+            gradeClass,
+            status,
+            allPapersUnmarked
+        };
+    });
+
+    // 6. Calculate Class-wise Positions (Rank within class)
+    const byClass = {};
+    studentSummaries.forEach(s => {
+        (byClass[s.class_id] = byClass[s.class_id] || []).push(s);
+    });
+
+    Object.keys(byClass).forEach(cid => {
+        const list = byClass[cid];
+        list.sort((a, b) => {
+            if (a.allPapersUnmarked && !b.allPapersUnmarked) return 1;
+            if (!a.allPapersUnmarked && b.allPapersUnmarked) return -1;
+            if (b.percentage !== a.percentage) return b.percentage - a.percentage;
+            return b.totalObtained - a.totalObtained;
+        });
+
+        let currentRank = 1;
+        list.forEach((s, idx) => {
+            if (s.allPapersUnmarked || s.status === 'absent') {
+                s.classRank = null;
+            } else {
+                if (idx > 0 && list[idx - 1].percentage === s.percentage && list[idx - 1].totalObtained === s.totalObtained) {
+                    s.classRank = list[idx - 1].classRank;
+                } else {
+                    s.classRank = currentRank;
+                }
+                currentRank++;
+            }
+        });
+    });
+
+    // 7. Calculate Overall Positions (Rank across entire exam)
+    const markedStudents = studentSummaries.filter(s => !s.allPapersUnmarked && s.status !== 'absent');
+    markedStudents.sort((a, b) => {
+        if (b.percentage !== a.percentage) return b.percentage - a.percentage;
+        return b.totalObtained - a.totalObtained;
+    });
+
+    let overallRank = 1;
+    markedStudents.forEach((s, idx) => {
+        if (idx > 0 && markedStudents[idx - 1].percentage === s.percentage && markedStudents[idx - 1].totalObtained === s.totalObtained) {
+            s.overallRank = markedStudents[idx - 1].overallRank;
+        } else {
+            s.overallRank = overallRank;
+        }
+        overallRank++;
+    });
+
+    studentSummaries.forEach(s => {
+        if (!s.overallRank) s.overallRank = null;
+    });
+
+    // 8. Filter students if a specific class is selected
+    let displayStudents = studentSummaries;
+    if (selectedClassId) {
+        displayStudents = studentSummaries.filter(s => String(s.class_id) === String(selectedClassId));
+    }
+
+    // Default sorting for display:
+    displayStudents.sort((a, b) => {
+        if (!selectedClassId && a.class_name !== b.class_name) {
+            return a.class_name.localeCompare(b.class_name);
+        }
+        if (a.classRank === null && b.classRank !== null) return 1;
+        if (a.classRank !== null && b.classRank === null) return -1;
+        if (a.classRank !== b.classRank) return (a.classRank || 9999) - (b.classRank || 9999);
+        return a.name.localeCompare(b.name);
+    });
+
+    // 9. Top 3 Position Holders for the podium/announcement cards
+    const eligibleForPodium = (selectedClassId ? displayStudents : markedStudents)
+        .filter(s => s.classRank !== null && s.status !== 'absent' && !s.allPapersUnmarked)
+        .sort((a, b) => (selectedClassId ? ((a.classRank || 999) - (b.classRank || 999)) : ((a.overallRank || 999) - (b.overallRank || 999))))
+        .slice(0, 3);
+
+    // 10. Summary Statistics
+    const totalStudentsCount = displayStudents.length;
+    const passedCount = displayStudents.filter(s => s.status === 'pass').length;
+    const failedCount = displayStudents.filter(s => s.status === 'fail').length;
+    const pendingCount = displayStudents.filter(s => s.status === 'pending').length;
+    const absentCount = displayStudents.filter(s => s.status === 'absent').length;
+    const evaluatedCount = totalStudentsCount - pendingCount;
+    const passPercentage = evaluatedCount > 0 ? ((passedCount / evaluatedCount) * 100).toFixed(1) : 0;
+
+    return {
+        students: displayStudents,
+        allStudentsCount: studentSummaries.length,
+        exam,
         classes,
-        selectedClassId: req.query.classId || ''
+        selectedClassId,
+        topPositions: eligibleForPodium,
+        stats: {
+            total: totalStudentsCount,
+            passed: passedCount,
+            failed: failedCount,
+            pending: pendingCount,
+            absent: absentCount,
+            passPercentage
+        }
+    };
+}
+
+// ADMIN: View Results & Summary Gazette (Web Page)
+router.get('/exams/:id/results', isAdmin, async (req, res) => {
+    const data = await loadExamResultsData(req.params.id, req.tenant.id, req.query.classId || '', req.getLocale());
+    if (!data) return res.status(404).send('Exam not found');
+    res.render('exams/results', data);
+});
+
+// ADMIN: Results Gazette & Merit Summary as Server-Side Generated PDF
+router.get('/exams/:id/results/pdf', isAdmin, async (req, res) => {
+    const data = await loadExamResultsData(req.params.id, req.tenant.id, req.query.classId || '', req.getLocale());
+    if (!data) return res.status(404).send('Exam not found');
+
+    res.render('exams/results', data, async (err, html) => {
+        if (err) {
+            console.error('Error rendering results for PDF:', err);
+            return res.status(500).send('Error generating PDF');
+        }
+
+        const origin = `${req.protocol}://${req.get('host')}`;
+        html = html.replace('<head>', `<head><base href="${origin}/">`);
+
+        let browser;
+        try {
+            browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+            const page = await browser.newPage();
+            await page.setContent(html, { waitUntil: 'networkidle0' });
+            const pdfBuffer = await page.pdf({
+                format: 'A4',
+                printBackground: true,
+                displayHeaderFooter: false,
+                margin: { top: '8mm', bottom: '8mm', left: '8mm', right: '8mm' }
+            });
+
+            const rawName = `${data.exam.name} Results Gazette`.replace(/["\\]/g, '').trim();
+            const asciiFallback = (rawName.replace(/[^\x20-\x7E]/g, '').trim().replace(/\s+/g, '_') || `results-${data.exam.id}`) + '.pdf';
+            const utf8Name = encodeURIComponent(`${rawName}.pdf`);
+            res.set({
+                'Content-Type': 'application/pdf',
+                'Content-Disposition': `attachment; filename="${asciiFallback}"; filename*=UTF-8''${utf8Name}`
+            });
+            res.send(pdfBuffer);
+        } catch (pdfErr) {
+            console.error('Error generating results PDF:', pdfErr);
+            res.status(500).send('Error generating PDF');
+        } finally {
+            if (browser) await browser.close();
+        }
     });
 });
 
@@ -908,16 +1174,13 @@ router.get('/exams/:id/datesheet/pdf', isTeacher, async (req, res) => {
     });
 });
 
-// ADMIN/STUDENT: Report Card
-router.get('/exams/:exam_id/student/:student_id/report-card', async (req, res) => {
-    const [student] = await db.execute('SELECT * FROM students WHERE id = ? AND tenant_id = ?', [req.params.student_id, req.tenant.id]);
-    
-    if (!student || student.length === 0) {
-        return res.status(404).send('Student not found');
-    }
+async function loadReportCardData(examId, studentId, tenantId, locale, translateFn) {
+    const [student] = await db.execute('SELECT * FROM students WHERE id = ? AND tenant_id = ?', [studentId, tenantId]);
+    if (!student || student.length === 0) return null;
 
-    const [exam] = await db.execute('SELECT id, name, exam_type, exam_year FROM exams WHERE id = ? AND tenant_id = ?', [req.params.exam_id, req.tenant.id]);
-    if (exam[0]) exam[0].name = examDisplayName(exam[0], req.getLocale());
+    const [exam] = await db.execute('SELECT id, name, exam_type, exam_year FROM exams WHERE id = ? AND tenant_id = ?', [examId, tenantId]);
+    if (!exam || exam.length === 0) return null;
+    exam[0].name = examDisplayName(exam[0], locale);
 
     const [results] = await db.execute(`
         SELECT
@@ -930,21 +1193,15 @@ router.get('/exams/:exam_id/student/:student_id/report-card', async (req, res) =
         LEFT JOIN student_paper_results spr ON ep.id = spr.paper_id AND spr.student_id = ?
         WHERE ep.exam_id = ? AND ep.class_id = ? AND ep.tenant_id = ?
         ORDER BY ep.subject ASC
-    `, [req.params.student_id, req.params.exam_id, student[0].class_id, req.tenant.id]);
+    `, [studentId, examId, student[0].class_id, tenantId]);
 
-    // Recompute each paper's max_marks live from its actually-written questions
-    // instead of trusting the stored exam_papers.max_marks column - a paper can
-    // carry leftover blank placeholder rows (see createDefaultQuestions) whose
-    // marks were never meant to count, so reading the stored column directly
-    // can overstate the total. This mirrors the filter the admin papers grid
-    // already applies for its own "کل نمبر" column.
     if (results.length > 0) {
         const [filledQuestions] = await db.query(
             `SELECT q.paper_id, q.marks, q.choice_group_id, g.required_count
              FROM questions q
              LEFT JOIN question_choice_groups g ON g.id = q.choice_group_id
              WHERE q.paper_id IN (?) AND q.tenant_id = ? AND TRIM(q.question_text) <> ''`,
-            [results.map(r => r.paper_id), req.tenant.id]
+            [results.map(r => r.paper_id), tenantId]
         );
         const byPaper = {};
         for (const q of filledQuestions) {
@@ -957,9 +1214,6 @@ router.get('/exams/:exam_id/student/:student_id/report-card', async (req, res) =
     let markedCount = 0;
 
     results.forEach(r => {
-        // spr.total_marks_obtained is a DECIMAL column, so mysql2 returns it as a
-        // string (e.g. "32.00"). Normalize to an integer here so numeric addition
-        // below doesn't fall back to string concatenation (which produced "032.00").
         r.obtained_marks = r.obtained_marks !== null ? Math.round(parseFloat(r.obtained_marks)) : null;
         totalMax += r.max_marks;
         if (r.obtained_marks !== null) {
@@ -971,24 +1225,76 @@ router.get('/exams/:exam_id/student/:student_id/report-card', async (req, res) =
     const allPapersUnmarked = markedCount === 0;
     const percentage = totalMax > 0 && !allPapersUnmarked ? (totalObtained / totalMax) * 100 : 0;
     
-    let grade = 'F (Rasib)', gradeClass = 'danger';
+    let gradeKey = 'Grade_Rasib', gradeClass = 'danger';
     if (!allPapersUnmarked) {
-        if (percentage >= 80) { grade = 'A+ (Mumtaz)'; gradeClass = 'success'; }
-        else if (percentage >= 60) { grade = 'A (Jaid Jiddan)'; gradeClass = 'primary'; }
-        else if (percentage >= 50) { grade = 'B (Jaid)'; gradeClass = 'info'; }
-        else if (percentage >= 40) { grade = 'C (Maqbool)'; gradeClass = 'warning'; }
+        if (percentage >= 80) { gradeKey = 'Grade_Mumtaz'; gradeClass = 'success'; }
+        else if (percentage >= 60) { gradeKey = 'Grade_Jaid_Jiddan'; gradeClass = 'primary'; }
+        else if (percentage >= 50) { gradeKey = 'Grade_Jaid'; gradeClass = 'info'; }
+        else if (percentage >= 40) { gradeKey = 'Grade_Maqbool'; gradeClass = 'warning'; }
     }
+    const grade = (translateFn ? translateFn(gradeKey) : null) || gradeKey;
 
-    res.render('exams/report_card', { 
+    return { 
         student: student[0], 
         exam: exam[0],
         results, 
         totalObtained, 
         totalMax, 
         percentage: percentage.toFixed(2), 
-        grade, 
+        grade,
+        gradeKey,
         gradeClass,
         allPapersUnmarked
+    };
+}
+
+// ADMIN/STUDENT: Report Card (Web Page)
+router.get('/exams/:exam_id/student/:student_id/report-card', async (req, res) => {
+    const data = await loadReportCardData(req.params.exam_id, req.params.student_id, req.tenant.id, req.getLocale(), req.__ ? req.__.bind(req) : null);
+    if (!data) return res.status(404).send('Student or Exam not found');
+    res.render('exams/report_card', data);
+});
+
+// ADMIN/STUDENT: Report Card as Server-Side Generated PDF
+router.get('/exams/:exam_id/student/:student_id/report-card/pdf', async (req, res) => {
+    const data = await loadReportCardData(req.params.exam_id, req.params.student_id, req.tenant.id, req.getLocale(), req.__ ? req.__.bind(req) : null);
+    if (!data) return res.status(404).send('Student or Exam not found');
+
+    res.render('exams/report_card', data, async (err, html) => {
+        if (err) {
+            console.error('Error rendering report card for PDF:', err);
+            return res.status(500).send('Error generating PDF');
+        }
+
+        const origin = `${req.protocol}://${req.get('host')}`;
+        html = html.replace('<head>', `<head><base href="${origin}/">`);
+
+        let browser;
+        try {
+            browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+            const page = await browser.newPage();
+            await page.setContent(html, { waitUntil: 'networkidle0' });
+            const pdfBuffer = await page.pdf({
+                format: 'A4',
+                printBackground: true,
+                displayHeaderFooter: false,
+                margin: { top: '8mm', bottom: '8mm', left: '8mm', right: '8mm' }
+            });
+
+            const rawName = `${data.student.name} ${data.exam.name} Report Card`.replace(/["\\]/g, '').trim();
+            const asciiFallback = (rawName.replace(/[^\x20-\x7E]/g, '').trim().replace(/\s+/g, '_') || `report-card-${data.student.id}`) + '.pdf';
+            const utf8Name = encodeURIComponent(`${rawName}.pdf`);
+            res.set({
+                'Content-Type': 'application/pdf',
+                'Content-Disposition': `attachment; filename="${asciiFallback}"; filename*=UTF-8''${utf8Name}`
+            });
+            res.send(pdfBuffer);
+        } catch (pdfErr) {
+            console.error('Error generating report card PDF:', pdfErr);
+            res.status(500).send('Error generating PDF');
+        } finally {
+            if (browser) await browser.close();
+        }
     });
 });
 

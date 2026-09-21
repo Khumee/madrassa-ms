@@ -45,9 +45,16 @@
 </style>
 
 <div class="container mt-4 mb-5">
-    <div class="text-end mb-3 no-print">
-        <a href="/exams/<%= exam.id %>/results" class="btn btn-outline-secondary me-2"><i class="bi bi-arrow-left"></i> <%= __('Back') || 'واپس' %></a>
-        <button onclick="window.print()" class="btn btn-dark"><i class="bi bi-printer"></i> <%= __('Print_Report_Card') || 'Print' %></button>
+    <div class="text-end mb-3 no-print d-flex justify-content-end gap-2 flex-wrap">
+        <a href="/exams/<%= exam.id %>/student/<%= student.id %>/report-card/pdf" onclick="if (typeof showPdfLoader === 'function') showPdfLoader();" class="btn btn-danger rounded-pill px-4 shadow-sm fw-bold">
+            <i class="bi bi-file-earmark-pdf-fill me-1"></i> <%= __('Download_PDF') || 'پی ڈی ایف ڈاؤن لوڈ کریں' %>
+        </a>
+        <button onclick="window.print()" class="btn btn-outline-dark rounded-pill px-3 shadow-sm fw-bold">
+            <i class="bi bi-printer me-1"></i> <%= __('Print') || 'پرنٹ' %>
+        </button>
+        <a href="/exams/<%= exam.id %>/results" class="btn btn-outline-secondary rounded-pill px-3 shadow-sm fw-bold">
+            <i class="bi bi-arrow-left me-1"></i> <%= __('Back') || 'واپس' %>
+        </a>
     </div>
 
     <div class="card shadow-lg p-3 p-md-4 report-card-container printable-area position-relative">
@@ -133,7 +140,7 @@
                     <% if (allPapersUnmarked) { %>
                         <h5 class="fw-bold text-muted mb-0"><%= __('Papers_not_marked') || 'Papers not marked yet' %></h5>
                     <% } else { %>
-                        <h4 class="fw-bold text-<%= gradeClass %> mb-0"><%= grade %></h4>
+                        <h4 class="fw-bold text-<%= gradeClass %> mb-0"><%= typeof gradeKey !== 'undefined' ? __(gradeKey) : grade %></h4>
                     <% } %>
                 </div>
             </div>
