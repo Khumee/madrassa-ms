@@ -617,6 +617,39 @@ exports.resetPassword = async (req, res) => {
     }
 };
 
+exports.deleteUser = async (req, res) => {
+    const { userId } = req.body;
+    try {
+        if (!userId) {
+            return res.status(400).json({ success: false, error: 'User ID is required' });
+        }
+
+        const targetId = parseInt(userId, 10);
+
+        // Prevent self deletion
+        if (req.session.userId === targetId) {
+            const errorMsg = req.__ ? req.__('Cannot_Delete_Own_Account') : 'Cannot delete your own account';
+            return res.status(400).json({ success: false, error: errorMsg });
+        }
+
+        // Unlink user from students and teachers
+        await db.execute('UPDATE students SET user_id = NULL WHERE user_id = ? AND tenant_id = ?', [targetId, req.tenant.id]);
+        await db.execute('UPDATE teachers SET user_id = NULL WHERE user_id = ? AND tenant_id = ?', [targetId, req.tenant.id]);
+
+        // Delete user
+        const [result] = await db.execute('DELETE FROM users WHERE id = ? AND tenant_id = ?', [targetId, req.tenant.id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Error deleting user:', err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+};
+
 exports.adminImportData = async (req, res) => {
     try {
         console.log('Starting Complete Live Sync...');

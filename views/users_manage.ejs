@@ -63,6 +63,10 @@
                                                 onclick="resetPassword(<%= user.id %>)" title="<%= __('Reset_Password') %>">
                                             <i class="bi bi-key-fill"></i>
                                         </button>
+                                        <button class="btn btn-sm btn-outline-danger rounded-pill px-3 ms-2" 
+                                                onclick="deleteUser(<%= user.id %>)" title="<%= __('Delete') %>">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </button>
                                     </td>
                                 </tr>
                             <% }) %>
@@ -183,6 +187,26 @@ async function resetPassword(userId) {
         body: JSON.stringify({ userId })
     });
     if ((await res.json()).success) alert('<%= __('Reset_Success') %>');
+}
+
+async function deleteUser(userId) {
+    if (!confirm('<%= __('Confirm_Delete_User') %>')) return;
+    try {
+        const res = await fetch('/users/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId })
+        });
+        const data = await res.json();
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.error || '<%= __('Delete_Error') %>');
+        }
+    } catch (err) {
+        console.error(err);
+        alert('<%= __('Delete_Error') %>');
+    }
 }
 </script>
 

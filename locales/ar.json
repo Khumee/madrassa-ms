@@ -571,5 +571,8 @@
     "Filter_By_Date": "تصفية حسب التاريخ",
     "Questions_Added": "مضاف",
     "Not_Started": "لم يبدأ",
-    "Papers_Started_Stat": "{filled} من أصل {total} معلمين أضافوا أسئلة إلى ورقتهم"
+    "Papers_Started_Stat": "{filled} من أصل {total} معلمين أضافوا أسئلة إلى ورقتهم",
+    "Confirm_Delete_User": "هل أنت متأكد من حذف هذا المستخدم؟",
+    "Cannot_Delete_Own_Account": "لا يمكنك حذف حسابك الحالي الذي قمت بتسجيل الدخول به.",
+    "Delete_User_Success": "تم حذف المستخدم بنجاح."
 }

@@ -571,5 +571,8 @@
     "Filter_By_Date": "تاریخ کے مطابق فلٹر کریں",
     "Questions_Added": "شامل",
     "Not_Started": "شروع نہیں ہوا",
-    "Papers_Started_Stat": "{total} میں سے {filled} اساتذہ نے اپنے پرچے میں سوالات شامل کیے ہیں"
+    "Papers_Started_Stat": "{total} میں سے {filled} اساتذہ نے اپنے پرچے میں سوالات شامل کیے ہیں",
+    "Confirm_Delete_User": "کیا آپ واقعی اس صارف کو حذف کرنا چاہتے ہیں؟",
+    "Cannot_Delete_Own_Account": "آپ اپنا موجودہ لاگ ان اکاؤنٹ حذف نہیں کر سکتے۔",
+    "Delete_User_Success": "صارف کامیابی سے حذف کر دیا گیا۔"
 }

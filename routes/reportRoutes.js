@@ -20,6 +20,7 @@ router.get('/users/manage', hasPermission('users_manage'), reportController.show
 router.post('/users/update', hasPermission('users_manage'), reportController.updateUser);
 router.post('/users/update-role', hasPermission('users_manage'), reportController.updateUserRole);
 router.post('/users/reset-password', hasPermission('users_manage'), reportController.resetPassword);
+router.post('/users/delete', hasPermission('users_manage'), reportController.deleteUser);
 
 router.get('/admin/import-data', hasRole(['مدير']), reportController.adminImportData);
 
