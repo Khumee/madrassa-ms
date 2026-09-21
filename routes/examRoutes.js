@@ -326,6 +326,7 @@ router.get('/exams/:id/results/pdf', isAdmin, async (req, res) => {
             browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox', '--disable-setuid-sandbox'] });
             const page = await browser.newPage();
             await page.setContent(html, { waitUntil: 'networkidle0' });
+            await page.emulateMediaType('print');
             const pdfBuffer = await page.pdf({
                 format: 'A4',
                 printBackground: true,
@@ -1297,6 +1298,7 @@ router.get('/exams/:exam_id/student/:student_id/report-card/pdf', async (req, re
             browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox', '--disable-setuid-sandbox'] });
             const page = await browser.newPage();
             await page.setContent(html, { waitUntil: 'networkidle0' });
+            await page.emulateMediaType('print');
             const pdfBuffer = await page.pdf({
                 format: 'A4',
                 printBackground: true,

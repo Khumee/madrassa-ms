@@ -1,47 +1,10 @@
 <%- include('../partials/header', { title: __('Exam_Result_Gazette') || 'Exam Result Gazette & Merit Summary' }) %>
 
 <style>
-    @media print {
-        .no-print, nav, #toastContainer, footer, .btn, .btn-group, .filter-trigger-btn { display: none !important; }
-        body {
-            background: white !important;
-            margin: 0 !important;
-            padding: 1cm !important;
-            font-family: 'Jameel Noori Nastaleeq', 'Nafees Web Naskh', 'Amiri', 'Tahoma', 'Arial', sans-serif !important;
-            color: #111 !important;
-        }
-        .container { max-width: 100% !important; width: 100% !important; padding: 0 !important; margin: 0 !important; }
-        .card { border: none !important; box-shadow: none !important; }
-        .print-header { display: flex !important; }
-        .print-table {
-            border-collapse: collapse !important;
-            width: 100% !important;
-        }
-        .print-table th, .print-table td {
-            border: 1px solid #333 !important;
-            padding: 6px 8px !important;
-            font-size: 0.95rem !important;
-        }
-        .print-table th {
-            background-color: #f0f0f0 !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-        }
-        .print-sign-block {
-            display: flex !important;
-            page-break-inside: avoid;
-        }
-        .print-kpis {
-            display: block !important;
-        }
-        .podium-section {
-            page-break-inside: avoid;
-        }
-        .badge {
-            border: 1px solid #333 !important;
-            color: #000 !important;
-            background: transparent !important;
-        }
+    @import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Noto+Nastaliq+Urdu:wght@400;600;700&display=swap');
+
+    .gazette-container, body {
+        font-family: 'Noto Naskh Arabic', 'Amiri', 'Segoe UI', Tahoma, sans-serif;
     }
 
     .print-header, .print-sign-block, .print-kpis { display: none; }
@@ -71,38 +34,156 @@
         box-shadow: 0 8px 20px -5px rgba(217, 119, 6, 0.15);
     }
     .medal-icon {
-        font-size: 2.2rem;
+        font-size: 2rem;
         line-height: 1;
+    }
+
+    /* Screen Table Styling */
+    .table-dark-custom th {
+        background-color: #1e293b !important;
+        color: #ffffff !important;
+        font-weight: 700;
+        border: none;
+    }
+
+    @media print {
+        @page {
+            size: A4 portrait;
+            margin: 8mm 8mm 8mm 8mm;
+        }
+        html, body {
+            background: #ffffff !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            color: #0f172a !important;
+            font-family: 'Noto Naskh Arabic', 'Amiri', 'Segoe UI', Tahoma, sans-serif !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        .no-print, nav.navbar, #pdfLoaderOverlay, #toastContainer, footer, .btn, .btn-group, .filter-trigger-btn {
+            display: none !important;
+            height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        .container, .gazette-container {
+            max-width: 100% !important;
+            width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        .card {
+            border: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
+        }
+        .print-header {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            text-align: center !important;
+            border-bottom: 2px solid #1e293b !important;
+            padding-bottom: 6px !important;
+            margin-bottom: 10px !important;
+        }
+        .print-kpis {
+            display: block !important;
+            margin-bottom: 10px !important;
+            border: 1px solid #94a3b8 !important;
+            background-color: #f8fafc !important;
+            border-radius: 8px !important;
+            padding: 6px 10px !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        .print-table {
+            border-collapse: collapse !important;
+            width: 100% !important;
+            margin-top: 5px !important;
+            page-break-inside: auto;
+        }
+        .print-table thead, .print-table thead tr, .print-table thead th {
+            background-color: #1e293b !important;
+            color: #ffffff !important;
+            border: 1px solid #1e293b !important;
+            padding: 6px 6px !important;
+            font-size: 0.95rem !important;
+            font-weight: 700 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        .print-table tbody tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+        }
+        .print-table tbody td {
+            border: 1px solid #cbd5e1 !important;
+            padding: 5px 6px !important;
+            font-size: 0.92rem !important;
+            color: #0f172a !important;
+        }
+        .print-table tbody tr:nth-child(even) {
+            background-color: #f8fafc !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        .podium-section {
+            page-break-inside: avoid;
+            margin-bottom: 10px !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 8px !important;
+        }
+        .podium-card {
+            box-shadow: none !important;
+            padding: 6px !important;
+        }
+        .print-sign-block {
+            display: flex !important;
+            margin-top: 25px !important;
+            page-break-inside: avoid;
+        }
+        .badge {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            font-weight: 700 !important;
+        }
+        .badge.bg-success { background-color: #10b981 !important; color: #fff !important; }
+        .badge.bg-primary { background-color: #3b82f6 !important; color: #fff !important; }
+        .badge.bg-info { background-color: #06b6d4 !important; color: #fff !important; }
+        .badge.bg-warning { background-color: #f59e0b !important; color: #1e293b !important; }
+        .badge.bg-danger { background-color: #ef4444 !important; color: #fff !important; }
+        .badge.bg-secondary { background-color: #64748b !important; color: #fff !important; }
+        .badge.bg-light { background-color: #f1f5f9 !important; color: #0f172a !important; border: 1px solid #cbd5e1 !important; }
     }
 </style>
 
-<!-- Print Only Header -->
-<div class="print-header flex-column align-items-center justify-content-center text-center mb-4 pb-3 border-bottom border-2 border-dark">
-    <div class="d-flex align-items-center justify-content-center gap-3 mb-2">
-        <img src="<%= locals.tenant && tenant.logo_url ? tenant.logo_url : '/logo.jpg' %>" alt="Logo" style="width: 70px; height: 70px; object-fit: contain; border-radius: 50%;">
-        <div>
-            <h2 class="fw-bold mb-0 text-dark"><%= locals.tenant ? (tenant.subdomain === 'madrassa-ms' ? __('Jamia_Habibullah_Islamabad') : (tenant.subdomain === 'kui' ? __('KUI_Production') : tenant.school_name)) : __('College_Name') %></h2>
-            <h4 class="fw-bold text-secondary mb-0"><%= exam.name %></h4>
+<div class="container gazette-container mt-2 mb-5">
+    <!-- Print Only Header -->
+    <div class="print-header">
+        <div class="d-flex align-items-center justify-content-center gap-3 mb-1">
+            <img src="<%= locals.tenant && tenant.logo_url ? tenant.logo_url : '/logo.jpg' %>" alt="Logo" style="width: 60px; height: 60px; object-fit: contain; border-radius: 50%;">
+            <div>
+                <h3 class="fw-bold mb-0 text-dark"><%= locals.tenant ? (tenant.subdomain === 'madrassa-ms' ? __('Jamia_Habibullah_Islamabad') : (tenant.subdomain === 'kui' ? __('KUI_Production') : tenant.school_name)) : __('College_Name') %></h3>
+                <h5 class="fw-bold text-secondary mb-0"><%= exam.name %></h5>
+            </div>
+        </div>
+        <div class="d-flex justify-content-between align-items-center w-100 px-3 mt-1 fs-6">
+            <span><strong><%= __('Exam_Result_Gazette') || 'امتحانی گزٹ / میرٹ لسٹ' %></strong></span>
+            <span><%= selectedClassId ? (classes.find(c => String(c.id) === String(selectedClassId)) ? classes.find(c => String(c.id) === String(selectedClassId)).name_ar : '') : (__('All') || 'تمام درجات') %></span>
+            <span><%= __('Date') %>: <strong><%= new Date().toLocaleDateString(locals.lang === 'en' ? 'en-US' : 'ur-PK') %></strong></span>
         </div>
     </div>
-    <div class="d-flex justify-content-between align-items-center w-100 px-4 mt-2 font-monospace fs-6">
-        <span><strong><%= __('Exam_Result_Gazette') || 'امتحانی گزٹ / میرٹ لسٹ' %></strong></span>
-        <span><%= selectedClassId ? (classes.find(c => String(c.id) === String(selectedClassId)) ? classes.find(c => String(c.id) === String(selectedClassId)).name_ar : '') : (__('All') || 'تمام درجات') %></span>
-        <span><%= __('Date') %>: <strong><%= new Date().toLocaleDateString(locals.lang === 'en' ? 'en-US' : 'ur-PK') %></strong></span>
-    </div>
-</div>
 
-<!-- Print-Only KPI Summary Strip (For PDF & Print Export Only) -->
-<div class="print-kpis w-100 mb-3 p-2 border border-dark rounded bg-light" style="page-break-inside: avoid;">
-    <div class="d-flex justify-content-around text-center fw-bold fs-6">
-        <div><span><%= __('Total_Students') || 'کل طلباء' %>:</span> <span class="badge text-dark border-0 p-0 fs-6"><%= stats.total %></span></div>
-        <div><span><%= __('Passed_Students') || 'کامیاب طلباء' %>:</span> <span class="badge text-dark border-0 p-0 fs-6"><%= stats.passed %></span></div>
-        <div><span><%= __('Failed_Students') || 'راسب طلباء' %>:</span> <span class="badge text-dark border-0 p-0 fs-6"><%= stats.failed %></span></div>
-        <div><span><%= __('Pass_Percentage') || 'کامیابی کا تناسب' %>:</span> <span class="badge text-dark border-0 p-0 fs-6"><%= stats.passPercentage %>%</span></div>
+    <!-- Print-Only KPI Summary Strip (For PDF & Print Export Only) -->
+    <div class="print-kpis w-100">
+        <div class="d-flex justify-content-around text-center fw-bold fs-6">
+            <div><span><%= __('Total_Students') || 'کل طلباء' %>:</span> <strong class="text-primary ms-1"><%= stats.total %></strong></div>
+            <div><span><%= __('Passed_Students') || 'کامیاب طلباء' %>:</span> <strong class="text-success ms-1"><%= stats.passed %></strong></div>
+            <div><span><%= __('Failed_Students') || 'راسب طلباء' %>:</span> <strong class="text-danger ms-1"><%= stats.failed %></strong></div>
+            <div><span><%= __('Pass_Percentage') || 'کامیابی کا تناسب' %>:</span> <strong class="text-warning text-dark ms-1"><%= stats.passPercentage %>%</strong></div>
+        </div>
     </div>
-</div>
 
-<div class="container mt-2 mb-5">
     <!-- Screen Header & Actions -->
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3 no-print">
         <div>
