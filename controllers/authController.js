@@ -31,7 +31,7 @@ exports.login = async (req, res) => {
                 .replace(/\u0629/g, '\u0647');
         };
 
-        const [rows] = await db.execute('SELECT * FROM users WHERE tenant_id = ?', [req.tenant.id]);
+        const [rows] = await db.execute('SELECT * FROM users WHERE tenant_id = ? AND deleted_at IS NULL', [req.tenant.id]);
         const user = rows.find(u => normalizeUsername(u.username) === normalizeUsername(cleanUsername));
         
         if (user) {

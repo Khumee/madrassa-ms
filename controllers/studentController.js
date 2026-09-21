@@ -6,7 +6,7 @@ const { getDateFilterParams } = require('../utils/dateHelper');
 
 exports.showStudentDashboard = async (req, res) => {
     try {
-        const [student] = await db.execute('SELECT * FROM students WHERE user_id = ? AND tenant_id = ?', [req.session.userId, req.tenant.id]);
+        const [student] = await db.execute('SELECT * FROM students WHERE user_id = ? AND tenant_id = ? AND deleted_at IS NULL', [req.session.userId, req.tenant.id]);
         if (!student[0]) return res.status(404).send('Student record not found');
 
         const classId = student[0].class_id;
@@ -204,7 +204,7 @@ exports.showStudentDashboard = async (req, res) => {
 
 exports.showCRDashboard = async (req, res) => {
     try {
-        const [student] = await db.execute('SELECT * FROM students WHERE user_id = ? AND tenant_id = ?', [req.session.userId, req.tenant.id]);
+        const [student] = await db.execute('SELECT * FROM students WHERE user_id = ? AND tenant_id = ? AND deleted_at IS NULL', [req.session.userId, req.tenant.id]);
         if (!student[0]) return res.status(404).send('Record not found');
 
         const classId = student[0].class_id;
@@ -219,7 +219,7 @@ exports.showCRDashboard = async (req, res) => {
             `SELECT s.*, a.status 
              FROM students s 
              LEFT JOIN attendance_students a ON s.id = a.student_id AND a.date = ? AND a.tenant_id = s.tenant_id
-             WHERE s.class_id = ? AND s.tenant_id = ?`,
+             WHERE s.class_id = ? AND s.tenant_id = ? AND s.deleted_at IS NULL`,
             [selectedDate, classId, req.tenant.id]
         );
 
@@ -435,7 +435,7 @@ exports.showStudentsManage = async (req, res) => {
             SELECT s.*, c.name_ar as class_name 
             FROM students s 
             JOIN classes c ON s.class_id = c.id AND c.tenant_id = s.tenant_id 
-            WHERE s.tenant_id = ?
+            WHERE s.tenant_id = ? AND s.deleted_at IS NULL
         `;
         let queryParams = [req.tenant.id];
 
@@ -611,7 +611,7 @@ exports.editStudent = async (req, res) => {
     try {
         if (['عريف', 'عریف'].includes(req.session.role)) {
             const crClassId = await getCRClassId(req.session.userId, req.tenant.id);
-            const [student] = await db.execute('SELECT class_id FROM students WHERE id = ? AND tenant_id = ?', [id, req.tenant.id]);
+            const [student] = await db.execute('SELECT class_id FROM students WHERE id = ? AND tenant_id = ? AND deleted_at IS NULL', [id, req.tenant.id]);
             if (!student.length || student[0].class_id !== crClassId || crClassId != classId) {
                 return res.status(403).send('Unauthorized to edit this student or change to this class');
             }
@@ -686,12 +686,19 @@ exports.deleteStudent = async (req, res) => {
     try {
         if (['عريف', 'عریف'].includes(req.session.role)) {
             const crClassId = await getCRClassId(req.session.userId, req.tenant.id);
-            const [student] = await db.execute('SELECT class_id FROM students WHERE id = ? AND tenant_id = ?', [id, req.tenant.id]);
+            const [student] = await db.execute('SELECT class_id FROM students WHERE id = ? AND tenant_id = ? AND deleted_at IS NULL', [id, req.tenant.id]);
             if (!student.length || student[0].class_id !== crClassId) {
                 return res.status(403).send('Unauthorized to delete this student');
             }
         }
-        await db.execute('DELETE FROM students WHERE id = ? AND tenant_id = ?', [id, req.tenant.id]);
+        
+        // Soft delete student and associated user login
+        const [studentRows] = await db.execute('SELECT user_id FROM students WHERE id = ? AND tenant_id = ?', [id, req.tenant.id]);
+        if (studentRows.length > 0 && studentRows[0].user_id) {
+            await db.execute('UPDATE users SET deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND tenant_id = ?', [studentRows[0].user_id, req.tenant.id]);
+        }
+        await db.execute('UPDATE students SET deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND tenant_id = ?', [id, req.tenant.id]);
+
         res.redirect('/students/manage');
     } catch (err) {
         console.error(err);
@@ -712,7 +719,7 @@ exports.showAttendance = async (req, res) => {
             `SELECT s.*, a.status 
              FROM students s 
              LEFT JOIN attendance_students a ON s.id = a.student_id AND a.date = ? AND a.tenant_id = s.tenant_id
-             WHERE s.class_id = ? AND s.tenant_id = ?`,
+             WHERE s.class_id = ? AND s.tenant_id = ? AND s.deleted_at IS NULL`,
             [date, classId, req.tenant.id]
         );
         console.log(`✅ Found ${students.length} students for this class.`);
@@ -724,7 +731,7 @@ exports.showAttendance = async (req, res) => {
              SUM(CASE WHEN status = 'leave' THEN 1 ELSE 0 END) as leave_count,
              SUM(CASE WHEN status = 'online' THEN 1 ELSE 0 END) as online
              FROM attendance_students 
-             WHERE student_id IN (SELECT id FROM students WHERE class_id = ? AND tenant_id = ?) AND tenant_id = ?
+             WHERE student_id IN (SELECT id FROM students WHERE class_id = ? AND tenant_id = ? AND deleted_at IS NULL) AND tenant_id = ?
              GROUP BY date 
              ORDER BY date DESC LIMIT 14`,
             [classId, req.tenant.id, req.tenant.id]
@@ -773,7 +780,7 @@ exports.showStudentView = async (req, res) => {
             `SELECT s.*, c.name_ar as class_name 
              FROM students s 
              JOIN classes c ON s.class_id = c.id AND c.tenant_id = s.tenant_id 
-             WHERE s.id = ? AND s.tenant_id = ?`,
+             WHERE s.id = ? AND s.tenant_id = ? AND s.deleted_at IS NULL`,
             [id, req.tenant.id]
         );
         if (!student.length) {
@@ -789,7 +796,7 @@ exports.showStudentView = async (req, res) => {
 exports.deleteLeaveRequest = async (req, res) => {
     const { id } = req.params;
     try {
-        const [studentRows] = await db.execute('SELECT id FROM students WHERE user_id = ? AND tenant_id = ?', [req.session.userId, req.tenant.id]);
+        const [studentRows] = await db.execute('SELECT id FROM students WHERE user_id = ? AND tenant_id = ? AND deleted_at IS NULL', [req.session.userId, req.tenant.id]);
         if (!studentRows[0]) return res.status(404).send('Student not found');
         const studentId = studentRows[0].id;
 
@@ -813,7 +820,7 @@ exports.exportStudentPdf = async (req, res) => {
             `SELECT s.*, c.name_ar as class_name 
              FROM students s 
              JOIN classes c ON s.class_id = c.id AND c.tenant_id = s.tenant_id 
-             WHERE s.id = ? AND s.tenant_id = ?`,
+             WHERE s.id = ? AND s.tenant_id = ? AND s.deleted_at IS NULL`,
             [id, req.tenant.id]
         );
         if (!student.length) {
@@ -880,7 +887,7 @@ exports.exportStudentPdf = async (req, res) => {
 
 exports.showStudentLeaves = async (req, res) => {
     try {
-        const [student] = await db.execute('SELECT * FROM students WHERE user_id = ? AND tenant_id = ?', [req.session.userId, req.tenant.id]);
+        const [student] = await db.execute('SELECT * FROM students WHERE user_id = ? AND tenant_id = ? AND deleted_at IS NULL', [req.session.userId, req.tenant.id]);
         if (!student[0]) return res.status(404).send('Student record not found');
 
         const [leaves] = await db.execute(
@@ -898,7 +905,7 @@ exports.showStudentLeaves = async (req, res) => {
 exports.applyLeave = async (req, res) => {
     const { start_date, end_date, reason } = req.body;
     try {
-        const [student] = await db.execute('SELECT * FROM students WHERE user_id = ? AND tenant_id = ?', [req.session.userId, req.tenant.id]);
+        const [student] = await db.execute('SELECT * FROM students WHERE user_id = ? AND tenant_id = ? AND deleted_at IS NULL', [req.session.userId, req.tenant.id]);
         if (!student[0]) return res.status(404).send('Student record not found');
 
         await db.execute(

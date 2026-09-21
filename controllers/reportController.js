@@ -51,7 +51,7 @@ exports.showReports = async (req, res) => {
             JOIN classes c ON se.class_id = c.id AND c.tenant_id = s.tenant_id
             LEFT JOIN attendance_students a ON s.id = a.student_id AND a.tenant_id = s.tenant_id
                 AND a.date BETWEEN ? AND ?
-            WHERE se.session_id = ? AND s.tenant_id = ?
+            WHERE se.session_id = ? AND s.tenant_id = ? AND s.deleted_at IS NULL
             GROUP BY s.id, c.id, s.name, c.name_ar
         `, [startDate, endDate, activeSessionId, req.tenant.id]);
 
@@ -250,7 +250,7 @@ exports.showSessionReports = async (req, res) => {
             JOIN classes c ON se.class_id = c.id AND c.tenant_id = s.tenant_id
             LEFT JOIN attendance_students a ON s.id = a.student_id AND a.tenant_id = s.tenant_id
                 AND a.date >= ?
-            WHERE se.session_id = ? AND s.tenant_id = ?
+            WHERE se.session_id = ? AND s.tenant_id = ? AND s.deleted_at IS NULL
             GROUP BY s.id, c.id, s.name, c.name_ar
         `, [sessionStartDate, activeSessionId, req.tenant.id]);
 
@@ -335,7 +335,7 @@ exports.exportSessionReportsPdf = async (req, res) => {
             JOIN classes c ON se.class_id = c.id AND c.tenant_id = s.tenant_id
             LEFT JOIN attendance_students a ON s.id = a.student_id AND a.tenant_id = s.tenant_id
                 AND a.date >= ?
-            WHERE se.session_id = ? AND s.tenant_id = ?
+            WHERE se.session_id = ? AND s.tenant_id = ? AND s.deleted_at IS NULL
             GROUP BY s.id, c.id, s.name, c.name_ar
         `, [sessionStartDate, activeSessionId, req.tenant.id]);
 
@@ -545,9 +545,9 @@ exports.showUsersManage = async (req, res) => {
             u.role, u.created_at,
             s.roll_number as student_id, t.id_number as teacher_id
             FROM users u
-            LEFT JOIN students s ON u.id = s.user_id AND s.tenant_id = u.tenant_id
-            LEFT JOIN teachers t ON u.id = t.user_id AND t.tenant_id = u.tenant_id
-            WHERE u.tenant_id = ?
+            LEFT JOIN students s ON u.id = s.user_id AND s.tenant_id = u.tenant_id AND s.deleted_at IS NULL
+            LEFT JOIN teachers t ON u.id = t.user_id AND t.tenant_id = u.tenant_id AND t.deleted_at IS NULL
+            WHERE u.tenant_id = ? AND u.deleted_at IS NULL
             ORDER BY u.role, u.username
         `, [req.tenant.id]);
         const normalizeRole = (role) => {
@@ -632,16 +632,16 @@ exports.deleteUser = async (req, res) => {
             return res.status(400).json({ success: false, error: errorMsg });
         }
 
-        // Unlink user from students and teachers
-        await db.execute('UPDATE students SET user_id = NULL WHERE user_id = ? AND tenant_id = ?', [targetId, req.tenant.id]);
-        await db.execute('UPDATE teachers SET user_id = NULL WHERE user_id = ? AND tenant_id = ?', [targetId, req.tenant.id]);
-
-        // Delete user
-        const [result] = await db.execute('DELETE FROM users WHERE id = ? AND tenant_id = ?', [targetId, req.tenant.id]);
+        // Soft delete user
+        const [result] = await db.execute('UPDATE users SET deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND tenant_id = ?', [targetId, req.tenant.id]);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ success: false, error: 'User not found' });
         }
+
+        // Soft delete associated student or teacher records
+        await db.execute('UPDATE students SET deleted_at = CURRENT_TIMESTAMP WHERE user_id = ? AND tenant_id = ?', [targetId, req.tenant.id]);
+        await db.execute('UPDATE teachers SET deleted_at = CURRENT_TIMESTAMP WHERE user_id = ? AND tenant_id = ?', [targetId, req.tenant.id]);
 
         res.json({ success: true });
     } catch (err) {
@@ -921,8 +921,8 @@ exports.showAreefStandardsReport = async (req, res) => {
             FROM classes c
             WHERE EXISTS (
                 SELECT 1 FROM students s
-                JOIN users u ON u.id = s.user_id AND u.tenant_id = s.tenant_id
-                WHERE s.class_id = c.id AND s.tenant_id = c.tenant_id
+                JOIN users u ON u.id = s.user_id AND u.tenant_id = s.tenant_id AND u.deleted_at IS NULL
+                WHERE s.class_id = c.id AND s.tenant_id = c.tenant_id AND s.deleted_at IS NULL
                   AND u.role IN ('عریف', 'عريف')
             ) AND c.tenant_id = ?
             ORDER BY c.id
@@ -935,8 +935,8 @@ exports.showAreefStandardsReport = async (req, res) => {
                    u.id      AS user_id,
                    u.username
             FROM users u
-            JOIN students s ON s.user_id = u.id AND s.tenant_id = u.tenant_id
-            WHERE u.role IN ('عریف', 'عريف') AND u.tenant_id = ?
+            JOIN students s ON s.user_id = u.id AND s.tenant_id = u.tenant_id AND s.deleted_at IS NULL
+            WHERE u.role IN ('عریف', 'عريف') AND u.tenant_id = ? AND u.deleted_at IS NULL
             ORDER BY s.class_id, s.name
         `, [req.tenant.id]);
 
@@ -1283,8 +1283,8 @@ exports.exportAreefStandardsReportPdf = async (req, res) => {
             FROM classes c
             WHERE EXISTS (
                 SELECT 1 FROM students s
-                JOIN users u ON u.id = s.user_id AND u.tenant_id = s.tenant_id
-                WHERE s.class_id = c.id AND s.tenant_id = c.tenant_id
+                JOIN users u ON u.id = s.user_id AND u.tenant_id = s.tenant_id AND u.deleted_at IS NULL
+                WHERE s.class_id = c.id AND s.tenant_id = c.tenant_id AND s.deleted_at IS NULL
                   AND u.role IN ('عریف', 'عريف')
             ) AND c.tenant_id = ?
             ORDER BY c.id
@@ -1296,8 +1296,8 @@ exports.exportAreefStandardsReportPdf = async (req, res) => {
                    u.id      AS user_id,
                    u.username
             FROM users u
-            JOIN students s ON s.user_id = u.id AND s.tenant_id = u.tenant_id
-            WHERE u.role IN ('عریف', 'عريف') AND u.tenant_id = ?
+            JOIN students s ON s.user_id = u.id AND s.tenant_id = u.tenant_id AND s.deleted_at IS NULL
+            WHERE u.role IN ('عریف', 'عريف') AND u.tenant_id = ? AND u.deleted_at IS NULL
             ORDER BY s.class_id, s.name
         `, [req.tenant.id]);
 

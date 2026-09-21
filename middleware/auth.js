@@ -106,7 +106,7 @@ const isAuthenticated = (req, res, next) => {
 };
 
 const getCRClassId = async (userId, tenantId) => {
-    const [student] = await db.execute('SELECT class_id FROM students WHERE user_id = ? AND tenant_id = ?', [userId, tenantId]);
+    const [student] = await db.execute('SELECT class_id FROM students WHERE user_id = ? AND tenant_id = ? AND deleted_at IS NULL', [userId, tenantId]);
     return student.length ? student[0].class_id : null;
 };
 

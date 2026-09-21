@@ -89,7 +89,7 @@ async function loadExamResultsData(examId, tenantId, selectedClassId, locale) {
          FROM students s 
          JOIN classes c ON s.class_id = c.id 
          JOIN exam_papers ep ON ep.class_id = c.id
-         WHERE ep.exam_id = ? AND ep.tenant_id = ? AND ep.deleted_at IS NULL
+         WHERE ep.exam_id = ? AND ep.tenant_id = ? AND ep.deleted_at IS NULL AND s.deleted_at IS NULL
          ORDER BY c.name_ar ASC, s.name ASC`,
         [examId, tenantId]
     );
@@ -331,7 +331,7 @@ router.get('/exams/:id/results/pdf', isAdmin, async (req, res) => {
                 format: 'A4',
                 printBackground: true,
                 displayHeaderFooter: false,
-                margin: { top: '8mm', bottom: '8mm', left: '8mm', right: '8mm' }
+                margin: { top: '5mm', bottom: '5mm', left: '5mm', right: '5mm' }
             });
 
             const rawName = `${data.exam.name} Results Gazette`.replace(/["\\]/g, '').trim();
@@ -859,7 +859,7 @@ router.get('/exams/:id/papers', isAdmin, async (req, res) => {
 
     // Fetch all for new paper assignment
     const [allClasses] = await db.execute('SELECT * FROM classes WHERE tenant_id = ?', [req.tenant.id]);
-    const [allTeachers] = await db.execute('SELECT u.id, COALESCE(t.name, u.username) as username FROM users u LEFT JOIN teachers t ON t.user_id = u.id AND t.tenant_id = u.tenant_id WHERE u.role = "أستاذ" AND u.tenant_id = ? ORDER BY username ASC', [req.tenant.id]);
+    const [allTeachers] = await db.execute('SELECT u.id, COALESCE(t.name, u.username) as username FROM users u LEFT JOIN teachers t ON t.user_id = u.id AND t.tenant_id = u.tenant_id WHERE u.role = "أستاذ" AND u.tenant_id = ? AND u.deleted_at IS NULL ORDER BY username ASC', [req.tenant.id]);
     const [books] = await db.execute('SELECT id, title, class_id FROM books WHERE tenant_id = ?', [req.tenant.id]);
 
     res.render('exams/exam_papers', {
@@ -954,7 +954,7 @@ router.get('/papers/:id/enter-marks', isTeacher, async (req, res) => {
     const [students] = await db.execute(`
         SELECT s.id, s.name, s.roll_number 
         FROM students s
-        WHERE s.class_id = ? AND s.tenant_id = ?
+        WHERE s.class_id = ? AND s.tenant_id = ? AND s.deleted_at IS NULL
         ORDER BY s.roll_number ASC, s.name ASC
     `, [paper[0].class_id, req.tenant.id]);
 
@@ -1183,7 +1183,7 @@ router.get('/exams/:id/datesheet/pdf', isTeacher, async (req, res) => {
 });
 
 async function loadReportCardData(examId, studentId, tenantId, locale, translateFn) {
-    const [student] = await db.execute('SELECT * FROM students WHERE id = ? AND tenant_id = ?', [studentId, tenantId]);
+    const [student] = await db.execute('SELECT * FROM students WHERE id = ? AND tenant_id = ? AND deleted_at IS NULL', [studentId, tenantId]);
     if (!student || student.length === 0) return null;
 
     const [exam] = await db.execute('SELECT id, name, exam_type, exam_year FROM exams WHERE id = ? AND tenant_id = ?', [examId, tenantId]);
