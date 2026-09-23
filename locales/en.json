@@ -590,5 +590,11 @@
     "Signatures_Preview": "Live Signatures Preview",
     "Appears_On_Gazette": "Appears on Gazette",
     "Appears_On_Both": "Appears on Both",
-    "Select_Teacher": "Teachers List"
+    "Select_Teacher": "Teachers List",
+    "All_Report_Cards": "All Report Cards",
+    "Download_All_Report_Cards_PDF": "All Report Cards (PDF)",
+    "Print_All_Report_Cards": "Print All Report Cards",
+    "Download_Full_PDF": "Download Combined PDF",
+    "Print_All": "Print All",
+    "Back_To_Gazette": "Back to Results Gazette"
 }

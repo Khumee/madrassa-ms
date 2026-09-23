@@ -598,5 +598,11 @@
     "Signatures_Preview": "معاينة مباشرة للتوقيعات على الوثائق",
     "Appears_On_Gazette": "يظهر في جدول النتائج",
     "Appears_On_Both": "يظهر في الجدول والبطاقات",
-    "Select_Teacher": "قائمة المعلمين"
+    "Select_Teacher": "قائمة المعلمين",
+    "All_Report_Cards": "جميع بطاقات النتائج",
+    "Download_All_Report_Cards_PDF": "جميع البطاقات (PDF)",
+    "Print_All_Report_Cards": "طباعة جميع البطاقات",
+    "Download_Full_PDF": "تحميل ملف PDF المجمع لجميع الطلاب",
+    "Print_All": "طباعة الكل",
+    "Back_To_Gazette": "العودة إلى جدول النتائج"
 }

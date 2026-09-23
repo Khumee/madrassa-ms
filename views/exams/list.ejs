@@ -33,10 +33,10 @@
                             <td><%= exam.name %></td>
                             <td><%= new Date(exam.created_at).toLocaleDateString() %></td>
                             <td>
-                                <div class="d-flex gap-1">
+                                <div class="d-flex gap-1 flex-wrap">
                                     <a href="/exams/<%= exam.id %>/papers" class="btn btn-sm btn-secondary"><i class="bi bi-list-task"></i> <%= __('All_Papers') || 'All Papers' %></a>
-
                                     <a href="/exams/<%= exam.id %>/results" class="btn btn-sm btn-success"><i class="bi bi-trophy-fill me-1"></i><%= __('View_Results') %></a>
+                                    <a href="/exams/<%= exam.id %>/report-cards" class="btn btn-sm btn-outline-success"><i class="bi bi-collection-fill me-1"></i><%= __('All_Report_Cards') || 'رپورٹ کارڈز' %></a>
                                     <a href="/exams/<%= exam.id %>/datesheet" class="btn btn-sm btn-info"><i class="bi bi-calendar-event"></i> <%= __('Date_Sheet') || 'Date Sheet' %></a>
                                     <a href="/exams/<%= exam.id %>/export-papers" class="btn btn-sm btn-outline-dark"><i class="bi bi-download"></i> <%= __('Export_All_Papers') || 'Export All Papers' %></a>
                                     <% if (session.role === 'مدير') { %>

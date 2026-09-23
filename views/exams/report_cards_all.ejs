@@ -1,0 +1,256 @@
+<%- include('../partials/header', { title: (exam.name + ' - ' + (__('All_Report_Cards') || 'تمام رپورٹ کارڈز')) }) %>
+
+<!-- Print styling -->
+<style>
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        .printable-area, .printable-area * {
+            visibility: visible;
+        }
+        .printable-area {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+        .no-print {
+            display: none !important;
+        }
+        .report-card-wrapper {
+            page-break-after: always !important;
+            break-after: page !important;
+            margin-bottom: 0 !important;
+            padding-top: 5px !important;
+            padding-bottom: 5px !important;
+        }
+        .card {
+            border: 2px solid #2c3e50 !important;
+            box-shadow: none !important;
+        }
+    }
+    
+    .report-card-wrapper {
+        page-break-after: always;
+        break-after: page;
+        margin-bottom: 45px;
+    }
+
+    .report-card-container {
+        max-width: 820px;
+        margin: auto;
+        border: 2px solid #2c3e50;
+        border-radius: 12px;
+        background-color: #fff;
+    }
+    
+    .watermark {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0.05;
+        z-index: 0;
+        width: 80%;
+        pointer-events: none;
+    }
+</style>
+
+<div class="container mt-4 mb-5">
+    <!-- Header Controls & Filters -->
+    <div class="no-print mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
+            <div>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-1">
+                        <li class="breadcrumb-item"><a href="/" class="text-decoration-none"><i class="bi bi-house me-1"></i><%= __('Main_Page') || 'صفحہ اول' %></a></li>
+                        <li class="breadcrumb-item"><a href="/exams" class="text-decoration-none"><%= __('Exams') || 'امتحانات' %></a></li>
+                        <li class="breadcrumb-item"><a href="/exams/<%= exam.id %>/results" class="text-decoration-none"><%= __('Results') || 'نتائج' %></a></li>
+                        <li class="breadcrumb-item active" aria-current="page"><%= __('All_Report_Cards') || 'تمام رپورٹ کارڈز' %></li>
+                    </ol>
+                </nav>
+                <h2 class="fw-bold text-dark mb-0">
+                    <i class="bi bi-collection-fill text-success me-2"></i><%= __('All_Report_Cards') || 'تمام طلباء کے مکمل رپورٹ کارڈز' %>
+                </h2>
+                <p class="text-muted mt-1 mb-0">
+                    <%= exam.name %> &bull; <%= cards.length %> <%= __('Students') || 'طلباء' %>
+                </p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <% if (locals.session && ['مدير', 'ناظم'].includes(session.role)) { %>
+                    <a href="/settings/signatures" class="btn btn-outline-primary rounded-pill px-3 shadow-sm fw-bold">
+                        <i class="bi bi-pen me-1"></i> <%= __('Signatures_Settings') || 'دستخط کی ترتیبات' %>
+                    </a>
+                <% } %>
+                <a href="/exams/<%= exam.id %>/report-cards/pdf<%= selectedClassId ? '?classId=' + selectedClassId : '' %>" onclick="if (typeof showPdfLoader === 'function') showPdfLoader();" class="btn btn-danger rounded-pill px-4 shadow-sm fw-bold">
+                    <i class="bi bi-file-earmark-pdf-fill me-1"></i> <%= __('Download_Full_PDF') || 'ایک ساتھ مکمل PDF ڈاؤن لوڈ کریں' %>
+                </a>
+                <button onclick="window.print()" class="btn btn-outline-dark rounded-pill px-3 shadow-sm fw-bold">
+                    <i class="bi bi-printer me-1"></i> <%= __('Print_All') || 'تمام پرنٹ کریں' %>
+                </button>
+                <a href="/exams/<%= exam.id %>/results<%= selectedClassId ? '?classId=' + selectedClassId : '' %>" class="btn btn-outline-secondary rounded-pill px-3 shadow-sm fw-bold">
+                    <i class="bi bi-arrow-left me-1"></i> <%= __('Back_To_Gazette') || 'گزٹ پر واپس' %>
+                </a>
+            </div>
+        </div>
+
+        <!-- Class Filter Strip -->
+        <div class="card shadow-sm border-0 rounded-4 bg-white p-3">
+            <div class="d-flex align-items-center flex-wrap gap-2">
+                <span class="fw-bold text-muted small me-2"><i class="bi bi-funnel-fill me-1"></i><%= __('Filter_By_Class') || 'درجہ کے لحاظ سے فلٹر کریں:' %></span>
+                <a href="/exams/<%= exam.id %>/report-cards" class="btn btn-sm <%= !selectedClassId ? 'btn-primary active' : 'btn-outline-primary' %> rounded-pill px-3">
+                    <i class="bi bi-grid-fill me-1"></i><%= __('All_Classes') || 'تمام درجات' %>
+                </a>
+                <% classes.forEach(c => { %>
+                    <% const isSelected = String(selectedClassId) === String(c.id); %>
+                    <a href="/exams/<%= exam.id %>/report-cards?classId=<%= c.id %>" class="btn btn-sm <%= isSelected ? 'btn-primary active' : 'btn-outline-primary' %> rounded-pill px-3">
+                        <%= c.name_ar || c.name %>
+                    </a>
+                <% }) %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Printable Cards Area -->
+    <div class="printable-area">
+        <% if (cards && cards.length > 0) { %>
+            <% cards.forEach((card, index) => { %>
+                <% const s = card.student; %>
+                <div class="report-card-wrapper">
+                    <div class="card p-3 p-md-4 report-card-container position-relative">
+                        <% if (locals.tenant && locals.tenant.logo_url) { %>
+                            <img src="<%= tenant.logo_url %>" alt="Madrassa Logo" class="watermark">
+                        <% } %>
+
+                        <!-- Header Section -->
+                        <div class="row mb-2 align-items-center" style="position: relative; z-index: 1;">
+                            <div class="col-3 text-center">
+                                <% if (locals.tenant && locals.tenant.logo_url) { %>
+                                    <img src="<%= tenant.logo_url %>" alt="Logo" style="max-height: 65px; max-width: 100%;">
+                                <% } %>
+                            </div>
+                            <div class="col-6 text-center">
+                                <h2 class="fw-bold text-dark mb-1" style="white-space: nowrap;"><%= locals.tenant ? (tenant.subdomain === 'madrassa-ms' ? __('Jamia_Habibullah_Islamabad') : (tenant.subdomain === 'kui' ? __('KUI_Production') : tenant.school_name)) : __('College_Name') %></h2>
+                                <h5 class="text-secondary mb-2"><%= exam.name %></h5>
+                                <h6 class="fw-bold bg-dark text-white d-inline-block px-3 py-1 rounded-pill mb-0"><%= __('Student_Report_Card') || 'Report Card' %></h6>
+                            </div>
+                            <div class="col-3 text-center">
+                                <!-- Optional space for student badge or QR -->
+                            </div>
+                        </div>
+
+                        <hr style="border-top: 2px solid #2c3e50; opacity: 1;" class="my-2">
+                        
+                        <!-- Student Details -->
+                        <div class="row mb-2" style="position: relative; z-index: 1;">
+                            <div class="col-6">
+                                <table class="table table-sm table-borderless mb-0">
+                                    <tr>
+                                        <th width="35%" class="text-muted"><%= __('Name') %>:</th>
+                                        <td class="fw-bold fs-6"><%= s.name %></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-muted"><%= __('Roll_Number') %>:</th>
+                                        <td class="fw-bold"><%= s.roll_number || s.id %></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-6">
+                                <table class="table table-sm table-borderless mb-0">
+                                    <% if (s.class_name) { %>
+                                        <tr>
+                                            <th width="35%" class="text-muted"><%= __('Class') %>:</th>
+                                            <td class="fw-bold"><%= s.class_name %></td>
+                                        </tr>
+                                    <% } %>
+                                    <tr>
+                                        <th class="text-muted"><%= __('Date') %>:</th>
+                                        <td class="fw-bold"><%= new Date().toLocaleDateString(locals.lang === 'en' ? 'en-US' : 'ur-PK') %></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Results Table -->
+                        <div style="position: relative; z-index: 1;">
+                            <table class="table table-bordered table-sm text-center align-middle border-dark mb-2">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th class="py-1"><%= __('Subject') %></th>
+                                        <th class="py-1" style="width: 130px;"><%= __('Max_Marks') %></th>
+                                        <th class="py-1" style="width: 150px;"><%= __('Obtained_Marks') %></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% card.results.forEach(r => { %>
+                                        <tr>
+                                            <td class="fw-semibold text-start px-3 py-1"><%= r.subject %></td>
+                                            <td class="py-1"><%= r.max_marks %></td>
+                                            <% if (r.is_absent) { %>
+                                                <td class="fw-bold py-1 text-danger"><%= __('Absent') || 'غائب' %></td>
+                                            <% } else if (r.obtained_marks !== null) { %>
+                                                <td class="fw-bold py-1 <%= r.obtained_marks < (r.max_marks * 0.4) ? 'text-danger' : '' %>"><%= r.obtained_marks %></td>
+                                            <% } else { %>
+                                                <td class="text-muted fst-italic py-1">-</td>
+                                            <% } %>
+                                        </tr>
+                                    <% }) %>
+                                    <tr class="table-secondary border-dark">
+                                        <td class="fw-bold text-start px-3 py-1"><%= __('Total') %></td>
+                                        <td class="fw-bold py-1"><%= card.totalMax %></td>
+                                        <td class="fw-bold py-1"><%= card.allPapersUnmarked ? '-' : card.totalObtained %></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Grading Section -->
+                        <div class="mt-2 p-2 rounded bg-light border" style="position: relative; z-index: 1;">
+                            <div class="row align-items-center text-center">
+                                <div class="col-6 border-end">
+                                    <h6 class="text-muted mb-1"><%= __('Percentage') %></h6>
+                                    <h4 class="fw-bold mb-0 <%= card.allPapersUnmarked ? 'text-muted' : '' %>"><%= card.allPapersUnmarked ? '-' : card.percentage + '%' %></h4>
+                                </div>
+                                <div class="col-6">
+                                    <h6 class="text-muted mb-1"><%= __('Grade') %></h6>
+                                    <% if (card.allPapersUnmarked) { %>
+                                        <h5 class="fw-bold text-muted mb-0"><%= __('Papers_not_marked') || 'Papers not marked yet' %></h5>
+                                    <% } else { %>
+                                        <h4 class="fw-bold text-<%= card.gradeClass %> mb-0"><%= typeof card.gradeKey !== 'undefined' ? __(card.gradeKey) : card.grade %></h4>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Signatures -->
+                        <div class="row mt-4 pt-4 text-center" style="position: relative; z-index: 1;">
+                            <div class="col-6">
+                                <hr style="width: 60%; margin: 0 auto 5px auto; border-top: 1px solid #000; opacity: 1;">
+                                <strong class="d-block"><%= __('Nazim_Saff') || 'ناظم صف' %></strong>
+                                <% const nazimSaff = s.nazim_saff_name || (locals.tenant && tenant.default_nazim_saff_name); %>
+                                <% if (nazimSaff) { %>
+                                    <span class="small text-dark fw-semibold mt-1 d-block">(<%= nazimSaff %>)</span>
+                                <% } %>
+                            </div>
+                            <div class="col-6">
+                                <hr style="width: 60%; margin: 0 auto 5px auto; border-top: 1px solid #000; opacity: 1;">
+                                <strong class="d-block"><%= __('Nazim_Imtihanat') || 'ناظم امتحانات' %></strong>
+                                <% if (locals.tenant && tenant.nazim_imtihanat_name) { %>
+                                    <span class="small text-dark fw-semibold mt-1 d-block">(<%= tenant.nazim_imtihanat_name %>)</span>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+        <% } else { %>
+            <div class="card shadow-sm border-0 rounded-4 bg-white p-5 text-center my-4">
+                <i class="bi bi-inbox fs-1 text-muted d-block mb-3"></i>
+                <h5 class="text-muted mb-0"><%= __('No_students_found') || 'اس فلٹر کے تحت کوئی طالب علم نہیں ملا۔' %></h5>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>
