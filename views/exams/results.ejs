@@ -230,6 +230,11 @@
             <p class="text-muted mb-0"><%= exam.name %> &bull; <%= __('Generate_individual_report_cards_for_students') || 'مکمل امتحانی سمری، پوزیشنیں اور رزلٹ گزٹ' %></p>
         </div>
         <div class="d-flex gap-2 flex-wrap">
+            <% if (locals.session && ['مدير', 'ناظم'].includes(session.role)) { %>
+                <a href="/settings/signatures" class="btn btn-outline-primary rounded-pill px-3 shadow-sm fw-bold">
+                    <i class="bi bi-pen me-1"></i> <%= __('Signatures_Settings') || 'دستخط کی ترتیبات' %>
+                </a>
+            <% } %>
             <a href="/exams/<%= exam.id %>/results/pdf<%= selectedClassId ? '?classId=' + selectedClassId : '' %>" onclick="if (typeof showPdfLoader === 'function') showPdfLoader();" class="btn btn-danger rounded-pill px-4 shadow-sm fw-bold">
                 <i class="bi bi-file-earmark-pdf-fill me-1"></i> <%= __('Download_PDF') || 'پی ڈی ایف ڈاؤن لوڈ کریں' %>
             </a>
@@ -436,15 +441,24 @@
     <div class="print-sign-block row mt-5 pt-5 text-center">
         <div class="col-4">
             <hr style="width: 70%; margin: 0 auto 6px auto; border-top: 1.5px solid #000; opacity: 1;">
-            <strong><%= __('Controller_Of_Exams') || 'ناظم امتحانات' %></strong>
+            <strong class="d-block"><%= __('Nazim_Imtihanat') || 'ناظم امتحانات' %></strong>
+            <% if (locals.tenant && tenant.nazim_imtihanat_name) { %>
+                <span class="small text-dark fw-semibold mt-1 d-block">(<%= tenant.nazim_imtihanat_name %>)</span>
+            <% } %>
         </div>
         <div class="col-4">
             <hr style="width: 70%; margin: 0 auto 6px auto; border-top: 1.5px solid #000; opacity: 1;">
-            <strong><%= __('Class_Teacher') || 'انچارج کمیٹی' %></strong>
+            <strong class="d-block"><%= __('Nazim_Taleemat') || 'ناظم تعلیمات' %></strong>
+            <% if (locals.tenant && tenant.nazim_taleemat_name) { %>
+                <span class="small text-dark fw-semibold mt-1 d-block">(<%= tenant.nazim_taleemat_name %>)</span>
+            <% } %>
         </div>
         <div class="col-4">
             <hr style="width: 70%; margin: 0 auto 6px auto; border-top: 1.5px solid #000; opacity: 1;">
-            <strong><%= __('Principal') || 'مہتمم / پرنسپل' %></strong>
+            <strong class="d-block"><%= __('Mohtamim') || 'مہتمم / پرنسپل' %></strong>
+            <% if (locals.tenant && tenant.mohtamim_name) { %>
+                <span class="small text-dark fw-semibold mt-1 d-block">(<%= tenant.mohtamim_name %>)</span>
+            <% } %>
         </div>
     </div>
 </div>

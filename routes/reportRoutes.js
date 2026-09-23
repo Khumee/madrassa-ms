@@ -28,4 +28,10 @@ router.get('/admin/import-data', hasRole(['مدير']), reportController.adminIm
 router.get('/permissions/manage', hasRole(['مدير']), reportController.showPermissionsManage);
 router.post('/permissions/toggle', hasRole(['مدير']), reportController.togglePermission);
 
+// Exam Signatures Settings (Mudeer & Nazim)
+const settingsController = require('../controllers/settingsController');
+router.get('/settings/signatures', hasRole(['مدير', 'ناظم']), settingsController.showSignatureSettings);
+router.post('/settings/signatures', hasRole(['مدير', 'ناظم']), settingsController.updateSignatureSettings);
+
 module.exports = router;
+

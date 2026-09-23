@@ -46,6 +46,11 @@
 
 <div class="container mt-4 mb-5">
     <div class="text-end mb-3 no-print d-flex justify-content-end gap-2 flex-wrap">
+        <% if (locals.session && ['مدير', 'ناظم'].includes(session.role)) { %>
+            <a href="/settings/signatures" class="btn btn-outline-primary rounded-pill px-3 shadow-sm fw-bold">
+                <i class="bi bi-pen me-1"></i> <%= __('Signatures_Settings') || 'دستخط کی ترتیبات' %>
+            </a>
+        <% } %>
         <a href="/exams/<%= exam.id %>/student/<%= student.id %>/report-card/pdf" onclick="if (typeof showPdfLoader === 'function') showPdfLoader();" class="btn btn-danger rounded-pill px-4 shadow-sm fw-bold">
             <i class="bi bi-file-earmark-pdf-fill me-1"></i> <%= __('Download_PDF') || 'پی ڈی ایف ڈاؤن لوڈ کریں' %>
         </a>
@@ -95,6 +100,16 @@
                     </tr>
                 </table>
             </div>
+            <% if (student.class_name) { %>
+                <div class="col-md-6">
+                    <table class="table table-sm table-borderless mb-0">
+                        <tr>
+                            <th width="40%" class="text-muted"><%= __('Class') %>:</th>
+                            <td class="fw-bold"><%= student.class_name %></td>
+                        </tr>
+                    </table>
+                </div>
+            <% } %>
         </div>
         
         <!-- Results Table -->
@@ -150,11 +165,18 @@
         <div class="row mt-4 pt-4 text-center" style="position: relative; z-index: 1;">
             <div class="col-6">
                 <hr style="width: 60%; margin: 0 auto 5px auto; border-top: 1px solid #000; opacity: 1;">
-                <strong><%= __('Class_Teacher') || 'Class Teacher' %></strong>
+                <strong class="d-block"><%= __('Nazim_Saff') || 'ناظم صف' %></strong>
+                <% const nazimSaff = student.nazim_saff_name || (locals.tenant && tenant.default_nazim_saff_name); %>
+                <% if (nazimSaff) { %>
+                    <span class="small text-dark fw-semibold mt-1 d-block">(<%= nazimSaff %>)</span>
+                <% } %>
             </div>
             <div class="col-6">
                 <hr style="width: 60%; margin: 0 auto 5px auto; border-top: 1px solid #000; opacity: 1;">
-                <strong><%= __('Principal') || 'Principal' %></strong>
+                <strong class="d-block"><%= __('Nazim_Imtihanat') || 'ناظم امتحانات' %></strong>
+                <% if (locals.tenant && tenant.nazim_imtihanat_name) { %>
+                    <span class="small text-dark fw-semibold mt-1 d-block">(<%= tenant.nazim_imtihanat_name %>)</span>
+                <% } %>
             </div>
         </div>
     </div>

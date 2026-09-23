@@ -1185,7 +1185,12 @@ router.get('/exams/:id/datesheet/pdf', isTeacher, async (req, res) => {
 });
 
 async function loadReportCardData(examId, studentId, tenantId, locale, translateFn) {
-    const [student] = await db.execute('SELECT * FROM students WHERE id = ? AND tenant_id = ? AND deleted_at IS NULL', [studentId, tenantId]);
+    const [student] = await db.execute(`
+        SELECT s.*, c.name_ar as class_name, c.nazim_saff_name 
+        FROM students s 
+        LEFT JOIN classes c ON s.class_id = c.id AND c.tenant_id = s.tenant_id
+        WHERE s.id = ? AND s.tenant_id = ? AND s.deleted_at IS NULL
+    `, [studentId, tenantId]);
     if (!student || student.length === 0) return null;
 
     const [exam] = await db.execute('SELECT id, name, exam_type, exam_year FROM exams WHERE id = ? AND tenant_id = ?', [examId, tenantId]);

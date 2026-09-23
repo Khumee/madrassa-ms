@@ -1,11 +1,20 @@
 <%- include('../partials/header', { title: __('Manage_Exams') }) %>
 
 <div class="container mt-1">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
         <h2><%= __('Exams') %></h2>
-        <% if (session.role === 'مدير') { %>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newExamModal"><%= __('Create_New_Exam') %></button>
-        <% } %>
+        <div class="d-flex gap-2">
+            <% if (session.role === 'مدير' || session.role === 'ناظم') { %>
+                <a href="/settings/signatures" class="btn btn-outline-primary rounded-pill px-3 shadow-sm">
+                    <i class="bi bi-pen me-1"></i> <%= __('Exam_Signatures_Settings') || 'امتحانی دستخط کی ترتیبات' %>
+                </a>
+            <% } %>
+            <% if (session.role === 'مدير') { %>
+                <button class="btn btn-primary rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#newExamModal">
+                    <i class="bi bi-plus-circle me-1"></i> <%= __('Create_New_Exam') %>
+                </button>
+            <% } %>
+        </div>
     </div>
 
     <div class="table-responsive">

@@ -1,0 +1,312 @@
+<%- include('partials/header', { title: __('Exam_Signatures_Settings') || 'امتحانی دستخط کی ترتیبات' }) %>
+
+<div class="container py-4 mb-5">
+    <!-- Breadcrumb & Header -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="/" class="text-decoration-none"><i class="bi bi-house me-1"></i><%= __('Main_Page') || 'صفحہ اول' %></a></li>
+                    <li class="breadcrumb-item"><a href="/exams" class="text-decoration-none"><%= __('Exams') || 'امتحانات' %></a></li>
+                    <li class="breadcrumb-item active" aria-current="page"><%= __('Exam_Signatures_Settings') || 'دستخط کی ترتیبات' %></li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold text-dark mb-0">
+                <i class="bi bi-pen-fill text-primary me-2"></i><%= __('Exam_Signatures_Settings') || 'امتحانی دستاویزات کے دستخط کنندگان کی ترتیبات' %>
+            </h2>
+            <p class="text-muted mt-1 mb-0">
+                <%= __('Signatures_Settings_Desc') || 'امتحانی گزٹ (نتائج رپورٹ) اور انفرادی رپورٹ کارڈز پر ظاہر ہونے والے دستخط کنندگان کے نام یہاں سے ترتیب دیں۔' %>
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="/exams" class="btn btn-outline-secondary rounded-pill px-4">
+                <i class="bi bi-arrow-left me-1"></i><%= __('Back') || 'واپس' %>
+            </a>
+        </div>
+    </div>
+
+    <% if (success) { %>
+        <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm border-0 d-flex align-items-center mb-4" role="alert">
+            <i class="bi bi-check-circle-fill fs-4 me-3 text-success"></i>
+            <div>
+                <strong><%= __('Success') || 'کامیابی!' %></strong> <%= __('Signatures_Saved_Successfully') || 'دستخط کنندگان کی ترتیبات کامیابی کے ساتھ محفوظ ہو چکی ہیں۔' %>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <% } %>
+
+    <form action="/settings/signatures" method="POST" id="signaturesForm">
+        <div class="row g-4">
+            <!-- Left/Top Column: Main Institutional Signatories -->
+            <div class="col-lg-6">
+                <div class="card shadow-sm border-0 rounded-4 h-100 bg-white">
+                    <div class="card-header bg-primary text-white p-3 px-4 rounded-top-4 d-flex align-items-center justify-content-between">
+                        <h5 class="fw-bold mb-0">
+                            <i class="bi bi-mortarboard-fill me-2"></i><%= __('Institutional_Signatories') || 'مرکزی امتحانی دستخط کنندگان' %>
+                        </h5>
+                        <span class="badge bg-white text-primary rounded-pill px-3"><%= __('Madrasa_Level') || 'جامعہ کی سطح پر' %></span>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="alert alert-info border-0 rounded-3 small mb-4">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            <%= __('Gazette_Signatures_Note') || 'یہ تینوں نام امتحانی گزٹ (مجموعی رزلٹ شیٹ) کے نیچے ظاہر ہوں گے۔' %>
+                        </div>
+
+                        <!-- 1. Mohtamim -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark d-flex align-items-center justify-content-between">
+                                <span><i class="bi bi-person-badge text-primary me-2"></i><%= __('Mohtamim') || 'مہتمم صاحب / پرنسپل' %></span>
+                                <span class="badge bg-light text-secondary border fw-normal"><%= __('Appears_On_Gazette') || 'گزٹ میں شامل' %></span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                                <input type="text" name="mohtamim_name" id="mohtamimInput" class="form-control" 
+                                       value="<%= tenant.mohtamim_name || '' %>" 
+                                       placeholder="مثال: مولانا مفتی محمد عبداللہ صاحب" 
+                                       list="teachersList" autocomplete="off">
+                            </div>
+                            <div class="form-text small text-muted"><%= __('Mohtamim_Hint') || 'مہتمم یا ناظم اعلیٰ کا نام یا القاب درج کریں۔' %></div>
+                        </div>
+
+                        <!-- 2. Nazim Taleemat -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark d-flex align-items-center justify-content-between">
+                                <span><i class="bi bi-journal-bookmark text-primary me-2"></i><%= __('Nazim_Taleemat') || 'ناظم تعلیمات / ڈائریکٹر تعلیم' %></span>
+                                <span class="badge bg-light text-secondary border fw-normal"><%= __('Appears_On_Gazette') || 'گزٹ میں شامل' %></span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                                <input type="text" name="nazim_taleemat_name" id="nazimTaleematInput" class="form-control" 
+                                       value="<%= tenant.nazim_taleemat_name || '' %>" 
+                                       placeholder="مثال: مولانا قاری اسحاق صاحب" 
+                                       list="teachersList" autocomplete="off">
+                            </div>
+                            <div class="form-text small text-muted"><%= __('Nazim_Taleemat_Hint') || 'تعلیمی امور کے ذمہ دار / ناظم تعلیمات کا نام درج کریں۔' %></div>
+                        </div>
+
+                        <!-- 3. Nazim Imtihanat -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark d-flex align-items-center justify-content-between">
+                                <span><i class="bi bi-card-checklist text-primary me-2"></i><%= __('Nazim_Imtihanat') || 'ناظم امتحانات / کنٹرولر امتحانات' %></span>
+                                <span class="badge bg-warning bg-opacity-25 text-dark border border-warning fw-normal"><%= __('Appears_On_Both') || 'گزٹ اور انفرادی دونوں پر' %></span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                                <input type="text" name="nazim_imtihanat_name" id="nazimImtihanatInput" class="form-control" 
+                                       value="<%= tenant.nazim_imtihanat_name || '' %>" 
+                                       placeholder="مثال: مولانا مفتی اسداللہ صاحب" 
+                                       list="teachersList" autocomplete="off">
+                            </div>
+                            <div class="form-text small text-muted"><%= __('Nazim_Imtihanat_Hint') || 'امتحانی شعبے کے نگراں / ناظم امتحانات کا نام درج کریں۔ یہ نام گزٹ اور تمام رپورٹ کارڈز دونوں پر ظاہر ہوگا۔' %></div>
+                        </div>
+
+                        <!-- 4. Default Nazim Saff -->
+                        <div class="mb-2">
+                            <label class="form-label fw-bold text-dark d-flex align-items-center justify-content-between">
+                                <span><i class="bi bi-person-check text-primary me-2"></i><%= __('Default_Nazim_Saff') || 'بنیادی ناظمِ صف (پیشگی نام)' %></span>
+                                <span class="badge bg-light text-secondary border fw-normal"><%= __('Fallback') || 'متبادل' %></span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                                <input type="text" name="default_nazim_saff_name" id="defaultNazimSaffInput" class="form-control" 
+                                       value="<%= tenant.default_nazim_saff_name || '' %>" 
+                                       placeholder="مثال: استاذ الصف / ناظم صف" 
+                                       list="teachersList" autocomplete="off">
+                            </div>
+                            <div class="form-text small text-muted"><%= __('Default_Nazim_Saff_Hint') || 'اگر کسی کلاس کے لیے الگ ناظم صف متعین نہ ہو تو رپورٹ کارڈ پر یہ نام ظاہر ہوگا۔' %></div>
+                        </div>
+
+                        <!-- Datalist of Teachers for quick auto-complete -->
+                        <datalist id="teachersList">
+                            <% teachers.forEach(t => { %>
+                                <option value="<%= t.name %>"><%= t.name %></option>
+                            <% }) %>
+                        </datalist>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right/Bottom Column: Class-Specific Nazim Saff -->
+            <div class="col-lg-6">
+                <div class="card shadow-sm border-0 rounded-4 h-100 bg-white">
+                    <div class="card-header bg-dark text-white p-3 px-4 rounded-top-4 d-flex align-items-center justify-content-between">
+                        <h5 class="fw-bold mb-0">
+                            <i class="bi bi-people-fill me-2"></i><%= __('Class_Nazim_Saff_Heading') || 'کلاس وار نظماءِ صفوف (استادِ صف)' %>
+                        </h5>
+                        <span class="badge bg-secondary rounded-pill px-3"><%= classes.length %> <%= __('Classes') || 'کلاسز' %></span>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="alert alert-info border-0 rounded-3 small mb-4">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            <%= __('Individual_Report_Card_Note') || 'انفرادی طالب علم کے رپورٹ کارڈ پر متعلقہ کلاس کے ناظم صف اور ناظم امتحانات کے دستخط ہوں گے۔' %>
+                        </div>
+
+                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                            <table class="table table-hover align-middle border">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th style="width: 35%;"><%= __('Class_Name') || 'درجہ / کلاس' %></th>
+                                        <th style="width: 65%;"><%= __('Nazim_Saff_Name') || 'ناظم صف (استاد کا نام)' %></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if (classes && classes.length > 0) { %>
+                                        <% classes.forEach(cls => { %>
+                                            <tr>
+                                                <td class="fw-bold text-dark">
+                                                    <i class="bi bi-bookmark-fill text-primary me-2"></i><%= cls.name_ar || cls.name %>
+                                                </td>
+                                                <td>
+                                                    <div class="input-group input-group-sm">
+                                                        <input type="text" 
+                                                               name="class_nazim[<%= cls.id %>]" 
+                                                               class="form-control" 
+                                                               value="<%= cls.nazim_saff_name || '' %>" 
+                                                               placeholder="<%= __('Select_Or_Type_Teacher') || 'استاد کا نام منتخب کریں یا لکھیں...' %>"
+                                                               list="teachersList" 
+                                                               autocomplete="off">
+                                                        <% if (teachers && teachers.length > 0) { %>
+                                                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                                <i class="bi bi-person-lines-fill"></i>
+                                                            </button>
+                                                            <ul class="dropdown-menu dropdown-menu-end">
+                                                                <% teachers.forEach(t => { %>
+                                                                    <li><a class="dropdown-item" href="javascript:void(0)" onclick="this.closest('.input-group').querySelector('input').value = '<%= t.name %>';"><%= t.name %></a></li>
+                                                                <% }) %>
+                                                            </ul>
+                                                        <% } %>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        <% }) %>
+                                    <% } else { %>
+                                        <tr>
+                                            <td colspan="2" class="text-center py-4 text-muted">
+                                                <%= __('No_classes_found') || 'کوئی کلاس درج نہیں ہے۔' %>
+                                            </td>
+                                        </tr>
+                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview Section -->
+        <div class="card shadow-sm border-0 rounded-4 bg-white mt-4">
+            <div class="card-header bg-light p-3 px-4 border-0 d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-eye-fill me-2 text-primary"></i><%= __('Signatures_Preview') || 'دستاویزات پر دستخطوں کا لائیو پیش منظر (Preview)' %>
+                </h6>
+                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary px-3 rounded-pill"><%= __('Auto_Updated') || 'خودکار پیش منظر' %></span>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-4">
+                    <!-- Gazette Preview -->
+                    <div class="col-md-6 border-end">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <h6 class="fw-bold text-center text-primary mb-3">
+                                📜 <%= __('Exam_Result_Gazette') || 'امتحانی نتائج گزٹ / سمری شیٹ' %>
+                            </h6>
+                            <div class="row text-center pt-3 mt-2 border-top">
+                                <div class="col-4">
+                                    <hr style="width: 70%; margin: 0 auto 6px auto; border-top: 1.5px solid #000; opacity: 1;">
+                                    <strong class="small d-block"><%= __('Nazim_Imtihanat') || 'ناظم امتحانات' %></strong>
+                                    <span class="small text-muted" id="previewGazetteNazimImtihanat"><%= tenant.nazim_imtihanat_name ? '(' + tenant.nazim_imtihanat_name + ')' : '' %></span>
+                                </div>
+                                <div class="col-4">
+                                    <hr style="width: 70%; margin: 0 auto 6px auto; border-top: 1.5px solid #000; opacity: 1;">
+                                    <strong class="small d-block"><%= __('Nazim_Taleemat') || 'ناظم تعلیمات' %></strong>
+                                    <span class="small text-muted" id="previewGazetteNazimTaleemat"><%= tenant.nazim_taleemat_name ? '(' + tenant.nazim_taleemat_name + ')' : '' %></span>
+                                </div>
+                                <div class="col-4">
+                                    <hr style="width: 70%; margin: 0 auto 6px auto; border-top: 1.5px solid #000; opacity: 1;">
+                                    <strong class="small d-block"><%= __('Mohtamim') || 'مہتمم / پرنسپل' %></strong>
+                                    <span class="small text-muted" id="previewGazetteMohtamim"><%= tenant.mohtamim_name ? '(' + tenant.mohtamim_name + ')' : '' %></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Report Card Preview -->
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <h6 class="fw-bold text-center text-primary mb-3">
+                                📋 <%= __('Student_Report_Card') || 'طالب علم کا انفرادی رپورٹ کارڈ' %>
+                            </h6>
+                            <div class="row text-center pt-3 mt-2 border-top">
+                                <div class="col-6">
+                                    <hr style="width: 60%; margin: 0 auto 6px auto; border-top: 1.5px solid #000; opacity: 1;">
+                                    <strong class="small d-block"><%= __('Nazim_Saff') || 'ناظم صف' %></strong>
+                                    <span class="small text-muted" id="previewCardNazimSaff"><%= (classes[0] && classes[0].nazim_saff_name) ? '(' + classes[0].nazim_saff_name + ')' : (tenant.default_nazim_saff_name ? '(' + tenant.default_nazim_saff_name + ')' : '') %></span>
+                                </div>
+                                <div class="col-6">
+                                    <hr style="width: 60%; margin: 0 auto 6px auto; border-top: 1.5px solid #000; opacity: 1;">
+                                    <strong class="small d-block"><%= __('Nazim_Imtihanat') || 'ناظم امتحانات' %></strong>
+                                    <span class="small text-muted" id="previewCardNazimImtihanat"><%= tenant.nazim_imtihanat_name ? '(' + tenant.nazim_imtihanat_name + ')' : '' %></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-footer bg-white p-4 border-0 d-flex justify-content-end gap-2">
+                <a href="/exams" class="btn btn-outline-secondary rounded-pill px-4"><%= __('Cancel') || 'منسوخ کریں' %></a>
+                <button type="submit" class="btn btn-success rounded-pill px-5 fw-bold shadow-sm">
+                    <i class="bi bi-check2-circle me-1"></i><%= __('Save_Changes') || 'ترتیبات محفوظ کریں' %>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Live update preview when typing
+    const mohtamimInput = document.getElementById('mohtamimInput');
+    const nazimTaleematInput = document.getElementById('nazimTaleematInput');
+    const nazimImtihanatInput = document.getElementById('nazimImtihanatInput');
+    const defaultNazimSaffInput = document.getElementById('defaultNazimSaffInput');
+
+    const previewGazetteMohtamim = document.getElementById('previewGazetteMohtamim');
+    const previewGazetteNazimTaleemat = document.getElementById('previewGazetteNazimTaleemat');
+    const previewGazetteNazimImtihanat = document.getElementById('previewGazetteNazimImtihanat');
+    const previewCardNazimImtihanat = document.getElementById('previewCardNazimImtihanat');
+    const previewCardNazimSaff = document.getElementById('previewCardNazimSaff');
+
+    function updatePreviews() {
+        if (mohtamimInput && previewGazetteMohtamim) {
+            previewGazetteMohtamim.textContent = mohtamimInput.value.trim() ? `(${mohtamimInput.value.trim()})` : '';
+        }
+        if (nazimTaleematInput && previewGazetteNazimTaleemat) {
+            previewGazetteNazimTaleemat.textContent = nazimTaleematInput.value.trim() ? `(${nazimTaleematInput.value.trim()})` : '';
+        }
+        if (nazimImtihanatInput) {
+            const val = nazimImtihanatInput.value.trim() ? `(${nazimImtihanatInput.value.trim()})` : '';
+            if (previewGazetteNazimImtihanat) previewGazetteNazimImtihanat.textContent = val;
+            if (previewCardNazimImtihanat) previewCardNazimImtihanat.textContent = val;
+        }
+        if (defaultNazimSaffInput && previewCardNazimSaff) {
+            // If any first class has value, use it or fallback
+            const firstClassInput = document.querySelector('input[name^="class_nazim"]');
+            const classVal = firstClassInput ? firstClassInput.value.trim() : '';
+            const fallbackVal = defaultNazimSaffInput.value.trim();
+            const finalVal = classVal || fallbackVal;
+            previewCardNazimSaff.textContent = finalVal ? `(${finalVal})` : '';
+        }
+    }
+
+    [mohtamimInput, nazimTaleematInput, nazimImtihanatInput, defaultNazimSaffInput].forEach(inp => {
+        if (inp) {
+            inp.addEventListener('input', updatePreviews);
+        }
+    });
+
+    document.querySelectorAll('input[name^="class_nazim"]').forEach(inp => {
+        inp.addEventListener('input', updatePreviews);
+    });
+</script>
+
+<%- include('partials/footer') %>
