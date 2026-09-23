@@ -118,14 +118,36 @@ async function migrate() {
 
     // Safe column check for book_progress updated_at
     try {
-        const [columns] = await db.execute('SHOW COLUMNS FROM book_progress LIKE "updated_at"');
-        if (columns.length === 0) {
-            console.log('Adding missing column updated_at to book_progress...');
-            await db.execute('ALTER TABLE book_progress ADD COLUMN updated_at timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP');
-            console.log('Column updated_at added successfully.');
+        const [hasBookProgress] = await db.execute("SHOW TABLES LIKE 'book_progress'");
+        if (hasBookProgress.length > 0) {
+            const [columns] = await db.execute('SHOW COLUMNS FROM book_progress LIKE "updated_at"');
+            if (columns.length === 0) {
+                console.log('Adding missing column updated_at to book_progress...');
+                await db.execute('ALTER TABLE book_progress ADD COLUMN updated_at timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP');
+                console.log('Column updated_at added successfully.');
+            }
         }
     } catch (columnErr) {
         console.error('Error checking/adding updated_at column:', columnErr.message);
+    }
+
+    // Safe column checks for exam signatories
+    try {
+        const [tenantCols] = await db.pool.execute('SHOW COLUMNS FROM tenants LIKE "mohtamim_name"');
+        if (tenantCols.length === 0) {
+            console.log('Adding signatory columns to tenants table...');
+            await db.pool.execute('ALTER TABLE tenants ADD COLUMN mohtamim_name VARCHAR(255) NULL DEFAULT ""');
+            await db.pool.execute('ALTER TABLE tenants ADD COLUMN nazim_taleemat_name VARCHAR(255) NULL DEFAULT ""');
+            await db.pool.execute('ALTER TABLE tenants ADD COLUMN nazim_imtihanat_name VARCHAR(255) NULL DEFAULT ""');
+            await db.pool.execute('ALTER TABLE tenants ADD COLUMN default_nazim_saff_name VARCHAR(255) NULL DEFAULT ""');
+        }
+        const [classCols] = await db.pool.execute('SHOW COLUMNS FROM classes LIKE "nazim_saff_name"');
+        if (classCols.length === 0) {
+            console.log('Adding nazim_saff_name column to classes table...');
+            await db.pool.execute('ALTER TABLE classes ADD COLUMN nazim_saff_name VARCHAR(255) NULL DEFAULT NULL');
+        }
+    } catch (sigErr) {
+        console.error('Error checking/adding exam signatory columns:', sigErr.message);
     }
     
     console.log('Migrations completed.');
