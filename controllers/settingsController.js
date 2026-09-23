@@ -31,16 +31,47 @@ exports.showSignatureSettings = async (req, res) => {
         const [tenants] = await db.pool.execute('SELECT * FROM tenants WHERE id = ?', [tenantId]);
         const tenant = tenants[0] || req.tenant;
 
-        // Fetch teachers list for dropdown / suggestions
+        // Fetch teachers/employees list for dropdown / suggestions
         let teachers = [];
         try {
-            const [teacherRows] = await db.execute(
-                'SELECT * FROM teachers WHERE tenant_id = ? ORDER BY name ASC',
-                [tenantId]
-            );
-            teachers = teacherRows;
-        } catch (tErr) {
-            console.warn('Error fetching teachers for signature settings:', tErr.message);
+            const [hasEmployees] = await db.pool.execute("SHOW TABLES LIKE 'employees'");
+            if (hasEmployees.length > 0) {
+                const [empRows] = await db.execute(
+                    "SELECT id, name, designation FROM employees WHERE tenant_id = ? AND (status IS NULL OR status = 'active' OR status != 'inactive') ORDER BY name ASC",
+                    [tenantId]
+                );
+                teachers = empRows
+                    .filter(e => e.name && e.name.trim().length > 0)
+                    .map(e => ({
+                        id: e.id,
+                        name: e.name.trim(),
+                        designation: e.designation || ''
+                    }));
+            }
+        } catch (eErr) {
+            console.warn('Error fetching employees for signature settings:', eErr.message);
+        }
+
+        // Fallback to teachers table if employees table was empty or not found
+        if (teachers.length === 0) {
+            try {
+                const [hasTeachers] = await db.pool.execute("SHOW TABLES LIKE 'teachers'");
+                if (hasTeachers.length > 0) {
+                    const [tRows] = await db.execute(
+                        'SELECT id, name, subject FROM teachers WHERE tenant_id = ? ORDER BY name ASC',
+                        [tenantId]
+                    );
+                    teachers = tRows
+                        .filter(t => t.name && t.name.trim().length > 0)
+                        .map(t => ({
+                            id: t.id,
+                            name: t.name.trim(),
+                            designation: t.subject || ''
+                        }));
+                }
+            } catch (tErr) {
+                console.warn('Error fetching teachers table:', tErr.message);
+            }
         }
 
         // Fetch classes list with current nazim_saff_name (using SELECT * to support both name and name_ar schemas)

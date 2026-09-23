@@ -62,10 +62,25 @@
                                 <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
                                 <input type="text" name="mohtamim_name" id="mohtamimInput" class="form-control" 
                                        value="<%= tenant.mohtamim_name || '' %>" 
-                                       placeholder="مثال: مولانا مفتی محمد عبداللہ صاحب" 
-                                       list="teachersList" autocomplete="off">
+                                       placeholder="<%= __('Mohtamim_Placeholder') || 'مثال: مولانا مفتی محمد عبداللہ صاحب' %>" 
+                                       autocomplete="off">
+                                <% if (teachers && teachers.length > 0) { %>
+                                    <button class="btn btn-outline-primary dropdown-toggle px-3" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-person-lines-fill me-1"></i><%= __('Select_Teacher') || 'اساتذہ' %>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="max-height: 260px; overflow-y: auto;">
+                                        <% teachers.forEach(t => { %>
+                                            <li>
+                                                <a class="dropdown-item py-2 d-flex justify-content-between align-items-center" href="javascript:void(0)" onclick="selectTeacherForInput('mohtamimInput', '<%= t.name.replace(/'/g, "\\'") %>')">
+                                                    <span class="fw-semibold"><%= t.name %></span>
+                                                    <% if (t.designation) { %><small class="text-muted ms-2">(<%= t.designation %>)</small><% } %>
+                                                </a>
+                                            </li>
+                                        <% }) %>
+                                    </ul>
+                                <% } %>
                             </div>
-                            <div class="form-text small text-muted"><%= __('Mohtamim_Hint') || 'مہتمم یا ناظم اعلیٰ کا نام یا القاب درج کریں۔' %></div>
+                            <div class="form-text small text-muted"><%= __('Mohtamim_Hint') || 'مہتمم یا ناظم اعلیٰ کا نام یا القاب درج کریں یا فہرست سے منتخب کریں۔' %></div>
                         </div>
 
                         <!-- 2. Nazim Taleemat -->
@@ -78,10 +93,25 @@
                                 <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
                                 <input type="text" name="nazim_taleemat_name" id="nazimTaleematInput" class="form-control" 
                                        value="<%= tenant.nazim_taleemat_name || '' %>" 
-                                       placeholder="مثال: مولانا قاری اسحاق صاحب" 
-                                       list="teachersList" autocomplete="off">
+                                       placeholder="<%= __('Nazim_Taleemat_Placeholder') || 'مثال: مولانا قاری اسحاق صاحب' %>" 
+                                       autocomplete="off">
+                                <% if (teachers && teachers.length > 0) { %>
+                                    <button class="btn btn-outline-primary dropdown-toggle px-3" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-person-lines-fill me-1"></i><%= __('Select_Teacher') || 'اساتذہ' %>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="max-height: 260px; overflow-y: auto;">
+                                        <% teachers.forEach(t => { %>
+                                            <li>
+                                                <a class="dropdown-item py-2 d-flex justify-content-between align-items-center" href="javascript:void(0)" onclick="selectTeacherForInput('nazimTaleematInput', '<%= t.name.replace(/'/g, "\\'") %>')">
+                                                    <span class="fw-semibold"><%= t.name %></span>
+                                                    <% if (t.designation) { %><small class="text-muted ms-2">(<%= t.designation %>)</small><% } %>
+                                                </a>
+                                            </li>
+                                        <% }) %>
+                                    </ul>
+                                <% } %>
                             </div>
-                            <div class="form-text small text-muted"><%= __('Nazim_Taleemat_Hint') || 'تعلیمی امور کے ذمہ دار / ناظم تعلیمات کا نام درج کریں۔' %></div>
+                            <div class="form-text small text-muted"><%= __('Nazim_Taleemat_Hint') || 'تعلیمی امور کے ذمہ دار / ناظم تعلیمات کا نام درج کریں یا فہرست سے منتخب کریں۔' %></div>
                         </div>
 
                         <!-- 3. Nazim Imtihanat -->
@@ -94,8 +124,23 @@
                                 <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
                                 <input type="text" name="nazim_imtihanat_name" id="nazimImtihanatInput" class="form-control" 
                                        value="<%= tenant.nazim_imtihanat_name || '' %>" 
-                                       placeholder="مثال: مولانا مفتی اسداللہ صاحب" 
-                                       list="teachersList" autocomplete="off">
+                                       placeholder="<%= __('Nazim_Imtihanat_Placeholder') || 'مثال: مولانا مفتی اسداللہ صاحب' %>" 
+                                       autocomplete="off">
+                                <% if (teachers && teachers.length > 0) { %>
+                                    <button class="btn btn-outline-primary dropdown-toggle px-3" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-person-lines-fill me-1"></i><%= __('Select_Teacher') || 'اساتذہ' %>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="max-height: 260px; overflow-y: auto;">
+                                        <% teachers.forEach(t => { %>
+                                            <li>
+                                                <a class="dropdown-item py-2 d-flex justify-content-between align-items-center" href="javascript:void(0)" onclick="selectTeacherForInput('nazimImtihanatInput', '<%= t.name.replace(/'/g, "\\'") %>')">
+                                                    <span class="fw-semibold"><%= t.name %></span>
+                                                    <% if (t.designation) { %><small class="text-muted ms-2">(<%= t.designation %>)</small><% } %>
+                                                </a>
+                                            </li>
+                                        <% }) %>
+                                    </ul>
+                                <% } %>
                             </div>
                             <div class="form-text small text-muted"><%= __('Nazim_Imtihanat_Hint') || 'امتحانی شعبے کے نگراں / ناظم امتحانات کا نام درج کریں۔ یہ نام گزٹ اور تمام رپورٹ کارڈز دونوں پر ظاہر ہوگا۔' %></div>
                         </div>
@@ -110,18 +155,26 @@
                                 <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
                                 <input type="text" name="default_nazim_saff_name" id="defaultNazimSaffInput" class="form-control" 
                                        value="<%= tenant.default_nazim_saff_name || '' %>" 
-                                       placeholder="مثال: استاذ الصف / ناظم صف" 
-                                       list="teachersList" autocomplete="off">
+                                       placeholder="<%= __('Default_Nazim_Saff_Placeholder') || 'مثال: استاذ الصف / ناظم صف' %>" 
+                                       autocomplete="off">
+                                <% if (teachers && teachers.length > 0) { %>
+                                    <button class="btn btn-outline-primary dropdown-toggle px-3" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-person-lines-fill me-1"></i><%= __('Select_Teacher') || 'اساتذہ' %>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="max-height: 260px; overflow-y: auto;">
+                                        <% teachers.forEach(t => { %>
+                                            <li>
+                                                <a class="dropdown-item py-2 d-flex justify-content-between align-items-center" href="javascript:void(0)" onclick="selectTeacherForInput('defaultNazimSaffInput', '<%= t.name.replace(/'/g, "\\'") %>')">
+                                                    <span class="fw-semibold"><%= t.name %></span>
+                                                    <% if (t.designation) { %><small class="text-muted ms-2">(<%= t.designation %>)</small><% } %>
+                                                </a>
+                                            </li>
+                                        <% }) %>
+                                    </ul>
+                                <% } %>
                             </div>
                             <div class="form-text small text-muted"><%= __('Default_Nazim_Saff_Hint') || 'اگر کسی کلاس کے لیے الگ ناظم صف متعین نہ ہو تو رپورٹ کارڈ پر یہ نام ظاہر ہوگا۔' %></div>
                         </div>
-
-                        <!-- Datalist of Teachers for quick auto-complete -->
-                        <datalist id="teachersList">
-                            <% teachers.forEach(t => { %>
-                                <option value="<%= t.name %>"><%= t.name %></option>
-                            <% }) %>
-                        </datalist>
                     </div>
                 </div>
             </div>
@@ -159,19 +212,24 @@
                                                 <td>
                                                     <div class="input-group input-group-sm">
                                                         <input type="text" 
+                                                               id="classInput_<%= cls.id %>"
                                                                name="class_nazim[<%= cls.id %>]" 
                                                                class="form-control" 
                                                                value="<%= cls.nazim_saff_name || '' %>" 
                                                                placeholder="<%= __('Select_Or_Type_Teacher') || 'استاد کا نام منتخب کریں یا لکھیں...' %>"
-                                                               list="teachersList" 
                                                                autocomplete="off">
                                                         <% if (teachers && teachers.length > 0) { %>
-                                                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                                                <i class="bi bi-person-lines-fill"></i>
+                                                            <button class="btn btn-outline-primary dropdown-toggle px-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="<%= __('Select_Teacher') || 'اساتذہ کی فہرست' %>">
+                                                                <i class="bi bi-person-lines-fill me-1"></i><span class="d-none d-sm-inline"><%= __('Select') || 'منتخب کریں' %></span>
                                                             </button>
-                                                            <ul class="dropdown-menu dropdown-menu-end">
+                                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="max-height: 220px; overflow-y: auto;">
                                                                 <% teachers.forEach(t => { %>
-                                                                    <li><a class="dropdown-item" href="javascript:void(0)" onclick="this.closest('.input-group').querySelector('input').value = '<%= t.name %>';"><%= t.name %></a></li>
+                                                                    <li>
+                                                                        <a class="dropdown-item py-1 d-flex justify-content-between align-items-center" href="javascript:void(0)" onclick="selectTeacherForInput('classInput_<%= cls.id %>', '<%= t.name.replace(/'/g, "\\'") %>')">
+                                                                            <span class="fw-semibold"><%= t.name %></span>
+                                                                            <% if (t.designation) { %><small class="text-muted ms-2">(<%= t.designation %>)</small><% } %>
+                                                                        </a>
+                                                                    </li>
                                                                 <% }) %>
                                                             </ul>
                                                         <% } %>
@@ -214,7 +272,7 @@
                                 <div class="col-4">
                                     <hr style="width: 70%; margin: 0 auto 6px auto; border-top: 1.5px solid #000; opacity: 1;">
                                     <strong class="small d-block"><%= __('Nazim_Imtihanat') || 'ناظم امتحانات' %></strong>
-                                    <span class="small text-muted" id="previewGazetteNazimImtihanat"><%= tenant.nazim_imtihanat_name ? '(' + tenant.nazim_imtihanat_name + ')' : '' %></span>
+                                    <span class="small text-muted" id="previewGazetteNazimImtihanat"><%= tenant.mohtamim_name ? '(' + tenant.nazim_imtihanat_name + ')' : '' %></span>
                                 </div>
                                 <div class="col-4">
                                     <hr style="width: 70%; margin: 0 auto 6px auto; border-top: 1.5px solid #000; opacity: 1;">
@@ -264,7 +322,7 @@
 </div>
 
 <script>
-    // Live update preview when typing
+    // Live update preview when typing or selecting
     const mohtamimInput = document.getElementById('mohtamimInput');
     const nazimTaleematInput = document.getElementById('nazimTaleematInput');
     const nazimImtihanatInput = document.getElementById('nazimImtihanatInput');
@@ -275,6 +333,14 @@
     const previewGazetteNazimImtihanat = document.getElementById('previewGazetteNazimImtihanat');
     const previewCardNazimImtihanat = document.getElementById('previewCardNazimImtihanat');
     const previewCardNazimSaff = document.getElementById('previewCardNazimSaff');
+
+    function selectTeacherForInput(inputId, teacherName) {
+        const inp = document.getElementById(inputId);
+        if (inp) {
+            inp.value = teacherName;
+            updatePreviews();
+        }
+    }
 
     function updatePreviews() {
         if (mohtamimInput && previewGazetteMohtamim) {
@@ -289,7 +355,6 @@
             if (previewCardNazimImtihanat) previewCardNazimImtihanat.textContent = val;
         }
         if (defaultNazimSaffInput && previewCardNazimSaff) {
-            // If any first class has value, use it or fallback
             const firstClassInput = document.querySelector('input[name^="class_nazim"]');
             const classVal = firstClassInput ? firstClassInput.value.trim() : '';
             const fallbackVal = defaultNazimSaffInput.value.trim();
@@ -307,6 +372,9 @@
     document.querySelectorAll('input[name^="class_nazim"]').forEach(inp => {
         inp.addEventListener('input', updatePreviews);
     });
+
+    // Run once on load to ensure preview is populated
+    updatePreviews();
 </script>
 
 <%- include('partials/footer') %>
