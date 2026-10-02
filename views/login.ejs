@@ -1,70 +1,88 @@
 <!DOCTYPE html>
 <html lang="<%= locals.lang || 'ur' %>" dir="<%= ['ar', 'ur'].includes(locals.lang || 'ur') ? 'rtl' : 'ltr' %>">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= locals.tenant ? (tenant.subdomain === 'madrassa-ms' ? __('Jamia_Habibullah_Islamabad') : (tenant.subdomain === 'kui' ? __('KUI_Production') : tenant.school_name)) : __('College_Name') %></title>
+    <title>
+        <%= locals.tenant ? (tenant.subdomain==='madrassa-ms' ? __('Jamia_Habibullah_Islamabad') :
+            (tenant.subdomain==='kui' ? __('KUI_Production') : tenant.school_name)) : __('College_Name') %>
+    </title>
     <link rel="icon" href="<%= (locals.tenant && tenant.logo_url) ? tenant.logo_url : '/logo.jpg' %>">
     <link rel="stylesheet" href="/css/style.css">
 </head>
+
 <body class="login-page">
     <div class="container" style="display: flex; height: 100vh; align-items: center; justify-content: center;">
-        <div class="card" style="width: 100%; max-width: 400px; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+        <div class="card"
+            style="width: 100%; max-width: 400px; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
             <div style="text-align: center; margin-bottom: 25px;">
-                <img src="<%= (locals.tenant && tenant.logo_url) ? tenant.logo_url : '/logo.jpg' %>" alt="<%= locals.tenant ? (tenant.subdomain === 'madrassa-ms' ? __('Jamia_Habibullah_Islamabad') : (tenant.subdomain === 'kui' ? __('KUI_Production') : tenant.school_name)) : __('College_Name') %>" style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 15px;">
-                <h2 style="margin: 0; font-size: 1.6rem; color: var(--primary); font-weight: 700;"><%= locals.tenant ? (tenant.subdomain === 'madrassa-ms' ? __('Jamia_Habibullah_Islamabad') : (tenant.subdomain === 'kui' ? __('KUI_Production') : tenant.school_name)) : __('College_Name') %></h2>
-                <h3 style="margin: 5px 0 0 0; color: #666; font-size: 1.1rem; font-weight: 400;"><%= __('Login_Title') %></h3>
+                <img src="<%= (locals.tenant && tenant.logo_url) ? tenant.logo_url : '/logo.jpg' %>"
+                    alt="<%= locals.tenant ? (tenant.subdomain === 'madrassa-ms' ? __('Jamia_Habibullah_Islamabad') : (tenant.subdomain === 'kui' ? __('KUI_Production') : tenant.school_name)) : __('College_Name') %>"
+                    style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 15px;">
+                <h2 style="margin: 0; font-size: 1.6rem; color: var(--primary); font-weight: 700;">
+                    <%= locals.tenant ? (tenant.subdomain==='madrassa-ms' ? __('Jamia_Habibullah_Islamabad') :
+                        (tenant.subdomain==='kui' ? __('KUI_Production') : tenant.school_name)) : __('College_Name') %>
+                </h2>
+                <h3 style="margin: 5px 0 0 0; color: #666; font-size: 1.1rem; font-weight: 400;">
+                    <%= __('Login_Title') %>
+                </h3>
             </div>
-            
+
             <% if (error) { %>
                 <div style="background: #fee; color: #c00; padding: 10px; border-radius: 5px; margin-bottom: 20px;">
                     <%= error %>
                 </div>
-            <% } %>
+                <% } %>
 
-            <form action="/login" method="POST">
-                <div style="margin-bottom: 15px;">
-                    <label><%= __('Username_Label') %></label>
-                    <input type="text" name="username" value="مدیر" class="form-control-login" style="width: 100%; text-align: inherit; background: #f9f9f9; border: 1px solid #ddd; color: #333; padding: 10px; border-radius: 8px;" required>
-                </div>
-                <div style="margin-bottom: 25px;">
-                    <label><%= __('Password_Label') %></label>
-                    <input type="password" name="password" value="1981" class="form-control-login" style="width: 100%; text-align: inherit; background: #f9f9f9; border: 1px solid #ddd; color: #333; padding: 10px; border-radius: 8px;" required>
-                </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;"><%= __('Login_Btn') %></button>
-            </form>
-            <!-- Open Access Section (No Login Required) -->
-            <div style="margin-top: 24px; padding-top: 18px; border-top: 1px dashed #cbd5e1; text-align: center;">
-                <span style="display: block; font-size: 0.78rem; color: #64748b; margin-bottom: 10px; font-weight: 600;">
-                    <%= locals.lang === 'ur' ? '— یا بغیر لاگ ان کے وزٹ کریں —' : (locals.lang === 'ar' ? '— أو تصفح الدروس مباشرة دون تسجيل —' : '— Or Explore Without Login —') %>
-                </span>
-                
-                <a href="/lms" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 11px 16px; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #e5c05d; border: 1.5px solid #e5c05d; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 0.95rem; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15); transition: all 0.2s ease;">
-                    <span style="font-size: 1.15rem;">🎓</span>
-                    <span><%= locals.lang === 'ur' ? 'مدرسہ آن لائن پورٹل (LMS)' : (locals.lang === 'ar' ? 'بوابة المدرسة الإلكترونية (LMS)' : 'Madrasa Online Portal (LMS)') %></span>
-                    <span style="font-size: 0.85rem; opacity: 0.8;">←</span>
-                </a>
-                
-                <small style="display: block; margin-top: 6px; color: #64748b; font-size: 0.76rem;">
-                    <%= locals.lang === 'ur' ? 'درسِ نظامی کے کتب و اسباق کا مطالعہ (کھلی رسائی)' : (locals.lang === 'ar' ? 'دروس وموضوعات تفاعلية (مفتوح للجميع)' : 'Open access lessons & interactive study models') %>
-                </small>
-            </div>
+                    <form action="/login" method="POST">
+                        <div style="margin-bottom: 15px;">
+                            <label>
+                                <%= __('Username_Label') %>
+                            </label>
+                            <input type="text" name="username" value="مدیر" class="form-control-login"
+                                style="width: 100%; text-align: inherit; background: #f9f9f9; border: 1px solid #ddd; color: #333; padding: 10px; border-radius: 8px;"
+                                required>
+                        </div>
+                        <div style="margin-bottom: 25px;">
+                            <label>
+                                <%= __('Password_Label') %>
+                            </label>
+                            <input type="password" name="password" value="1981" class="form-control-login"
+                                style="width: 100%; text-align: inherit; background: #f9f9f9; border: 1px solid #ddd; color: #333; padding: 10px; border-radius: 8px;"
+                                required>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            <%= __('Login_Btn') %>
+                        </button>
+                    </form>
+                    <!-- Open Access Section (No Login Required) -->
+                    <div
+                        style="margin-top: 24px; padding-top: 18px; border-top: 1px dashed #cbd5e1; text-align: center;">
+                        <span
+                            style="display: block; font-size: 0.78rem; color: #64748b; margin-bottom: 10px; font-weight: 600;">
+                            <%= locals.lang==='ur' ? '— یا بغیر لاگ ان کے وزٹ کریں —' : (locals.lang==='ar'
+                                ? '— أو تصفح الدروس مباشرة دون تسجيل —' : '— Or Explore Without Login —' ) %>
+                        </span>
 
-            <div style="text-align: center; margin-top: 12px;">
-                <a href="/timetable/public" style="color: #475569; text-decoration: none; font-size: 0.82rem; display: inline-flex; align-items: center; gap: 5px;">
-                    📅 <%= locals.lang === 'ur' ? 'عوامی ٹائم ٹیبل دیکھیں' : (locals.lang === 'ar' ? 'عرض الجدول العام' : 'View Public Timetable') %>
-                </a>
-            </div>
+                        <a href="/lms" target="_blank"
+                            style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 11px 16px; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #e5c05d; border: 1.5px solid #e5c05d; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 0.95rem; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15); transition: all 0.2s ease;">
+                            <span style="font-size: 1.15rem;">🎓</span>
+                            <span>
+                                <%= locals.lang==='ur' ? 'مدرسہ آن لائن پورٹل (LMS)' : (locals.lang==='ar'
+                                    ? 'بوابة المدرسة الإلكترونية (LMS)' : 'Madrasa Online Portal (LMS)' ) %>
+                            </span>
+                            <span style="font-size: 0.85rem; opacity: 0.8;">←</span>
+                        </a>
 
-            <% if (!locals.isMobileApp) { %>
-            <div style="text-align: center; margin-top: 16px;">
-                <a href="/mobile" style="color: #666; text-decoration: none; font-size: 0.9em; display: inline-flex; align-items: center; gap: 5px;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    <%= __('Download_Android_App') %>
-                </a>
-            </div>
-            <% } %>
+                        <small style="display: block; margin-top: 6px; color: #64748b; font-size: 0.76rem;">
+                            <%= locals.lang==='ur' ? 'درسِ نظامی کے کتب و اسباق کا مطالعہ (کھلی رسائی)' :
+                                (locals.lang==='ar' ? 'دروس وموضوعات تفاعلية (مفتوح للجميع)'
+                                : 'Open access lessons & interactive study models' ) %>
+                        </small>
+                    </div>
         </div>
     </div>
 </body>
+
 </html>
