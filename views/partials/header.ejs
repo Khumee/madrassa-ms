@@ -359,3 +359,33 @@
     </div>
 
     <div class="container pb-5">
+        <!-- Mobile Quick Navigation Bar (Prominent 3-Button Card for Mobile) -->
+        <div class="d-block d-lg-none mb-3">
+            <div class="card border-0 shadow-sm rounded-4" style="background: #ffffff; border: 1px solid rgba(0,0,0,0.06) !important;">
+                <div class="card-body p-2 p-sm-3">
+                    <div class="row g-2 text-center align-items-center">
+                        <!-- Home / Dashboard Button -->
+                        <div class="col-4">
+                            <a href="/" class="btn btn-light w-100 py-2 px-1 rounded-3 shadow-none d-flex flex-column align-items-center justify-content-center border-0 text-dark" style="background: rgba(59, 130, 246, 0.08);">
+                                <i class="bi bi-house-door-fill fs-5 mb-1 text-primary"></i>
+                                <span class="fw-bold text-truncate w-100" style="font-size: 0.78rem;"><%= __('Main_Page') %></span>
+                            </a>
+                        </div>
+                        <!-- Timetable Button -->
+                        <div class="col-4">
+                            <a href="<%= (locals.session && session.userId) ? '/periods/full' : '/timetable/public' %>" class="btn btn-light w-100 py-2 px-1 rounded-3 shadow-none d-flex flex-column align-items-center justify-content-center border-0 text-dark" style="background: rgba(16, 185, 129, 0.08);">
+                                <i class="bi bi-calendar3 fs-5 mb-1 text-success"></i>
+                                <span class="fw-bold text-truncate w-100" style="font-size: 0.78rem;"><%= __('Timetable') %></span>
+                            </a>
+                        </div>
+                        <!-- LMS Portal Button -->
+                        <div class="col-4">
+                            <a href="/lms" target="_blank" class="btn btn-dark w-100 py-2 px-1 rounded-3 shadow-none d-flex flex-column align-items-center justify-content-center border-0 text-white" style="background: linear-gradient(145deg, #0f172a, #1e293b); border: 1px solid rgba(229, 192, 93, 0.3) !important;">
+                                <i class="bi bi-mortarboard-fill fs-5 mb-1" style="color: #e5c05d;"></i>
+                                <span class="fw-bold text-truncate w-100" style="font-size: 0.78rem; color: #e5c05d;"><%= __('LMS_Portal') %></span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
