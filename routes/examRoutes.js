@@ -1479,7 +1479,8 @@ router.get('/exams/:id/report-cards/pdf', isAdmin, async (req, res) => {
                 format: 'A4',
                 printBackground: true,
                 displayHeaderFooter: false,
-                margin: { top: '8mm', bottom: '8mm', left: '8mm', right: '8mm' }
+                preferCSSPageSize: true,
+                margin: { top: '0mm', bottom: '0mm', left: '0mm', right: '0mm' }
             });
 
             const rawName = `${data.exam.name} All Report Cards`.replace(/["\\]/g, '').trim();

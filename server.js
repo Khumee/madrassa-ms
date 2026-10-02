@@ -17,6 +17,9 @@ const PORT = process.env.PORT || 3000;
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
+// LMS Portal - Open interactive learning platform (publicly accessible, no auth required)
+app.use('/lms', express.static(path.join(__dirname, 'lms')));
+app.get('/lms', (req, res) => res.sendFile(path.join(__dirname, 'lms', 'index.html')));
 app.get('/logo.jpg', (req, res) => res.sendFile(path.join(__dirname, 'logo.jpg')));
 app.get('/mobile', (req, res) => res.redirect('/mms.apk'));
 app.get('/api/app-version', (req, res) => {

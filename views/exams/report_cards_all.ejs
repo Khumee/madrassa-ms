@@ -1,40 +1,73 @@
 <%- include('../partials/header', { title: (exam.name + ' - ' + (__('All_Report_Cards') || 'تمام رپورٹ کارڈز')) }) %>
 
-<!-- Print styling -->
+<!-- Print styling for strict 1 Card = 1 Page A4 Output -->
 <style>
+    @page {
+        size: A4 portrait;
+        margin: 5mm;
+    }
     @media print {
-        body * {
-            visibility: hidden;
+        html, body {
+            background: #fff !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            font-size: 13px !important;
         }
-        .printable-area, .printable-area * {
-            visibility: visible;
+        nav.navbar, footer, .no-print, #pdfLoaderOverlay, .toast-container, .breadcrumb {
+            display: none !important;
+            visibility: hidden !important;
+        }
+        .container {
+            max-width: 100% !important;
+            width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
         }
         .printable-area {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-        }
-        .no-print {
-            display: none !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
         }
         .report-card-wrapper {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
             page-break-after: always !important;
             break-after: page !important;
-            margin-bottom: 0 !important;
-            padding-top: 5px !important;
-            padding-bottom: 5px !important;
+            box-sizing: border-box !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            min-height: 280mm !important;
+            max-height: 287mm !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: flex-start !important;
         }
-        .card {
+        .report-card-wrapper:last-child {
+            page-break-after: auto !important;
+            break-after: auto !important;
+        }
+        .report-card-container {
             border: 2px solid #2c3e50 !important;
+            border-radius: 10px !important;
             box-shadow: none !important;
+            padding: 16px 20px !important;
+            box-sizing: border-box !important;
+            flex: 1 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
         }
     }
     
     .report-card-wrapper {
         page-break-after: always;
         break-after: page;
-        margin-bottom: 45px;
+        margin-bottom: 40px;
+    }
+    .report-card-wrapper:last-child {
+        page-break-after: auto;
+        break-after: auto;
+        margin-bottom: 0;
     }
 
     .report-card-container {
@@ -52,12 +85,12 @@
         transform: translate(-50%, -50%);
         opacity: 0.05;
         z-index: 0;
-        width: 80%;
+        width: 70%;
         pointer-events: none;
     }
 </style>
 
-<div class="container mt-4 mb-5">
+<div class="container mt-3 mb-5">
     <!-- Header Controls & Filters -->
     <div class="no-print mb-4">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
@@ -112,7 +145,7 @@
         </div>
     </div>
 
-    <!-- Printable Cards Area -->
+    <!-- Printable Cards Area (Strict 1 Card per Page) -->
     <div class="printable-area">
         <% if (cards && cards.length > 0) { %>
             <% cards.forEach((card, index) => { %>
@@ -123,108 +156,110 @@
                             <img src="<%= tenant.logo_url %>" alt="Madrassa Logo" class="watermark">
                         <% } %>
 
-                        <!-- Header Section -->
-                        <div class="row mb-2 align-items-center" style="position: relative; z-index: 1;">
-                            <div class="col-3 text-center">
-                                <% if (locals.tenant && locals.tenant.logo_url) { %>
-                                    <img src="<%= tenant.logo_url %>" alt="Logo" style="max-height: 65px; max-width: 100%;">
-                                <% } %>
-                            </div>
-                            <div class="col-6 text-center">
-                                <h2 class="fw-bold text-dark mb-1" style="white-space: nowrap;"><%= locals.tenant ? (tenant.subdomain === 'madrassa-ms' ? __('Jamia_Habibullah_Islamabad') : (tenant.subdomain === 'kui' ? __('KUI_Production') : tenant.school_name)) : __('College_Name') %></h2>
-                                <h5 class="text-secondary mb-2"><%= exam.name %></h5>
-                                <h6 class="fw-bold bg-dark text-white d-inline-block px-3 py-1 rounded-pill mb-0"><%= __('Student_Report_Card') || 'Report Card' %></h6>
-                            </div>
-                            <div class="col-3 text-center">
-                                <!-- Optional space for student badge or QR -->
-                            </div>
-                        </div>
-
-                        <hr style="border-top: 2px solid #2c3e50; opacity: 1;" class="my-2">
-                        
-                        <!-- Student Details -->
-                        <div class="row mb-2" style="position: relative; z-index: 1;">
-                            <div class="col-6">
-                                <table class="table table-sm table-borderless mb-0">
-                                    <tr>
-                                        <th width="35%" class="text-muted"><%= __('Name') %>:</th>
-                                        <td class="fw-bold fs-6"><%= s.name %></td>
-                                    </tr>
-                                    <tr>
-                                        <th class="text-muted"><%= __('Roll_Number') %>:</th>
-                                        <td class="fw-bold"><%= s.roll_number || s.id %></td>
-                                    </tr>
-                                </table>
-                            </div>
-                            <div class="col-6">
-                                <table class="table table-sm table-borderless mb-0">
-                                    <% if (s.class_name) { %>
-                                        <tr>
-                                            <th width="35%" class="text-muted"><%= __('Class') %>:</th>
-                                            <td class="fw-bold"><%= s.class_name %></td>
-                                        </tr>
+                        <div>
+                            <!-- Header Section -->
+                            <div class="row mb-1 align-items-center" style="position: relative; z-index: 1;">
+                                <div class="col-3 text-center">
+                                    <% if (locals.tenant && locals.tenant.logo_url) { %>
+                                        <img src="<%= tenant.logo_url %>" alt="Logo" style="max-height: 55px; max-width: 100%;">
                                     <% } %>
-                                    <tr>
-                                        <th class="text-muted"><%= __('Date') %>:</th>
-                                        <td class="fw-bold"><%= new Date().toLocaleDateString(locals.lang === 'en' ? 'en-US' : 'ur-PK') %></td>
-                                    </tr>
-                                </table>
+                                </div>
+                                <div class="col-6 text-center">
+                                    <h3 class="fw-bold text-dark mb-0" style="white-space: nowrap;"><%= locals.tenant ? (tenant.subdomain === 'madrassa-ms' ? __('Jamia_Habibullah_Islamabad') : (tenant.subdomain === 'kui' ? __('KUI_Production') : tenant.school_name)) : __('College_Name') %></h3>
+                                    <h6 class="text-secondary mb-1"><%= exam.name %></h6>
+                                    <span class="fw-bold bg-dark text-white d-inline-block px-3 py-1 rounded-pill small"><%= __('Student_Report_Card') || 'Report Card' %></span>
+                                </div>
+                                <div class="col-3 text-center">
+                                    <!-- Optional placeholder -->
+                                </div>
                             </div>
-                        </div>
-                        
-                        <!-- Results Table -->
-                        <div style="position: relative; z-index: 1;">
-                            <table class="table table-bordered table-sm text-center align-middle border-dark mb-2">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th class="py-1"><%= __('Subject') %></th>
-                                        <th class="py-1" style="width: 130px;"><%= __('Max_Marks') %></th>
-                                        <th class="py-1" style="width: 150px;"><%= __('Obtained_Marks') %></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <% card.results.forEach(r => { %>
+
+                            <hr style="border-top: 2px solid #2c3e50; opacity: 1;" class="my-2">
+                            
+                            <!-- Student Details -->
+                            <div class="row mb-2" style="position: relative; z-index: 1;">
+                                <div class="col-6">
+                                    <table class="table table-sm table-borderless mb-0">
                                         <tr>
-                                            <td class="fw-semibold text-start px-3 py-1"><%= r.subject %></td>
-                                            <td class="py-1"><%= r.max_marks %></td>
-                                            <% if (r.is_absent) { %>
-                                                <td class="fw-bold py-1 text-danger"><%= __('Absent') || 'غائب' %></td>
-                                            <% } else if (r.obtained_marks !== null) { %>
-                                                <td class="fw-bold py-1 <%= r.obtained_marks < (r.max_marks * 0.4) ? 'text-danger' : '' %>"><%= r.obtained_marks %></td>
-                                            <% } else { %>
-                                                <td class="text-muted fst-italic py-1">-</td>
-                                            <% } %>
+                                            <th width="35%" class="text-muted py-0"><%= __('Name') %>:</th>
+                                            <td class="fw-bold fs-6 py-0"><%= s.name %></td>
                                         </tr>
-                                    <% }) %>
-                                    <tr class="table-secondary border-dark">
-                                        <td class="fw-bold text-start px-3 py-1"><%= __('Total') %></td>
-                                        <td class="fw-bold py-1"><%= card.totalMax %></td>
-                                        <td class="fw-bold py-1"><%= card.allPapersUnmarked ? '-' : card.totalObtained %></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        <!-- Grading Section -->
-                        <div class="mt-2 p-2 rounded bg-light border" style="position: relative; z-index: 1;">
-                            <div class="row align-items-center text-center">
-                                <div class="col-6 border-end">
-                                    <h6 class="text-muted mb-1"><%= __('Percentage') %></h6>
-                                    <h4 class="fw-bold mb-0 <%= card.allPapersUnmarked ? 'text-muted' : '' %>"><%= card.allPapersUnmarked ? '-' : card.percentage + '%' %></h4>
+                                        <tr>
+                                            <th class="text-muted py-0"><%= __('Roll_Number') %>:</th>
+                                            <td class="fw-bold py-0"><%= s.roll_number || s.id %></td>
+                                        </tr>
+                                    </table>
                                 </div>
                                 <div class="col-6">
-                                    <h6 class="text-muted mb-1"><%= __('Grade') %></h6>
-                                    <% if (card.allPapersUnmarked) { %>
-                                        <h5 class="fw-bold text-muted mb-0"><%= __('Papers_not_marked') || 'Papers not marked yet' %></h5>
-                                    <% } else { %>
-                                        <h4 class="fw-bold text-<%= card.gradeClass %> mb-0"><%= typeof card.gradeKey !== 'undefined' ? __(card.gradeKey) : card.grade %></h4>
-                                    <% } %>
+                                    <table class="table table-sm table-borderless mb-0">
+                                        <% if (s.class_name) { %>
+                                            <tr>
+                                                <th width="35%" class="text-muted py-0"><%= __('Class') %>:</th>
+                                                <td class="fw-bold py-0"><%= s.class_name %></td>
+                                            </tr>
+                                        <% } %>
+                                        <tr>
+                                            <th class="text-muted py-0"><%= __('Date') %>:</th>
+                                            <td class="fw-bold py-0"><%= new Date().toLocaleDateString(locals.lang === 'en' ? 'en-US' : 'ur-PK') %></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <!-- Results Table -->
+                            <div style="position: relative; z-index: 1;">
+                                <table class="table table-bordered table-sm text-center align-middle border-dark mb-2">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th class="py-1"><%= __('Subject') %></th>
+                                            <th class="py-1" style="width: 120px;"><%= __('Max_Marks') %></th>
+                                            <th class="py-1" style="width: 130px;"><%= __('Obtained_Marks') %></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% card.results.forEach(r => { %>
+                                            <tr>
+                                                <td class="fw-semibold text-start px-3 py-1"><%= r.subject %></td>
+                                                <td class="py-1"><%= r.max_marks %></td>
+                                                <% if (r.is_absent) { %>
+                                                    <td class="fw-bold py-1 text-danger"><%= __('Absent') || 'غائب' %></td>
+                                                <% } else if (r.obtained_marks !== null) { %>
+                                                    <td class="fw-bold py-1 <%= r.obtained_marks < (r.max_marks * 0.4) ? 'text-danger' : '' %>"><%= r.obtained_marks %></td>
+                                                <% } else { %>
+                                                    <td class="text-muted fst-italic py-1">-</td>
+                                                <% } %>
+                                            </tr>
+                                        <% }) %>
+                                        <tr class="table-secondary border-dark">
+                                            <td class="fw-bold text-start px-3 py-1"><%= __('Total') %></td>
+                                            <td class="fw-bold py-1"><%= card.totalMax %></td>
+                                            <td class="fw-bold py-1"><%= card.allPapersUnmarked ? '-' : card.totalObtained %></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <!-- Grading Section -->
+                            <div class="mt-2 p-2 rounded bg-light border" style="position: relative; z-index: 1;">
+                                <div class="row align-items-center text-center">
+                                    <div class="col-6 border-end">
+                                        <h6 class="text-muted mb-0 small"><%= __('Percentage') %></h6>
+                                        <h4 class="fw-bold mb-0 <%= card.allPapersUnmarked ? 'text-muted' : '' %>"><%= card.allPapersUnmarked ? '-' : card.percentage + '%' %></h4>
+                                    </div>
+                                    <div class="col-6">
+                                        <h6 class="text-muted mb-0 small"><%= __('Grade') %></h6>
+                                        <% if (card.allPapersUnmarked) { %>
+                                            <h5 class="fw-bold text-muted mb-0"><%= __('Papers_not_marked') || 'Papers not marked yet' %></h5>
+                                        <% } else { %>
+                                            <h4 class="fw-bold text-<%= card.gradeClass %> mb-0"><%= typeof card.gradeKey !== 'undefined' ? __(card.gradeKey) : card.grade %></h4>
+                                        <% } %>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <!-- Signatures -->
-                        <div class="row mt-4 pt-4 text-center" style="position: relative; z-index: 1;">
+                        <!-- Signatures (Pinned neatly to bottom) -->
+                        <div class="row mt-4 pt-3 text-center" style="position: relative; z-index: 1;">
                             <div class="col-6">
                                 <hr style="width: 60%; margin: 0 auto 5px auto; border-top: 1px solid #000; opacity: 1;">
                                 <strong class="d-block"><%= __('Nazim_Saff') || 'ناظم صف' %></strong>
