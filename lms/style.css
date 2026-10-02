@@ -1250,15 +1250,17 @@ body.view-urdu-only .parallel-block { grid-template-columns: 1fr !important; }
 
 .math-formula {
   direction: ltr;
-  font-family: monospace;
+  unicode-bidi: isolate;
+  font-family: 'Cambria Math', 'STIX Two Math', 'Segoe UI Symbol', 'Noto Sans Math', 'DejaVu Sans', 'Fira Code', 'Consolas', monospace;
   font-size: 1.15rem;
   font-weight: bold;
   color: var(--text-accent);
   margin: 0.5rem 0;
-  padding: 0.5rem;
+  padding: 0.6rem 1rem;
   background: rgba(0, 0, 0, 0.3);
   border-radius: var(--radius-sm);
   display: inline-block;
+  line-height: 1.6;
 }
 
 /* ================== TAB 5: OBJECTIONS & TAWHEED ================== */
@@ -1702,16 +1704,78 @@ body.view-urdu-only .parallel-block { grid-template-columns: 1fr !important; }
 }
 
 .concept-math {
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Cambria Math', 'STIX Two Math', 'Segoe UI Symbol', 'Noto Sans Math', 'DejaVu Sans', 'Fira Code', 'Consolas', monospace;
   direction: ltr;
   text-align: left;
+  unicode-bidi: isolate;
   background: rgba(0, 0, 0, 0.28);
   border-left: 3px solid var(--teal-accent);
-  padding: 0.5rem 0.8rem;
-  border-radius: 4px;
-  font-size: 0.88rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: 6px;
+  font-size: 0.92rem;
   color: var(--teal-accent);
   margin-bottom: 0.8rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  letter-spacing: 0.3px;
+}
+
+.math-label {
+  font-weight: 700;
+  color: var(--text-accent);
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: 0.5px;
+}
+
+.math-expr {
+  font-family: 'Cambria Math', 'STIX Two Math', 'Segoe UI Symbol', 'Noto Sans Math', 'Consolas', monospace;
+  font-weight: 600;
+  font-size: 1.08rem;
+  color: #f8fafc;
+  background: rgba(45, 212, 191, 0.15);
+  border: 1px solid rgba(45, 212, 191, 0.35);
+  padding: 0.2rem 0.6rem;
+  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  direction: ltr;
+  unicode-bidi: isolate;
+  vertical-align: middle;
+}
+
+.math-op {
+  font-weight: bold;
+  color: var(--teal-accent);
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.math-quant {
+  font-size: 1.12rem;
+  color: #38bdf8;
+  font-weight: bold;
+}
+
+.math-var {
+  font-style: italic;
+  font-family: 'Times New Roman', 'Cambria Math', serif;
+  color: #fde047;
+  font-size: 1.1rem;
+}
+
+.math-neg {
+  font-weight: bold;
+  color: #f87171;
+  font-size: 1.1rem;
+}
+
+.math-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-family: 'Outfit', sans-serif;
 }
 
 .modern-explanation {
