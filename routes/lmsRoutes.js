@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 
 const DOWNLOADS_DIR = path.join(__dirname, '..', 'lms', 'downloads');
+const MASTER_PDF = path.join(DOWNLOADS_DIR, 'Tawzeeh-Complete-Topic.pdf');
 const NOTES_PDF = path.join(DOWNLOADS_DIR, 'Tawzeeh-Lecture-Notes.pdf');
 const SLIDES_PDF = path.join(DOWNLOADS_DIR, 'Tawzeeh-Slides.pdf');
 
@@ -11,6 +12,22 @@ const SLIDES_PDF = path.join(DOWNLOADS_DIR, 'Tawzeeh-Slides.pdf');
 if (!fs.existsSync(DOWNLOADS_DIR)) {
   fs.mkdirSync(DOWNLOADS_DIR, { recursive: true });
 }
+
+// Download Complete Master Topic PDF (All-in-One File)
+router.get('/api/lms/tarjeeh/pdf/master', async (req, res) => {
+  try {
+    if (!fs.existsSync(MASTER_PDF) || req.query.regenerate === 'true') {
+      const { generateTawzeehPDFs } = require('../scripts/generate_tarjeeh_pdfs');
+      await generateTawzeehPDFs();
+    }
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename="Tawzeeh-Complete-Study-Guide.pdf"');
+    res.sendFile(MASTER_PDF);
+  } catch (err) {
+    console.error('Error serving Master PDF:', err);
+    res.status(500).send('Error generating server-side PDF: ' + err.message);
+  }
+});
 
 // Download Lecture Notes PDF (Matn + Urdu Translation + Notes)
 router.get('/api/lms/tarjeeh/pdf/notes', async (req, res) => {

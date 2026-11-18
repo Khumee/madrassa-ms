@@ -306,13 +306,17 @@
             <span class="btn-text">اندازِ ظاہری</span>
           </button>
         </div>
-        <a href="downloads/Tawzeeh-Lecture-Notes.pdf" class="action-btn download-btn" download="Tawzeeh-Lecture-Notes.pdf" title="مکمل عربی متن اور اردو ترجمہ پی ڈی ایف ڈاؤنلوڈ کریں">
-          <span class="icon">📥</span>
-          <span class="btn-text">ڈاؤنلوڈ نوٹس (PDF)</span>
+        <a href="downloads/Tawzeeh-Complete-Topic.pdf" class="action-btn download-btn" download="Tawzeeh-Complete-Topic.pdf" title="سارا موضوع ایک جامع پی ڈی ایف میں ڈاؤنلوڈ کریں (متن، ترجمہ، سلائیڈز، تراجیح فاسدہ اور کوئز)">
+          <span class="icon">📚</span>
+          <span class="btn-text">ڈاؤنلوڈ مکمل گائیڈ (سارا موضوع PDF)</span>
         </a>
-        <a href="downloads/Tawzeeh-Slides.pdf" class="action-btn download-btn secondary" download="Tawzeeh-Slides.pdf" title="پریزنٹیشن سلائیڈز مع امثلہ پی ڈی ایف ڈاؤنلوڈ کریں">
+        <a href="downloads/Tawzeeh-Lecture-Notes.pdf" class="action-btn download-btn secondary" download="Tawzeeh-Lecture-Notes.pdf" title="مکمل عربی متن اور اردو ترجمہ پی ڈی ایف ڈاؤنلوڈ کریں">
+          <span class="icon">📜</span>
+          <span class="btn-text">درسی نوٹس (PDF)</span>
+        </a>
+        <a href="downloads/Tawzeeh-Slides.pdf" class="action-btn download-btn secondary" download="Tawzeeh-Slides.pdf" title="پریزنٹیشن سلائیڈز پی ڈی ایف ڈاؤنلوڈ کریں">
           <span class="icon">📽️</span>
-          <span class="btn-text">ڈاؤنلوڈ سلائیڈز (PDF)</span>
+          <span class="btn-text">سلائیڈز (PDF)</span>
         </a>
         <button id="printBtn" class="action-btn secondary" onclick="window.print()" title="صفحہ پرنٹ کریں">
           <span class="icon">🖨️</span>
@@ -454,7 +458,7 @@
         <!-- Card 3 -->
         <div class="card feature-card modern-summary-card clickable-card" data-goto="tab-slides" title="سلائیڈز دیکھیں">
           <div class="card-top-badge">
-            <span class="card-icon">🤼‍♂️</span>
+            <span class="card-icon">⚖️</span>
             <span class="badge-mini">ص ۴۰۲ - ۴۰۳</span>
           </div>
           <h3>۳. الفرق الدقيق في اعتبار الكثرة</h3>
@@ -467,14 +471,14 @@
             فرد سے الگ جڑا ہو (جیسے کشتی اور دلائل)، وہاں ۱ طاقتور دلیل ہزار کمزوروں پر غالب رہتی ہے!
           </p>
           <div class="real-world-box">
-            <div class="rw-title">🏋️‍♂️ حسی تمثیل (پہلوانی اور چٹان):</div>
+            <div class="rw-title">حسی تمثیل (وزن اٹھانا بمقابلہ کشتی):</div>
             <p>
               کشتی میں اکیلا چیمپئن ہزار کمزوروں کو ہرا سکتا ہے، لیکن بھاری چٹان اٹھانے کے لیے ۱۰ افراد کا اکٹھا زور
               درکار ہوتا ہے۔ فقہی دلائل کشتی کی مانند ہیں!
             </p>
           </div>
           <div class="card-footer-action">
-            <span>سلائیڈز میں تصویری تفہیم دیکھیں 📽️</span>
+            <span>سلائیڈز میں اصولی تفہیم دیکھیں 📜</span>
           </div>
         </div>
       </div>
@@ -497,7 +501,7 @@
           </div>
           <div class="term-pill">
             <span class="term-ar">قوة التأثير:</span>
-            <span class="term-ur">علت کا شرعی حکم پیدا کرنے میں ذاتی طور پر قوی اور موثر ہونا۔</span>
+            <span class="term-ur">شریعت نے اس وصف کے اندر بذاتِ خود اس حکم کو بدلنے کی صلاحیت رکھی ہو؛ نہ کہ ایسا اثر دعویٰ کیا جائے جو شریعت نے اس وصف کو دیا ہی نہ ہو (جیسے شریعت میں غلامی احکام کو آدھا کرتی ہے، حرام نہیں کرتی)۔</span>
           </div>
           <div class="term-pill">
             <span class="term-ar">قوة الثبات:</span>
@@ -776,21 +780,59 @@
           <div class="step-card">
             <h4>دفعِ تعارض کی اصولی ترتیب</h4>
             <div class="grid-2-col mt-2">
-              <div style="background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 8px;">
-                <strong>۱. التوفيق بتغاير الحكم أو المحل:</strong><br>
-                دونوں نصوص پر عمل کی صورت نکالنا (جیسے یمینِ غموس بمقابلہ یمینِ منعقدہ)۔
+              <!-- Type 1 -->
+              <div style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.1); border-right: 4px solid var(--gold-primary); padding: 0.9rem; border-radius: 8px;">
+                <div style="font-weight: 700; color: var(--gold-primary); font-size: 1rem; margin-bottom: 0.3rem;">
+                  ۱. التوفيق بتغاير الحكم أو المحل (تطبیق و جمع):
+                </div>
+                <div style="font-size: 0.88rem; line-height: 1.7; margin-bottom: 0.5rem;">
+                  دونوں نصوص پر عمل کی صورت نکالنا تا کہ کلامِ الٰہی کا کوئی حصہ ضائع نہ ہو۔
+                </div>
+                <div style="background: rgba(0,0,0,0.2); padding: 0.5rem 0.7rem; border-radius: 6px; font-size: 0.84rem; color: #a7f3d0; border-right: 2px solid #10b981;">
+                  <strong>مثالِ اول (تغایرِ حکم):</strong> یمین کی دو متقابل آیات؛ ﴿بِمَا كَسَبَتْ قُلُوبُكُمْ﴾ کو یمینِ غموس پر محمول کیا جس میں صرف آخرت کا مؤاخذہ ہے (کفارہ نہیں)، اور ﴿بِمَا عَقَّدتُّمُ الأَيْمَانَ﴾ کو یمینِ منعقدہ پر محمول کیا جس میں دنیا کا کفارہ ہے۔<br>
+                  <strong>مثالِ دوم (تغایرِ محل):</strong> حائضہ کی دو قرأتیں؛ ﴿حَتَّىٰ يَطْهُرْنَ﴾ ۱۰ دن پورے ہونے پر (بغیر غسل حلت)، اور ﴿حَتَّىٰ يَطَّهَّرْنَ﴾ ۱۰ دن سے کم میں رکنے پر (غسل شرط)۔
+                </div>
               </div>
-              <div style="background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 8px;">
-                <strong>۲. النسخ بتغاير الزمان:</strong><br>
-                تاریخ معلوم ہو تو پچھلی نص منسوخ، یا "المحرم ناسخ للمبيح" کا قاعدہ۔
+
+              <!-- Type 2 -->
+              <div style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.1); border-right: 4px solid #38bdf8; padding: 0.9rem; border-radius: 8px;">
+                <div style="font-weight: 700; color: #38bdf8; font-size: 1rem; margin-bottom: 0.3rem;">
+                  ۲. النسخ بتغاير الزمان (پچھلے حکم کا منسوخ ہونا):
+                </div>
+                <div style="font-size: 0.88rem; line-height: 1.7; margin-bottom: 0.5rem;">
+                  تاریخ معلوم ہو تو پچھلی نص منسوخ، اور تاریخ نامعلوم ہونے پر «المحرِّم ناسخ للمبيح» کا قاعدہ۔
+                </div>
+                <div style="background: rgba(0,0,0,0.2); padding: 0.5rem 0.7rem; border-radius: 6px; font-size: 0.84rem; color: #bae6fd; border-right: 2px solid #0284c7;">
+                  <strong>مثالِ اول (تاریخ معلوم):</strong> بیوہ کی عدت؛ پہلے ۱ سال تھی ﴿مَتَاعًا إِلَى الْحَوْلِ﴾، بعد میں ۴ ماہ ۱۰ دن ﴿أَرْبَعَةَ أَشْهُرٍ وَعَشْرًا﴾ نازل ہو کر اس کی ناسخ بنی۔<br>
+                  <strong>مثالِ دوم (تاریخ نامعلوم):</strong> شراب و سود کی ابتدائی اباحت کے مقابلے میں جب حرمت کی نص آئی تو تاریخ کے بغیر بھی حرمت کو ناسخ مانا گیا کیونکہ کائنات میں اصل "اباحت" تھی، تحریم بعد میں آئی۔
+                </div>
               </div>
-              <div style="background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 8px;">
-                <strong>۳. الترجيح بوصف تابع:</strong><br>
-                اگر توفیق و نسخ نہ ہو سکے تو اوصافِ معتبرہ (قوة التأثير و الثبات) سے ترجیح۔
+
+              <!-- Type 3 -->
+              <div style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.1); border-right: 4px solid #f59e0b; padding: 0.9rem; border-radius: 8px;">
+                <div style="font-weight: 700; color: #f59e0b; font-size: 1rem; margin-bottom: 0.3rem;">
+                  ۳. الترجيح بوصف تابع (ضمنی وصف سے فوقیت دینا):
+                </div>
+                <div style="font-size: 0.88rem; line-height: 1.7; margin-bottom: 0.5rem;">
+                  اگر توفیق و نسخ ممکن نہ ہو سکے تو اوصافِ معتبرہ (راوی کی فقاہت، ضبط، یا قیاس میں قوة التأثير و الثبات) سے ترجیح۔
+                </div>
+                <div style="background: rgba(0,0,0,0.2); padding: 0.5rem 0.7rem; border-radius: 6px; font-size: 0.84rem; color: #fef08a; border-right: 2px solid #eab308;">
+                  <strong>مثالِ حدیث (فقاہت و واقعہ):</strong> نکاحِ میمونہؓ میں خود حضرت میمونہؓ و ابو رافعؓ کی روایت (حالتِ حلال میں نکاح) کو ابن عباسؓ پر ترجیح ملی کیونکہ وہ صاحبِ واقعہ تھے۔<br>
+                  <strong>مثالِ قیاس (قوة التأثير):</strong> نکاحِ أمة كتابية میں احناف کا قیاس راجح ہے کیونکہ شریعت میں غلامی احکام کو آدھا کرتی ہے (تنصیف)، حرام نہیں کرتی۔
+                </div>
               </div>
-              <div style="background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 8px;">
-                <strong>۴. التساقط (گر جانا):</strong><br>
-                نصوص میں اگر ترجیح نہ ہو سکے تو دونوں ساقط ہو جائیں گی اور ظاہرِ حال پر عمل ہوگا۔
+
+              <!-- Type 4 -->
+              <div style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.1); border-right: 4px solid #f87171; padding: 0.9rem; border-radius: 8px;">
+                <div style="font-weight: 700; color: #f87171; font-size: 1rem; margin-bottom: 0.3rem;">
+                  ۴. التساقط ثم الرجوع إلى الأصل (دونوں کا گر جانا):
+                </div>
+                <div style="font-size: 0.88rem; line-height: 1.7; margin-bottom: 0.5rem;">
+                  نصوص میں اگر ترجیح بھی نہ ہو سکے تو دونوں ساقط ہو جائیں گی اور ما قبل کی اصل یا ظاہرِ حال پر فیصلہ ہوگا۔
+                </div>
+                <div style="background: rgba(0,0,0,0.2); padding: 0.5rem 0.7rem; border-radius: 6px; font-size: 0.84rem; color: #fecaca; border-right: 2px solid #dc2626;">
+                  <strong>مثال (تعارضِ بینتین):</strong> دو شخص ایک ہی شے کی ملکیت کا دعویٰ کریں اور دونوں برابر عادل گواہ (بینہ) پیش کر دیں، اور کسی کے پاس قبضہ نہ ہو اور تاریخ بھی نامعلوم ہو؛ تو دونوں کی گواہیاں ٹکرا کر ساقط ہو جائیں گی («سقطت البينتان») اور مدعا علیہ کی براتِ اصلیہ پر فیصلہ ہوگا۔
+                </div>
               </div>
             </div>
           </div>
@@ -847,465 +889,340 @@
 
         <!-- Slide 1 -->
         <div class="lecture-slide active" data-slide="1">
-          <span class="slide-tag">سلائیڈ ۱: حقیقتِ معارضہ</span>
-          <h3 class="slide-title">معارضہ کیا ہے؟ اور اس کے شرائط</h3>
+          <span class="slide-tag">المبحث الأول • ص ۳۸۹</span>
+          <h3 class="slide-title">حقیقتِ معارضہ اور اس کے ۳ بنیادی شرائط</h3>
 
-          <div class="slide-pictorial-layout">
-            <div class="slide-text-col">
-              <ul class="slide-bullets">
-                <li><strong>تعریف:</strong> دو دلیلیں ایک دوسرے کی نفی و ضد کا تقاضا کریں۔</li>
-                <li><strong>بنیادی شرط ۱:</strong> دونوں کا <strong>محل</strong> ایک ہو۔</li>
-                <li><strong>بنیادی شرط ۲:</strong> دونوں کا <strong>زمانہ</strong> ایک ہو۔</li>
-                <li><strong>بنیادی شرط ۳:</strong> دونوں قوت میں برابر ہوں یا وصفِ تابع سے قوی ہوں۔</li>
-              </ul>
-              <div class="slide-formula-badge">
-                محلِ واحد + زمانِ واحد + تقابلِ ضدین = معارضہ شرعیہ
-              </div>
+          <div class="slide-cards-grid">
+            <div class="rect-card">
+              <div class="rect-card-header">تعریفِ معارضہ</div>
+              <div class="rect-card-content">دو دلیلیں ایک ہی وقت اور ایک ہی جگہ ایک دوسرے کی نفی و ضد کا تقاضا کریں اس طور پر کہ دونوں کا جمع ہونا محال ہو۔</div>
             </div>
 
-            <div class="pictorial-box">
-              <span class="pictorial-icon">⚔️</span>
-              <div class="pictorial-title">تصویری خاکہ: تصادمِ دلیلین</div>
-              <div class="pictorial-diagram-row">
-                <div class="pictorial-card-mini card-mini-green">دلیل الف (اثبات)</div>
-                <div style="font-size: 1.4rem; font-weight: bold; color: var(--gold-primary);">⚡</div>
-                <div class="pictorial-card-mini card-mini-red">دلیل ب (نفی)</div>
+            <div class="rect-card">
+              <div class="rect-card-header">شروطِ تحققِ معارضہ</div>
+              <div class="rect-items-list">
+                <div class="rect-sub-item">۱. اتحادِ محل: دونوں دلیلیں ایک ہی جگہ پر وارد ہوں۔</div><div class="rect-sub-item">۲. اتحادِ زمانہ: ایک ہی زمانے میں دونوں کا نفاذ چاہا جائے۔</div><div class="rect-sub-item">۳. تساوی فی القوة: دونوں قوت میں مساوی ہوں یا وصفِ تابع سے قوت ہو۔</div>
               </div>
-              <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.5rem;">
-                اگر محل یا زمانہ الگ ہو جائے تو تعارض ختم ہو جاتا ہے!
-              </p>
             </div>
+          </div>
+
+          <div class="example-rect-card">
+            <div class="example-title">المثال الفقهي التطبيقي</div>
+            <div class="example-desc">ایک گواہ دعویٰ کرے کہ زید نے فلاں وقت قتل کیا، اور دوسرا گواہ گواہی دے کہ عین اسی وقت زید مکہ میں تھا؛ یہاں محل و زمانہ ایک ہونے سے حقیقی معارضہ واقع ہو گیا۔</div>
           </div>
 
           <div class="slide-note-box">
-            <strong>نکتہ تدریس:</strong> طلبہ کو واضح کریں کہ "معارضہ" صرف برابری کی دلیلوں میں ہوتا ہے، بڑی اور چھوٹی
-            دلیل میں نہیں۔
+            <strong>نکتۂ تدریس:</strong> اگر محل یا زمانہ الگ ہو جائے تو تعارض ختم ہو جاتا ہے؛ اور معارضہ صرف برابری کی دلیلوں میں ہوتا ہے۔
           </div>
         </div>
-
         <!-- Slide 2 -->
         <div class="lecture-slide" data-slide="2">
-          <span class="slide-tag">سلائیڈ ۲: معارضہ کی ۳ صورتیں</span>
+          <span class="slide-tag">المبحث الأول • ص ۳۸۹</span>
           <h3 class="slide-title">معارضہ کی ۳ صورتیں اور نص بمقابلہ قیاس</h3>
 
-          <div class="slide-pictorial-layout">
-            <div class="slide-text-col">
-              <ul class="slide-bullets">
-                <li><strong>صورت ۱:</strong> دونوں قوت میں برابر ہوں (معارضہ قائم)۔</li>
-                <li><strong>صورت ۲:</strong> ایک دلیل وصفِ تابع سے قوی ہو (معارضہ و رجحان قائم)۔</li>
-                <li><strong>صورت ۳:</strong> ایک دلیل ذاتی و اصل قوت سے برتر ہو (عدمِ معارضہ)۔</li>
-              </ul>
-              <div class="slide-formula-badge">
-                النص لا يعارض القياس؛ لأن القوي يُسقط الضعيف بالكلية!
-              </div>
+          <div class="slide-cards-grid">
+            <div class="rect-card">
+              <div class="rect-card-header">صورتِ اولیٰ و ثانیہ (معارضہ قائم)</div>
+              <div class="rect-card-content">۱. دونوں قوت میں مساوی ہوں (تساوی القوة)۔<br>۲. ایک دلیل وصفِ تابع (شہرت یا فقاہتِ راوی) سے قوی ہو؛ یہ معمولی قوت "رجحان" کہلاتی ہے۔</div>
             </div>
 
-            <div class="pictorial-box">
-              <span class="pictorial-icon">⚖️</span>
-              <div class="pictorial-title">میزانِ قوت</div>
-              <div style="width: 100%; display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.82rem;">
-                <div class="pictorial-card-mini card-mini-gold">۱. دلیل = دلیل ➡️ (تساوی و معارضہ)</div>
-                <div class="pictorial-card-mini card-mini-blue">۲. دلیل + وصفِ تابع ➡️ (رجحان)</div>
-                <div class="pictorial-card-mini card-mini-red">۳. نصِ قطعی بمقابلہ قیاس ➡️ (قیاس کالعدم)</div>
+            <div class="rect-card">
+              <div class="rect-card-header">صورتِ ثالثہ (عدمِ معارضہ)</div>
+              <div class="rect-items-list">
+                <div class="rect-sub-item">ایک دلیل ذاتی و اصل قوت (وصفِ غیر تابع) سے برتر ہو۔</div><div class="rect-sub-item">جیسے نصِ قطعی بمقابلہ قیاسِ ظنی۔</div><div class="rect-sub-item">یہاں قیاس سرے سے کالعدم ہو جاتا ہے؛ لہٰذا معارضہ نہیں رہتا۔</div>
               </div>
             </div>
+          </div>
+
+          <div class="example-rect-card">
+            <div class="example-title">المثال الفقهي التطبيقي</div>
+            <div class="example-desc">نصِ قرآنی ﴿وَأَحَلَّ اللَّهُ الْبَيْعَ﴾ کے سامنے کوئی قیاس لایا جائے تو قیاس سرے سے ساقط ہو جاتا ہے، اسے ترجیح نہیں کہتے۔</div>
           </div>
 
           <div class="slide-note-box">
-            <strong>قاعدہ:</strong> یوں نہیں کہا جاتا کہ "نص قیاس پر راجح ہے"؛ کیونکہ نص قیاس کو سرے سے گرا دیتی ہے۔
+            <strong>نکتۂ تدریس:</strong> «النص لا يعارض القياس؛ لأن القوي يُسقط الضعيف بالكلية»۔
           </div>
         </div>
-
         <!-- Slide 3 -->
         <div class="lecture-slide" data-slide="3">
-          <span class="slide-tag">سلائیڈ ۳: مخلص اول</span>
-          <h3 class="slide-title">دفعِ تعارض کا پہلا راستہ: التوفيق بتغاير الحكم</h3>
+          <span class="slide-tag">المخلص الأول • ص ۳۹۲</span>
+          <h3 class="slide-title">دفعِ تعارض ۱: التوفيق بتغاير الحكم</h3>
 
-          <div class="slide-pictorial-layout">
-            <div class="slide-text-col">
-              <ul class="slide-bullets">
-                <li>قاعدہ: <strong>«إعمال الكلام أولى من إهماله»</strong> (دونوں دلیلوں پر عمل کرنا گرانے سے بہتر ہے)۔
-                </li>
-                <li>آیت ۱: {بِمَا كَسَبَتْ قُلُوبُكُمْ} ➡️ <strong>یمینِ غموس</strong> (دل کا جھوٹا ارادہ)۔</li>
-                <li>آیت ۲: {بِمَا عَقَّدتُّمُ الْأَيْمَانَ} ➡️ <strong>یمینِ منعقدہ</strong> (مستقبل کی پکی قسم)۔</li>
-              </ul>
-              <div class="slide-formula-badge">
-                غموس ⬅️ آخرت کا گناہ | منعقدہ ⬅️ دنیا میں کفارہ
-              </div>
+          <div class="slide-cards-grid">
+            <div class="rect-card">
+              <div class="rect-card-header">قاعدۂ توفیق</div>
+              <div class="rect-card-content">«إعمال الكلام أولى من إهماله» — دونوں شرعی دلیلوں پر حتی الامکان عمل کرنا دلیل کو گرانے سے ہزار گنا بہتر ہے۔</div>
             </div>
 
-            <div class="pictorial-box">
-              <span class="pictorial-icon">📜</span>
-              <div class="pictorial-title">آیاتِ قسم میں توفیق</div>
-              <div class="pictorial-diagram-row">
-                <div class="pictorial-card-mini card-mini-red">💔 یمینِ غموس<br><small>آخرت کا وبال</small></div>
-                <div style="font-weight: bold; color: var(--gold-primary);">≠</div>
-                <div class="pictorial-card-mini card-mini-green">🤝 یمینِ منعقدہ<br><small>دنیا کا کفارہ</small></div>
+            <div class="rect-card">
+              <div class="rect-card-header">تفریقِ احکام فی آیاتِ الأیمان</div>
+              <div class="rect-items-list">
+                <div class="rect-sub-item">آیت ۱: {بِمَا كَسَبَتْ قُلُوبُكُمْ} ➡️ یمینِ غموس (دل کا جھوٹا ارادہ) پر آخرت کا گناہ۔</div><div class="rect-sub-item">آیت ۲: {بِمَا عَقَّدتُّمُ الْأَيْمَانَ} ➡️ یمینِ منعقدہ (مستقبل کی پکی قسم) پر دنیا کا کفارہ۔</div>
               </div>
-              <p style="font-size: 0.82rem; color: var(--green-success); margin-top: 0.4rem;">
-                دونوں آیتیں اپنے اپنے حکم پر برقرار، تعارض ختم!
-              </p>
             </div>
+          </div>
+
+          <div class="example-rect-card">
+            <div class="example-title">المثال الفقهي التطبيقي</div>
+            <div class="example-desc">جھوٹی ماضی کی قسم کھانے والے پر کفارہ نہیں بلکہ توبہ و استغفار ہے، جبکہ آئندہ کی قسم توڑنے پر ۱۰ مساکین کو کھانا کھلانا یا ۳ روزے ہیں۔</div>
           </div>
 
           <div class="slide-note-box">
-            <strong>امام شافعیؒ کا رد:</strong> امام شافعیؒ نے دونوں میں کفارہ واجب مانا، صدر الشریعہؒ نے ثابت کیا کہ
-            احناف کی توفیق اقرب الی القرآن ہے۔
+            <strong>نکتۂ تدریس:</strong> دونوں قرآنی آیات اپنے اپنے حکم پر قائم رہیں اور تعارض رفع ہو گیا۔
           </div>
         </div>
-
         <!-- Slide 4 -->
         <div class="lecture-slide" data-slide="4">
-          <span class="slide-tag">سلائیڈ ۴: مخلص دوم</span>
-          <h3 class="slide-title">دفعِ تعارض کا دوسرا راستہ: التوفيق بتغاير المحل</h3>
+          <span class="slide-tag">المخلص الثاني • ص ۳۹۳</span>
+          <h3 class="slide-title">دفعِ تعارض ۲: التوفيق بتغاير المحل</h3>
 
-          <div class="slide-pictorial-layout">
-            <div class="slide-text-col">
-              <ul class="slide-bullets">
-                <li>قرآن کی دو متواتر قرأتیں بظاہر مختلف حکم دیتی ہیں:</li>
-                <li>قرأت ۱: <strong>{حَتَّىٰ يَطْهُرْنَ}</strong> (تخفیف): فقط خون کا بند ہونا۔</li>
-                <li>قرأت ۲: <strong>{حَتَّىٰ يَطَّهَّرْنَ}</strong> (تشدید): باقاعدہ غسل کرنا۔</li>
-              </ul>
-              <div class="slide-formula-badge">
-                ۱۰ دن کی انتہا ⬅️ تخفیف | ۱۰ دن سے کم ⬅️ تشدید
-              </div>
+          <div class="slide-cards-grid">
+            <div class="rect-card">
+              <div class="rect-card-header">تغایرِ قرأت</div>
+              <div class="rect-card-content">قرآن کریم کی دو متواتر قرأتیں بظاہر دو مختلف احکام کا تقاضا کرتی ہیں:</div>
             </div>
 
-            <div class="pictorial-box">
-              <span class="pictorial-icon">🩸</span>
-              <div class="pictorial-title">محل کی تفریق</div>
-              <div style="width: 100%; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.82rem;">
-                <div class="pictorial-card-mini card-mini-blue">
-                  <strong>محلِ تخفیف (۱۰ دن مکمل):</strong><br>
-                  خون رکتے ہی حلال، غسل شرط نہیں
-                </div>
-                <div class="pictorial-card-mini card-mini-gold">
-                  <strong>محلِ تشدید (۱۰ دن سے کم):</strong><br>
-                  خون رکنے کے بعد غسل لازمی شرط ہے
-                </div>
+            <div class="rect-card">
+              <div class="rect-card-header">تفریقِ محل کا اصولی ضابطہ</div>
+              <div class="rect-items-list">
+                <div class="rect-sub-item">قرأت ۱: {حَتَّىٰ يَطْهُرْنَ} (تخفیف: خون بند ہونا) ➡️ محلِ ۱۰ دن (بغیر غسل حلت)۔</div><div class="rect-sub-item">قرأت ۲: {حَتَّىٰ يَطَّهَّرْنَ} (تشدید: غسل کرنا) ➡️ محلِ کمتر از ۱۰ دن (غسل شرط ہے)۔</div>
               </div>
             </div>
+          </div>
+
+          <div class="example-rect-card">
+            <div class="example-title">المثال الفقهي التطبيقي</div>
+            <div class="example-desc">حائضہ عورت کا خون عادت کے پورے ۱۰ دن پر رکے تو بغیر نہائے بھی خاوند کے لیے قربت حلال ہے، اور ۱۰ دن سے کم میں رکے تو غسل شرط ہے۔</div>
           </div>
 
           <div class="slide-note-box">
-            <strong>اصول:</strong> محل کے الگ ہونے سے دونوں قرأتیں اپنے اپنے دائرے میں سچی اور نافذ العمل رہتی ہیں۔
+            <strong>نکتۂ تدریس:</strong> دونوں متواتر قرأتیں اپنے اپنے مخصوص محل پر سچی اور نافذ العمل ہیں۔
           </div>
         </div>
-
         <!-- Slide 5 -->
         <div class="lecture-slide" data-slide="5">
-          <span class="slide-tag">سلائیڈ ۵: مخلص سوم</span>
-          <h3 class="slide-title">دفعِ تعارض کا تیسرا راستہ: النسخ بتغاير الزمان</h3>
+          <span class="slide-tag">المخلص الثالث • ص ۳۹۳</span>
+          <h3 class="slide-title">دفعِ تعارض ۳: النسخ بتغاير الزمان</h3>
 
-          <div class="slide-pictorial-layout">
-            <div class="slide-text-col">
-              <ul class="slide-bullets">
-                <li>اگر تاریخ معلوم ہو: بعد میں آنے والی نص ناسخ ہوگی۔</li>
-                <li>اگر تاریخ معلوم نہ ہو تو حنفی قاعدہ: <strong>«المحرِّم ناسخ للمبيح»</strong>۔</li>
-                <li><strong>عقلی علت:</strong> بعثت سے قبل اصل "اباحت" تھی؛ مبیح نص نے اصل کو برقرار رکھا، پھر محرم نص
-                  نے آ کر نیا حکم دیا اور منسوخ کیا۔</li>
-              </ul>
-              <div class="slide-formula-badge">
-                قبل البعثة: إباحة ⬅️ المبيح (إبقاء) ⬅️ المحرِّم (نسخ)
-              </div>
+          <div class="slide-cards-grid">
+            <div class="rect-card">
+              <div class="rect-card-header">قاعدۂ نسخ</div>
+              <div class="rect-card-content">اگر تاریخ معلوم ہو تو بعد میں نازل ہونے والی نص پہلے کو منسوخ کرے گی۔</div>
             </div>
 
-            <div class="pictorial-box">
-              <span class="pictorial-icon">⏳</span>
-              <div class="pictorial-title">ٹائم لائن کا تصویری نقشہ</div>
-              <div style="width: 100%; font-size: 0.82rem;">
-                <div class="pictorial-card-mini card-mini-gold" style="margin-bottom: 0.3rem;">۱. آغازِ کائنات: اصلِ
-                  اباحت</div>
-                <div style="font-size: 1.1rem; color: var(--text-accent);">⬇️</div>
-                <div class="pictorial-card-mini card-mini-blue" style="margin-bottom: 0.3rem;">۲. مبیح نص: اصل کو باقی
-                  رکھا</div>
-                <div style="font-size: 1.1rem; color: var(--text-accent);">⬇️</div>
-                <div class="pictorial-card-mini card-mini-red">۳. محرم نص: نیا حکم لا کر ناسخ بنی! 🚫</div>
+            <div class="rect-card">
+              <div class="rect-card-header">تاریخ نامعلوم ہونے پر حنفی ضابطہ</div>
+              <div class="rect-items-list">
+                <div class="rect-sub-item">«المحرِّم ناسخ للمبيح» (حرام کرنے والی نص مبیح کے لیے ناسخ ہوگی)۔</div><div class="rect-sub-item">علت: بعثت سے قبل اصل "اباحت" تھی؛ مبیح نص نے اصل کو باقی رکھا۔</div><div class="rect-sub-item">محرم نص نے نیا شرعی حکم جاری کیا؛ لہٰذا وہ لازماً بعد میں آئی۔</div>
               </div>
             </div>
+          </div>
+
+          <div class="example-rect-card">
+            <div class="example-title">المثال الفقهي التطبيقي</div>
+            <div class="example-desc">شراب کی ابتدائی اباحت کے مقابلے میں جب حرمت کی نص آئی تو حرمت والی نص ناسخ مانی گئی اور اباحت ہمیشہ کے لیے ختم ہو گئی۔</div>
           </div>
 
           <div class="slide-note-box">
-            <strong>امتحانی نکتہ:</strong> حنفیہ کے نزدیک تحریم اباحت پر تاریخ کی لاعلمی کے وقت بھی ناسخ مانی جاتی ہے۔
+            <strong>نکتۂ تدریس:</strong> حرمت کا حکم ہمیشہ نیا ہوتا ہے لہٰذا وہ مبیح کے بعد ہی آتا ہے۔
           </div>
         </div>
-
         <!-- Slide 6 -->
         <div class="lecture-slide" data-slide="6">
-          <span class="slide-tag">سلائیڈ ۶: نصوص بمقابلہ اقیسہ</span>
+          <span class="slide-tag">المبحث الثاني • ص ۳۹۶</span>
           <h3 class="slide-title">تعارض میں نصوص اور قیاس کا تقابل</h3>
 
-          <div class="slide-pictorial-layout">
-            <div class="slide-text-col">
-              <ul class="slide-bullets">
-                <li><strong>نصوص میں تعارض:</strong> حل نہ نکلے تو دونوں ساقط ہو جاتی ہیں («سقط النصان»)؛ کیونکہ جہل کے
-                  ساتھ کسی ایک کو اپنانا من مانی ہے۔</li>
-                <li><strong>قیاس میں تعارض:</strong> دو متعارض قیاس کبھی باطل یا ساقط نہیں ہوتے! («ولا يسقطان
-                  بالتعارض»)۔</li>
-                <li><strong>وجہ:</strong> مجتہد دونوں جانب دلیل پر ہے، پس وہ <strong>دل کے اطمینان (شہادتِ قلب)</strong>
-                  سے جس پر چاہے عمل کر لے۔</li>
-              </ul>
-              <div class="slide-formula-badge">
-                النصوص ⬅️ تساقط عند الجهل | الأقيسة ⬅️ تخیر بالشهادة
-              </div>
+          <div class="slide-cards-grid">
+            <div class="rect-card">
+              <div class="rect-card-header">نصوص میں تعارض (التساقط)</div>
+              <div class="rect-card-content">تاریخ سے لاعلمی پر دونوں نصوص کا حکم ساقط ہو جاتا ہے («سقط النصان»)؛ کیونکہ جہلِ محض کے ساتھ کسی ایک کو اپنانا تحکم ہے۔</div>
             </div>
 
-            <div class="pictorial-box">
-              <span class="pictorial-icon">⚖️</span>
-              <div class="pictorial-title">سقوط بمقابلہ بقاء</div>
-              <div class="pictorial-diagram-row">
-                <div class="pictorial-card-mini card-mini-red">
-                  <strong>نصوص:</strong><br>
-                  جہلِ ناسخ کی وجہ سے دونوں ساقط ❌
-                </div>
-                <div class="pictorial-card-mini card-mini-green">
-                  <strong>قیاس:</strong><br>
-                  شہادتِ قلب سے عمل جاری ✅
-                </div>
+            <div class="rect-card">
+              <div class="rect-card-header">قیاس میں تعارض (البقاء والتخییر)</div>
+              <div class="rect-items-list">
+                <div class="rect-sub-item">دو متعارض قیاس کبھی باطل یا ساقط نہیں ہوتے! («ولا يسقطان بالتعارض»)۔</div><div class="rect-sub-item">مجتہد دونوں جانب دلیل پر قائم ہے؛ لہٰذا وہ اپنے دل کے اطمینان سے چنے۔</div><div class="rect-sub-item">اقوالِ صحابہ جن میں قیاس کا دخل ہو ان کا حکم بھی قیاس جیسا ہے۔</div>
               </div>
             </div>
+          </div>
+
+          <div class="example-rect-card">
+            <div class="example-title">المثال الفقهي التطبيقي</div>
+            <div class="example-desc">سفر میں قصر یا اتمام کے مختلف اجتہادی اقیسہ میں مجتہد جس قیاس پر اطمینان پائے اس پر عمل کر سکتا ہے، قیاس باطل نہیں ہوتا۔</div>
           </div>
 
           <div class="slide-note-box">
-            <strong>فائدہ:</strong> اقوالِ صحابہؓ جن میں قیاس کا دخل ہو ان کا حکم بھی قیاس جیسا ہی ہے۔
+            <strong>نکتۂ تدریس:</strong> نصوص میں جہلِ ناسخ مانع ہے جبکہ قیاس میں دونوں جانب دلیل موجود ہے۔
           </div>
         </div>
-
         <!-- Slide 7 -->
         <div class="lecture-slide" data-slide="7">
-          <span class="slide-tag">سلائیڈ ۷: ترجیح قیاس ۱</span>
+          <span class="slide-tag">شروط الترجيح ۱ • ص ۳۹۷</span>
           <h3 class="slide-title">قیاس میں ترجیح کا پہلا سبب: قوة التأثير</h3>
 
-          <div class="slide-pictorial-layout">
-            <div class="slide-text-col">
-              <ul class="slide-bullets">
-                <li><strong>تعریف:</strong> علت کا شرعی حکم پیدا کرنے میں ذاتی طور پر قوی اور موثر ہونا۔</li>
-                <li><strong>مسئلہ: نکاحِ أمة كتابية (اہلِ کتاب باندی سے نکاح):</strong></li>
-                <li>امام شافعیؒ: غلامی اور کفر جمع ہو کر کفرِ غلیظ بن گئے، لہٰذا نکاح حرام۔</li>
-                <li><strong>احناف کا قوی قیاس:</strong> غلامی احکام کو آدھا کرتی ہے (تنصیف)، حرام نہیں کرتی؛ جیسا کہ
-                  طلاق، عدت اور حدود میں ہے۔</li>
-              </ul>
-              <div class="slide-formula-badge">
-                الرق منصف لا محرم في الشريعة
-              </div>
+          <div class="slide-cards-grid">
+            <div class="rect-card">
+              <div class="rect-card-header">حقیقتِ قوة التأثير</div>
+              <div class="rect-card-content">شریعت نے اس وصف میں بذاتِ خود اس حکم کو بدلنے کی صلاحیت رکھی ہو، نہ کہ ایسا اثر دعویٰ کیا جائے جو اس کی فطرت میں نہ ہو (جیسے غلامی کا کام تنصیف ہے، تحریم نہیں)۔</div>
             </div>
 
-            <div class="pictorial-box">
-              <span class="pictorial-icon">💍</span>
-              <div class="pictorial-title">قوتِ تاثیر کا ثبوت</div>
-              <div style="width: 100%; font-size: 0.82rem;">
-                <div class="pictorial-card-mini card-mini-gold" style="margin-bottom: 0.4rem;">
-                  آزاد کتابیہ سے نکاح حلال ➡️ باندی سے بھی حلال
-                </div>
-                <div class="pictorial-card-mini card-mini-green">
-                  غلامی احکام میں = نصف (➗ ۲)<br>
-                  نہ کہ ممانعتِ نکاح (تحریم 🚫)
-                </div>
+            <div class="rect-card">
+              <div class="rect-card-header">نكاح الأمة الكتابية میں اختلاف</div>
+              <div class="rect-items-list">
+                <div class="rect-sub-item">امام شافعیؒ: غلامی + کفر = کفرِ غلیظ ➡️ نکاح حرام ہے۔</div><div class="rect-sub-item">احناف کا قوی قیاس: آزاد کتابیہ حلال ہے تو باندی بھی حلال ہے۔</div><div class="rect-sub-item">قاعدہ: «الرق منصف لا محرم في الشريعة» (غلامی آدھا کرتی ہے حرام نہیں)۔</div>
               </div>
             </div>
+          </div>
+
+          <div class="example-rect-card">
+            <div class="example-title">المثال الفقهي التطبيقي</div>
+            <div class="example-desc">جیسے باندی پر طلاقیں ۲ ہیں اور عدت ۲ حیض ہے (تنصیف)، اسی طرح نکاح کا اصل دروازہ بند نہیں ہوتا، احناف کا قیاس قوی ہے۔</div>
           </div>
 
           <div class="slide-note-box">
-            <strong>نتیجہ:</strong> چونکہ احناف کا قیاس اثر میں مضبوط ہے اس لیے وہ شافعیہ کے قیاس پر راجح ہے۔
+            <strong>نکتۂ تدریس:</strong> چونکہ احناف کا قیاس اثر میں قوی ہے اس لیے وہ شافعیہ کے قیاس پر راجح ہے۔
           </div>
         </div>
-
         <!-- Slide 8 -->
         <div class="lecture-slide" data-slide="8">
-          <span class="slide-tag">سلائیڈ ۸: ترجیح قیاس ۲</span>
+          <span class="slide-tag">شروط الترجيح ۲ • ص ۳۹۹</span>
           <h3 class="slide-title">قیاس میں ترجیح کا دوسرا سبب: قوة الثبات</h3>
 
-          <div class="slide-pictorial-layout">
-            <div class="slide-text-col">
-              <ul class="slide-bullets">
-                <li><strong>تعریف:</strong> شارع نے اس وصف کو شریعت کے دیگر ابواب میں کثرت اور استقلال سے مانا ہو۔</li>
-                <li><strong>مسئلہ: نیتِ صومِ رمضان:</strong></li>
-                <li>امام شافعیؒ: ہر عبادت میں نیت کی تعیین شرط ہے جیسے نماز میں۔</li>
-                <li><strong>احناف:</strong> رمضان کا وقت خود متعین ہے؛ اور شارع نے ودیعت، غصب اور بیع فاسد کے رد میں
-                  "متعین" پر نیت کی تعیین ساقط رکھی ہے۔</li>
-              </ul>
-              <div class="slide-formula-badge">
-                الوصف المتعین یسقط التعيين في سائر الأبواب
-              </div>
+          <div class="slide-cards-grid">
+            <div class="rect-card">
+              <div class="rect-card-header">حقیقتِ قوة الثبات</div>
+              <div class="rect-card-content">شارع کا اس وصف کو شریعت کے دیگر ابواب میں بار بار اور کثرت کے ساتھ معتبر ماننا۔</div>
             </div>
 
-            <div class="pictorial-box">
-              <span class="pictorial-icon">🌙</span>
-              <div class="pictorial-title">ثباتِ وصف کے ۳ نظائر</div>
-              <div style="width: 100%; display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.8rem;">
-                <div class="pictorial-card-mini card-mini-gold">📦 ردِ ودیعت متعین ہے ➡️ تعیین نہیں</div>
-                <div class="pictorial-card-mini card-mini-gold">🚫 ردِ مغصوب متعین ہے ➡️ تعیین نہیں</div>
-                <div class="pictorial-card-mini card-mini-green">✨ صومِ رمضان متعین ہے ➡️ مطلق نیت کافی</div>
+            <div class="rect-card">
+              <div class="rect-card-header">ثباتِ وصف کے ۳ فقہی نظائر</div>
+              <div class="rect-items-list">
+                <div class="rect-sub-item">۱. ردِ ودیعت: چونکہ امانت کی واپسی خود متعین ہے اس لیے نیت کی تعیین ساقط ہے۔</div><div class="rect-sub-item">۲. ردِ مغصوب: غصب شدہ مال کی واپسی متعین ہے اس لیے تعیین کی شرط نہیں۔</div><div class="rect-sub-item">۳. صومِ رمضان: رمضان کا وقت خود متعین ہے اس لیے مطلق نیت کافی ہے۔</div>
               </div>
             </div>
+          </div>
+
+          <div class="example-rect-card">
+            <div class="example-title">المثال الفقهي التطبيقي</div>
+            <div class="example-desc">غصب شدہ چیز واپس کرتے وقت نیت کی تعیین نہیں کہنی پڑتی کیونکہ واپسی خود متعین ہے۔ رمضان کے روزے کا وقت بھی ایسا ہی ہے۔</div>
           </div>
 
           <div class="slide-note-box">
-            <strong>ضابطہ:</strong> جب کسی وصف کو شارع نے اتنی جگہ معتبر مانا ہو تو اس کا ثبات قوی ترین ہوتا ہے۔
+            <strong>نکتۂ تدریس:</strong> جس وصف کو شارع نے متعدد ابواب میں معتبر مانا ہو وہ شرعاً قوی الثبات ہوتا ہے۔
           </div>
         </div>
-
         <!-- Slide 9 -->
         <div class="lecture-slide" data-slide="9">
-          <span class="slide-tag">سلائیڈ ۹: الترجیح الفاسد ۱</span>
+          <span class="slide-tag">التراجيح الفاسدة ۱ • ص ۴۰۲</span>
           <h3 class="slide-title">باطل ترجیح ۱: غلبۂ اشباہ اور عتقِ بھائی کا قضیہ</h3>
 
-          <div class="slide-pictorial-layout">
-            <div class="slide-text-col">
-              <ul class="slide-bullets">
-                <li><strong>دعویٰ (امام شافعیؒ):</strong> خریدا ہوا بھائی آزاد نہیں ہوتا؛ کیونکہ وہ چچا کے بیٹے کے مشابہ
-                  ۴ چیزوں میں ہے (زکوٰۃ، بیوی، گواہی، قصاص) اور بیٹے کے مشابہ فقط ۱ چیز (محرمیت) میں ہے۔</li>
-                <li><strong>صدر الشریعہؒ کا رد:</strong> یہ ترجیح فاسد اور باطل ہے!</li>
-                <li><strong>قاعدہ:</strong> مطلوبہ حکم "عتق" ہے؛ اور عتق میں اثر رکھنے والا ۱ وصف غیر موثر ہزار اوصاف سے
-                  وزنی ہے۔</li>
-              </ul>
-              <div class="slide-formula-badge">
-                المشابهة في وصف واحد مؤثر أقوى من ألف وصف غير مؤثر
-              </div>
+          <div class="slide-cards-grid">
+            <div class="rect-card">
+              <div class="rect-card-header">دعوائے شافعیہ (فاسد)</div>
+              <div class="rect-card-content">خریدا ہوا بھائی آزاد نہیں ہوتا؛ کیونکہ وہ چچا کے بیٹے کے مشابہ ۴ اوصاف میں ہے (زکوٰۃ، بیوی، گواہی، قصاص) اور بیٹے کے مشابہ ۱ میں، پس ۴ کا عدد ۱ پر راجح ہے۔</div>
             </div>
 
-            <div class="pictorial-box">
-              <span class="pictorial-icon">⚖️</span>
-              <div class="pictorial-title">ترازو کا تصویری موازنہ</div>
-              <div class="pictorial-diagram-row">
-                <div class="pictorial-card-mini card-mini-red">
-                  شافعیہ پلڑا:<br>
-                  ۴ اوصافِ غیر مؤثرہ ❌
-                </div>
-                <div style="font-size: 1.5rem; color: var(--gold-primary);">⬅️ ⬇️</div>
-                <div class="pictorial-card-mini card-mini-green">
-                  احناف پلڑا (بھاری):<br>
-                  ۱ وصفِ مؤثر (محرمیت) ✅
-                </div>
+            <div class="rect-card">
+              <div class="rect-card-header">ردِ صدر الشریعہؒ</div>
+              <div class="rect-items-list">
+                <div class="rect-sub-item">«المشابهة في وصف واحد مؤثر أقوى من المشابهة في ألف وصف غير مؤثر»۔</div><div class="rect-sub-item">مطلوبہ حکم "عتق" ہے؛ اور عتق میں محرمیت اثر انداز ہوتی ہے۔</div><div class="rect-sub-item">زکوٰۃ، شہادت یا قصاص کا عتق میں سرے سے کوئی اثر ہی نہیں! پس عدد باطل ہے۔</div>
               </div>
-              <p style="font-size: 0.8rem; color: var(--teal-accent); margin-top: 0.4rem;">
-                ایک مؤثر وصف کا پلڑا بھاری رہا!
-              </p>
             </div>
+          </div>
+
+          <div class="example-rect-card">
+            <div class="example-title">المثال الفقهي التطبيقي</div>
+            <div class="example-desc">عتق میں محرمیت کا ۱ مؤثر وصف چچا زاد کے ۴ غیر مؤثر اوصاف پر بدرجہا بھاری ہے، لہٰذا خریدا ہوا بھائی فی الفور آزاد ہو جائے گا۔</div>
           </div>
 
           <div class="slide-note-box">
-            <strong>اصول:</strong> گنتی کی زیادتی باطل ہے، تاثیر کا وزن معتبر ہے۔
+            <strong>نکتۂ تدریس:</strong> گنتی کی زیادتی باطل ہے، تاثیر کا وزن معتبر ہے۔
           </div>
         </div>
-
         <!-- Slide 10 -->
         <div class="lecture-slide" data-slide="10">
-          <span class="slide-tag">سلائیڈ ۱۰: التراجیح الفاسدہ ۲ و ۳</span>
+          <span class="slide-tag">التراجيح الفاسدة ۲ و ۳ • ص ۴۰۲</span>
           <h3 class="slide-title">باطل ترجیحات ۲ و ۳: عمومِ علت اور قلتِ اجزاء</h3>
 
-          <div class="slide-pictorial-layout">
-            <div class="slide-text-col">
-              <ul class="slide-bullets">
-                <li><strong>۲. الترجيح بكون الوصف أعم (باطل):</strong> سود میں علت "طعام" کو اس لیے راجح کہنا کہ وہ قلیل
-                  اور کثیر دونوں کو عام ہے۔</li>
-                <li><strong>رد:</strong> ترجیح تاثیر کی قوت سے ہوتی ہے نہ کہ لفظی دائرے کے پھیلاؤ سے۔</li>
-                <li><strong>۳. الترجيح بقلة الأجزاء (باطل):</strong> یہ دعویٰ کہ ایک جزو والی علت دو یا تین اجزاء والی
-                  علت پر راجح ہے۔</li>
-                <li><strong>رد:</strong> شرعاً اس کی کوئی حیثیت نہیں، صحتِ استدلال معتبر ہے۔</li>
-              </ul>
+          <div class="slide-cards-grid">
+            <div class="rect-card">
+              <div class="rect-card-header">۲. الترجيح بكون الوصف أعم (باطل)</div>
+              <div class="rect-card-content">سود میں علت "طعام" کو اس لیے راجح کہنا کہ وہ قلیل اور کثیر دونوں کو عام ہے۔<br><strong>رد:</strong> ترجیح تاثیر کی قوت سے ہوتی ہے نہ کہ لفظی دائرے کے پھیلاؤ سے۔</div>
             </div>
 
-            <div class="pictorial-box">
-              <span class="pictorial-icon">🛡️</span>
-              <div class="pictorial-title">دو باطل اصولوں کا رد</div>
-              <div style="width: 100%; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.82rem;">
-                <div class="pictorial-card-mini card-mini-red">
-                  🌾 عمومِ وصف 🚫<br>
-                  (وسعتِ لفظ تاثیر کی جگہ نہیں لے سکتی)
-                </div>
-                <div class="pictorial-card-mini card-mini-red">
-                  🧩 قلتِ اجزاء 🚫<br>
-                  (اجزاء کی کمی بیشی کا کوئی شرعی اثر نہیں)
-                </div>
+            <div class="rect-card">
+              <div class="rect-card-header">۳. الترجيح بقلة الأجزاء (باطل)</div>
+              <div class="rect-items-list">
+                <div class="rect-sub-item">یہ دعویٰ کہ ایک جزو والی علت دو یا تین اجزاء والی علت پر راجح ہے۔</div><div class="rect-sub-item">رد: شرعاً اجزاء کی کمی بیشی کا کوئی شرعی اثر نہیں۔</div><div class="rect-sub-item">شریعت میں علت کا مدار اس کی اصولی صحت اور تاثیر پر ہے۔</div>
               </div>
             </div>
           </div>
 
+          <div class="example-rect-card">
+            <div class="example-title">المثال الفقهي التطبيقي</div>
+            <div class="example-desc">سود کی علت احناف کے نزدیک "قدر مع الجنس" (کیل یا وزن) ہے، جو کہ تاثیر میں طعام سے بدرجہا قوی تر ہے۔</div>
+          </div>
+
           <div class="slide-note-box">
-            <strong>تنبیہ:</strong> مناظرے میں ان دو غیر معتبر حربوں سے مغالطہ پیدا کیا جاتا ہے جس کا التوضيح نے ابطال
-            فرمایا۔
+            <strong>نکتۂ تدریس:</strong> مناظرے میں ان دو غیر معتبر حربوں سے مغالطہ پیدا کیا جاتا ہے جس کا التوضيح نے رد فرمایا۔
           </div>
         </div>
-
         <!-- Slide 11 -->
         <div class="lecture-slide" data-slide="11">
-          <span class="slide-tag">سلائیڈ ۱۱: باطل ترجیح ۴ و ہیئتِ اجتماعیہ</span>
-          <h3 class="slide-title">کشتی بمقابلہ وزن اٹھانا (کثرتِ ادلہ کا اصولی راز)</h3>
+          <span class="slide-tag">التراجيح الفاسدة ۴ • ص ۴۰۳</span>
+          <h3 class="slide-title">باطل ترجیح ۴ اور ہیئتِ اجتماعیہ کا اصولی راز</h3>
 
-          <div class="slide-pictorial-layout">
-            <div class="slide-text-col">
-              <ul class="slide-bullets">
-                <li><strong>کثرتِ ادلہ باطل ہے:</strong> شیخینؒ کے نزدیک دلائل کی محض گنتی سے ترجیح نہیں ہوتی (جیسے ۲
-                  گواہوں پر ۱۰ گواہ راجح نہیں ہوتے)۔</li>
-                <li><strong>صدر الشریعہؒ کا نایاب فرق:</strong></li>
-                <li><strong>حمل الأثقال (وزن اٹھانا):</strong> جہاں مل کر <strong>"ہیئتِ اجتماعیہ"</strong> بنے وہاں ۱۰
-                  افراد اکیلے سے فائق ہیں (کثرت معتبر ہے)۔</li>
-                <li><strong>المصارعة (کشتی):</strong> جہاں مقابلہ انفرادی ہو، وہاں ۱ طاقتور پہلوان ہزار کمزوروں پر غالب
-                  ہے (دلائل کشتی کی مانند ہیں)!</li>
-              </ul>
+          <div class="slide-cards-grid">
+            <div class="rect-card">
+              <div class="rect-card-header">الترجيح بكثرة الأدلة (باطل عند الشيخين)</div>
+              <div class="rect-card-content">شیخینؒ کے نزدیک دلائل کی محض گنتی سے ترجیح نہیں ہوتی؛ کیونکہ ہر دلیل بذاتِ خود مستقل مؤثر ہوتی ہے۔</div>
             </div>
 
-            <div class="pictorial-box">
-              <div class="pictorial-title">حسی تمثیل (ص ۴۰۳)</div>
-              <div style="width: 100%; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.8rem;">
-                <div class="pictorial-card-mini card-mini-blue">
-                  🤼‍♂️ <strong>المصارعة (کشتی و دلائل):</strong><br>
-                  ۱ قوی پہلوان ＞ ۱۰۰۰ کمزور افراد (کثرت بے اثر)
-                </div>
-                <div class="pictorial-card-mini card-mini-gold">
-                  🏋️‍♂️ <strong>حمل الأثقال (وزن و تواتر):</strong><br>
-                  ۱۰ مزدور ＞ ۱ اکیلا مزدور (ہیئتِ اجتماعیہ معتبر)
-                </div>
+            <div class="rect-card">
+              <div class="rect-card-header">صدر الشریعہؒ کا نایاب اصولی فرق</div>
+              <div class="rect-items-list">
+                <div class="rect-sub-item">حمل الأثقال (وزن اٹھانا): جہاں مل کر "ہیئتِ اجتماعیہ" بنے وہاں ۱۰ افراد اکیلے سے فائق ہیں (کثرت معتبر)۔</div><div class="rect-sub-item">المصارعة (کشتی): جہاں مقابلہ انفرادی ہو، وہاں ۱ طاقتور پہلوان ہزار کمزوروں پر غالب ہے (دلائل کشتی کی مانند ہیں)!</div><div class="rect-sub-item">راویوں کی کثرت بھی تب معتبر ہوگی جب وہ حدِ تواتر تک پہنچ کر ہیئتِ اجتماعیہ بنا لے، ورنہ ۳ راوی ۲ پر راجح نہیں ہوں گے۔</div>
               </div>
             </div>
+          </div>
+
+          <div class="example-rect-card">
+            <div class="example-title">المثال الفقهي التطبيقي</div>
+            <div class="example-desc">۲ عادل گواہوں کے مقابلے میں ۱۰ گواہ آ جائیں تو محض گنتی کی وجہ سے ۱۰ کو ترجیح نہیں دی جاتی، کیونکہ ہر گواہی انفرادی ہے۔</div>
           </div>
 
           <div class="slide-note-box">
-            <strong>قاعدۂ کلیہ:</strong> راویوں کی تعداد بھی تب معتبر ہوگی جب وہ حدِ تواتر تک پہنچ کر ہیئتِ اجتماعیہ بنا
-            لیں، ورنہ ۳ راوی ۲ پر راجح نہیں ہوں گے۔
+            <strong>نکتۂ تدریس:</strong> دلائل کشتی کی مانند ہیں؛ پس ۱ قوی و مؤثر دلیل ہزار ضعیف دلیلوں پر غالب رہتی ہے۔
           </div>
         </div>
-
         <!-- Slide 12 -->
         <div class="lecture-slide" data-slide="12">
-          <span class="slide-tag">سلائیڈ ۱۲: خلاصۂ باب</span>
-          <h3 class="slide-title">التوضيح: باب المعارضة کا حتمی چارٹ</h3>
+          <span class="slide-tag">الخاتمة • خلاصۂ باب</span>
+          <h3 class="slide-title">التوضيح: باب المعارضة کا حتمی خلاصہ</h3>
 
-          <div class="slide-pictorial-layout">
-            <div class="slide-text-col">
-              <ul class="slide-bullets">
-                <li>۱. معارضہ فقط تساوی یا وصفِ تابع کی برتری میں ہوتا ہے۔</li>
-                <li>۲. دفعِ تعارض کی ترتیب: توفیق ➡️ نسخ ➡️ ترجیح ➡️ تساقط۔</li>
-                <li>۳. قیاس میں ترجیح: قوة التأثير اور قوة الثبات۔</li>
-                <li>۴. چاروں فاسد ترجیحات سے بچنا ہر فقیہ کے لیے فرض ہے۔</li>
-              </ul>
-              <div class="slide-formula-badge" style="border-color: var(--teal-accent);">
-                علم الأصول ميزان الاستنباط ودفع الشبهات
-              </div>
+          <div class="slide-cards-grid">
+            <div class="rect-card">
+              <div class="rect-card-header">خلاصۂ مناہجِ دفعِ تعارض</div>
+              <div class="rect-card-content">۱. التوفيق بتغاير الحكم أو المحل ➡️ ۲. النسخ بتغاير الزمان («المحرِّم ناسخ للمبيح») ➡️ ۳. الترجيح بوصف تابع ➡️ ۴. تساقط النصلین۔</div>
             </div>
 
-            <div class="pictorial-box">
-              <span class="pictorial-icon">🎓</span>
-              <div class="pictorial-title">مکمل اصولی فلو میپ</div>
-              <div style="width: 100%; font-size: 0.78rem; display: flex; flex-direction: column; gap: 0.3rem;">
-                <div class="pictorial-card-mini card-mini-blue">ورود دلیلین متعارضین</div>
-                <div style="color: var(--gold-primary);">⬇️</div>
-                <div class="pictorial-card-mini card-mini-gold">التوفيق (تغاير الحكم أو المحل)</div>
-                <div style="color: var(--gold-primary);">⬇️</div>
-                <div class="pictorial-card-mini card-mini-green">النسخ (تغاير الزمان / المحرم ناسخ)</div>
-                <div style="color: var(--gold-primary);">⬇️</div>
-                <div class="pictorial-card-mini card-mini-gold">الترجيح الصحيح (قوة التأثير والثبات)</div>
+            <div class="rect-card">
+              <div class="rect-card-header">خلاصۂ ترجیحاتِ صحیحہ و فاسدہ</div>
+              <div class="rect-items-list">
+                <div class="rect-sub-item">صحیح ترجیح: قوة التأثير اور قوة الثبات على الحكم۔</div><div class="rect-sub-item">باطل ترجیحات: غلبة الأشباه، عموم العلة، قلة الأجزاء، كثرة الأدلة۔</div><div class="rect-sub-item">ضابطۂ کثرت: الكثرة معتبرة مع الهيئة الاجتماعية فقط۔</div>
               </div>
             </div>
           </div>
 
-          <div class="slide-note-box" style="border-color: var(--gold-primary);">
-            <strong>مبارکباد:</strong> التوضيح کے اس باب پر مکمل دسترس سے فقہِ حنفی کی تخریج اور اصولی مناظرات کے تمام
-            اسرار واضح ہو جاتے ہیں۔
+          <div class="example-rect-card">
+            <div class="example-title">المثال الفقهي التطبيقي</div>
+            <div class="example-desc">ان اصولی قواعد کی مدد سے فقہِ حنفی کی تمام فتاویٰ اور تخریجات میں تعارضات کو قطعی طور پر حل کیا جا سکتا ہے۔</div>
+          </div>
+
+          <div class="slide-note-box">
+            <strong>نکتۂ تدریس:</strong> «علم الأصول ميزان الاستنباط ودفع الشبهات»۔
           </div>
         </div>
-
         <!-- Slide Navigation Controls -->
         <div class="slide-controls-bar">
           <button id="slidePrevBtn" class="sim-btn secondary" disabled>
