@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="التوضيح في حل غوامض التنقيح لصدر الشريعة المحبوبي الحنفي: باب المعارضة والترجيح والتراجيح الفاسدة - دليل تفاعلي وبصري للطلاب مع النص العربي والترجمة الأردية والسلائیڈز">
+  <title>التوضيح في حل غوامض التنقيح | باب المعارضة والترجيح</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Noto+Nastaliq+Urdu:wght@400;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    /* Modern Visual Pictorial Slides System */
+    .slide-deck-container {
+      background: var(--bg-card);
+      border: 1.5px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      margin-top: 1.5rem;
+    }
+
+    .slide-header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.8rem;
+      background: rgba(0, 0, 0, 0.35);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .slide-counter {
+      font-weight: 700;
+      color: var(--text-accent);
+      font-size: 1rem;
+    }
+
+    .slide-progress-track {
+      width: 100%;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .slide-progress-bar {
+      height: 100%;
+      width: 8.33%;
+      background: linear-gradient(90deg, var(--teal-accent), var(--gold-primary));
+      transition: width 0.3s ease;
+    }
+
+    .lecture-slide {
+      display: none;
+      padding: 2.2rem 2rem;
+      min-height: 480px;
+      animation: fadeIn 0.4s ease forwards;
+    }
+
+    .lecture-slide.active {
+      display: block;
+    }
+
+    .slide-tag {
+      display: inline-block;
+      background: rgba(212, 175, 55, 0.14);
+      color: var(--gold-primary);
+      padding: 0.25rem 0.85rem;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin-bottom: 0.8rem;
+    }
+
+    .slide-title {
+      font-family: var(--font-arabic);
+      font-size: 1.85rem;
+      color: var(--text-main);
+      margin-bottom: 1.2rem;
+      line-height: 1.4;
+    }
+
+    /* 2-column Pictorial Split */
+    .slide-pictorial-layout {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 1.8rem;
+      align-items: stretch;
+      margin: 1rem 0;
+    }
+
+    @media (max-width: 850px) {
+      .slide-pictorial-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .slide-text-col {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .slide-bullets {
+      list-style: none;
+      padding: 0;
+      margin: 0.5rem 0;
+    }
+
+    .slide-bullets li {
+      position: relative;
+      padding-right: 1.8rem;
+      margin-bottom: 0.8rem;
+      font-size: 0.98rem;
+      line-height: 1.7;
+      color: var(--text-main);
+    }
+
+    .slide-bullets li::before {
+      content: '⚡';
+      position: absolute;
+      right: 0;
+      top: 0;
+      font-size: 0.9rem;
+    }
+
+    /* Pictorial Visual Card */
+    .pictorial-box {
+      background: var(--bg-glass);
+      border: 1.5px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.4rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .pictorial-icon {
+      font-size: 2.8rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .pictorial-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--text-accent);
+      margin-bottom: 0.6rem;
+    }
+
+    .pictorial-diagram-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      width: 100%;
+      margin: 0.6rem 0;
+    }
+
+    .pictorial-card-mini {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.5rem 0.6rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      flex: 1;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-mini-red {
+      border-color: rgba(248, 113, 113, 0.4);
+      background: rgba(248, 113, 113, 0.08);
+      color: var(--red-alert);
+    }
+
+    .card-mini-green {
+      border-color: rgba(52, 211, 153, 0.4);
+      background: rgba(52, 211, 153, 0.08);
+      color: var(--green-success);
+    }
+
+    .card-mini-gold {
+      border-color: rgba(212, 175, 55, 0.4);
+      background: rgba(212, 175, 55, 0.08);
+      color: var(--gold-primary);
+    }
+
+    .card-mini-blue {
+      border-color: rgba(56, 189, 248, 0.4);
+      background: rgba(56, 189, 248, 0.08);
+      color: var(--blue-accent);
+    }
+
+    .slide-formula-badge {
+      display: inline-block;
+      margin-top: 0.6rem;
+      padding: 0.35rem 0.9rem;
+      background: rgba(212, 175, 55, 0.15);
+      border: 1px dashed var(--gold-primary);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-accent);
+    }
+
+    .example-highlight-box {
+      background: rgba(34, 197, 94, 0.1);
+      border-right: 3.5px solid var(--green-success);
+      padding: 0.5rem 0.85rem;
+      border-radius: 0 8px 8px 0;
+      margin-top: 0.7rem;
+      font-size: 0.88rem;
+      color: #86efac;
+      line-height: 1.6;
+    }
+
+    body.theme-light .example-highlight-box {
+      background: #f0fdf4;
+      color: #166534;
+      border-right-color: #16a34a;
+    }
+
+    .slide-note-box {
+      background: rgba(0, 0, 0, 0.25);
+      border-right: 4px solid var(--teal-accent);
+      padding: 0.8rem 1.2rem;
+      border-radius: 0 8px 8px 0;
+      margin-top: 1.2rem;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    .slide-controls-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.9rem 1.8rem;
+      background: rgba(0, 0, 0, 0.25);
+      border-top: 1px solid var(--border-color);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+
+<body class="theme-dars">
+
+  <!-- Madrasa LMS Portal Top Navigation Banner -->
+  <div class="lms-top-nav">
+    <div class="lms-nav-container">
+      <div class="lms-nav-links">
+        <a href="index.html" class="lms-nav-btn lms-btn-topics" title="فہرستِ اسباق پر واپس جائیں">
+          <span class="lms-icon">📚</span>
+          <span>فہرستِ اسباق</span>
+        </a>
+        <a href="/" class="lms-nav-btn lms-btn-home" title="مرکزی مدرسہ پورٹل پر جائیں">
+          <span class="lms-icon">🏛️</span>
+          <span>مرکزی پورٹل</span>
+        </a>
+      </div>
+      <div class="lms-breadcrumb">
+        <span class="crumb-root">مدرسہ پورٹل</span>
+        <span class="crumb-sep">/</span>
+        <span class="crumb-item">درجہ سابعہ (العالیۃ الثانیۃ)</span>
+        <span class="crumb-sep">/</span>
+        <span class="crumb-item">أصول الفقه</span>
+        <span class="crumb-sep">/</span>
+        <span class="crumb-active">التوضيح: باب المعارضة والترجيح</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header Section -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="badge-islamic">درسِ نظامی • أصول الفقه الحنفي</div>
+        <h1 class="main-title">التوضيح في حل غوامض التنقيح</h1>
+        <p class="subtitle">للإمام صدر الشريعة عبيد الله بن مسعود المحبوبي الحنفيؒ | باب المعارضة والترجيح والتراجيح
+          الفاسدة (صفحات ۳۸۹ تا ۴۰۳)</p>
+      </div>
+
+      <div class="header-actions">
+        <div class="theme-switcher">
+          <button id="themeToggleBtn" class="action-btn" title="تھیم تبدیل کریں">
+            <span class="icon">🌓</span>
+            <span class="btn-text">اندازِ ظاہری</span>
+          </button>
+        </div>
+        <a href="downloads/Tawzeeh-Lecture-Notes.pdf" class="action-btn download-btn" download="Tawzeeh-Lecture-Notes.pdf" title="مکمل عربی متن اور اردو ترجمہ پی ڈی ایف ڈاؤنلوڈ کریں">
+          <span class="icon">📥</span>
+          <span class="btn-text">ڈاؤنلوڈ نوٹس (PDF)</span>
+        </a>
+        <a href="downloads/Tawzeeh-Slides.pdf" class="action-btn download-btn secondary" download="Tawzeeh-Slides.pdf" title="پریزنٹیشن سلائیڈز مع امثلہ پی ڈی ایف ڈاؤنلوڈ کریں">
+          <span class="icon">📽️</span>
+          <span class="btn-text">ڈاؤنلوڈ سلائیڈز (PDF)</span>
+        </a>
+        <button id="printBtn" class="action-btn secondary" onclick="window.print()" title="صفحہ پرنٹ کریں">
+          <span class="icon">🖨️</span>
+          <span class="btn-text">پرنٹ</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs" id="mainNav">
+      <button class="nav-btn active" data-tab="tab-overview">
+        <span class="tab-icon">📖</span>
+        <span>تعارف و خلاصہ</span>
+      </button>
+      <button class="nav-btn" data-tab="tab-text">
+        <span class="tab-icon">📜</span>
+        <span>متن و سلیس ترجمہ</span>
+      </button>
+      <button class="nav-btn" data-tab="tab-logic">
+        <span class="tab-icon">🧠</span>
+        <span>شجرۂ دفعِ تعارض و ترجیح</span>
+      </button>
+      <button class="nav-btn highlight-tab" data-tab="tab-slides">
+        <span class="tab-icon">📽️</span>
+        <span>پریزنٹیشن سلائیڈز و تصویری تفہیم</span>
+      </button>
+      <button class="nav-btn" data-tab="tab-fasida">
+        <span class="tab-icon">🛡️</span>
+        <span>التراجيح الفاسدة الأربعة</span>
+      </button>
+      <button class="nav-btn" data-tab="tab-quiz">
+        <span class="tab-icon">📝</span>
+        <span>امتحانی سوالات و خود آزمائی</span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="main-container">
+
+    <!-- ==================== TAB 1: OVERVIEW ==================== -->
+    <section id="tab-overview" class="tab-pane active">
+      <div class="hero-card">
+        <div class="hero-content">
+          <span class="hero-tag">کتاب التوضيح: صفحات ۳۸۹، ۳۹۲، ۳۹۳، ۳۹۶، ۳۹۷، ۳۹۸، ۳۹۹، ۴۰۲، ۴۰۳ کا عطر و نچوڑ</span>
+          <h2>تعارضِ ادلہ کے حل اور ترجیح کے قطعی اصولی ضوابط</h2>
+          <p class="hero-desc">
+            یہ درسی صفحات علمِ اصول میں صدر الشریعہ عبید اللہ بن مسعود المحبوبیؒ کی کتاب <strong>«التوضيح»</strong> کی
+            سب سے فکری اور دقیق مباحث ہیں۔ امام نے ثابت فرمایا کہ جب دو شرعی دلیلیں باہم متصادم نظر آئیں تو تعارض کو
+            کیسے رفع کیا جائے (توفیق، نسخ، ترجیح، تساقط)۔ نیز یہ کہ کن اوصاف کی بنا پر ترجیح معتبر ہوتی ہے (قوة التأثير،
+            قوة الثبات)، اور کون سی چار ترجیحات باطل اور فاسد ہیں (غلبة الأشباه، عموم العلة، قلة الأجزاء، كثرة الأدلة)۔
+          </p>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-box clickable" data-goto="tab-text" title="متن اور ترجمہ پر جائیں">
+            <span class="stat-num">۹</span>
+            <span class="stat-label">درسی صفحات کا احاطہ</span>
+            <span class="stat-hint">دیکھیں 📜</span>
+          </div>
+          <div class="stat-box clickable" data-goto="tab-slides" title="پریزنٹیشن سلائیڈز پر جائیں">
+            <span class="stat-num">۱۲</span>
+            <span class="stat-label">تصویری درسی سلائیڈز</span>
+            <span class="stat-hint">کھولیں 📽️</span>
+          </div>
+          <div class="stat-box clickable" data-goto="tab-fasida" title="التراجیح الفاسدہ پر جائیں">
+            <span class="stat-num">۴</span>
+            <span class="stat-label">باطل فاسد ترجیحات</span>
+            <span class="stat-hint">پڑھیں 🛡️</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conceptual Pillars -->
+      <div class="summary-cards-header mt-4">
+        <div>
+          <span class="badge-islamic">اصولی فہم • Core Principles</span>
+          <h3 class="section-title">۳ بنیادی اصولی ستون: تعریف، اصول اور تفہیمی مثالیں</h3>
+          <p class="section-desc">طلبہ اور اساتذہ کے لیے التوضيح کی دقیق عبارات کا سب سے آسان عملی فہم</p>
+        </div>
+      </div>
+
+      <div class="grid-3-col mt-2">
+        <!-- Card 1 -->
+        <div class="card feature-card modern-summary-card clickable-card" data-goto="tab-text"
+          title="متن اور ترجمہ پر جائیں">
+          <div class="card-top-badge">
+            <span class="card-icon">⚖️</span>
+            <span class="badge-mini">ص ۳۸۹</span>
+          </div>
+          <h3>۱. حقیقتِ معارضہ و ترجیح</h3>
+          <div class="modern-term-badge">
+            <span class="label">اصطلاحی ضابطہ:</span>
+            <strong>المعارضة في محل واحد وزمان واحد</strong>
+          </div>
+          <p class="card-desc">
+            معارضہ اس وقت ہوتا ہے جب دو دلیلیں ایک ہی جگہ اور ایک ہی وقت میں ایک دوسرے کی ضد کا تقاضا کریں۔ اگر دونوں
+            مساوی ہوں یا ایک دلیل میں زیادتی وصفِ تابع سے ہو تو معارضہ قائم ہوگا، اور یہ زیادتی "رجحان" کہلائے گی۔
+          </p>
+          <div class="real-world-box">
+            <div class="rw-title">🔍 اصولی نکتہ (النص والقياس):</div>
+            <p>
+              نص کو قیاس پر "راجح" نہیں کہتے، کیونکہ نص قیاس کو سرے سے گرا دیتی ہے، اور ترجیح فقط ان دو دلیلوں کے مابین
+              ہوتی ہے جو برابری کی قوت رکھتی ہوں!
+            </p>
+          </div>
+          <div class="card-footer-action">
+            <span>متن و تشریح دیکھیں 📜</span>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="card feature-card modern-summary-card clickable-card" data-goto="tab-logic"
+          title="شجرۂ استدلال پر جائیں">
+          <div class="card-top-badge">
+            <span class="card-icon">🔄</span>
+            <span class="badge-mini">ص ۳۹۲ - ۳۹۳</span>
+          </div>
+          <h3>۲. دفعِ تعارض کے ۴ مناہج</h3>
+          <div class="modern-term-badge">
+            <span class="label">اصطلاحی ضابطہ:</span>
+            <strong>التوفيق ثم النسخ ثم الترجيح ثم التساقط</strong>
+          </div>
+          <p class="card-desc">
+            جب دو نصوص میں تعارض ہو تو فوراً دلیل کو نہیں چھوڑا جاتا، بلکہ: ۱. حکم میں تغیر مان کر توفیق، ۲. محل کے تغیر
+            سے توفیق، ۳. تاریخ سے نسخ کا ثبوت، ۴. یا ترجیح اور تساقط کا فیصلہ کیا جاتا ہے۔
+          </p>
+          <div class="real-world-box">
+            <div class="rw-title">💡 قرآنی نظیر (قسم کا کفارہ):</div>
+            <p>
+              یمینِ غموس پر آخرت کی سزا ہے اور یمینِ منعقدہ پر دنیا میں کفارہ ہے؛ یوں دونوں قرآنی آیات میں تعارض کے
+              بجائے توفیق واقع ہو جاتی ہے۔
+            </p>
+          </div>
+          <div class="card-footer-action">
+            <span>شجرۂ استدلال دیکھیں 🧠</span>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="card feature-card modern-summary-card clickable-card" data-goto="tab-slides" title="سلائیڈز دیکھیں">
+          <div class="card-top-badge">
+            <span class="card-icon">🤼‍♂️</span>
+            <span class="badge-mini">ص ۴۰۲ - ۴۰۳</span>
+          </div>
+          <h3>۳. الفرق الدقيق في اعتبار الكثرة</h3>
+          <div class="modern-term-badge">
+            <span class="label">اصطلاحی ضابطہ:</span>
+            <strong>الهيئة الاجتماعية (حمل الأثقال بمقابل المصارعة)</strong>
+          </div>
+          <p class="card-desc">
+            کثرت صرف وہاں معتبر ہے جہاں "ہیئتِ اجتماعیہ" بنے اور حکم مجموعے سے جڑا ہو (جیسے وزن اٹھانا)۔ اور جہاں حکم ہر
+            فرد سے الگ جڑا ہو (جیسے کشتی اور دلائل)، وہاں ۱ طاقتور دلیل ہزار کمزوروں پر غالب رہتی ہے!
+          </p>
+          <div class="real-world-box">
+            <div class="rw-title">🏋️‍♂️ حسی تمثیل (پہلوانی اور چٹان):</div>
+            <p>
+              کشتی میں اکیلا چیمپئن ہزار کمزوروں کو ہرا سکتا ہے، لیکن بھاری چٹان اٹھانے کے لیے ۱۰ افراد کا اکٹھا زور
+              درکار ہوتا ہے۔ فقہی دلائل کشتی کی مانند ہیں!
+            </p>
+          </div>
+          <div class="card-footer-action">
+            <span>سلائیڈز میں تصویری تفہیم دیکھیں 📽️</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Key Terminology Strip -->
+      <div class="terms-container mt-4">
+        <h3 class="section-title">اہم اصولی و درسی اصطلاحات</h3>
+        <div class="terms-grid">
+          <div class="term-pill">
+            <span class="term-ar">المعارضة:</span>
+            <span class="term-ur">دو دلیلوں کا ایک ہی محل اور وقت میں باہم متضاد احکام کا تقاضا کرنا۔</span>
+          </div>
+          <div class="term-pill">
+            <span class="term-ar">الترجيح:</span>
+            <span class="term-ur">وصفِ تابع کے ذریعے ایک دلیل کو دوسری مدمقابل دلیل پر فائق قرار دینا۔</span>
+          </div>
+          <div class="term-pill">
+            <span class="term-ar">قوة التأثير:</span>
+            <span class="term-ur">علت کا شرعی حکم پیدا کرنے میں ذاتی طور پر قوی اور موثر ہونا۔</span>
+          </div>
+          <div class="term-pill">
+            <span class="term-ar">قوة الثبات:</span>
+            <span class="term-ur">شارع کا اس وصف کو مختلف ابوابِ فقہ میں کثرت سے معتبر ماننا۔</span>
+          </div>
+          <div class="term-pill">
+            <span class="term-ar">غلبة الأشباه:</span>
+            <span class="term-ur">محض بہت سے غیر موثر اوصاف کی مشابہت گنوانا (جو کہ باطل ہے)۔</span>
+          </div>
+          <div class="term-pill">
+            <span class="term-ar">الهيئة الاجتماعية:</span>
+            <span class="term-ur">افراد کے مجموعے سے مل کر پیدا ہونے والی اجتماعی قوت (Synergy)۔</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 2: TEXT & TRANSLATION ==================== -->
+    <section id="tab-text" class="tab-pane">
+      <div class="section-header-row">
+        <div>
+          <h2 class="section-title">عباراتِ التوضيح مع سلیس اردو ترجمہ و اصولی حل</h2>
+          <p class="section-desc">کتاب التوضيح (صفحات ۳۸۹ تا ۴۰۳) کی اصل عربی عبارت، مکمل اعراب، حواشی اور سلیس مفہوم
+          </p>
+        </div>
+        <div class="view-controls">
+          <button class="filter-btn active" data-view="both">دونوں زبانیں (متوازی)</button>
+          <button class="filter-btn" data-view="ar">صرف عربی متن</button>
+          <button class="filter-btn" data-view="ur">صرف اردو ترجمہ</button>
+        </div>
+      </div>
+
+      <!-- Page 389 Block -->
+      <div class="page-container" id="page-389">
+        <div class="page-ribbon">صفحہ ۳۸۹: باب المعارضة والترجيح</div>
+
+        <div class="matn-box">
+          <span class="matn-tag">متن التنقيح وشرحه التوضيح</span>
+          <p class="matn-text">
+            [إِذَا وَرَدَ دَلِيلَانِ يَقْتَضِي أَحَدُهُمَا عَدَمَ مَا يَقْتَضِيهِ الْآخَرُ فِي مَحَلٍّ وَاحِدٍ، فِي
+            زَمَانٍ وَاحِدٍ، فَإِنْ تَسَاوَيَا قُوَّةً أَوْ يَكُونُ أَحَدُهُمَا أَقْوَى بِوَصْفٍ هُوَ تَابِعٌ،
+            فَبَيْنَهُمَا مُعَارَضَةٌ؛ وَالْقُوَّةُ الْمَذْكُورَةُ رُجْحَانٌ. وَإِنْ كَانَ أَقْوَى بِمَا هُوَ غَيْرُ
+            تَابِعٍ لَا يُسَمَّى رُجْحَاناً، فَلَا يُقَالُ: النَّصُّ رَاجِحٌ عَلَى الْقِيَاسِ.]
+          </p>
+          <p class="matn-ur">
+            جب دو دلیلیں اس طرح وارد ہوں کہ ان میں سے ایک اس چیز کی نفی چاہے جس کا دوسری تقاضا کرتی ہے ایک ہی محل میں
+            اور ایک ہی زمانے میں: پس اگر وہ دونوں قوت میں برابر ہوں یا ان میں سے ایک ایسے وصف کے ساتھ قوی ہو جو تابع ہو،
+            تو ان دونوں کے درمیان "معارضہ" ہے، اور یہ مذکورہ قوت "رجحان" ہے۔ اور اگر وہ ایسے وصف سے قوی ہو جو تابع نہیں
+            تو اسے رجحان نہیں کہتے، چنانچہ یوں نہیں کہا جاتا کہ نص قیاس پر راجح ہے۔
+          </p>
+        </div>
+
+        <div class="parallel-block">
+          <div class="col-arabic">
+            <span class="lang-label">التوضيح: لصدر الشريعة المحبوبيؒ</span>
+            <p class="arabic-p">
+              «قوله: <span class="highlight-text">[إذا ورد دليلان...]</span> شروع في الصور الثلاث، والمعارضة تتحقق في
+              الأخيرين لا في الأولى. الصورة الأولى: تساوي القوة. الصورة الثانية: زيادة القوة بوصف تابع. الصورة الثالثة:
+              زيادة القوة بوصف غير تابع.
+              والرجحان مأخوذ من قوله عليه السلام: <span class="highlight-text">«زِنْ وَأَرْجِحْ»</span>، والمراد الفضل
+              القليل؛ لئلا يلزم الربا في قضاء الديون، فيجعل ذلك عفوا؛ لأنه لقلته في حكم العدم.
+              فلو كان أحدهما أقوى بما هو غير تابع — كالنص بالنسبة إلى القياس — لم يكن بينهما معارضة؛ لأن القوي يسقط
+              الضعيف بالكلية فلا يتحقق التقابل.»
+            </p>
+            <div class="hashiya-box">
+              <span class="hashiya-icon">📌</span>
+              <span><strong>حاشیہ التلويح:</strong> قوله «زن وأرجح»: نبی اکرم ﷺ نے فرمایا تولو اور تھوڑا جھکاؤ دو۔ یہ
+                تھوڑا سا جھکاؤ "رجحان" کہلاتا ہے جو اصل ترازو کے دونوں پلڑوں کی برابری کے بعد معمولی فرق کو کہتے
+                ہیں۔</span>
+            </div>
+          </div>
+
+          <div class="col-urdu">
+            <span class="lang-label">سلیس اردو ترجمہ و تشریح</span>
+            <p class="urdu-p">
+              <strong>معارضہ اور ترجیح کی حقیقت:</strong> صدر الشریعہؒ یہاں سے تعارض کی تین صورتیں بیان فرما رہے ہیں:
+              <strong>۱. پہلی صورت:</strong> دونوں دلیلیں قوت میں بالکل مساوی ہوں۔
+              <strong>۲. دوسری صورت:</strong> ایک دلیل دوسری سے ایسے وصف کے ذریعے قوی ہو جو تابع ہو (جیسے سند کی شہرت یا
+              راوی کی فقاہت)۔ ان دونوں صورتوں میں حقیقتاً معارضہ واقع ہوتا ہے۔
+              <strong>۳. تیسری صورت:</strong> ایک دلیل ذاتی و اصل قوت کے اعتبار سے برتر ہو (جیسے نص قطعی بمقابلہ قیاس
+              ظنی)۔ یہاں سرے سے معارضہ ہوتا ہی نہیں کیونکہ نص قیاس کو سرے سے کالعدم کر دیتی ہے۔
+            </p>
+            <p class="urdu-p">
+              لفظ "رجحان" حدیث پاک «زن وأرجح» (تولو اور تھوڑا جھکا دو) سے ماخوذ ہے، یعنی اصل وزن کے بعد جو ذرا سا اضافہ
+              ہو، اور وہ کمی بیشی قرضوں کی ادائیگی میں سود کا سبب نہیں بنتی بلکہ عفو ہوتی ہے۔
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pages 392 - 393 Block -->
+      <div class="page-container mt-4" id="page-392">
+        <div class="page-ribbon">صفحات ۳۹۲ - ۳۹۳: الصور الأربع للتعارض والمخلص عنها</div>
+
+        <div class="parallel-block">
+          <div class="col-arabic">
+            <span class="lang-label">التوضيح: لصدر الشريعة المحبوبيؒ</span>
+            <p class="arabic-p">
+              «<span class="highlight-text">[الصور الأربع والتعارض والمخلص عنها]</span>:
+              إما بأن يُحمل على تغاير الحكم كقوله تعالى: ﴿لَا يُؤَاخِذُكُمُ اللَّهُ بِاللَّغْوِ فِي أَيْمَانِكُمْ
+              وَلَكِن يُؤَاخِذُكُم بِمَا كَسَبَتْ قُلُوبُكُمْ﴾، وفي موضع آخر: ﴿وَلَكِن يُؤَاخِذُكُم بِمَا عَقَّدتُّمُ
+              الْأَيْمَانَ فَكَفَّارَتُهُ...﴾،
+              فاللغو في هذه الآية ما يخلو عن الفائدة... والآية الأولى تقتضي المؤاخذة في الغموس؛ لأن الغموس من كسب القلب،
+              والمؤاخذة في الثانية بالكفارة في المنعقدة، فاندفع التعارض.
+              وأما الثاني وهو المخلص من قبل المحل: فبأن يحمل على تغاير المحل كقوله تعالى: ﴿حَتَّىٰ يَطْهُرْنَ﴾ بالتخفيف
+              والتشديد...
+              وأما الثالث: وهو المخلص من قبل الزمان: فبأن يكون أحدهما ناسخاً للآخر عند معرفة التاريخ، وإلا فالمحرِّم
+              ناسخ للمبيح؛ لأن الأصل قبل البعثة الإباحة، والمبيح ورد لإبقائه، ثم المحرم نسخه.»
+            </p>
+          </div>
+
+          <div class="col-urdu">
+            <span class="lang-label">سلیس اردو ترجمہ و تشریح</span>
+            <p class="urdu-p">
+              <strong>دفعِ تعارض کے ۴ راستے (المخلص عن التعارض):</strong>
+              جب دو قرآنی آیات یا احادیث میں بظاہر ٹکراؤ نظر آئے تو اس سے نکلنے کے چار طریقے ہیں:
+              <strong>۱. حکم کے الگ ہونے پر محمول کرنا:</strong> جیسے قسم کی دو آیات: ایک آیت میں فرمایا کہ دل کے ارادے
+              والی قسم پر گرفت ہوگی، اور دوسری میں فرمایا کہ مؤکد قسم پر کفارہ ہوگا۔ صدر الشریعہؒ نے فرمایا: پہلی آیت
+              یمینِ غموس پر محمول ہے جس میں آخرت کا وبال ہے، اور دوسری یمینِ منعقدہ پر محمول ہے جس میں دنیا کا کفارہ ہے۔
+              پس تعارض ختم ہو گیا۔
+              <strong>۲. محل کے الگ ہونے پر محمول کرنا:</strong> جیسے حائضہ کے متعلق قرآنی قرأت: "حتی یطهرن" (تخفیف: خون
+              بند ہونا) اور "یطّهرن" (تشدید: غسل کرنا)۔ اگر ۱۰ دن پر خون رکے تو غسل کے بغیر حلال ہے، اور کم پر رکے تو
+              غسل شرط ہے۔
+              <strong>۳. زمانے کے فرق پر محمول کرنا (نسخ):</strong> اگر تاریخ معلوم ہو تو بعد والی نص ناسخ ہوگی۔ اور اگر
+              تاریخ صراحتاً معلوم نہ ہو تو "المحرم ناسخ للمبیح" (حرام کرنے والی نص مبیح کے لیے ناسخ ہوگی) کیونکہ بعثت سے
+              قبل اصل اباحت تھی، مبیح نص اس کو برقرار رکھنے آئی جبکہ محرم نے نیا حکم دے کر اسے منسوخ کر دیا۔
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Page 396 Block -->
+      <div class="page-container mt-4" id="page-396">
+        <div class="page-ribbon">صفحہ ۳۹۶: تعارض الإثبات والنفي في الأخبار والقياس</div>
+
+        <div class="parallel-block">
+          <div class="col-arabic">
+            <span class="lang-label">التوضيح: لصدر الشريعة المحبوبيؒ</span>
+            <p class="arabic-p">
+              «<span class="highlight-text">[تعارض الإثبات والنفي في الأخبار]</span>: النفي على ثلاثة أقسام:
+              الأول: ما يكون معرفته بالدليل، كما روي أنه ﷺ تزوج ميمونة وهو حلال (مثبت)، وما روي أنه تزوج وهو محرم (ناف)،
+              فإنه اتفق على أنه لم يكن في الحل الأصلي...
+              الثاني: ما لا يكون معرفته بالدليل بل بظاهر الحال، كنحو: أعتقت بريرة وزوجها حر (مثبت)، وأعتقت وزوجها عبد
+              (ناف)، فهذا النفي يعرف بظاهر الحال فالمثبت أولى.
+              الثالث: ما يحتمل الأمرين، كالإخبار بطهارة الماء ونجاسته.
+              <span class="highlight-text">[وأما في القياس]</span>: إذا تعارض قياسان فلا يحمل على النسخ، ولا يسقطان
+              بالتعارض كما يسقط النصان؛ لأن المجتهد في كل واحد منهما مصيب في حق العمل، فيأخذ بأيهما شاء بعد شهادة قلبه.»
+            </p>
+          </div>
+
+          <div class="col-urdu">
+            <span class="lang-label">سلیس اردو ترجمہ و تشریح</span>
+            <p class="urdu-p">
+              <strong>روایات میں نفی اور اثبات کا ٹکراؤ:</strong> نفی کی ۳ قسمیں ہیں:
+              ۱. جو دلیل و مشاہدے سے معلوم ہو (جیسے نکاحِ میمونہؓ، تو دونوں مساوی ہیں اور راوی کی خصوصیت دیکھی جائے گی)۔
+              ۲. جو دلیل پر نہیں بلکہ ظاہرِ حال اور اصل پر مبنی ہو (جیسے حضرت بریرہؓ کا واقعہ، تو یہاں مثبت راوی راجح
+              ہوگا کیونکہ وہ نیا علم لا رہا ہے)۔
+              ۳. جو دونوں کا احتمال رکھے (جیسے پانی پاک یا ناپاک ہونے کی خبر، دلیل پوچھی جائے گی)۔
+            </p>
+            <p class="urdu-p highlight-p">
+              <strong>قیاس اور نصوص کا عظیم فرق:</strong> نصوص میں تعارض ہو اور حل نہ نکلے تو دونوں ساقط ہو جاتی ہیں
+              (التساقط)، لیکن دو قیاس آپس میں ٹکرا کر کبھی ساقط نہیں ہوتے! مجتہد اپنے دل کے اطمینان (شہادتِ قلب) سے جس
+              قیاس پر چاہے عمل کر سکتا ہے، کیونکہ دونوں جانب اجتہاد میں دلیل کا وجود ہے۔
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pages 397 - 399 Block -->
+      <div class="page-container mt-4" id="page-397">
+        <div class="page-ribbon">صفحات ۳۹۷ - ۳۹۹: شروط الترجيح الصحيح (قوة التأثير وقوة الثبات)</div>
+
+        <div class="parallel-block">
+          <div class="col-arabic">
+            <span class="lang-label">التوضيح: لصدر الشريعة المحبوبيؒ</span>
+            <p class="arabic-p">
+              «فصل: ما يقع به الترجيح فعليك استخراجه من مباحث الكتاب والسنة متناً وسنداً...
+              والذي ذكروا في ترجيح القياس أربعة أمور:
+              <span class="highlight-text">الأول: قوة التأثير</span>، كما في مسألة طول الحرة، ونكاح الأمة الكتابية؛ فإن
+              الرق منصف لا محرم في الطلاق والعدة والحدود.
+              <span class="highlight-text">والثاني: قوة ثبات الوصف على الحكم</span>، والمراد منه كثرة اعتبار الشارع هذا
+              الوصف في هذا الحكم، كالمسح في التخفيف في كل تطهير غير معقول كالتيمم ومسح الخف والجورب، بخلاف الركن...
+              وكقولنا في صوم رمضان: إنه متعين فلا يجب التعيين؛ لأن هذا الوصف اعتبره الشارع في الودائع والغصوب ورد المبيع
+              بيعاً فاسداً.»
+            </p>
+          </div>
+
+          <div class="col-urdu">
+            <span class="lang-label">سلیس اردو ترجمہ و تشریح</span>
+            <p class="urdu-p">
+              <strong>قیاس میں ترجیح کے دو بڑے اسباب:</strong>
+              <strong>۱. قوة التأثير (اثر کی قوت):</strong> جیسے اہل کتاب باندی سے نکاح کے مسئلے میں احناف کا قیاس
+              شافعیہ کے قیاس پر راجح ہے، کیونکہ غلامی احکام کو آدھا (تنصیف) کرتی ہے، حرام نہیں کرتی جیسے طلاق، عدت اور
+              حدود میں دیکھا گیا۔
+              <strong>۲. قوة الثبات (شریعت میں وصف کی کثرتِ اعتبار):</strong> شارع نے اس وصف کو کتنی بار تسلیم کیا ہے۔
+              جیسے رمضان کے روزے میں نیت کی تعیین کا شرط نہ ہونا؛ کیونکہ شارع نے ودیعت، مغصوبہ چیز، اور بیع فاسد کے رد
+              میں "متعین" ہونے کے وصف کی بنا پر تعیین کو ساقط مانا ہے۔
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pages 402 - 403 Block -->
+      <div class="page-container mt-4" id="page-402">
+        <div class="page-ribbon">صفحات ۴۰۲ - ۴۰۳: التراجيح الفاسدة والفرق الدقيق في الكثرة</div>
+
+        <div class="matn-box">
+          <span class="matn-tag">متن التنقيح وشرحه التوضيح</span>
+          <p class="matn-text">
+            [فَصْلٌ: وَمِنَ التَّرَاجِيحِ الْفَاسِدَةِ: التَّرْجِيحُ بِغَلَبَةِ الْأَشْبَاهِ... وَمِنْهَا: التَّرْجِيحُ
+            بِكَوْنِ الْوَصْفِ أَعَمَّ... وَمِنْهَا: التَّرْجِيحُ بِقِلَّةِ الْأَجْزَاءِ... وَلَا يُرَجَّحُ بِكَثْرَةِ
+            الْأَدِلَّةِ عِنْدَ الشَّيْخَيْنِ.]
+          </p>
+        </div>
+
+        <div class="parallel-block">
+          <div class="col-arabic">
+            <span class="lang-label">التوضيح: لصدر الشريعة المحبوبيؒ</span>
+            <p class="arabic-p">
+              «قوله: <span class="highlight-text">[الترجيح بغلبة الأشباه]</span> كقول الشافعي رحمه الله في أن الأخ
+              المشترى لا يعتق عنده: الأخ يشبه الولد بوجه — وهو المحرمية — وابن العم بوجوه: كحل الزكاة، وحل زوجته، وقبول
+              الشهادة، ووجوب القصاص. وهذا باطل؛ لأن المشابهة في وصف واحد مؤثر في الحكم المطلوب أقوى من المشابهة في ألف
+              وصف غير مؤثر.
+              <span class="highlight-text">[الفرق الدقيق في الكثرة]</span>: واعلم أنا نرجح بالكثرة في بعض المواضع —
+              كالترجيح بكثرة الأصول — ولا نرجح بكثرة الأدلة. ولنا في ذلك فرق دقيق: وهو أن الكثرة معتبرة في كل موضع يحصل
+              بها هيئة اجتماعية ويكون الحكم منوطاً بالمجموع من حيث هو المجموع (كحمل الأثقال والحروب)، وغير معتبرة في كل
+              موضع لا يحصل بها هيئة اجتماعية ويكون الحكم منوطاً بكل واحد منها (كالمصارعة مثلاً؛ فإن الكثير لا يغلب
+              القليل فيها، بل رب واحد قوي يغلب الآلاف من الضعاف).»
+            </p>
+          </div>
+
+          <div class="col-urdu">
+            <span class="lang-label">سلیس اردو ترجمہ و تشریح</span>
+            <p class="urdu-p">
+              <strong>التراجیح الفاسدہ کا مکمل حل:</strong>
+              <strong>۱. غلبہ اشباہ باطل ہے:</strong> خریدا ہوا بھائی آزاد ہونے کے مسئلے میں امام شافعیؒ نے فرمایا کہ
+              بھائی چچا کے بیٹے کے مشابہ ۴ چیزوں میں ہے (زکوٰۃ، بیوی، گواہی، قصاص) اور بیٹے کے مشابہ صرف ۱ چیز (محرمیت)
+              میں ہے۔ صدر الشریعہؒ نے فرمایا یہ ترجیح فاسد ہے؛ کیونکہ مطلوبہ حکم (عتق) میں اثر رکھنے والا ۱ وصف غیر موثر
+              ہزار اوصاف کی مشابہت پر بدرجہا بھاری ہے!
+              <strong>۲. کثرتِ ادلہ باطل ہے:</strong> صرف دلیلوں کی تعداد زیادہ ہونا شیخینؒ کے نزدیک ترجیح کا سبب نہیں
+              بنتا، کیونکہ گواہوں کی تعداد سے ترجیح نہیں ہوتی۔
+              <strong>۳. نایاب فرق (ہیئتِ اجتماعیہ):</strong> وزن اٹھانے اور لشکر میں اجتماعی قوت (ہیئتِ اجتماعیہ) بنتی
+              ہے تو کثرت معتبر ہے؛ لیکن کشتی میں ہر پہلوان اکیلا لڑتا ہے، لہٰذا اکیلا رستم ہزار کمزوروں کو پچھاڑ دیتا
+              ہے۔ فقہی دلائل کشتی کی مانند ہیں، پس ۱ قوی دلیل ہزار کمزور دلیلوں پر راجح ہوتی ہے!
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: LOGIC TREE ==================== -->
+    <section id="tab-logic" class="tab-pane">
+      <div class="section-header-row">
+        <div>
+          <h2 class="section-title">شجرۂ دفعِ تعارض و مراتبِ ترجیح (Algorithmic Logic Tree)</h2>
+          <p class="section-desc">التوضيح لصدر الشريعة کے مطابق دو دلیلوں کے ٹکراؤ سے لے کر حتمی شرعی فیصلے تک کا منظم
+            راستہ</p>
+        </div>
+      </div>
+
+      <div class="flowchart-board">
+        <!-- Step 1 -->
+        <div class="flow-step">
+          <div class="step-badge">مرحلہ اول: ورودِ دلیلین</div>
+          <div class="step-card">
+            <h4>دو دلیلوں کا باہم متضاد احکام کے ساتھ وارد ہونا</h4>
+            <p>کیا دونوں کا محل ایک ہے اور زمانہ ایک ہے؟ اگر محل یا زمانہ الگ ہو تو سرے سے تعارض نہیں!</p>
+          </div>
+        </div>
+
+        <div class="flow-arrow">⬇️ جب محل اور زمانہ ایک ہو جائے (تحققِ تعارض)</div>
+
+        <!-- Step 2 -->
+        <div class="flow-step">
+          <div class="step-badge">مرحلہ دوم: المخلص عن التعارض (۴ مراحل)</div>
+          <div class="step-card">
+            <h4>دفعِ تعارض کی اصولی ترتیب</h4>
+            <div class="grid-2-col mt-2">
+              <div style="background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 8px;">
+                <strong>۱. التوفيق بتغاير الحكم أو المحل:</strong><br>
+                دونوں نصوص پر عمل کی صورت نکالنا (جیسے یمینِ غموس بمقابلہ یمینِ منعقدہ)۔
+              </div>
+              <div style="background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 8px;">
+                <strong>۲. النسخ بتغاير الزمان:</strong><br>
+                تاریخ معلوم ہو تو پچھلی نص منسوخ، یا "المحرم ناسخ للمبيح" کا قاعدہ۔
+              </div>
+              <div style="background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 8px;">
+                <strong>۳. الترجيح بوصف تابع:</strong><br>
+                اگر توفیق و نسخ نہ ہو سکے تو اوصافِ معتبرہ (قوة التأثير و الثبات) سے ترجیح۔
+              </div>
+              <div style="background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 8px;">
+                <strong>۴. التساقط (گر جانا):</strong><br>
+                نصوص میں اگر ترجیح نہ ہو سکے تو دونوں ساقط ہو جائیں گی اور ظاہرِ حال پر عمل ہوگا۔
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-arrow">⬇️ نصوص اور اقیسہ میں تفریق</div>
+
+        <!-- Step 3 Split -->
+        <div class="flow-split">
+          <div class="split-branch branch-impossible">
+            <div class="split-tag">النصوص (قرآن و سنت)</div>
+            <div class="step-card warning-card">
+              <h4>نصوص میں تعارض اور لا علمی</h4>
+              <p>اگر ناسخ معلوم نہ ہو سکے تو دونوں نصوص سے عمل ساقط ہو جائے گا، کیونکہ جہلِ محض کے ساتھ کسی ایک کو من
+                مانی طور پر ترجیح دینا جائز نہیں۔</p>
+            </div>
+          </div>
+
+          <div class="split-branch branch-proven">
+            <div class="split-tag tag-success">الأقيسة (اجتہادی قیاس)</div>
+            <div class="step-card success-card">
+              <h4>قیاسات کبھی ساقط نہیں ہوتے!</h4>
+              <p>دو متعارض قیاسات میں سے کوئی بھی باطل نہیں ہوتا، مجتہد اپنے قلب کے اطمینان سے جس قیاس پر چاہے عمل کر
+                لے، کیونکہ دونوں میں دلیل موجود ہے۔</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4: PRESENTATION SLIDES & PICTORIAL EXPLANATIONS ==================== -->
+    <section id="tab-slides" class="tab-pane">
+      <div class="section-header-row">
+        <div>
+          <span class="badge-islamic">کلاس روم موڈ • 12 Visual Slides Deck</span>
+          <h2 class="section-title">پریزنٹیشن سلائیڈز: مختصر عبارات اور تصویری خاکے</h2>
+          <p class="section-desc">کلاس میں تدریس کے لیے جامع، غیر بوجھل، اور تصویری تفہیم پر مبنی ۱۲ سلائیڈز</p>
+        </div>
+      </div>
+
+      <div class="slide-deck-container">
+        <div class="slide-header-bar">
+          <div class="slide-counter">
+            سلائیڈ <span id="slideCurrentNum">۱</span> از <span id="slideTotalNum">۱۲</span>
+          </div>
+          <div style="font-size: 0.85rem; color: var(--text-muted);">
+            کی بورڈ کے بائیں/دائیں تیر (Arrow Keys) یا نیچے بٹن سے سلائیڈ تبدیل کریں
+          </div>
+        </div>
+
+        <div class="slide-progress-track">
+          <div class="slide-progress-bar" id="slideProgressBar"></div>
+        </div>
+
+        <!-- Slide 1 -->
+        <div class="lecture-slide active" data-slide="1">
+          <span class="slide-tag">سلائیڈ ۱: حقیقتِ معارضہ</span>
+          <h3 class="slide-title">معارضہ کیا ہے؟ اور اس کے شرائط</h3>
+
+          <div class="slide-pictorial-layout">
+            <div class="slide-text-col">
+              <ul class="slide-bullets">
+                <li><strong>تعریف:</strong> دو دلیلیں ایک دوسرے کی نفی و ضد کا تقاضا کریں۔</li>
+                <li><strong>بنیادی شرط ۱:</strong> دونوں کا <strong>محل</strong> ایک ہو۔</li>
+                <li><strong>بنیادی شرط ۲:</strong> دونوں کا <strong>زمانہ</strong> ایک ہو۔</li>
+                <li><strong>بنیادی شرط ۳:</strong> دونوں قوت میں برابر ہوں یا وصفِ تابع سے قوی ہوں۔</li>
+              </ul>
+              <div class="slide-formula-badge">
+                محلِ واحد + زمانِ واحد + تقابلِ ضدین = معارضہ شرعیہ
+              </div>
+            </div>
+
+            <div class="pictorial-box">
+              <span class="pictorial-icon">⚔️</span>
+              <div class="pictorial-title">تصویری خاکہ: تصادمِ دلیلین</div>
+              <div class="pictorial-diagram-row">
+                <div class="pictorial-card-mini card-mini-green">دلیل الف (اثبات)</div>
+                <div style="font-size: 1.4rem; font-weight: bold; color: var(--gold-primary);">⚡</div>
+                <div class="pictorial-card-mini card-mini-red">دلیل ب (نفی)</div>
+              </div>
+              <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.5rem;">
+                اگر محل یا زمانہ الگ ہو جائے تو تعارض ختم ہو جاتا ہے!
+              </p>
+            </div>
+          </div>
+
+          <div class="slide-note-box">
+            <strong>نکتہ تدریس:</strong> طلبہ کو واضح کریں کہ "معارضہ" صرف برابری کی دلیلوں میں ہوتا ہے، بڑی اور چھوٹی
+            دلیل میں نہیں۔
+          </div>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="lecture-slide" data-slide="2">
+          <span class="slide-tag">سلائیڈ ۲: معارضہ کی ۳ صورتیں</span>
+          <h3 class="slide-title">معارضہ کی ۳ صورتیں اور نص بمقابلہ قیاس</h3>
+
+          <div class="slide-pictorial-layout">
+            <div class="slide-text-col">
+              <ul class="slide-bullets">
+                <li><strong>صورت ۱:</strong> دونوں قوت میں برابر ہوں (معارضہ قائم)۔</li>
+                <li><strong>صورت ۲:</strong> ایک دلیل وصفِ تابع سے قوی ہو (معارضہ و رجحان قائم)۔</li>
+                <li><strong>صورت ۳:</strong> ایک دلیل ذاتی و اصل قوت سے برتر ہو (عدمِ معارضہ)۔</li>
+              </ul>
+              <div class="slide-formula-badge">
+                النص لا يعارض القياس؛ لأن القوي يُسقط الضعيف بالكلية!
+              </div>
+            </div>
+
+            <div class="pictorial-box">
+              <span class="pictorial-icon">⚖️</span>
+              <div class="pictorial-title">میزانِ قوت</div>
+              <div style="width: 100%; display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.82rem;">
+                <div class="pictorial-card-mini card-mini-gold">۱. دلیل = دلیل ➡️ (تساوی و معارضہ)</div>
+                <div class="pictorial-card-mini card-mini-blue">۲. دلیل + وصفِ تابع ➡️ (رجحان)</div>
+                <div class="pictorial-card-mini card-mini-red">۳. نصِ قطعی بمقابلہ قیاس ➡️ (قیاس کالعدم)</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="slide-note-box">
+            <strong>قاعدہ:</strong> یوں نہیں کہا جاتا کہ "نص قیاس پر راجح ہے"؛ کیونکہ نص قیاس کو سرے سے گرا دیتی ہے۔
+          </div>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="lecture-slide" data-slide="3">
+          <span class="slide-tag">سلائیڈ ۳: مخلص اول</span>
+          <h3 class="slide-title">دفعِ تعارض کا پہلا راستہ: التوفيق بتغاير الحكم</h3>
+
+          <div class="slide-pictorial-layout">
+            <div class="slide-text-col">
+              <ul class="slide-bullets">
+                <li>قاعدہ: <strong>«إعمال الكلام أولى من إهماله»</strong> (دونوں دلیلوں پر عمل کرنا گرانے سے بہتر ہے)۔
+                </li>
+                <li>آیت ۱: {بِمَا كَسَبَتْ قُلُوبُكُمْ} ➡️ <strong>یمینِ غموس</strong> (دل کا جھوٹا ارادہ)۔</li>
+                <li>آیت ۲: {بِمَا عَقَّدتُّمُ الْأَيْمَانَ} ➡️ <strong>یمینِ منعقدہ</strong> (مستقبل کی پکی قسم)۔</li>
+              </ul>
+              <div class="slide-formula-badge">
+                غموس ⬅️ آخرت کا گناہ | منعقدہ ⬅️ دنیا میں کفارہ
+              </div>
+            </div>
+
+            <div class="pictorial-box">
+              <span class="pictorial-icon">📜</span>
+              <div class="pictorial-title">آیاتِ قسم میں توفیق</div>
+              <div class="pictorial-diagram-row">
+                <div class="pictorial-card-mini card-mini-red">💔 یمینِ غموس<br><small>آخرت کا وبال</small></div>
+                <div style="font-weight: bold; color: var(--gold-primary);">≠</div>
+                <div class="pictorial-card-mini card-mini-green">🤝 یمینِ منعقدہ<br><small>دنیا کا کفارہ</small></div>
+              </div>
+              <p style="font-size: 0.82rem; color: var(--green-success); margin-top: 0.4rem;">
+                دونوں آیتیں اپنے اپنے حکم پر برقرار، تعارض ختم!
+              </p>
+            </div>
+          </div>
+
+          <div class="slide-note-box">
+            <strong>امام شافعیؒ کا رد:</strong> امام شافعیؒ نے دونوں میں کفارہ واجب مانا، صدر الشریعہؒ نے ثابت کیا کہ
+            احناف کی توفیق اقرب الی القرآن ہے۔
+          </div>
+        </div>
+
+        <!-- Slide 4 -->
+        <div class="lecture-slide" data-slide="4">
+          <span class="slide-tag">سلائیڈ ۴: مخلص دوم</span>
+          <h3 class="slide-title">دفعِ تعارض کا دوسرا راستہ: التوفيق بتغاير المحل</h3>
+
+          <div class="slide-pictorial-layout">
+            <div class="slide-text-col">
+              <ul class="slide-bullets">
+                <li>قرآن کی دو متواتر قرأتیں بظاہر مختلف حکم دیتی ہیں:</li>
+                <li>قرأت ۱: <strong>{حَتَّىٰ يَطْهُرْنَ}</strong> (تخفیف): فقط خون کا بند ہونا۔</li>
+                <li>قرأت ۲: <strong>{حَتَّىٰ يَطَّهَّرْنَ}</strong> (تشدید): باقاعدہ غسل کرنا۔</li>
+              </ul>
+              <div class="slide-formula-badge">
+                ۱۰ دن کی انتہا ⬅️ تخفیف | ۱۰ دن سے کم ⬅️ تشدید
+              </div>
+            </div>
+
+            <div class="pictorial-box">
+              <span class="pictorial-icon">🩸</span>
+              <div class="pictorial-title">محل کی تفریق</div>
+              <div style="width: 100%; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.82rem;">
+                <div class="pictorial-card-mini card-mini-blue">
+                  <strong>محلِ تخفیف (۱۰ دن مکمل):</strong><br>
+                  خون رکتے ہی حلال، غسل شرط نہیں
+                </div>
+                <div class="pictorial-card-mini card-mini-gold">
+                  <strong>محلِ تشدید (۱۰ دن سے کم):</strong><br>
+                  خون رکنے کے بعد غسل لازمی شرط ہے
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="slide-note-box">
+            <strong>اصول:</strong> محل کے الگ ہونے سے دونوں قرأتیں اپنے اپنے دائرے میں سچی اور نافذ العمل رہتی ہیں۔
+          </div>
+        </div>
+
+        <!-- Slide 5 -->
+        <div class="lecture-slide" data-slide="5">
+          <span class="slide-tag">سلائیڈ ۵: مخلص سوم</span>
+          <h3 class="slide-title">دفعِ تعارض کا تیسرا راستہ: النسخ بتغاير الزمان</h3>
+
+          <div class="slide-pictorial-layout">
+            <div class="slide-text-col">
+              <ul class="slide-bullets">
+                <li>اگر تاریخ معلوم ہو: بعد میں آنے والی نص ناسخ ہوگی۔</li>
+                <li>اگر تاریخ معلوم نہ ہو تو حنفی قاعدہ: <strong>«المحرِّم ناسخ للمبيح»</strong>۔</li>
+                <li><strong>عقلی علت:</strong> بعثت سے قبل اصل "اباحت" تھی؛ مبیح نص نے اصل کو برقرار رکھا، پھر محرم نص
+                  نے آ کر نیا حکم دیا اور منسوخ کیا۔</li>
+              </ul>
+              <div class="slide-formula-badge">
+                قبل البعثة: إباحة ⬅️ المبيح (إبقاء) ⬅️ المحرِّم (نسخ)
+              </div>
+            </div>
+
+            <div class="pictorial-box">
+              <span class="pictorial-icon">⏳</span>
+              <div class="pictorial-title">ٹائم لائن کا تصویری نقشہ</div>
+              <div style="width: 100%; font-size: 0.82rem;">
+                <div class="pictorial-card-mini card-mini-gold" style="margin-bottom: 0.3rem;">۱. آغازِ کائنات: اصلِ
+                  اباحت</div>
+                <div style="font-size: 1.1rem; color: var(--text-accent);">⬇️</div>
+                <div class="pictorial-card-mini card-mini-blue" style="margin-bottom: 0.3rem;">۲. مبیح نص: اصل کو باقی
+                  رکھا</div>
+                <div style="font-size: 1.1rem; color: var(--text-accent);">⬇️</div>
+                <div class="pictorial-card-mini card-mini-red">۳. محرم نص: نیا حکم لا کر ناسخ بنی! 🚫</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="slide-note-box">
+            <strong>امتحانی نکتہ:</strong> حنفیہ کے نزدیک تحریم اباحت پر تاریخ کی لاعلمی کے وقت بھی ناسخ مانی جاتی ہے۔
+          </div>
+        </div>
+
+        <!-- Slide 6 -->
+        <div class="lecture-slide" data-slide="6">
+          <span class="slide-tag">سلائیڈ ۶: نصوص بمقابلہ اقیسہ</span>
+          <h3 class="slide-title">تعارض میں نصوص اور قیاس کا تقابل</h3>
+
+          <div class="slide-pictorial-layout">
+            <div class="slide-text-col">
+              <ul class="slide-bullets">
+                <li><strong>نصوص میں تعارض:</strong> حل نہ نکلے تو دونوں ساقط ہو جاتی ہیں («سقط النصان»)؛ کیونکہ جہل کے
+                  ساتھ کسی ایک کو اپنانا من مانی ہے۔</li>
+                <li><strong>قیاس میں تعارض:</strong> دو متعارض قیاس کبھی باطل یا ساقط نہیں ہوتے! («ولا يسقطان
+                  بالتعارض»)۔</li>
+                <li><strong>وجہ:</strong> مجتہد دونوں جانب دلیل پر ہے، پس وہ <strong>دل کے اطمینان (شہادتِ قلب)</strong>
+                  سے جس پر چاہے عمل کر لے۔</li>
+              </ul>
+              <div class="slide-formula-badge">
+                النصوص ⬅️ تساقط عند الجهل | الأقيسة ⬅️ تخیر بالشهادة
+              </div>
+            </div>
+
+            <div class="pictorial-box">
+              <span class="pictorial-icon">⚖️</span>
+              <div class="pictorial-title">سقوط بمقابلہ بقاء</div>
+              <div class="pictorial-diagram-row">
+                <div class="pictorial-card-mini card-mini-red">
+                  <strong>نصوص:</strong><br>
+                  جہلِ ناسخ کی وجہ سے دونوں ساقط ❌
+                </div>
+                <div class="pictorial-card-mini card-mini-green">
+                  <strong>قیاس:</strong><br>
+                  شہادتِ قلب سے عمل جاری ✅
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="slide-note-box">
+            <strong>فائدہ:</strong> اقوالِ صحابہؓ جن میں قیاس کا دخل ہو ان کا حکم بھی قیاس جیسا ہی ہے۔
+          </div>
+        </div>
+
+        <!-- Slide 7 -->
+        <div class="lecture-slide" data-slide="7">
+          <span class="slide-tag">سلائیڈ ۷: ترجیح قیاس ۱</span>
+          <h3 class="slide-title">قیاس میں ترجیح کا پہلا سبب: قوة التأثير</h3>
+
+          <div class="slide-pictorial-layout">
+            <div class="slide-text-col">
+              <ul class="slide-bullets">
+                <li><strong>تعریف:</strong> علت کا شرعی حکم پیدا کرنے میں ذاتی طور پر قوی اور موثر ہونا۔</li>
+                <li><strong>مسئلہ: نکاحِ أمة كتابية (اہلِ کتاب باندی سے نکاح):</strong></li>
+                <li>امام شافعیؒ: غلامی اور کفر جمع ہو کر کفرِ غلیظ بن گئے، لہٰذا نکاح حرام۔</li>
+                <li><strong>احناف کا قوی قیاس:</strong> غلامی احکام کو آدھا کرتی ہے (تنصیف)، حرام نہیں کرتی؛ جیسا کہ
+                  طلاق، عدت اور حدود میں ہے۔</li>
+              </ul>
+              <div class="slide-formula-badge">
+                الرق منصف لا محرم في الشريعة
+              </div>
+            </div>
+
+            <div class="pictorial-box">
+              <span class="pictorial-icon">💍</span>
+              <div class="pictorial-title">قوتِ تاثیر کا ثبوت</div>
+              <div style="width: 100%; font-size: 0.82rem;">
+                <div class="pictorial-card-mini card-mini-gold" style="margin-bottom: 0.4rem;">
+                  آزاد کتابیہ سے نکاح حلال ➡️ باندی سے بھی حلال
+                </div>
+                <div class="pictorial-card-mini card-mini-green">
+                  غلامی احکام میں = نصف (➗ ۲)<br>
+                  نہ کہ ممانعتِ نکاح (تحریم 🚫)
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="slide-note-box">
+            <strong>نتیجہ:</strong> چونکہ احناف کا قیاس اثر میں مضبوط ہے اس لیے وہ شافعیہ کے قیاس پر راجح ہے۔
+          </div>
+        </div>
+
+        <!-- Slide 8 -->
+        <div class="lecture-slide" data-slide="8">
+          <span class="slide-tag">سلائیڈ ۸: ترجیح قیاس ۲</span>
+          <h3 class="slide-title">قیاس میں ترجیح کا دوسرا سبب: قوة الثبات</h3>
+
+          <div class="slide-pictorial-layout">
+            <div class="slide-text-col">
+              <ul class="slide-bullets">
+                <li><strong>تعریف:</strong> شارع نے اس وصف کو شریعت کے دیگر ابواب میں کثرت اور استقلال سے مانا ہو۔</li>
+                <li><strong>مسئلہ: نیتِ صومِ رمضان:</strong></li>
+                <li>امام شافعیؒ: ہر عبادت میں نیت کی تعیین شرط ہے جیسے نماز میں۔</li>
+                <li><strong>احناف:</strong> رمضان کا وقت خود متعین ہے؛ اور شارع نے ودیعت، غصب اور بیع فاسد کے رد میں
+                  "متعین" پر نیت کی تعیین ساقط رکھی ہے۔</li>
+              </ul>
+              <div class="slide-formula-badge">
+                الوصف المتعین یسقط التعيين في سائر الأبواب
+              </div>
+            </div>
+
+            <div class="pictorial-box">
+              <span class="pictorial-icon">🌙</span>
+              <div class="pictorial-title">ثباتِ وصف کے ۳ نظائر</div>
+              <div style="width: 100%; display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.8rem;">
+                <div class="pictorial-card-mini card-mini-gold">📦 ردِ ودیعت متعین ہے ➡️ تعیین نہیں</div>
+                <div class="pictorial-card-mini card-mini-gold">🚫 ردِ مغصوب متعین ہے ➡️ تعیین نہیں</div>
+                <div class="pictorial-card-mini card-mini-green">✨ صومِ رمضان متعین ہے ➡️ مطلق نیت کافی</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="slide-note-box">
+            <strong>ضابطہ:</strong> جب کسی وصف کو شارع نے اتنی جگہ معتبر مانا ہو تو اس کا ثبات قوی ترین ہوتا ہے۔
+          </div>
+        </div>
+
+        <!-- Slide 9 -->
+        <div class="lecture-slide" data-slide="9">
+          <span class="slide-tag">سلائیڈ ۹: الترجیح الفاسد ۱</span>
+          <h3 class="slide-title">باطل ترجیح ۱: غلبۂ اشباہ اور عتقِ بھائی کا قضیہ</h3>
+
+          <div class="slide-pictorial-layout">
+            <div class="slide-text-col">
+              <ul class="slide-bullets">
+                <li><strong>دعویٰ (امام شافعیؒ):</strong> خریدا ہوا بھائی آزاد نہیں ہوتا؛ کیونکہ وہ چچا کے بیٹے کے مشابہ
+                  ۴ چیزوں میں ہے (زکوٰۃ، بیوی، گواہی، قصاص) اور بیٹے کے مشابہ فقط ۱ چیز (محرمیت) میں ہے۔</li>
+                <li><strong>صدر الشریعہؒ کا رد:</strong> یہ ترجیح فاسد اور باطل ہے!</li>
+                <li><strong>قاعدہ:</strong> مطلوبہ حکم "عتق" ہے؛ اور عتق میں اثر رکھنے والا ۱ وصف غیر موثر ہزار اوصاف سے
+                  وزنی ہے۔</li>
+              </ul>
+              <div class="slide-formula-badge">
+                المشابهة في وصف واحد مؤثر أقوى من ألف وصف غير مؤثر
+              </div>
+            </div>
+
+            <div class="pictorial-box">
+              <span class="pictorial-icon">⚖️</span>
+              <div class="pictorial-title">ترازو کا تصویری موازنہ</div>
+              <div class="pictorial-diagram-row">
+                <div class="pictorial-card-mini card-mini-red">
+                  شافعیہ پلڑا:<br>
+                  ۴ اوصافِ غیر مؤثرہ ❌
+                </div>
+                <div style="font-size: 1.5rem; color: var(--gold-primary);">⬅️ ⬇️</div>
+                <div class="pictorial-card-mini card-mini-green">
+                  احناف پلڑا (بھاری):<br>
+                  ۱ وصفِ مؤثر (محرمیت) ✅
+                </div>
+              </div>
+              <p style="font-size: 0.8rem; color: var(--teal-accent); margin-top: 0.4rem;">
+                ایک مؤثر وصف کا پلڑا بھاری رہا!
+              </p>
+            </div>
+          </div>
+
+          <div class="slide-note-box">
+            <strong>اصول:</strong> گنتی کی زیادتی باطل ہے، تاثیر کا وزن معتبر ہے۔
+          </div>
+        </div>
+
+        <!-- Slide 10 -->
+        <div class="lecture-slide" data-slide="10">
+          <span class="slide-tag">سلائیڈ ۱۰: التراجیح الفاسدہ ۲ و ۳</span>
+          <h3 class="slide-title">باطل ترجیحات ۲ و ۳: عمومِ علت اور قلتِ اجزاء</h3>
+
+          <div class="slide-pictorial-layout">
+            <div class="slide-text-col">
+              <ul class="slide-bullets">
+                <li><strong>۲. الترجيح بكون الوصف أعم (باطل):</strong> سود میں علت "طعام" کو اس لیے راجح کہنا کہ وہ قلیل
+                  اور کثیر دونوں کو عام ہے۔</li>
+                <li><strong>رد:</strong> ترجیح تاثیر کی قوت سے ہوتی ہے نہ کہ لفظی دائرے کے پھیلاؤ سے۔</li>
+                <li><strong>۳. الترجيح بقلة الأجزاء (باطل):</strong> یہ دعویٰ کہ ایک جزو والی علت دو یا تین اجزاء والی
+                  علت پر راجح ہے۔</li>
+                <li><strong>رد:</strong> شرعاً اس کی کوئی حیثیت نہیں، صحتِ استدلال معتبر ہے۔</li>
+              </ul>
+            </div>
+
+            <div class="pictorial-box">
+              <span class="pictorial-icon">🛡️</span>
+              <div class="pictorial-title">دو باطل اصولوں کا رد</div>
+              <div style="width: 100%; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.82rem;">
+                <div class="pictorial-card-mini card-mini-red">
+                  🌾 عمومِ وصف 🚫<br>
+                  (وسعتِ لفظ تاثیر کی جگہ نہیں لے سکتی)
+                </div>
+                <div class="pictorial-card-mini card-mini-red">
+                  🧩 قلتِ اجزاء 🚫<br>
+                  (اجزاء کی کمی بیشی کا کوئی شرعی اثر نہیں)
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="slide-note-box">
+            <strong>تنبیہ:</strong> مناظرے میں ان دو غیر معتبر حربوں سے مغالطہ پیدا کیا جاتا ہے جس کا التوضيح نے ابطال
+            فرمایا۔
+          </div>
+        </div>
+
+        <!-- Slide 11 -->
+        <div class="lecture-slide" data-slide="11">
+          <span class="slide-tag">سلائیڈ ۱۱: باطل ترجیح ۴ و ہیئتِ اجتماعیہ</span>
+          <h3 class="slide-title">کشتی بمقابلہ وزن اٹھانا (کثرتِ ادلہ کا اصولی راز)</h3>
+
+          <div class="slide-pictorial-layout">
+            <div class="slide-text-col">
+              <ul class="slide-bullets">
+                <li><strong>کثرتِ ادلہ باطل ہے:</strong> شیخینؒ کے نزدیک دلائل کی محض گنتی سے ترجیح نہیں ہوتی (جیسے ۲
+                  گواہوں پر ۱۰ گواہ راجح نہیں ہوتے)۔</li>
+                <li><strong>صدر الشریعہؒ کا نایاب فرق:</strong></li>
+                <li><strong>حمل الأثقال (وزن اٹھانا):</strong> جہاں مل کر <strong>"ہیئتِ اجتماعیہ"</strong> بنے وہاں ۱۰
+                  افراد اکیلے سے فائق ہیں (کثرت معتبر ہے)۔</li>
+                <li><strong>المصارعة (کشتی):</strong> جہاں مقابلہ انفرادی ہو، وہاں ۱ طاقتور پہلوان ہزار کمزوروں پر غالب
+                  ہے (دلائل کشتی کی مانند ہیں)!</li>
+              </ul>
+            </div>
+
+            <div class="pictorial-box">
+              <div class="pictorial-title">حسی تمثیل (ص ۴۰۳)</div>
+              <div style="width: 100%; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.8rem;">
+                <div class="pictorial-card-mini card-mini-blue">
+                  🤼‍♂️ <strong>المصارعة (کشتی و دلائل):</strong><br>
+                  ۱ قوی پہلوان ＞ ۱۰۰۰ کمزور افراد (کثرت بے اثر)
+                </div>
+                <div class="pictorial-card-mini card-mini-gold">
+                  🏋️‍♂️ <strong>حمل الأثقال (وزن و تواتر):</strong><br>
+                  ۱۰ مزدور ＞ ۱ اکیلا مزدور (ہیئتِ اجتماعیہ معتبر)
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="slide-note-box">
+            <strong>قاعدۂ کلیہ:</strong> راویوں کی تعداد بھی تب معتبر ہوگی جب وہ حدِ تواتر تک پہنچ کر ہیئتِ اجتماعیہ بنا
+            لیں، ورنہ ۳ راوی ۲ پر راجح نہیں ہوں گے۔
+          </div>
+        </div>
+
+        <!-- Slide 12 -->
+        <div class="lecture-slide" data-slide="12">
+          <span class="slide-tag">سلائیڈ ۱۲: خلاصۂ باب</span>
+          <h3 class="slide-title">التوضيح: باب المعارضة کا حتمی چارٹ</h3>
+
+          <div class="slide-pictorial-layout">
+            <div class="slide-text-col">
+              <ul class="slide-bullets">
+                <li>۱. معارضہ فقط تساوی یا وصفِ تابع کی برتری میں ہوتا ہے۔</li>
+                <li>۲. دفعِ تعارض کی ترتیب: توفیق ➡️ نسخ ➡️ ترجیح ➡️ تساقط۔</li>
+                <li>۳. قیاس میں ترجیح: قوة التأثير اور قوة الثبات۔</li>
+                <li>۴. چاروں فاسد ترجیحات سے بچنا ہر فقیہ کے لیے فرض ہے۔</li>
+              </ul>
+              <div class="slide-formula-badge" style="border-color: var(--teal-accent);">
+                علم الأصول ميزان الاستنباط ودفع الشبهات
+              </div>
+            </div>
+
+            <div class="pictorial-box">
+              <span class="pictorial-icon">🎓</span>
+              <div class="pictorial-title">مکمل اصولی فلو میپ</div>
+              <div style="width: 100%; font-size: 0.78rem; display: flex; flex-direction: column; gap: 0.3rem;">
+                <div class="pictorial-card-mini card-mini-blue">ورود دلیلین متعارضین</div>
+                <div style="color: var(--gold-primary);">⬇️</div>
+                <div class="pictorial-card-mini card-mini-gold">التوفيق (تغاير الحكم أو المحل)</div>
+                <div style="color: var(--gold-primary);">⬇️</div>
+                <div class="pictorial-card-mini card-mini-green">النسخ (تغاير الزمان / المحرم ناسخ)</div>
+                <div style="color: var(--gold-primary);">⬇️</div>
+                <div class="pictorial-card-mini card-mini-gold">الترجيح الصحيح (قوة التأثير والثبات)</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="slide-note-box" style="border-color: var(--gold-primary);">
+            <strong>مبارکباد:</strong> التوضيح کے اس باب پر مکمل دسترس سے فقہِ حنفی کی تخریج اور اصولی مناظرات کے تمام
+            اسرار واضح ہو جاتے ہیں۔
+          </div>
+        </div>
+
+        <!-- Slide Navigation Controls -->
+        <div class="slide-controls-bar">
+          <button id="slidePrevBtn" class="sim-btn secondary" disabled>
+            <span>قبلی سلائیڈ ◀️</span>
+          </button>
+          <div style="font-weight: 700; color: var(--gold-primary);">
+            التوضيح في حل غوامض التنقيح • درجہ سابعہ
+          </div>
+          <button id="slideNextBtn" class="sim-btn primary">
+            <span>اگلی سلائیڈ ▶️</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 5: INVALID PREPONDERANCES ==================== -->
+    <section id="tab-fasida" class="tab-pane">
+      <div class="section-header-row">
+        <div>
+          <h2 class="section-title">التراجيح الفاسدة الأربعة (چار باطل ترجیحات کی تفصیلی چھان بین)</h2>
+          <p class="section-desc">صدر الشریعہ المحبوبیؒ نے جن چار طریقوں کو ترجیح کے نام پر باطل قرار دیا</p>
+        </div>
+      </div>
+
+      <div class="grid-2-col mt-4">
+        <!-- Fasida 1 -->
+        <div class="card objection-card">
+          <div class="obj-header">
+            <span class="obj-tag">۱. الترجیح الفاسد</span>
+            <h3>الترجيح بغلبة الأشباه</h3>
+          </div>
+          <div class="obj-body">
+            <div class="objection-text">
+              <strong>دعویٰ (امام شافعیؒ):</strong> خریدا ہوا بھائی آزاد نہیں ہوتا؛ کیونکہ وہ چچا کے بیٹے کے مشابہ ۴
+              اوصاف میں ہے اور حقیقی بیٹے کے مشابہ صرف ۱ وصف میں ہے۔ پس ۴ کا عدد ۱ پر راجح ہے۔
+            </div>
+            <div class="answer-box">
+              <div class="ans-badge">صدر الشریعہؒ کا ردِ بلیغ</div>
+              <p>
+                <strong>«المشابهة في وصف واحد مؤثر أقوى من ألف وصف غير مؤثر»:</strong> مطلوبہ حکم عتق ہے۔ عتق میں محرمیت
+                اثر انداز ہوتی ہے نہ کہ زکوٰۃ یا قصاص۔ لہٰذا ایک موثر وصف کی مشابہت ہزار غیر موثر مشابہتوں پر غالب رہتی
+                ہے!
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fasida 2 -->
+        <div class="card objection-card">
+          <div class="obj-header">
+            <span class="obj-tag">۲. الترجیح الفاسد</span>
+            <h3>الترجيح بكون الوصف أعم</h3>
+          </div>
+          <div class="obj-body">
+            <div class="objection-text">
+              <strong>دعویٰ:</strong> سود کی علت "طعام" کو اس لیے راجح ماننا کہ وہ قلیل اور کثیر دونوں کو عام ہے، جبکہ
+              احناف کی علت (کیل و وزن) اتنی عام نہیں۔
+            </div>
+            <div class="answer-box">
+              <div class="ans-badge">صدر الشریعہؒ کا ردِ بلیغ</div>
+              <p>
+                <strong>اعتبار تاثیر کا ہے، عموم کا نہیں:</strong> ترجیح کا مدار اس پر ہے کہ علت میں شرعی حکم پیدا کرنے
+                کی کتنی قوت ہے، نہ کہ اس کے لفظی دائرے کے پھیلنے پر۔
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fasida 3 -->
+        <div class="card objection-card">
+          <div class="obj-header">
+            <span class="obj-tag">۳. الترجیح الفاسد</span>
+            <h3>الترجيح بقلة الأجزاء</h3>
+          </div>
+          <div class="obj-body">
+            <div class="objection-text">
+              <strong>دعویٰ:</strong> یہ گمان کرنا کہ جس علت کا ایک جزو ہو (مثلاً مفرد وصف) وہ دو یا تین اجزاء والی مرکب
+              علت سے بہتر اور راجح ہے۔
+            </div>
+            <div class="answer-box">
+              <div class="ans-badge">صدر الشریعہؒ کا ردِ بلیغ</div>
+              <p>
+                <strong>قلتِ اجزاء بے اثر ہے:</strong> شریعت میں علت کا مدار اس کی اصولی صحت اور تاثیر پر ہے، اجزاء کی
+                کمی بیشی سے ترجیح کا کوئی تعلق نہیں۔
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fasida 4 -->
+        <div class="card objection-card">
+          <div class="obj-header">
+            <span class="obj-tag">۴. الترجیح الفاسد</span>
+            <h3>الترجيح بكثرة الأدلة</h3>
+          </div>
+          <div class="obj-body">
+            <div class="objection-text">
+              <strong>دعویٰ (بعض اصولیین):</strong> جس حکم کی تین دلیلیں ہوں وہ اس حکم پر راجح ہے جس کی ایک دلیل ہو،
+              تاکہ غلبۂ ظن حاصل ہو۔
+            </div>
+            <div class="answer-box">
+              <div class="ans-badge">شیخین (ابو حنیفہ و ابو یوسفؒ) کا رد</div>
+              <p>
+                <strong>ہر دلیل بنفسہ مستقل ہے:</strong> گواہوں کی کثرت سے ترجیح نہیں ہوتی، نہ وراثت میں اسباب کی کثرت
+                سے سارا ترکہ ملتا ہے۔ جب تک ہیئتِ اجتماعیہ نہ بنے، صرف گنتی کی زیادتی سے ترجیح نہیں ہو سکتی!
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 6: QUIZ & ASSESSMENT ==================== -->
+    <section id="tab-quiz" class="tab-pane">
+      <div class="quiz-container">
+        <div class="section-header-row">
+          <div>
+            <h2 class="section-title">امتحانی خود آزمائی (Student Assessment Quiz)</h2>
+            <p class="section-desc">درسِ نظامی کے سالانہ امتحانات کے طرز پر کتاب التوضيح کے باب المعارضة والترجیح پر
+              اپنی فہم کی جانچ کریں</p>
+          </div>
+          <div class="score-display" id="quizScore">اسکور: ۰ / ۵</div>
+        </div>
+
+        <div id="quizCardsContainer">
+          <!-- Quiz Questions inserted by JS -->
+        </div>
+
+        <div class="quiz-footer mt-4">
+          <button id="resetQuizBtn" class="action-btn secondary">تمام جوابات صاف کریں</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Sticky Footer -->
+  <footer class="app-footer">
+    <div class="footer-content">
+      <p>منظومہ اصولیہ • تفہیمِ التوضيح في حل غوامض التنقيح (باب المعارضة والترجيح - صفحات ۳۸۹ تا ۴۰۳) • دار العلوم و
+        مدارسِ اسلامیہ کے طلبہ کے لیے ایک سلیس و تصویری پیشکش</p>
+    </div>
+  </footer>
+
+  <script src="tarjeeh.js"></script>
+</body>
+
+</html>
