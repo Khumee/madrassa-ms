@@ -20,9 +20,9 @@ async function generateTawzeehPDFs() {
 
   try {
     /* ==============================================================
-       1. GENERATE ALL-IN-ONE MASTER PDF (EVERYTHING IN ONE FILE)
+       1. GENERATE ALL-IN-ONE MASTER PDF (FOLLOWING EXACT WEBPAGE ORDER)
        ============================================================== */
-    console.log('Generating Tawzeeh Complete Master Topic PDF (All-in-One)...');
+    console.log('Generating Tawzeeh Complete Master Topic PDF (Following Exact Webpage Order)...');
     const pageMaster = await browser.newPage();
 
     const masterHTML = `
@@ -30,14 +30,14 @@ async function generateTawzeehPDFs() {
 <html lang="ur" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>التوضيح لصدر الشريعة | جامع درسی انسائیکلوپیڈیا (سارا موضوع ایک فائل میں)</title>
+  <title>التوضيح لصدر الشريعة | جامع درسی انسائیکلوپیڈیا</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Nastaliq+Urdu:wght@400;600;700&family=Noto+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     @page {
       size: A4 portrait;
-      margin: 16mm 14mm 16mm 14mm;
+      margin: 15mm 14mm 16mm 14mm;
       @top-center {
         content: "التوضيح في حل غوامض التنقيح (ومعه التلويح) • باب المعارضة والترجيح والتراجيح الفاسدة";
         font-family: 'Noto Sans Arabic', sans-serif;
@@ -60,7 +60,7 @@ async function generateTawzeehPDFs() {
       text-align: right;
       color: #1e293b;
       line-height: 1.8;
-      font-size: 10pt;
+      font-size: 9.8pt;
       background: #ffffff;
       margin: 0;
       padding: 0;
@@ -68,8 +68,8 @@ async function generateTawzeehPDFs() {
     .cover-header {
       text-align: center;
       border-bottom: 2.5px double #b48c28;
-      padding-bottom: 12px;
-      margin-bottom: 16px;
+      padding-bottom: 10px;
+      margin-bottom: 12px;
     }
     .badge {
       display: inline-block;
@@ -80,45 +80,110 @@ async function generateTawzeehPDFs() {
       border-radius: 14px;
       font-size: 8.5pt;
       font-weight: bold;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
     h1 {
       font-family: 'Amiri', serif;
-      font-size: 22pt;
+      font-size: 21pt;
       color: #78350f;
-      margin: 4px 0;
-      line-height: 1.3;
+      margin: 2px 0;
+      line-height: 1.25;
     }
     .subtitle {
-      font-size: 10.5pt;
+      font-size: 10pt;
       color: #475569;
+      margin-bottom: 2px;
+    }
+    .hero-card {
+      background: linear-gradient(135deg, #fdfbf7 0%, #f7f3ea 100%);
+      border: 1.5px solid #d4af37;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-bottom: 12px;
+      page-break-inside: avoid;
+    }
+    .hero-tag {
+      display: inline-block;
+      background: #b45309;
+      color: #ffffff;
+      padding: 2px 10px;
+      border-radius: 4px;
+      font-size: 8pt;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+    .hero-title {
+      font-family: 'Amiri', serif;
+      font-size: 14pt;
+      color: #78350f;
+      margin: 0 0 4px 0;
+    }
+    .hero-desc {
+      font-size: 9.2pt;
+      line-height: 1.7;
+      color: #334155;
+      margin: 0;
+    }
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+      page-break-inside: avoid;
+    }
+    .pillar-card {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-top: 3.5px solid #b48c28;
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 8.8pt;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .pillar-title {
+      font-weight: bold;
+      color: #0f172a;
+      font-size: 9.5pt;
+      margin-bottom: 4px;
+      border-bottom: 1px dashed #cbd5e1;
+      padding-bottom: 3px;
+    }
+    .pillar-rule {
+      color: #92400e;
+      font-weight: 600;
+      font-size: 8.5pt;
       margin-bottom: 4px;
     }
-    .meta-box {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 8px 12px;
-      margin-bottom: 16px;
-      font-size: 9pt;
-      display: flex;
-      justify-content: space-between;
+    .pillar-desc {
+      line-height: 1.6;
+      color: #334155;
+    }
+    .pillar-ex {
+      background: #eff6ff;
+      border-right: 2px solid #3b82f6;
+      padding: 4px 6px;
+      border-radius: 3px;
+      margin-top: 5px;
+      font-size: 8.2pt;
+      color: #1e3a8a;
     }
     .section-title-banner {
       background: #78350f;
       color: #ffffff;
       padding: 7px 12px;
       border-radius: 6px;
-      font-size: 12pt;
+      font-size: 11.5pt;
       font-weight: bold;
-      margin: 18px 0 10px 0;
+      margin: 16px 0 10px 0;
       page-break-after: avoid;
     }
     .sub-section-title {
-      font-size: 11pt;
+      font-size: 10.5pt;
       font-weight: bold;
       color: #0f172a;
-      margin: 12px 0 6px 0;
+      margin: 10px 0 6px 0;
       border-bottom: 1px solid #cbd5e1;
       padding-bottom: 3px;
       page-break-after: avoid;
@@ -126,12 +191,12 @@ async function generateTawzeehPDFs() {
     .matn-arabic-block {
       background: #fafaf9;
       border-right: 4px solid #b48c28;
-      padding: 10px 14px;
-      margin-bottom: 12px;
+      padding: 9px 12px;
+      margin-bottom: 6px;
       border-radius: 0 6px 6px 0;
       font-family: 'Amiri', serif;
-      font-size: 12.5pt;
-      line-height: 2;
+      font-size: 12pt;
+      line-height: 1.95;
       color: #0f172a;
       page-break-inside: avoid;
     }
@@ -142,87 +207,77 @@ async function generateTawzeehPDFs() {
     .urdu-block {
       background: #f0fdf4;
       border-right: 4px solid #16a34a;
-      padding: 10px 14px;
+      padding: 9px 12px;
       margin-bottom: 12px;
       border-radius: 0 6px 6px 0;
       font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', serif;
-      font-size: 10pt;
-      line-height: 2.1;
+      font-size: 9.8pt;
+      line-height: 2.05;
       color: #14532d;
       page-break-inside: avoid;
+    }
+    .method-card {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 8px 10px;
+      margin-bottom: 8px;
+      page-break-inside: avoid;
+    }
+    .method-header {
+      font-weight: bold;
+      font-size: 9.8pt;
+      margin-bottom: 3px;
+    }
+    .method-ex {
+      background: #eff6ff;
+      border-right: 3px solid #3b82f6;
+      padding: 5px 8px;
+      border-radius: 4px;
+      margin-top: 4px;
+      font-size: 8.8pt;
+      color: #1e3a8a;
     }
     .fasida-card {
       background: #fffbeb;
       border: 1px solid #fde68a;
       border-right: 4px solid #d97706;
       border-radius: 6px;
-      padding: 9px 12px;
-      margin-bottom: 10px;
+      padding: 8px 10px;
+      margin-bottom: 8px;
       page-break-inside: avoid;
     }
     .fasida-title {
       font-weight: bold;
       color: #92400e;
-      font-size: 10.5pt;
-      margin-bottom: 4px;
+      font-size: 10pt;
+      margin-bottom: 3px;
     }
     .term-box {
       background: #f8fafc;
       border: 1px solid #e2e8f0;
       border-right: 4px solid #2563eb;
       border-radius: 6px;
-      padding: 9px 12px;
-      margin-bottom: 10px;
+      padding: 8px 10px;
+      margin-bottom: 8px;
       page-break-inside: avoid;
     }
     .term-title {
       font-weight: bold;
       color: #1e40af;
-      font-size: 10.5pt;
-      margin-bottom: 4px;
-    }
-    .method-card {
-      background: #f8fafc;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      padding: 9px 12px;
-      margin-bottom: 10px;
-      page-break-inside: avoid;
-    }
-    .method-header {
-      font-weight: bold;
       font-size: 10pt;
-      margin-bottom: 4px;
-    }
-    .method-ex {
-      background: #eff6ff;
-      border-right: 3px solid #3b82f6;
-      padding: 6px 10px;
-      border-radius: 4px;
-      margin-top: 5px;
-      font-size: 9pt;
-      color: #1e3a8a;
-    }
-    .quran-quote {
-      font-family: 'Amiri', serif;
-      font-size: 11.5pt;
-      color: #78350f;
-      background: #fefce8;
-      padding: 2px 6px;
-      border-radius: 4px;
-      display: inline-block;
-      margin: 2px 0;
+      margin-bottom: 3px;
     }
     .rules-table {
       width: 100%;
       border-collapse: collapse;
-      margin: 10px 0;
-      font-size: 9pt;
+      margin: 8px 0;
+      font-size: 8.8pt;
       page-break-inside: avoid;
     }
     .rules-table th, .rules-table td {
       border: 1px solid #cbd5e1;
-      padding: 6px 8px;
+      padding: 5px 7px;
       text-align: right;
     }
     .rules-table th {
@@ -233,52 +288,51 @@ async function generateTawzeehPDFs() {
     .slide-unit-box {
       background: #ffffff;
       border: 1.5px solid #cbd5e1;
-      border-radius: 8px;
-      padding: 10px 12px;
-      margin-bottom: 12px;
+      border-radius: 6px;
+      padding: 8px 10px;
+      margin-bottom: 10px;
       page-break-inside: avoid;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
     .slide-unit-top {
       display: flex;
       justify-content: space-between;
       border-bottom: 1px dashed #cbd5e1;
-      padding-bottom: 4px;
-      margin-bottom: 6px;
-      font-size: 8.5pt;
+      padding-bottom: 3px;
+      margin-bottom: 5px;
+      font-size: 8.2pt;
     }
     .slide-unit-title {
-      font-size: 11.5pt;
+      font-size: 11pt;
       font-weight: bold;
       color: #78350f;
-      margin: 0 0 8px 0;
+      margin: 0 0 6px 0;
     }
     .slide-grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 8px;
+      gap: 8px;
+      margin-bottom: 6px;
     }
     .mini-card {
       background: #f8fafc;
       border: 1px solid #e2e8f0;
-      border-radius: 5px;
-      padding: 6px 8px;
-      font-size: 8.8pt;
+      border-radius: 4px;
+      padding: 5px 7px;
+      font-size: 8.5pt;
     }
     .mini-card-head {
       font-weight: bold;
       color: #0f172a;
       border-bottom: 1px solid #e2e8f0;
-      padding-bottom: 3px;
-      margin-bottom: 4px;
+      padding-bottom: 2px;
+      margin-bottom: 3px;
     }
     .quiz-q-box {
       background: #f8fafc;
       border: 1px solid #e2e8f0;
       border-radius: 6px;
-      padding: 8px 12px;
-      margin-bottom: 10px;
+      padding: 7px 10px;
+      margin-bottom: 8px;
       page-break-inside: avoid;
     }
     .page-break { page-break-before: always; }
@@ -286,30 +340,211 @@ async function generateTawzeehPDFs() {
 </head>
 <body>
 
-  <!-- Cover Header -->
+  <!-- ==================== PAGE 1: WEBPAGE HERO INTRO & OVERVIEW ==================== -->
   <div class="cover-header">
-    <div class="badge">جامع درسی دستاویز • درسِ نظامی • درجہ سابعہ (العالية الثانية) • أصول الفقه</div>
+    <div class="badge">درسِ نظامی • درجہ سابعہ (العالية الثانية) • فن أصول الفقه</div>
     <h1>التوضيح في حل غوامض التنقيح (ومعه التلويح)</h1>
     <div class="subtitle">تصنيف: الإمام صدر الشريعة عبيد الله بن مسعود المحبوبي البخاري الحنفي (المتوفى ۷۴۷ھ)</div>
-    <div style="font-size: 11.5pt; font-weight: bold; color: #b45309; margin-top: 4px;">
+    <div style="font-size: 10.5pt; font-weight: bold; color: #b45309; margin-top: 2px;">
       باب المعارضة والترجيح والتراجيح الفاسدة (صفحات ۳۸۹ تا ۴۰۳)
     </div>
   </div>
 
-  <div class="meta-box">
-    <span><strong>مشتملات:</strong> ۱. الأركان الأصولية | ۲. المتن العربي | ۳. الترجمة والشرح | ۴. القواعد | ۵. التراجيح الفاسدة | ۶. حل المعضلات | ۷. الشرائح | ۸. الاختبار</span>
-    <span><strong>شرح وتحقيق:</strong> قسم أصول الفقه والمناهج التعليمية</span>
+  <!-- Webpage Hero Intro Box -->
+  <div class="hero-card">
+    <span class="hero-tag">تعارف و خلاصۂ موضوع (Tab 1: Overview)</span>
+    <h2 class="hero-title">تعارضِ ادلہ کے حل اور ترجیح کے قطعی اصولی ضوابط</h2>
+    <p class="hero-desc">
+      یہ درسی صفحات علمِ اصول میں صدر الشریعہ عبید اللہ بن مسعود المحبوبیؒ کی کتاب <strong>«التوضيح»</strong> کی سب سے فکری اور دقیق مباحث ہیں۔ امام نے ثابت فرمایا کہ جب دو شرعی دلیلیں باہم متصادم نظر آئیں تو تعارض کو کیسے رفع کیا جائے (توفیق، نسخ، ترجیح، تساقط)۔ نیز یہ کہ کن اوصاف کی بنا پر ترجیح معتبر ہوتی ہے (قوة التأثير، قوة الثبات)، اور کون سی چار ترجیحات باطل اور فاسد ہیں (غلبة الأشباه، عموم العلة، قلة الأجزاء، كثرة الأدلة)۔
+    </p>
   </div>
 
-  <!-- SECTION 1: CORE FOUNDATIONS & THE 4 METHODS WITH EXAMPLES -->
+  <!-- 3 Conceptual Pillars (Exactly as on Webpage) -->
+  <div class="sub-section-title">۳ بنیادی اصولی ستون: تعریف، اصول اور تفہیمی مثالیں</div>
+  <div class="pillars-grid">
+    <!-- Pillar 1 -->
+    <div class="pillar-card">
+      <div>
+        <div class="pillar-title">۱. حقیقتِ معارضہ و ترجیح (ص ۳۸۹)</div>
+        <div class="pillar-rule">المعارضة في محل واحد وزمان واحد</div>
+        <div class="pillar-desc">
+          معارضہ اس وقت ہوتا ہے جب دو دلیلیں ایک ہی جگہ اور ایک ہی وقت میں ایک دوسرے کی ضد کا تقاضا کریں۔ اگر دونوں مساوی ہوں یا ایک دلیل میں زیادتی وصفِ تابع سے ہو تو معارضہ قائم ہوگا، اور یہ زیادتی "رجحان" کہلائے گی۔
+        </div>
+      </div>
+      <div class="pillar-ex">
+        <strong>اصولی نکتہ:</strong> نص کو قیاس پر "راجح" نہیں کہتے، کیونکہ نص قیاس کو سرے سے گرا دیتی ہے۔
+      </div>
+    </div>
+
+    <!-- Pillar 2 -->
+    <div class="pillar-card">
+      <div>
+        <div class="pillar-title">۲. دفعِ تعارض کے ۴ مناہج (ص ۳۹۲)</div>
+        <div class="pillar-rule">التوفيق ثم النسخ ثم الترجيح ثم التساقط</div>
+        <div class="pillar-desc">
+          جب دو نصوص میں تعارض ہو تو فوراً دلیل کو نہیں چھوڑا جاتا، بلکہ: ۱. حکم میں تغیر مان کر توفیق، ۲. محل کے تغیر سے توفیق، ۳. تاریخ سے نسخ کا ثبوت، ۴. یا ترجیح اور تساقط کا فیصلہ کیا جاتا ہے۔
+        </div>
+      </div>
+      <div class="pillar-ex">
+        <strong>قرآنی نظیر:</strong> یمینِ غموس پر آخرت کی سزا ہے اور یمینِ منعقدہ پر دنیا میں کفارہ ہے۔
+      </div>
+    </div>
+
+    <!-- Pillar 3 -->
+    <div class="pillar-card">
+      <div>
+        <div class="pillar-title">۳. اعتبارِ کثرت کا راز (ص ۴۰۲)</div>
+        <div class="pillar-rule">الهيئة الاجتماعية (أثقال بمقابل مصارعة)</div>
+        <div class="pillar-desc">
+          کثرت صرف وہاں معتبر ہے جہاں "ہیئتِ اجتماعیہ" بنے اور حکم مجموعے سے جڑا ہو (جیسے وزن اٹھانا)۔ اور جہاں حکم ہر فرد سے الگ جڑا ہو (جیسے کشتی اور دلائل)، وہاں ۱ طاقتور دلیل ہزار کمزوروں پر غالب رہتی ہے!
+        </div>
+      </div>
+      <div class="pillar-ex">
+        <strong>تمثیل:</strong> کشتی میں اکیلا رستم ہزار کو پچھاڑ سکتا ہے، دلائل کشتی کی مانند ہیں!
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Terminology Table (Exactly as on Webpage) -->
+  <div class="sub-section-title">اہم اصولی و درسی اصطلاحات کی واضح تفہیم</div>
+  <table class="rules-table">
+    <tr>
+      <th style="width: 23%;">الاصطلاح</th>
+      <th style="width: 77%;">المعنى والضابط الأصولي الواضح</th>
+    </tr>
+    <tr>
+      <td><strong>المعارضة</strong></td>
+      <td>محلِ واحد اور زمانِ واحد میں دو دلیلوں کا باہم متضاد احکام کا تقاضا کرنا اس طور پر کہ دونوں کا جمع ہونا محال ہو۔</td>
+    </tr>
+    <tr>
+      <td><strong>الترجيح</strong></td>
+      <td>دو مساوی دلیلوں میں سے ایک کو کسی ضمنی وصفِ تابع کے ذریعے دوسری مدمقابل دلیل پر فائق قرار دینا۔</td>
+    </tr>
+    <tr>
+      <td><strong>الوصف التابع</strong></td>
+      <td>دلیل کے ساتھ لگی وہ ضمنی/خارجی صفت (جیسے راوی کی فقاہت، ضبط یا حدیث کی شہرت) جو دو مساوی دلیلوں میں سے ایک کو تقویت دے؛ جبکہ دلیل کی ذاتی اصل قوت (جیسے نص بنام قیاس) کو وصفِ تابع نہیں کہا جاتا۔</td>
+    </tr>
+    <tr>
+      <td><strong>قوة التأثير</strong></td>
+      <td>شریعت نے اس وصف کے اندر بذاتِ خود اس حکم کو بدلنے کی صلاحیت رکھی ہو؛ نہ کہ ایسا اثر دعویٰ کیا جائے جو شریعت نے اس وصف کو دیا ہی نہ ہو (جیسے شریعت میں غلامی احکام کو آدھا کرتی ہے، حرام نہیں کرتی)۔</td>
+    </tr>
+    <tr>
+      <td><strong>قوة الثبات</strong></td>
+      <td>شارع کا اس وصف کو مختلف ابوابِ فقہ میں بار بار معتبر ماننا (جیسے صومِ رمضان میں تعیین ساقط ہے کیونکہ ودیعت و غصب میں بھی تعیین ساقط ہے)۔</td>
+    </tr>
+    <tr>
+      <td><strong>غلبة الأشباه (فاسد)</strong></td>
+      <td>محض بہت سے غیر موثر اوصاف کی مشابہت گنوانا؛ جبکہ مؤثر وصف کی ایک مشابہت ہزار غیر مؤثر مشابہتوں پر غالب رہتی ہے۔</td>
+    </tr>
+    <tr>
+      <td><strong>الهيئة الاجتماعية</strong></td>
+      <td>افراد کے مجموعے سے مل کر پیدا ہونے والی اجتماعی قوت (جیسے وزن اٹھانا اور لشکر) جہاں کثرت معتبر ہے؛ جبکہ دلائل کشتی کی مانند انفرادی ہوتے ہیں۔</td>
+    </tr>
+  </table>
+
+  <div class="page-break"></div>
+
+  <!-- ==================== TAB 2: TEXT & TRANSLATION (PARAGRAPH BY PARAGRAPH) ==================== -->
+  <div class="section-title-banner" style="background: #78350f;">
+    الباب الأول: عباراتِ التوضيح مع سلیس اردو ترجمہ و اصولی حل (فقرہ بہ فقرہ - Tab 2: Text)
+  </div>
+
+  <!-- Paragraph 1 -->
+  <div class="matn-arabic-block">
+    <div style="font-weight: bold; color: #b48c28; margin-bottom: 3px;">[۱. حقيقة المعارضة والترجيح - صفحة ۳۸۹]</div>
+    <p>
+      «<span class="matn-highlight">[فصل: المعارضة]</span> تقابل الدليلين على سبيل الممانعة؛ بأن يقتضي أحدهما نفي ما يقتضيه الآخر في محل واحد وزمان واحد.
+      فإن تساويا قوةً، أو ترجّح أحدهما بوصف تابع: كالشهرة في الأخبار، والفقاهة في الرواة: فهما متعارضان؛ وتلك الزيادة تسمى <span class="matn-highlight">«رجحاناً»</span>.
+      وإن كان بوصف غير تابع — وهو الأصل القوة — لم يسم رجحاناً، حتى لا يقال: النص راجح على القياس.»
+    </p>
+  </div>
+  <div class="urdu-block">
+    <div style="font-weight: bold; color: #166534; margin-bottom: 3px;">[سلیس اردو ترجمہ و اصولی حل: ص ۳۸۹]</div>
+    <p>
+      جب دو دلیلیں اس طور پر وارد ہوں کہ ان میں سے ایک اس چیز کی نفی کا تقاضا کرے جس کا دوسری تقاضا کرتی ہے ایک ہی محل اور ایک ہی زمانے میں: پس اگر وہ دونوں قوت میں برابر ہوں یا ان میں سے ایک وصفِ تابع (جیسے راوی کی فقاہت یا شہرت) سے قوی ہو، تو دونوں میں معارضہ ہے؛ اور یہ اضافی قوت "رجحان" کہلاتی ہے۔ اور اگر وہ وصفِ غیر تابع (اصل قوت) سے برتر ہو تو اسے رجحان نہیں کہتے، چنانچہ یوں نہیں کہا جاتا کہ "نص قیاس پر راجح ہے"؛ کیونکہ نص قیاس کو سرے سے کالعدم کر دیتی ہے اور مقابلہ ہی باقی نہیں رہتا۔
+    </p>
+  </div>
+
+  <!-- Paragraph 2 -->
+  <div class="matn-arabic-block">
+    <div style="font-weight: bold; color: #b48c28; margin-bottom: 3px;">[۲. دفع التعارض في النصوص (التوفيق، النسخ، التساقط) - صفحات ۳۹۲ تا ۳۹۳]</div>
+    <p>
+      «وحكمه: وجوب العمل بأحدهما بالتوفيق بحمل كل واحد على حال؛ كآيتي اليمين: ﴿بِمَا كَسَبَتْ قُلُوبُكُمْ﴾، و﴿بِمَا عَقَّدتُّمُ الأَيْمَانَ﴾، وقراءتي طهارة الحائض: ﴿حَتَّىٰ يَطْهُرْنَ﴾، و﴿يَطَّهَّرْنَ﴾.
+      فإن تعذر التوفيق: فالنسخ؛ بأن يعلم تاريخ أحدهما؛ فيعمل بالمتأخر، ويكون ناسخاً للأول.
+      فإن جهل التاريخ: سقط النصان بالتعارض، وعمل بما يوجبه القياس، أو ظاهر الحال؛ لأن المحرِّم ناسخ للمبيح؛ لأن الأصل في الأشياء الإباحة قبل ورود الشرع، فالمبيح مقرر للأصل، والمحرِّم ناقل ومغيّر، فيكون متأخراً.»
+    </p>
+  </div>
+  <div class="urdu-block">
+    <div style="font-weight: bold; color: #166534; margin-bottom: 3px;">[سلیس اردو ترجمہ و اصولی حل: ص ۳۹۲ - ۳۹۳]</div>
+    <p>
+      نصوص میں تعارض دفع کرنے کی واجب اصولی ترتیب یہ ہے:  
+      <strong>۱. التوفيق:</strong> دونوں نصوص کو الگ الگ احوال پر محمول کرنا؛ جیسے قسم کی دو آیات میں ﴿بِمَا كَسَبَتْ قُلُوبُكُمْ﴾ کو یمینِ غموس پر (صرف آخرت کا مؤاخذہ) اور ﴿بِمَا عَقَّدتُّمُ الأَيْمَانَ﴾ کو یمینِ منعقدہ پر (دنیا کا کفارہ) محمول کیا۔ اور طہارتِ حائضہ میں ﴿حَتَّىٰ يَطْهُرْنَ﴾ کو ۱۰ دن پورے ہونے پر اور ﴿حَتَّىٰ يَطَّهَّرْنَ﴾ کو ۱۰ دن سے کم پر محمول کیا۔  
+      <strong>۲. النسخ:</strong> اگر توفیق نہ ہو سکے تو تاریخ کی طرف رجوع ہوگا؛ بعد والی نص ناسخ ہوگی۔  
+      <strong>۳. التساقط:</strong> اگر تاریخ معلوم نہ ہو تو دونوں نصوص سے عمل ساقط ہو جائے گا اور قیاس یا ظاہرِ حال پر فیصلہ ہوگا، کیونکہ «المحرِّم ناسخ للمبيح» کے تحت تحریم بعد میں آئی ہے کیونکہ کائنات میں اصل اباحت تھی۔
+    </p>
+  </div>
+
+  <!-- Paragraph 3 -->
+  <div class="matn-arabic-block">
+    <div style="font-weight: bold; color: #b48c28; margin-bottom: 3px;">[۳. تعارض القياسين وحكمه - صفحات ۳۹۶ تا ۳۹۷]</div>
+    <p>
+      «<span class="matn-highlight">[فصل: وأما إذا تعارض القياسان]</span>: فلا يسقطان بالتعارض، بل يصار إلى الترجيح؛ لأن القياس حجة باجتهاد المجتهد، والمجتهد متمسك بالدليل في كل جانب، فلا يطرح دليله بمجرد المعارضة... وإن لم يترجح أحدهما عنده تخيّر في العمل بأيهما شاء؛ لأن قلبه يشهد بصحة كل واحد منهما. ومثله: تعارض قولي الصحابيين إذا كان مبناهما على القياس.»
+    </p>
+  </div>
+  <div class="urdu-block">
+    <div style="font-weight: bold; color: #166534; margin-bottom: 3px;">[سلیس اردو ترجمہ و اصولی حل: ص ۳۹۶ - ۳۹۷]</div>
+    <p>
+      دو متعارض نصوص میں تاریخ کی لاعلمی پر دونوں کا حکم ساقط ہو جاتا ہے؛ کیونکہ جہلِ محض کے ساتھ کسی ایک کو اپنانا تحکم ہے۔ لیکن دو متعارض قیاس کبھی باطل یا ساقط نہیں ہوتے («ولا يسقطان بالتعارض»)؛ کیونکہ مجتہد ہر دو جانب دلیل پر قائم ہے اور اس کا دل دونوں کی صحت پر گواہ ہے، پس اگر ترجیح قائم نہ ہو سکے تو وہ اپنے دل کے اطمینان (شہادتِ قلب) سے جس قیاس پر چاہے عمل کر لے۔ اور یہی حکم دو صحابہ کے اقوال میں تعارض کا ہے جب ان کی بنیاد قیاس پر ہو۔
+    </p>
+  </div>
+
+  <!-- Paragraph 4 -->
+  <div class="matn-arabic-block">
+    <div style="font-weight: bold; color: #b48c28; margin-bottom: 3px;">[۴. شروط الترجيح الصحيح: قوة التأثير وقوة الثبات - صفحات ۳۹۷ تا ۳۹۹]</div>
+    <p>
+      «فصل: ما يقع به الترجيح فعليك استخراجه من مباحث الكتاب والسنة متناً وسنداً... والذي ذكروا في ترجيح القياس أربعة أمور:
+      <span class="matn-highlight">الأول: قوة التأثير</span>، كما في مسألة طول الحرة، ونكاح الأمة الكتابية؛ فإن الرق منصف لا محرم في الطلاق والعدة والحدود.
+      <span class="matn-highlight">والثاني: قوة ثبات الوصف على الحكم</span>، والمراد منه كثرة اعتبار الشارع هذا الوصف في هذا الحكم، كالمسح في التخفيف في كل تطهير غير معقول كالتيمم ومسح الخف والجورب، بخلاف الركن... وكقولنا في صوم رمضان: إنه متعين فلا يجب التعيين؛ لأن هذا الوصف اعتبره الشارع في الودائع والغصوب ورد المبيع بيعاً فاسداً.»
+    </p>
+  </div>
+  <div class="urdu-block">
+    <div style="font-weight: bold; color: #166534; margin-bottom: 3px;">[سلیس اردو ترجمہ و اصولی حل: ص ۳۹۷ - ۳۹۹]</div>
+    <p>
+      قیاس میں ترجیح کے دو صحیح اور بنیادی اسباب ہیں:  
+      <strong>۱. قوة التأثير:</strong> شریعت نے علت کے اندر بذاتِ خود اس حکم کو بدلنے کی حقیقی صلاحیت رکھی ہو؛ نہ کہ ایسا اثر دعویٰ کیا جائے جو شریعت نے اس وصف کو دیا ہی نہ ہو۔ جیسے اہل کتاب باندی کے نکاح میں احناف کا قیاس راجح ہے کیونکہ شریعت میں غلامی احکام کو آدھا کرتی ہے (تنصیف)، حرام نہیں کرتی۔  
+      <strong>۲. قوة الثبات:</strong> شارع کا اس وصف کو دیگر فقہی ابواب میں بار بار معتبر ماننا۔ جیسے صومِ رمضان میں تعیین ساقط ہے کیونکہ ودیعت، غصب اور بیع فاسد کے رد میں تعیین کو شارع نے کالعدم مانا ہے۔
+    </p>
+  </div>
+
+  <!-- Paragraph 5 -->
+  <div class="matn-arabic-block">
+    <div style="font-weight: bold; color: #b48c28; margin-bottom: 3px;">[۵. التراجيح الفاسدة الأربعة والفرق في الكثرة - صفحات ۴۰۲ تا ۴۰۳]</div>
+    <p>
+      «<span class="matn-highlight">[فصل: ومن التراجيح الفاسدة: الترجيح بغلبة الأشباه]</span> كقول الشافعي رحمه الله في أن الأخ المشترى لا يعتق عنده: الأخ يشبه الولد بوجه — وهو المحرمية — وابن العم بوجوه: كحل الزكاة، وحل زوجته، وقبول الشهادة، ووجوب القصاص. وهذا باطل؛ لأن المشابهة في وصف واحد مؤثر في الحكم المطلوب أقوى من المشابهة في ألف وصف غير مؤثر.
+      ومنها: الترجيح بكون الوصف أعم، كالطعم... ومنها: الترجيح بقلة الأجزاء.
+      <span class="matn-highlight">[ولا يرجح بكثرة الأدلة عند الشيخين]</span>... ولنا في ذلك فرق دقيق: وهو أن الكثرة معتبرة في كل موضع يحصل بها هيئة اجتماعية ويكون الحكم منوطاً بالمجموع من حيث هو المجموع (كحمل الأثقال والحروب)، وغير معتبرة في كل موضع لا يحصل بها هيئة اجتماعية ويكون الحكم منوطاً بكل واحد منها (كالمصارعة مثلاً؛ فإن الكثير لا يغلب القليل فيها، بل رب واحد قوي يغلب الآلاف من الضعاف).»
+    </p>
+  </div>
+  <div class="urdu-block">
+    <div style="font-weight: bold; color: #166534; margin-bottom: 3px;">[سلیس اردو ترجمہ و اصولی حل: ص ۴۰۲ - ۴۰۳]</div>
+    <p>
+      چار ترجیحات باطل اور فاسد ہیں جن سے پرہیز لازم ہے:  
+      <strong>۱. غلبۂ اشباہ باطل ہے:</strong> خریدا ہوا بھائی آزاد ہونے میں امام شافعیؒ کا ۴ اوصاف لانا رد کیا گیا؛ کیونکہ ایک موثر وصف (محرمیت) ہزار غیر موثر اوصاف پر فائق ہے۔  
+      <strong>۲. عمومِ علت باطل ہے:</strong> سود میں طعام کے لفظی پھیلاؤ سے ترجیح نہیں ہوتی، بلکہ اعتبار تاثیر کا ہے۔  
+      <strong>۳. قلتِ اجزاء باطل ہے:</strong> کم اجزاء والی علت کی کوئی شرعی برتری نہیں۔  
+      <strong>۴. کثرتِ ادلہ باطل ہے عند الشیخین:</strong> دلائل کی محض گنتی سے ترجیح نہیں ہوتی۔  
+      <strong>صدر الشریعہؒ کا نایاب اصولی راز:</strong> وزن اٹھانے (حمل الأثقال) اور لشکر میں چونکہ "ہیئتِ اجتماعیہ" بنتی ہے اس لیے ۱۰ افراد ۱ پر فائق ہیں (کثرت معتبر ہے)؛ لیکن کشتی (المصارعة) میں مقابلہ انفرادی ہے اس لیے ۱ طاقتور پہلوان ہزار کمزوروں کو پچھاڑ دیتا ہے۔ فقہی دلائل کشتی کے پہلوانوں کی مانند ہیں!
+    </p>
+  </div>
+
+  <div class="page-break"></div>
+
+  <!-- ==================== TAB 3: LOGIC FLOWCHART & 4 METHODS (TAB 3: LOGIC) ==================== -->
   <div class="section-title-banner" style="background: #1e3a8a;">
-    القسم التمهيدي: الأركان الأصولية ومناهج دفع التعارض الأربعة مع الأمثلة
+    الباب الثاني: شجرۂ دفعِ تعارض اور ۴ مناہج مع مفصل فقہی امثلہ (Tab 3: Logic Flowchart)
   </div>
 
-  <div class="sub-section-title">۱. مناهج دفعِ تعارض کی اصولی ترتیب مع مفصل فقہی امثلہ (ص ۳۹۲ - ۳۹۳)</div>
-  <p style="margin: 4px 0 8px 0; font-size: 9.2pt;">
-    جب دو دلیلیں ایک ہی محل اور زمانے میں باہم متضاد تقاضا کریں تو حنفی اصول کے مطابق تعارض کو درج ذیل ۴ قطعی مراحل سے حل کیا جاتا ہے:
-  </p>
+  <div class="sub-section-title">دفعِ تعارض کی اصولی ترتیب مع مفصل فقہی امثلہ (ص ۳۹۲ - ۳۹۳)</div>
 
   <div class="method-card" style="border-right: 4px solid #16a34a;">
     <div class="method-header" style="color: #166534;">
@@ -354,219 +589,30 @@ async function generateTawzeehPDFs() {
     </div>
   </div>
 
-  <div class="sub-section-title">۲. اہم درسی اصطلاحات کی واضح تفہیم</div>
+  <div class="sub-section-title">نصوص اور اقیسہ میں تعارض کا بنیادی اصولی فرق</div>
   <table class="rules-table">
     <tr>
-      <th style="width: 25%;">الاصطلاح</th>
-      <th style="width: 75%;">المعنى والضابط الأصولي الواضح</th>
+      <th style="width: 25%;">نوعِ دلیل</th>
+      <th style="width: 35%;">تعارض کی صورت میں شرعی حکم</th>
+      <th style="width: 40%;">اصولی و عقلی علت</th>
     </tr>
     <tr>
-      <td><strong>المعارضة</strong></td>
-      <td>محلِ واحد اور زمانِ واحد میں دو دلیلوں کا باہم متضاد احکام کا تقاضا کرنا اس طور پر کہ دونوں کا جمع ہونا محال ہو۔</td>
+      <td><strong>النصوص (قرآن و حدیث)</strong></td>
+      <td>تاریخ کی لاعلمی پر تساقط («سقط النصان»)<br>اور اصل کی طرف رجوع۔</td>
+      <td>جہلِ تاریخ کی موجودگی میں کسی ایک نص کو من مانے طور پر اپنانا تحکم ہے جو شرعاً باطل ہے۔</td>
     </tr>
     <tr>
-      <td><strong>الترجيح</strong></td>
-      <td>دو مساوی دلیلوں میں سے ایک کو کسی ضمنی وصفِ تابع کے ذریعے دوسری مدمقابل دلیل پر فائق قرار دینا۔</td>
-    </tr>
-    <tr>
-      <td><strong>الوصف التابع</strong></td>
-      <td>دلیل کے ساتھ لگی وہ ضمنی/خارجی صفت (جیسے راوی کی فقاہت، ضبط یا حدیث کی شہرت) جو دو مساوی دلیلوں میں سے ایک کو تقویت دے؛ جبکہ دلیل کی ذاتی اصل قوت (جیسے نص بنام قیاس) کو وصفِ تابع نہیں کہا جاتا۔</td>
-    </tr>
-    <tr>
-      <td><strong>قوة التأثير</strong></td>
-      <td>شریعت نے اس وصف کے اندر بذاتِ خود اس حکم کو بدلنے کی صلاحیت رکھی ہو؛ نہ کہ ایسا اثر دعویٰ کیا جائے جو شریعت نے اس وصف کو دیا ہی نہ ہو (جیسے شریعت میں غلامی احکام کو آدھا کرتی ہے، حرام نہیں کرتی)۔</td>
-    </tr>
-    <tr>
-      <td><strong>قوة الثبات</strong></td>
-      <td>شارع کا اس وصف کو مختلف ابوابِ فقہ میں بار بار معتبر ماننا (جیسے صومِ رمضان میں تعیین ساقط ہے کیونکہ ودیعت و غصب میں بھی تعیین ساقط ہے)۔</td>
-    </tr>
-    <tr>
-      <td><strong>غلبة الأشباه (فاسد)</strong></td>
-      <td>محض بہت سے غیر موثر اوصاف کی مشابہت گنوانا؛ جبکہ مؤثر وصف کی ایک مشابہت ہزار غیر مؤثر مشابہتوں پر غالب رہتی ہے۔</td>
-    </tr>
-    <tr>
-      <td><strong>الهيئة الاجتماعية</strong></td>
-      <td>افراد کے مجموعے سے مل کر پیدا ہونے والی اجتماعی قوت (جیسے وزن اٹھانا اور لشکر)۔ جہاں ہیئتِ اجتماعیہ بنے وہاں کثرت معتبر ہے؛ اور جہاں مقابلہ انفرادی ہو (جیسے کشتی اور فقہی دلائل) وہاں کثرت بے اثر ہے۔</td>
+      <td><strong>القياس (اجتہادی قیاس)</strong></td>
+      <td>قیاس کبھی ساقط نہیں ہوتا («ولا يسقطان»)<br>بلکہ مجتہد کو عمل کا اختیار ہے۔</td>
+      <td>مجتہد دونوں جانب دلیل پر قائم ہے اور اس کا دل دونوں کی صحت کی شہادت دیتا ہے۔</td>
     </tr>
   </table>
 
   <div class="page-break"></div>
 
-  <!-- SECTION 2: PARAGRAPH-BY-PARAGRAPH ARABIC MATN & URDU TRANSLATION -->
-  <div class="section-title-banner" style="background: #78350f;">
-    الجزء الأول: نصوص التوضيح مع الترجمة والشرح (فقرہ بہ فقرہ / Paragraph by Paragraph)
-  </div>
-
-  <!-- Paragraph 1 -->
-  <div class="matn-arabic-block">
-    <div style="font-weight: bold; color: #b48c28; margin-bottom: 4px;">[۱. حقيقة المعارضة والترجيح - صفحة ۳۸۹]</div>
-    <p>
-      «<span class="matn-highlight">[فصل: المعارضة]</span> تقابل الدليلين على سبيل الممانعة؛ بأن يقتضي أحدهما نفي ما يقتضيه الآخر في محل واحد وزمان واحد.
-      فإن تساويا قوةً، أو ترجّح أحدهما بوصف تابع: كالشهرة في الأخبار، والفقاهة في الرواة: فهما متعارضان؛ وتلك الزيادة تسمى <span class="matn-highlight">«رجحاناً»</span>.
-      وإن كان بوصف غير تابع — وهو الأصل القوة — لم يسم رجحاناً، حتى لا يقال: النص راجح على القياس.»
-    </p>
-  </div>
-  <div class="urdu-block">
-    <div style="font-weight: bold; color: #166534; margin-bottom: 4px;">[سلیس اردو ترجمہ و اصولی حل: ص ۳۸۹]</div>
-    <p>
-      جب دو دلیلیں اس طور پر وارد ہوں کہ ان میں سے ایک اس چیز کی نفی کا تقاضا کرے جس کا دوسری تقاضا کرتی ہے ایک ہی محل اور ایک ہی زمانے میں: پس اگر وہ دونوں قوت میں برابر ہوں یا ان میں سے ایک وصفِ تابع (جیسے راوی کی فقاہت یا شہرت) سے قوی ہو، تو دونوں میں معارضہ ہے؛ اور یہ اضافی قوت "رجحان" کہلاتی ہے۔ اور اگر وہ وصفِ غیر تابع (اصل قوت) سے برتر ہو تو اسے رجحان نہیں کہتے، چنانچہ یوں نہیں کہا جاتا کہ "نص قیاس پر راجح ہے"؛ کیونکہ نص قیاس کو سرے سے کالعدم کر دیتی ہے اور مقابلہ ہی باقی نہیں رہتا۔
-    </p>
-  </div>
-
-  <!-- Paragraph 2 -->
-  <div class="matn-arabic-block">
-    <div style="font-weight: bold; color: #b48c28; margin-bottom: 4px;">[۲. دفع التعارض في النصوص (التوفيق، النسخ، التساقط) - صفحات ۳۹۲ تا ۳۹۳]</div>
-    <p>
-      «وحكمه: وجوب العمل بأحدهما بالتوفيق بحمل كل واحد على حال؛ كآيتي اليمين: ﴿بِمَا كَسَبَتْ قُلُوبُكُمْ﴾، و﴿بِمَا عَقَّدتُّمُ الأَيْمَانَ﴾، وقراءتي طهارة الحائض: ﴿حَتَّىٰ يَطْهُرْنَ﴾، و﴿يَطَّهَّرْنَ﴾.
-      فإن تعذر التوفيق: فالنسخ؛ بأن يعلم تاريخ أحدهما؛ فيعمل بالمتأخر، ويكون ناسخاً للأول.
-      فإن جهل التاريخ: سقط النصان بالتعارض، وعمل بما يوجبه القياس، أو ظاهر الحال؛ لأن المحرِّم ناسخ للمبيح؛ لأن الأصل في الأشياء الإباحة قبل ورود الشرع، فالمبيح مقرر للأصل، والمحرِّم ناقل ومغيّر، فيكون متأخراً.»
-    </p>
-  </div>
-  <div class="urdu-block">
-    <div style="font-weight: bold; color: #166534; margin-bottom: 4px;">[سلیس اردو ترجمہ و اصولی حل: ص ۳۹۲ - ۳۹۳]</div>
-    <p>
-      نصوص میں تعارض دفع کرنے کی واجب اصولی ترتیب یہ ہے:  
-      <strong>۱. التوفيق:</strong> دونوں نصوص کو الگ الگ احوال پر محمول کرنا؛ جیسے قسم کی دو آیات میں ﴿بِمَا كَسَبَتْ قُلُوبُكُمْ﴾ کو یمینِ غموس پر (صرف آخرت کا مؤاخذہ) اور ﴿بِمَا عَقَّدتُّمُ الأَيْمَانَ﴾ کو یمینِ منعقدہ پر (دنیا کا کفارہ) محمول کیا۔ اور طہارتِ حائضہ میں ﴿حَتَّىٰ يَطْهُرْنَ﴾ کو ۱۰ دن پورے ہونے پر اور ﴿حَتَّىٰ يَطَّهَّرْنَ﴾ کو ۱۰ دن سے کم پر محمول کیا۔  
-      <strong>۲. النسخ:</strong> اگر توفیق نہ ہو سکے تو تاریخ کی طرف رجوع ہوگا؛ بعد والی نص ناسخ ہوگی۔  
-      <strong>۳. التساقط:</strong> اگر تاریخ معلوم نہ ہو تو دونوں نصوص سے عمل ساقط ہو جائے گا اور قیاس یا ظاہرِ حال پر فیصلہ ہوگا، کیونکہ «المحرِّم ناسخ للمبيح» کے تحت تحریم بعد میں آئی ہے کیونکہ کائنات میں اصل اباحت تھی۔
-    </p>
-  </div>
-
-  <!-- Paragraph 3 -->
-  <div class="matn-arabic-block">
-    <div style="font-weight: bold; color: #b48c28; margin-bottom: 4px;">[۳. تعارض القياسين وحكمه - صفحات ۳۹۶ تا ۳۹۷]</div>
-    <p>
-      «<span class="matn-highlight">[فصل: وأما إذا تعارض القياسان]</span>: فلا يسقطان بالتعارض، بل يصار إلى الترجيح؛ لأن القياس حجة باجتهاد المجتهد، والمجتهد متمسك بالدليل في كل جانب، فلا يطرح دليله بمجرد المعارضة... وإن لم يترجح أحدهما عنده تخيّر في العمل بأيهما شاء؛ لأن قلبه يشهد بصحة كل واحد منهما. ومثله: تعارض قولي الصحابيين إذا كان مبناهما على القياس.»
-    </p>
-  </div>
-  <div class="urdu-block">
-    <div style="font-weight: bold; color: #166534; margin-bottom: 4px;">[سلیس اردو ترجمہ و اصولی حل: ص ۳۹۶ - ۳۹۷]</div>
-    <p>
-      دو متعارض نصوص میں تاریخ کی لاعلمی پر دونوں کا حکم ساقط ہو جاتا ہے؛ کیونکہ جہلِ محض کے ساتھ کسی ایک کو اپنانا تحکم ہے۔ لیکن دو متعارض قیاس کبھی باطل یا ساقط نہیں ہوتے («ولا يسقطان بالتعارض»)؛ کیونکہ مجتہد ہر دو جانب دلیل پر قائم ہے اور اس کا دل دونوں کی صحت پر گواہ ہے، پس اگر ترجیح قائم نہ ہو سکے تو وہ اپنے دل کے اطمینان (شہادتِ قلب) سے جس قیاس پر چاہے عمل کر لے۔ اور یہی حکم دو صحابہ کے اقوال میں تعارض کا ہے جب ان کی بنیاد قیاس پر ہو۔
-    </p>
-  </div>
-
-  <!-- Paragraph 4 -->
-  <div class="matn-arabic-block">
-    <div style="font-weight: bold; color: #b48c28; margin-bottom: 4px;">[۴. شروط الترجيح الصحيح: قوة التأثير وقوة الثبات - صفحات ۳۹۷ تا ۳۹۹]</div>
-    <p>
-      «فصل: ما يقع به الترجيح فعليك استخراجه من مباحث الكتاب والسنة متناً وسنداً... والذي ذكروا في ترجيح القياس أربعة أمور:
-      <span class="matn-highlight">الأول: قوة التأثير</span>، كما في مسألة طول الحرة، ونكاح الأمة الكتابية؛ فإن الرق منصف لا محرم في الطلاق والعدة والحدود.
-      <span class="matn-highlight">والثاني: قوة ثبات الوصف على الحكم</span>، والمراد منه كثرة اعتبار الشارع هذا الوصف في هذا الحكم، كالمسح في التخفيف في كل تطهير غير معقول كالتيمم ومسح الخف والجورب، بخلاف الركن... وكقولنا في صوم رمضان: إنه متعين فلا يجب التعيين؛ لأن هذا الوصف اعتبره الشارع في الودائع والغصوب ورد المبيع بيعاً فاسداً.»
-    </p>
-  </div>
-  <div class="urdu-block">
-    <div style="font-weight: bold; color: #166534; margin-bottom: 4px;">[سلیس اردو ترجمہ و اصولی حل: ص ۳۹۷ - ۳۹۹]</div>
-    <p>
-      قیاس میں ترجیح کے دو صحیح اور بنیادی اسباب ہیں:  
-      <strong>۱. قوة التأثير:</strong> شریعت نے علت کے اندر بذاتِ خود اس حکم کو بدلنے کی حقیقی صلاحیت رکھی ہو؛ نہ کہ ایسا اثر دعویٰ کیا جائے جو شریعت نے اس وصف کو دیا ہی نہ ہو۔ جیسے اہل کتاب باندی کے نکاح میں احناف کا قیاس راجح ہے کیونکہ شریعت میں غلامی احکام کو آدھا کرتی ہے (تنصیف)، حرام نہیں کرتی۔  
-      <strong>۲. قوة الثبات:</strong> شارع کا اس وصف کو دیگر فقہی ابواب میں بار بار معتبر ماننا۔ جیسے صومِ رمضان میں تعیین ساقط ہے کیونکہ ودیعت، غصب اور بیع فاسد کے رد میں تعیین کو شارع نے کالعدم مانا ہے۔
-    </p>
-  </div>
-
-  <!-- Paragraph 5 -->
-  <div class="matn-arabic-block">
-    <div style="font-weight: bold; color: #b48c28; margin-bottom: 4px;">[۵. التراجيح الفاسدة الأربعة والفرق في الكثرة - صفحات ۴۰۲ تا ۴۰۳]</div>
-    <p>
-      «<span class="matn-highlight">[فصل: ومن التراجيح الفاسدة: الترجيح بغلبة الأشباه]</span> كقول الشافعي رحمه الله في أن الأخ المشترى لا يعتق عنده: الأخ يشبه الولد بوجه — وهو المحرمية — وابن العم بوجوه: كحل الزكاة، وحل زوجته، وقبول الشهادة، ووجوب القصاص. وهذا باطل؛ لأن المشابهة في وصف واحد مؤثر في الحكم المطلوب أقوى من المشابهة في ألف وصف غير مؤثر.
-      ومنها: الترجيح بكون الوصف أعم، كالطعم... ومنها: الترجيح بقلة الأجزاء.
-      <span class="matn-highlight">[ولا يرجح بكثرة الأدلة عند الشيخين]</span>... ولنا في ذلك فرق دقيق: وهو أن الكثرة معتبرة في كل موضع يحصل بها هيئة اجتماعية ويكون الحكم منوطاً بالمجموع من حيث هو المجموع (كحمل الأثقال والحروب)، وغير معتبرة في كل موضع لا يحصل بها هيئة اجتماعية ويكون الحكم منوطاً بكل واحد منها (كالمصارعة مثلاً؛ فإن الكثير لا يغلب القليل فيها، بل رب واحد قوي يغلب الآلاف من الضعاف).»
-    </p>
-  </div>
-  <div class="urdu-block">
-    <div style="font-weight: bold; color: #166534; margin-bottom: 4px;">[سلیس اردو ترجمہ و اصولی حل: ص ۴۰۲ - ۴۰۳]</div>
-    <p>
-      چار ترجیحات باطل اور فاسد ہیں جن سے پرہیز لازم ہے:  
-      <strong>۱. غلبۂ اشباہ باطل ہے:</strong> خریدا ہوا بھائی آزاد ہونے میں امام شافعیؒ کا ۴ اوصاف لانا رد کیا گیا؛ کیونکہ ایک موثر وصف (محرمیت) ہزار غیر موثر اوصاف پر فائق ہے۔  
-      <strong>۲. عمومِ علت باطل ہے:</strong> سود میں طعام کے لفظی پھیلاؤ سے ترجیح نہیں ہوتی، بلکہ اعتبار تاثیر کا ہے۔  
-      <strong>۳. قلتِ اجزاء باطل ہے:</strong> کم اجزاء والی علت کی کوئی شرعی برتری نہیں۔  
-      <strong>۴. کثرتِ ادلہ باطل ہے عند الشیخین:</strong> دلائل کی محض گنتی سے ترجیح نہیں ہوتی۔  
-      <strong>صدر الشریعہؒ کا نایاب اصولی راز:</strong> وزن اٹھانے (حمل الأثقال) اور لشکر میں چونکہ "ہیئتِ اجتماعیہ" بنتی ہے اس لیے ۱۰ افراد ۱ پر فائق ہیں (کثرت معتبر ہے)؛ لیکن کشتی (المصارعة) میں مقابلہ انفرادی ہے اس لیے ۱ طاقتور پہلوان ہزار کمزوروں کو پچھاڑ دیتا ہے۔ فقہی دلائل کشتی کے پہلوانوں کی مانند ہیں!
-    </p>
-  </div>
-
-  <!-- SECTION 4: THE 4 CORRUPT PREPONDERANCES -->
-  <div class="section-title-banner" style="background: #b45309;">
-    الجزء الرابع: التراجيح الفاسدة الأربعة (چار باطل ترجیحات کا تفصیلی اصولی محاکمہ)
-  </div>
-
-  <div class="fasida-card">
-    <div class="fasida-title">۱. باطل ترجیحِ اول: الترجيح بغلبة الأشباه (غلبۂ اشباہ اور عتقِ بھائی کا قضیہ)</div>
-    <p><strong>دعویٰ (امام شافعیؒ):</strong> خریدا ہوا بھائی آزاد نہیں ہوتا؛ کیونکہ وہ چچا کے بیٹے (ابن العم) کے مشابہ ۴ اوصاف میں ہے: (۱) زکوٰۃ کا حلال ہونا، (۲) اس کی بیوہ سے نکاح جائز ہونا، (۳) اس کے حق میں گواہی قبول ہونا، اور (۴) قتل پر قصاص واجب ہونا۔ جبکہ اپنے حقیقی بیٹے کے مشابہ صرف ۱ وصف میں ہے اور وہ "محرمیت" (حرمتِ نکاح) ہے۔ پس ۴ کا عدد ۱ پر راجح ہے۔</p>
-    <p><strong>ردِ صدر الشریعہؒ:</strong> «المشابهة في وصف واحد مؤثر أقوى من المشابهة في ألف وصف غير مؤثر»۔ مطلوبہ شرعی حکم "عتق" (آزادی) ہے، اور عتق میں محرمیت اثر انداز ہوتی ہے کیونکہ نبی کریم ﷺ کا ارشاد ہے: «من ملك ذا رحم محرم عتق عليه»۔ زکوٰۃ، شہادت یا قصاص کا عتق میں سرے سے کوئی تعلق ہی نہیں۔ لہٰذا مؤثر وصف کی ایک مشابہت ہزار غیر مؤثر مشابہتوں پر غالب رہتی ہے، اور بھائی فوراً آزاد ہو جائے گا!</p>
-  </div>
-
-  <div class="fasida-card">
-    <div class="fasida-title">۲. باطل ترجیحِ دوم: الترجيح بكون الوصف أعم (عمومِ علت کا فاسد دعویٰ)</div>
-    <p><strong>دعویٰ:</strong> سود کے باب میں علت "طعام" کو احناف کی علت "قدر مع الجنس" (کیل یا وزن) پر اس لیے راجح کہنا کہ لفظِ طعام قلیل اور کثیر دونوں دانوں کو شامل ہے، پس یہ علت زیادہ عام ہے۔</p>
-    <p><strong>ردِ صدر الشریعہؒ:</strong> ترجیح کا مدار اس پر ہے کہ علت میں شرعی حکم پیدا کرنے کی کتنی ذاتی تاثیر اور وزن ہے، نہ کہ اس کے لفظی دائرے کے پھیلاؤ پر۔ احناف کے ہاں کیل اور وزن میں تاثیر طعام سے بدرجہا قوی تر ہے، اس لیے محض عموم کی وجہ سے کوئی علت راجح نہیں بن سکتی۔</p>
-  </div>
-
-  <div class="fasida-card">
-    <div class="fasida-title">۳. باطل ترجیحِ سوم: الترجيح بقلة الأجزاء (قلتِ اجزاء کا فاسد دعویٰ)</div>
-    <p><strong>دعویٰ:</strong> یہ گمان کرنا کہ جس علت کا صرف ایک جزو ہو (مفرد وصف) وہ دو یا تین اجزاء والی علت سے زیادہ مضبوط اور راجح ہے کیونکہ اس میں اجزاء کم ہیں۔</p>
-    <p><strong>ردِ صدر الشریعہؒ:</strong> شریعتِ مطہرہ میں علت کا مدار اس کے شرعی اعتبار، ثبوت اور تاثیر پر ہے۔ اجزاء کی کمی یا زیادتی سے شریعت میں ترجیح کا کوئی تعلق نہیں۔</p>
-  </div>
-
-  <div class="fasida-card">
-    <div class="fasida-title">۴. باطل ترجیحِ چہارم: الترجيح بكثرة الأدلة (کثرتِ ادلہ عند الشیخین اور ہیئتِ اجتماعیہ کا راز)</div>
-    <p><strong>دعویٰ:</strong> جس حکم کی تین دلیلیں ہوں وہ اس حکم پر راجح ہے جس کی ایک یا دو دلیلیں ہوں، تاکہ کثرت سے غلبۂ ظن ملے۔</p>
-    <p><strong>ردِ شیخین (امام ابو حنیفہ و امام ابو یوسفؒ):</strong> ہر دلیل بذاتِ خود ایک مستقل حجت ہوتی ہے۔ محض گنتی کی کثرت سے کوئی دلیل راجح نہیں ہوتی، جیسا کہ ۲ عادل گواہوں کے مقابلے میں ۱۰ گواہ آ جائیں تو محض گنتی سے ۱۰ کو ترجیح نہیں ملتی۔</p>
-    <p><strong>صدر الشریعہؒ کا نایاب اور گہرا تفسیری فرق (ہیئتِ اجتماعیہ بمقابلہ مقابلہ انفرادی):</strong> کثرت صرف ان امور میں معتبر ہوتی ہے جہاں مل کر "ہیئتِ اجتماعیہ" (مجموعی طاقت) بنتی ہو؛ جیسے بھاری وزن اٹھانا (حمل الأثقال) کہ ۱۰ آدمی مل کر وہ وزن اٹھا لیتے ہیں جو اکیلا نہیں اٹھا سکتا؛ یا جنگی لشکر۔ لیکن جہاں مقابلہ انفرادی ہو اور ہیئتِ اجتماعیہ نہ بنتی ہو، وہاں کثرت کی کوئی وقعت نہیں ہوتی؛ جیسے کشتی (المصارعة): اگر اکھاڑے میں ۱۰ کمزور پہلوان ہوں تو ایک اکیلا طاقتور پہلوان ان سب پر بھاری رہتا ہے۔ شرعی دلائل کشتی کے پہلوانوں کی مانند ہیں! پس ایک قوی و باوزن دلیل گنتی کی دس کمزور دلیلوں پر غالب رہتی ہے۔</p>
-  </div>
-
-  <div class="page-break"></div>
-
-  <!-- SECTION 5: SOLVING DIFFICULT CONCEPTS -->
-  <div class="section-title-banner" style="background: #1d4ed8;">
-    الجزء الخامس: حل المعضلات والمصطلحات الدقيقة (مشکل اصطلاحات کا آسان ترین فہم)
-  </div>
-
-  <div class="term-box">
-    <div class="term-title">۱. اصطلاحی فرق: «وصفِ تابع» بمقابلہ «دلیلِ ذاتی و اصل قوت»</div>
-    <p><strong>اصل قوت / دلیلِ ذاتی:</strong> جب دو دلیلیں اپنے درجے اور ساخت میں ہی الگ ہوں؛ مثلاً ایک نصِ قطعی (قرآن) ہو اور دوسرا قیاس۔ یہاں نص قیاس پر بذاتِ خود غالب ہے، اس کو اصولیین "ترجیح" نہیں کہتے، کیونکہ ترجیح صرف برابری کے بعد اضافی خوبی کو کہا جاتا ہے۔</p>
-    <p><strong>وصفِ تابع:</strong> جب دونوں دلیلیں اصل قوت میں بالکل مساوی ہوں (جیسے دونوں خبرِ واحد ہوں)، لیکن ایک دلیل کے ساتھ کوئی ضمنی یا خارجی صفت لگ جائے جو اسے تھوڑا سا اضافی وزن دے دے؛ مثلاً راوی زیادہ فقیہ ہو، یا اس حدیث کو زیادہ شہرت حاصل ہو، یا راوی صاحبِ واقعہ ہو۔ اس اضافی ضمنی خوبی کو "وصفِ تابع" کہتے ہیں، اور اسی کے ذریعے "ترجیح" قائم ہوتی ہے۔</p>
-  </div>
-
-  <div class="term-box">
-    <div class="term-title">۲. امام شافعیؒ کا رد: آیاتِ یمین اور احناف کی توفیق اقرب الی القرآن کیوں ہے؟</div>
-    <p>قرآن مجید میں قسم کے متعلق دو متقابل آیات ہیں:  
-    <br><span class="quran-quote">﴿لَا يُؤَاخِذُكُمُ اللَّهُ بِاللَّغْوِ فِي أَيْمَانِكُمْ وَلَٰكِن يُؤَاخِذُكُم بِمَا كَسَبَتْ قُلُوبُكُمْ﴾</span> [البقرة: ۲۲۵]  
-    <br><span class="quran-quote">﴿وَلَٰكِن يُؤَاخِذُكُم بِمَا عَقَّدتُّمُ الْأَيْمَانَ ۖ فَكَفَّارَتُهُ إِطْعَامُ عَشَرَةِ مَسَاكِينَ...﴾</span> [المائدة: ۸۹]</p>
-    <p><strong>اعتراض و رد (امام شافعیؒ):</strong> امام شافعیؒ نے دونوں میں کفارہ واجب مانا۔</p>
-    <p><strong>صدر الشریعہؒ کا اصولی جواب:</strong> احناف کی توفیق قرآن کے الفاظ کے سب سے زیادہ قریب ہے؛ کیونکہ احناف نے پہلی آیت کو "یمینِ غموس" (ماضی کی جھوٹی قسم) پر محمول کیا جس میں دل نے دانستہ گناہ کمایا، اس پر اللہ نے صرف اخروی مؤاخذہ فرمایا اور کفارہ ذکر نہیں کیا کیونکہ غموس اتنا بڑا گناہ ہے کہ دنیاوی کفارہ اس کا ازالہ نہیں کر سکتا؛ اور دوسری آیت کو "یمینِ منعقدہ" (مستقبل کی قسم) پر محمول کیا جس میں "عقد" (پختہ گرہ) ہوتی ہے اور اس پر صراحتاً کفارے کا حکم ہے۔ پس دونوں آیتیں اپنے اپنے لفظ کے مطابق نافذ العمل ہو گئیں اور کوئی تعارض باقی نہ رہا۔</p>
-  </div>
-
-  <div class="term-box">
-    <div class="term-title">۳. محل کے الگ ہونے سے دونوں قرأتیں اپنے اپنے دائرے میں کیسے نافذ العمل رہتی ہیں؟</div>
-    <p>حائضہ عورت کے طہر کے متعلق قرآن کی دو متواتر قرأتیں ہیں:  
-    <br>۱. قراءتِ تخفیف: <span class="quran-quote">﴿حَتَّىٰ يَطْهُرْنَ﴾</span> (یہاں تک کہ وہ حیض سے پاک ہو جائیں، یعنی خون رک جائے)۔  
-    <br>۲. قراءتِ تشدید: <span class="quran-quote">﴿حَتَّىٰ يَطَّهَّرْنَ﴾</span> (یہاں تک کہ وہ پانی سے غسل کر کے خوب پاکی حاصل کریں)۔</p>
-    <p><strong>تغاير المحل کا بدیہی فہم:</strong>  
-    <br><strong>المحل الأول (۱۰ دن پورے ہو جانا):</strong> جب خون حیض کی انتہائی مدت (۱۰ دن) پر رکے تو مزید حیض آ ہی نہیں سکتا، لہٰذا طہارتِ طبعی خود بخود حاصل ہو گئی۔ یہاں پہلی قرأت ﴿يَطْهُرْنَ﴾ نافذ ہوگی اور غسل کے بغیر بھی قربت حلال ہو جائے گی۔  
-    <br><strong>المحل الثاني (۱۰ دن سے کم میں خون رکنا):</strong> یہاں چونکہ طہارت یقینی نہیں جب تک پانی سے غسل نہ کر لے، اس لیے دوسری قرأت ﴿يَطَّهَّرْنَ﴾ نافذ ہوگی اور غسل شرط ہوگا۔ پس محل کے الگ ہونے سے دونوں قرأتیں اپنے اپنے دائرے میں سچی اور قطعی طور پر نافذ رہتی ہیں!</p>
-  </div>
-
-  <div class="term-box">
-    <div class="term-title">۴. حنفیہ کے نزدیک تحریم اباحت پر تاریخ کی لاعلمی کے وقت بھی کیوں ناسخ مانی جاتی ہے؟</div>
-    <p><strong>اصولی ضابطہ:</strong> «المحرِّم ناسخ للمبيح عند الجهل بالتاريخ»</p>
-    <p><strong>اس کا آسان راز:</strong> شریعت کا بنیادی قانون یہ ہے کہ کائنات کی تمام اشیاء اصل پیدائش کے اعتبار سے انسان کے لیے مباح اور حلال تھیں (الإباحة الأصلية)۔ جبکہ کسی چیز کا حرام ہونا (تحریم) ایک نیا شرعی حکم (حادث و طارئ) ہے جو بعد میں آتا ہے۔ لہٰذا جب ایک دلیل حلت بتائے اور دوسری حرمت، اور تاریخ معلوم نہ ہو کہ کون سی پہلے آئی، تو عقلی و اصولی طور پر اباحت پہلے سے موجود تھی اور حرمت بعد میں نازل ہو کر اس کی ناسخ بنی۔ چنانچہ تحریم کو ناسخ مان کر حلت کو منسوخ قرار دیا جاتا ہے۔</p>
-  </div>
-
-  <div class="term-box">
-    <div class="term-title">۵. ردِ ودیعت، ردِ مغصوب اور صومِ رمضان میں تعیین ساقط ہونے کا آسان فہم</div>
-    <p><strong>اصولی ضابطہ (قوۃ الثبات):</strong> جب کسی عمل کا وقت یا اس کی ذات اللہ تعالیٰ کی طرف سے خود بخود متعین ہو، تو بندے کی طرف سے نیت کی تعیین ساقط ہو جاتی ہے۔</p>
-    <p><strong>۱. ردِ ودیعت (امانت لوٹانا):</strong> آپ کے پاس کسی کی رکھی ہوئی امانت موجود ہے، وہ چیز بذاتِ خود متعین ہے۔ جب آپ وہ چیز مالک کو واپس کریں گے تو زبان یا دل میں یہ خاص نیت باندھنا شرط نہیں کہ "میں امانت کے طور پر دے رہا ہوں"۔ صرف چیز کا دے دینا ہی کافی ہے۔  
-    <br><strong>۲. ردِ مغصوب (غصب شدہ مال واپس کرنا):</strong> چھینا ہوا مال مالک کو واپس کرتے وقت نیت کی تعیین شرط نہیں؛ کیونکہ شے کی واپسی خود متعین ہے۔  
-    <br><strong>۳. صومِ رمضان (رمضان کا روزہ):</strong> اللہ تعالیٰ نے پورا ماہِ رمضان صرف اپنے فرض روزے کے لیے خاص اور متعین فرما دیا ہے۔ اگر کوئی انسان صبح صرف عام روزے کی نیت کر لے (مطلق نیت)، تو وہ خود بخود رمضان کا ہی فرض روزہ بنے گا، کوئی نفل یا قضا کا روزہ اس وقت میں واقع ہی نہیں ہو سکتا!  
-    <br><strong>نتیجہ:</strong> شارع نے ان تینوں نظائر میں "تعیین کے ساقط ہونے" کو بار بار معتبر مانا ہے، پس یہ وصف "قوی الثبات" ہے۔</p>
-  </div>
-
-  <div class="page-break"></div>
-
-  <!-- SECTION 6: PRESENTATION SLIDES DECK (ALL 12 SLIDES) -->
+  <!-- ==================== TAB 4: PRESENTATION SLIDES (TAB 4: SLIDES) ==================== -->
   <div class="section-title-banner" style="background: #0f172a;">
-    الجزء السادس: پریزنٹیشن سلائیڈز مع امثلہ فقہیہ (۱۲ درسی سلائیڈز کے مستطیل خانے)
+    الباب الثالث: پریزنٹیشن سلائیڈز مع امثلہ فقہیہ (۱۲ درسی سلائیڈز کے مستطیل خانے - Tab 4: Slides)
   </div>
 `;
 
@@ -771,10 +817,10 @@ async function generateTawzeehPDFs() {
         <div>${s.card2Items.map(i => `<div style="margin-bottom: 2px;">• ${i}</div>`).join('')}</div>
       </div>
     </div>
-    <div style="background: #f0fdf4; border: 1px solid #86efac; border-right: 3px solid #16a34a; padding: 6px 10px; border-radius: 5px; font-size: 8.8pt; margin-bottom: 5px;">
+    <div style="background: #f0fdf4; border: 1px solid #86efac; border-right: 3px solid #16a34a; padding: 5px 8px; border-radius: 4px; font-size: 8.5pt; margin-bottom: 4px;">
       <strong style="color: #166534;">المثال الفقهي التطبيقي:</strong> ${s.example}
     </div>
-    <div style="font-size: 8.3pt; color: #64748b;">
+    <div style="font-size: 8pt; color: #64748b;">
       💡 <strong>نکتۂ تدریس:</strong> ${s.note}
     </div>
   </div>
@@ -784,14 +830,61 @@ async function generateTawzeehPDFs() {
     const masterHTMLFinal = masterHTML + allSlidesCardsHTML + `
   <div class="page-break"></div>
 
-  <!-- SECTION 7: EXAM QUIZ & SELF-ASSESSMENT -->
+  <!-- ==================== TAB 5: INVALID PREPONDERANCES (TAB 5: FASIDA) ==================== -->
+  <div class="section-title-banner" style="background: #b45309;">
+    الباب الرابع: التراجيح الفاسدة الأربعة (چار باطل ترجیحات کا تفصیلی اصولی محاکمہ - Tab 5: Fasida)
+  </div>
+
+  <div class="fasida-card">
+    <div class="fasida-title">۱. باطل ترجیحِ اول: الترجيح بغلبة الأشباه (غلبۂ اشباہ اور عتقِ بھائی کا قضیہ)</div>
+    <p><strong>دعویٰ (امام شافعیؒ):</strong> خریدا ہوا بھائی آزاد نہیں ہوتا؛ کیونکہ وہ چچا کے بیٹے (ابن العم) کے مشابہ ۴ اوصاف میں ہے: (۱) زکوٰۃ کا حلال ہونا، (۲) اس کی بیوہ سے نکاح جائز ہونا، (۳) اس کے حق میں گواہی قبول ہونا، اور (۴) قتل پر قصاص واجب ہونا۔ جبکہ اپنے حقیقی بیٹے کے مشابہ صرف ۱ وصف میں ہے اور وہ "محرمیت" (حرمتِ نکاح) ہے۔ پس ۴ کا عدد ۱ پر راجح ہے۔</p>
+    <p><strong>ردِ صدر الشریعہؒ:</strong> «المشابهة في وصف واحد مؤثر أقوى من المشابهة في ألف وصف غير مؤثر»۔ مطلوبہ شرعی حکم "عتق" (آزادی) ہے، اور عتق میں محرمیت اثر انداز ہوتی ہے کیونکہ نبی کریم ﷺ کا ارشاد ہے: «من ملك ذا رحم محرم عتق عليه»۔ زکوٰۃ، شہادت یا قصاص کا عتق میں سرے سے کوئی تعلق ہی نہیں۔ لہٰذا مؤثر وصف کی ایک مشابہت ہزار غیر مؤثر مشابہتوں پر غالب رہتی ہے، اور بھائی فوراً آزاد ہو جائے گا!</p>
+  </div>
+
+  <div class="fasida-card">
+    <div class="fasida-title">۲. باطل ترجیحِ دوم: الترجيح بكون الوصف أعم (عمومِ علت کا فاسد دعویٰ)</div>
+    <p><strong>دعویٰ:</strong> سود کے باب میں علت "طعام" کو احناف کی علت "قدر مع الجنس" (کیل یا وزن) پر اس لیے راجح کہنا کہ لفظِ طعام قلیل اور کثیر دونوں دانوں کو شامل ہے، پس یہ علت زیادہ عام ہے۔</p>
+    <p><strong>ردِ صدر الشریعہؒ:</strong> ترجیح کا مدار اس پر ہے کہ علت میں شرعی حکم پیدا کرنے کی کتنی ذاتی تاثیر اور وزن ہے، نہ کہ اس کے لفظی دائرے کے پھیلاؤ پر۔ احناف کے ہاں کیل اور وزن میں تاثیر طعام سے بدرجہا قوی تر ہے، اس لیے محض عموم کی وجہ سے کوئی علت راجح نہیں بن سکتی۔</p>
+  </div>
+
+  <div class="fasida-card">
+    <div class="fasida-title">۳. باطل ترجیحِ سوم: الترجيح بقلة الأجزاء (قلتِ اجزاء کا فاسد دعویٰ)</div>
+    <p><strong>دعویٰ:</strong> یہ گمان کرنا کہ جس علت کا صرف ایک جزو ہو (مفرد وصف) وہ دو یا تین اجزاء والی علت سے زیادہ مضبوط اور راجح ہے کیونکہ اس میں اجزاء کم ہیں۔</p>
+    <p><strong>ردِ صدر الشریعہؒ:</strong> شریعتِ مطہرہ میں علت کا مدار اس کے شرعی اعتبار، ثبوت اور تاثیر پر ہے۔ اجزاء کی کمی یا زیادتی سے شریعت میں ترجیح کا کوئی تعلق نہیں۔</p>
+  </div>
+
+  <div class="fasida-card">
+    <div class="fasida-title">۴. باطل ترجیحِ چہارم: الترجيح بكثرة الأدلة (کثرتِ ادلہ عند الشیخین اور ہیئتِ اجتماعیہ کا راز)</div>
+    <p><strong>دعویٰ:</strong> جس حکم کی تین دلیلیں ہوں وہ اس حکم پر راجح ہے جس کی ایک یا دو دلیلیں ہوں، تاکہ کثرت سے غلبۂ ظن ملے۔</p>
+    <p><strong>ردِ شیخین (امام ابو حنیفہ و امام ابو یوسفؒ):</strong> ہر دلیل بذاتِ خود ایک مستقل حجت ہوتی ہے۔ محض گنتی کی کثرت سے کوئی دلیل راجح نہیں ہوتی، جیسا کہ ۲ عادل گواہوں کے مقابلے میں ۱۰ گواہ آ جائیں تو محض گنتی سے ۱۰ کو ترجیح نہیں ملتی۔</p>
+    <p><strong>صدر الشریعہؒ کا نایاب اور گہرا تفسیری فرق (ہیئتِ اجتماعیہ بمقابلہ مقابلہ انفرادی):</strong> کثرت صرف ان امور میں معتبر ہوتی ہے جہاں مل کر "ہیئتِ اجتماعیہ" (مجموعی طاقت) بنتی ہو؛ جیسے بھاری وزن اٹھانا (حمل الأثقال) کہ ۱۰ آدمی مل کر وہ وزن اٹھا لیتے ہیں جو اکیلا نہیں اٹھا سکتا؛ یا جنگی لشکر۔ لیکن جہاں مقابلہ انفرادی ہو اور ہیئتِ اجتماعیہ نہ بنتی ہو، وہاں کثرت کی کوئی وقعت نہیں ہوتی؛ جیسے کشتی (المصارعة): اگر اکھاڑے میں ۱۰ کمزور پہلوان ہوں تو ایک اکیلا طاقتور پہلوان ان سب پر بھاری رہتا ہے۔ شرعی دلائل کشتی کے پہلوانوں کی مانند ہیں! پس ایک قوی و باوزن دلیل گنتی کی دس کمزور دلیلوں پر غالب رہتی ہے۔</p>
+  </div>
+
+  <!-- Difficult Concepts Resolved -->
+  <div class="sub-section-title">حل المعضلات والمصطلحات الدقيقة</div>
+  <div class="term-box">
+    <div class="term-title">۱. «وصفِ تابع» بمقابلہ «دلیلِ ذاتی و اصل قوت»</div>
+    <div>اصل قوت میں ایک نص ہو اور دوسرا قیاس، نص قیاس کو سرے سے گرا دیتی ہے، اسے ترجیح نہیں کہتے۔ وصفِ تابع وہ خارجی صفت ہے جو دو مساوی دلیلوں میں سے ایک کو تقویت دے (جیسے راوی کی فقاہت یا شہرت)۔</div>
+  </div>
+  <div class="term-box">
+    <div class="term-title">۲. تحریم اباحت پر تاریخ کی لاعلمی کے وقت بھی کیوں ناسخ ہے؟</div>
+    <div>اصولی قاعدہ «المحرِّم ناسخ للمبيح عند الجهل بالتاريخ» ہے۔ کیونکہ کائنات میں اصل اباحت تھی، تحریم بعد میں آ کر ناسخ بنی۔</div>
+  </div>
+  <div class="term-box">
+    <div class="term-title">۳. ردِ ودیعت، ردِ مغصوب اور صومِ رمضان میں تعیین کا ساقط ہونا</div>
+    <div>جس شے کا وقت یا ذات اللہ کی طرف سے پہلے ہی متعین ہو، اس میں بندے کی طرف سے نیت کی تعیین ساقط ہوتی ہے۔ (قوة الثبات على الحكم)۔</div>
+  </div>
+
+  <div class="page-break"></div>
+
+  <!-- ==================== TAB 6: EXAM QUIZ (TAB 6: QUIZ) ==================== -->
   <div class="section-title-banner" style="background: #475569;">
-    الجزء السابع: امتحانی سوالات اور خود آزمائی مع اصولی تعلیل (Exam Quiz)
+    الباب الخامس: امتحانی سوالات اور خود آزمائی مع اصولی تعلیل (Tab 6: Exam Quiz)
   </div>
 
   <div class="quiz-q-box">
-    <div style="font-weight: bold; color: #0f172a; margin-bottom: 4px;">سوال ۱: معارضہ کن دو دلیلوں کے درمیان واقع ہو سکتا ہے؟</div>
-    <div style="font-size: 9pt; color: #334155;">
+    <div style="font-weight: bold; color: #0f172a; margin-bottom: 3px;">سوال ۱: معارضہ کن دو دلیلوں کے درمیان واقع ہو سکتا ہے؟</div>
+    <div style="font-size: 8.8pt; color: #334155;">
       الف) نص اور قیاس میں<br>
       <strong>ب) [صحیح] دو مساوی قوت کی دلیلوں میں، یا جہاں ایک وصفِ تابع سے قوی ہو۔</strong><br>
       ج) ہر دو دلیلوں میں چاہے ایک قطعی اور دوسری ظنی ہو<br>
@@ -800,8 +893,8 @@ async function generateTawzeehPDFs() {
   </div>
 
   <div class="quiz-q-box">
-    <div style="font-weight: bold; color: #0f172a; margin-bottom: 4px;">سوال ۲: نصوص میں تاریخ نامعلوم ہونے کی صورت میں حنفیہ کس نص کو ناسخ مانتے ہیں؟</div>
-    <div style="font-size: 9pt; color: #334155;">
+    <div style="font-weight: bold; color: #0f172a; margin-bottom: 3px;">سوال ۲: نصوص میں تاریخ نامعلوم ہونے کی صورت میں حنفیہ کس نص کو ناسخ مانتے ہیں؟</div>
+    <div style="font-size: 8.8pt; color: #334155;">
       الف) اباحت والی نص کو<br>
       <strong>ب) [صحیح] تحریم (حرام کرنے) والی نص کو («المحرِّم ناسخ للمبيح»)۔</strong><br>
       ج) دونوں نصوص سے بیک وقت عمل کیا جائے گا<br>
@@ -810,8 +903,8 @@ async function generateTawzeehPDFs() {
   </div>
 
   <div class="quiz-q-box">
-    <div style="font-weight: bold; color: #0f172a; margin-bottom: 4px;">سوال ۳: صومِ رمضان میں مطلق نیت کے کافی ہونے کی اصولی علت کیا ہے؟</div>
-    <div style="font-size: 9pt; color: #334155;">
+    <div style="font-weight: bold; color: #0f172a; margin-bottom: 3px;">سوال ۳: صومِ رمضان میں مطلق نیت کے کافی ہونے کی اصولی علت کیا ہے؟</div>
+    <div style="font-size: 8.8pt; color: #334155;">
       الف) قوة التأثير<br>
       <strong>ب) [صحیح] قوة الثبات على الحكم (شارع کی جانب سے ودیعت و غصب میں تعیین کا بار بار ساقط ہونا)۔</strong><br>
       ج) قلتِ اجزاء<br>
@@ -820,8 +913,8 @@ async function generateTawzeehPDFs() {
   </div>
 
   <div class="quiz-q-box">
-    <div style="font-weight: bold; color: #0f172a; margin-bottom: 4px;">سوال ۴: خریدا ہوا بھائی آزاد ہونے کے مسئلے میں امام شافعیؒ کی پیش کردہ ترجیح کو کیوں باطل قرار دیا گیا؟</div>
-    <div style="font-size: 9pt; color: #334155;">
+    <div style="font-weight: bold; color: #0f172a; margin-bottom: 3px;">سوال ۴: خریدا ہوا بھائی آزاد ہونے کے مسئلے میں امام شافعیؒ کی پیش کردہ ترجیح کو کیوں باطل قرار دیا گیا؟</div>
+    <div style="font-size: 8.8pt; color: #334155;">
       الف) کیونکہ شافعیہ کی حدیث ضعیف تھی<br>
       <strong>ب) [صحیح] کیونکہ وہ "غلبۂ اشباہ" پر مبنی تھی اور مطلوبہ حکم (عتق) میں صرف محرمیت مؤثر ہے، دیگر ۴ اوصاف غیر مؤثر تھے۔</strong><br>
       ج) کیونکہ احناف قیاس کو تسلیم نہیں کرتے<br>
@@ -830,15 +923,15 @@ async function generateTawzeehPDFs() {
   </div>
 
   <div class="quiz-q-box">
-    <div style="font-weight: bold; color: #0f172a; margin-bottom: 4px;">سوال ۵: دلائل کی کثرت کے متعلق صدر الشریعہؒ نے کشتی (المصارعة) اور وزن اٹھانے (حمل الأثقال) میں کیا فرق کیا؟</div>
-    <div style="font-size: 9pt; color: #334155;">
+    <div style="font-weight: bold; color: #0f172a; margin-bottom: 3px;">سوال ۵: دلائل کی کثرت کے متعلق صدر الشریعہؒ نے کشتی (المصارعة) اور وزن اٹھانے (حمل الأثقال) میں کیا فرق کیا؟</div>
+    <div style="font-size: 8.8pt; color: #334155;">
       <strong>[صحیح] وزن اٹھانے میں ہیئتِ اجتماعیہ بنتی ہے اس لیے کثرت معتبر ہے؛ جبکہ کشتی اور فقہی دلائل میں مقابلہ انفرادی ہوتا ہے اس لیے ۱ قوی دلیل ہزار کمزور دلیلوں پر غالب رہتی ہے۔</strong><br>
       <em>اصولی وجہ:</em> شرعی دلائل کشتی کے پہلوانوں کی طرح ہیں، ہر دلیل بذاتِ خود مؤثر ہوتی ہے۔
     </div>
   </div>
 
-  <div style="text-align: center; border-top: 1.5px solid #cbd5e1; padding-top: 10px; margin-top: 16px; font-size: 9pt; color: #64748b;">
-    تمت المذكرة الأصولية الكاملة بحمد الله تعالى • جامعہ ہذا کی نصابی تیاری کے لیے تیار کردہ مستند دستاویز
+  <div style="text-align: center; border-top: 1.5px solid #cbd5e1; padding-top: 8px; margin-top: 12px; font-size: 8.5pt; color: #64748b;">
+    تمت المذكرة الأصولية الكاملة بحمد الله تعالى • مطابق لترتيب المنهاج التعليمي
   </div>
 </body>
 </html>
@@ -849,19 +942,19 @@ async function generateTawzeehPDFs() {
       path: MASTER_PDF_PATH,
       format: 'A4',
       printBackground: true,
-      margin: { top: '16mm', bottom: '16mm', left: '14mm', right: '14mm' }
+      margin: { top: '15mm', bottom: '16mm', left: '14mm', right: '14mm' }
     });
     console.log('Tawzeeh Complete Master Topic PDF saved at:', MASTER_PDF_PATH);
     await pageMaster.close();
 
     /* ==============================================================
-       2. GENERATE LECTURE NOTES PDF (A4 Portrait - Matn + Translation + Notes)
+       2. GENERATE LECTURE NOTES PDF (A4 Portrait - Paragraph-by-Paragraph)
        ============================================================== */
     console.log('Generating Tawzeeh Lecture Notes PDF...');
     const pageNotes = await browser.newPage();
 
-    // Re-use the existing comprehensive lecture notes
-    const notesContentOnly = masterHTMLFinal.substring(0, masterHTMLFinal.indexOf('<!-- SECTION 6: PRESENTATION SLIDES DECK'));
+    // Notes PDF contains Page 1 (Intro/Pillars) + Tab 2 (Text/Translation) + Tab 3 (Methods with Examples) + Tab 5 (Fasida) + Difficult Concepts
+    const notesContentOnly = masterHTMLFinal.substring(0, masterHTMLFinal.indexOf('<!-- ==================== TAB 4: PRESENTATION SLIDES'));
     const notesHTMLClean = notesContentOnly + `
   <div style="text-align: center; border-top: 1.5px solid #cbd5e1; padding-top: 10px; margin-top: 16px; font-size: 9pt; color: #64748b;">
     تمت مذكرة المحاضرات والترجمة الكاملة بحمد الله تعالى
@@ -875,7 +968,7 @@ async function generateTawzeehPDFs() {
       path: NOTES_PDF_PATH,
       format: 'A4',
       printBackground: true,
-      margin: { top: '16mm', bottom: '16mm', left: '14mm', right: '14mm' }
+      margin: { top: '15mm', bottom: '16mm', left: '14mm', right: '14mm' }
     });
     console.log('Tawzeeh Lecture Notes PDF saved at:', NOTES_PDF_PATH);
     await pageNotes.close();
