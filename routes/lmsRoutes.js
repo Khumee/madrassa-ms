@@ -8,6 +8,10 @@ const MASTER_PDF = path.join(DOWNLOADS_DIR, 'Tawzeeh-Complete-Topic.pdf');
 const NOTES_PDF = path.join(DOWNLOADS_DIR, 'Tawzeeh-Lecture-Notes.pdf');
 const SLIDES_PDF = path.join(DOWNLOADS_DIR, 'Tawzeeh-Slides.pdf');
 
+const BURHAN_MASTER_PDF = path.join(DOWNLOADS_DIR, 'Burhan-Tatbiq-Complete-Topic.pdf');
+const BURHAN_NOTES_PDF = path.join(DOWNLOADS_DIR, 'Burhan-Tatbiq-Lecture-Notes.pdf');
+const BURHAN_SLIDES_PDF = path.join(DOWNLOADS_DIR, 'Burhan-Tatbiq-Slides.pdf');
+
 // Ensure downloads folder exists
 if (!fs.existsSync(DOWNLOADS_DIR)) {
   fs.mkdirSync(DOWNLOADS_DIR, { recursive: true });
@@ -57,6 +61,58 @@ router.get('/api/lms/tarjeeh/pdf/slides', async (req, res) => {
     res.sendFile(SLIDES_PDF);
   } catch (err) {
     console.error('Error serving Slides PDF:', err);
+    res.status(500).send('Error generating server-side PDF: ' + err.message);
+  }
+});
+
+// ==========================================
+// Burhan-Tatbiq (Sharh al-Aqaid) PDF Routes
+// ==========================================
+
+// Download Complete Master Topic PDF for Burhan-Tatbiq
+router.get('/api/lms/burhan-tatbiq/pdf/master', async (req, res) => {
+  try {
+    if (!fs.existsSync(BURHAN_MASTER_PDF) || req.query.regenerate === 'true') {
+      const { generateBurhanTatbiqPDFs } = require('../scripts/generate_burhan_tatbiq_pdfs');
+      await generateBurhanTatbiqPDFs();
+    }
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename="Burhan-Tatbiq-Complete-Topic.pdf"');
+    res.sendFile(BURHAN_MASTER_PDF);
+  } catch (err) {
+    console.error('Error serving Burhan Master PDF:', err);
+    res.status(500).send('Error generating server-side PDF: ' + err.message);
+  }
+});
+
+// Download Lecture Notes PDF for Burhan-Tatbiq
+router.get('/api/lms/burhan-tatbiq/pdf/notes', async (req, res) => {
+  try {
+    if (!fs.existsSync(BURHAN_NOTES_PDF) || req.query.regenerate === 'true') {
+      const { generateBurhanTatbiqPDFs } = require('../scripts/generate_burhan_tatbiq_pdfs');
+      await generateBurhanTatbiqPDFs();
+    }
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename="Burhan-Tatbiq-Lecture-Notes.pdf"');
+    res.sendFile(BURHAN_NOTES_PDF);
+  } catch (err) {
+    console.error('Error serving Burhan Notes PDF:', err);
+    res.status(500).send('Error generating server-side PDF: ' + err.message);
+  }
+});
+
+// Download Slides PDF for Burhan-Tatbiq
+router.get('/api/lms/burhan-tatbiq/pdf/slides', async (req, res) => {
+  try {
+    if (!fs.existsSync(BURHAN_SLIDES_PDF) || req.query.regenerate === 'true') {
+      const { generateBurhanTatbiqPDFs } = require('../scripts/generate_burhan_tatbiq_pdfs');
+      await generateBurhanTatbiqPDFs();
+    }
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename="Burhan-Tatbiq-Slides.pdf"');
+    res.sendFile(BURHAN_SLIDES_PDF);
+  } catch (err) {
+    console.error('Error serving Burhan Slides PDF:', err);
     res.status(500).send('Error generating server-side PDF: ' + err.message);
   }
 });
