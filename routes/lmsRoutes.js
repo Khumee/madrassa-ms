@@ -12,6 +12,10 @@ const BURHAN_MASTER_PDF = path.join(DOWNLOADS_DIR, 'Burhan-Tatbiq-Complete-Topic
 const BURHAN_NOTES_PDF = path.join(DOWNLOADS_DIR, 'Burhan-Tatbiq-Lecture-Notes.pdf');
 const BURHAN_SLIDES_PDF = path.join(DOWNLOADS_DIR, 'Burhan-Tatbiq-Slides.pdf');
 
+const AQEEDAH_MASTER_PDF = path.join(DOWNLOADS_DIR, 'Aqeedah-Complete-Topic.pdf');
+const AQEEDAH_NOTES_PDF = path.join(DOWNLOADS_DIR, 'Aqeedah-Lecture-Notes.pdf');
+const AQEEDAH_SLIDES_PDF = path.join(DOWNLOADS_DIR, 'Aqeedah-Slides.pdf');
+
 // Ensure downloads folder exists
 if (!fs.existsSync(DOWNLOADS_DIR)) {
   fs.mkdirSync(DOWNLOADS_DIR, { recursive: true });
@@ -113,6 +117,58 @@ router.get('/api/lms/burhan-tatbiq/pdf/slides', async (req, res) => {
     res.sendFile(BURHAN_SLIDES_PDF);
   } catch (err) {
     console.error('Error serving Burhan Slides PDF:', err);
+    res.status(500).send('Error generating server-side PDF: ' + err.message);
+  }
+});
+
+// ==========================================
+// Aqeedah (Session 3: Iman-e-Mufassal) PDF Routes
+// ==========================================
+
+// Download Complete Master Topic PDF for Aqeedah
+router.get('/api/lms/aqeedah/pdf/master', async (req, res) => {
+  try {
+    if (!fs.existsSync(AQEEDAH_MASTER_PDF) || req.query.regenerate === 'true') {
+      const { generateAqeedahPDFs } = require('../scripts/generate_aqeedah_pdfs');
+      await generateAqeedahPDFs();
+    }
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename="Aqeedah-Complete-Topic.pdf"');
+    res.sendFile(AQEEDAH_MASTER_PDF);
+  } catch (err) {
+    console.error('Error serving Aqeedah Master PDF:', err);
+    res.status(500).send('Error generating server-side PDF: ' + err.message);
+  }
+});
+
+// Download Lecture Notes PDF for Aqeedah
+router.get('/api/lms/aqeedah/pdf/notes', async (req, res) => {
+  try {
+    if (!fs.existsSync(AQEEDAH_NOTES_PDF) || req.query.regenerate === 'true') {
+      const { generateAqeedahPDFs } = require('../scripts/generate_aqeedah_pdfs');
+      await generateAqeedahPDFs();
+    }
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename="Aqeedah-Lecture-Notes.pdf"');
+    res.sendFile(AQEEDAH_NOTES_PDF);
+  } catch (err) {
+    console.error('Error serving Aqeedah Notes PDF:', err);
+    res.status(500).send('Error generating server-side PDF: ' + err.message);
+  }
+});
+
+// Download Slides PDF for Aqeedah
+router.get('/api/lms/aqeedah/pdf/slides', async (req, res) => {
+  try {
+    if (!fs.existsSync(AQEEDAH_SLIDES_PDF) || req.query.regenerate === 'true') {
+      const { generateAqeedahPDFs } = require('../scripts/generate_aqeedah_pdfs');
+      await generateAqeedahPDFs();
+    }
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename="Aqeedah-Slides.pdf"');
+    res.sendFile(AQEEDAH_SLIDES_PDF);
+  } catch (err) {
+    console.error('Error serving Aqeedah Slides PDF:', err);
     res.status(500).send('Error generating server-side PDF: ' + err.message);
   }
 });
