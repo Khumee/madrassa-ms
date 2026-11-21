@@ -1,11 +1,12 @@
 /**
  * حقيقة العقيدة والإيمان المفصل - LMS Interactive Script
- * Handles navigation, theme toggle, and quiz interactions
+ * Handles navigation, theme toggle, interactive 8-slide player, and quiz
  */
 
 document.addEventListener('DOMContentLoaded', () => {
   initNavigation();
   initThemeToggle();
+  initSlidesPlayer();
   initQuiz();
 });
 
@@ -73,7 +74,65 @@ function initThemeToggle() {
 }
 
 /* ========================================================
-   3. INTERACTIVE QUIZ
+   3. INTERACTIVE 8-SLIDE DECK PLAYER
+======================================================== */
+function initSlidesPlayer() {
+  const slides = document.querySelectorAll('.lecture-slide');
+  const prevBtn = document.getElementById('slidePrevBtn');
+  const nextBtn = document.getElementById('slideNextBtn');
+  const currentIndicator = document.getElementById('slideCurrentNum');
+  const totalIndicator = document.getElementById('slideTotalNum');
+  const progressBar = document.getElementById('slideProgressBar');
+
+  if (!slides.length) return;
+
+  let currentSlideIndex = 0;
+  const totalSlides = slides.length;
+  if (totalIndicator) totalIndicator.textContent = totalSlides;
+
+  function showSlide(index) {
+    if (index < 0) index = 0;
+    if (index >= totalSlides) index = totalSlides - 1;
+    currentSlideIndex = index;
+
+    slides.forEach((slide, idx) => {
+      slide.classList.toggle('active', idx === currentSlideIndex);
+    });
+
+    if (currentIndicator) currentIndicator.textContent = currentSlideIndex + 1;
+    if (progressBar) {
+      const pct = ((currentSlideIndex + 1) / totalSlides) * 100;
+      progressBar.style.width = `${pct}%`;
+    }
+
+    if (prevBtn) prevBtn.disabled = currentSlideIndex === 0;
+    if (nextBtn) nextBtn.disabled = currentSlideIndex === totalSlides - 1;
+  }
+
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => showSlide(currentSlideIndex - 1));
+  }
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => showSlide(currentSlideIndex + 1));
+  }
+
+  // Keyboard navigation when slides tab is active
+  document.addEventListener('keydown', (e) => {
+    const slidesTab = document.getElementById('tab-slides');
+    if (slidesTab && slidesTab.classList.contains('active')) {
+      if (e.key === 'ArrowLeft' || e.key === 'PageDown') {
+        showSlide(currentSlideIndex + 1); // Next in RTL
+      } else if (e.key === 'ArrowRight' || e.key === 'PageUp') {
+        showSlide(currentSlideIndex - 1); // Prev in RTL
+      }
+    }
+  });
+
+  showSlide(0);
+}
+
+/* ========================================================
+   4. INTERACTIVE QUIZ
 ======================================================== */
 function initQuiz() {
   const container = document.getElementById('quizCardsContainer');
@@ -96,6 +155,17 @@ function initQuiz() {
     },
     {
       id: 2,
+      q: 'اگر دنیا میں انبیاء نہ آتے تو انسانیت کی حالت کیا ہوتی؟',
+      options: [
+        { text: 'طاقتور کی حکومت (جنگل کا قانون) ہوتی، اخلاقی انارکی ہوتی اور انسان پتھروں و مخلوقات کو پوجتا رہتا۔', correct: true },
+        { text: 'انسان خود بخود تمام حلال و حرام جان لیتا۔', correct: false },
+        { text: 'سائنس انسان کو زندگی کا حقیقی مقصد اور موت کے بعد کا حال بتا دیتی۔', correct: false },
+        { text: 'دنیا بغیر کسی قانون کے بالکل پرامن رہتی۔', correct: false }
+      ],
+      explanation: 'بالکل درست! عقل اکیلی سائنس کے آلات تو بنا سکتی ہے، مگر خیر و شر، عدلِ مطلق اور روح کے مقصد کا حتمی پیمانہ صرف وحیِ نبوت سے ملتا ہے۔'
+    },
+    {
+      id: 3,
       q: 'توحید فی الصفات میں اللہ تعالیٰ اور مخلوق کی صفات کے درمیان بنیادی کلامی فرق کیا ہے؟',
       options: [
         { text: 'اللہ کی صفات قدیم، ذاتی اور مطلق ہیں؛ جبکہ مخلوق کی صفات حادث، عطائی اور محدود ہیں۔', correct: true },
@@ -103,40 +173,29 @@ function initQuiz() {
         { text: 'مخلوق کی صفات قدیم ہیں اور اللہ کی صفات حادث ہیں۔', correct: false },
         { text: 'دونوں صفات مطلق اور غیر محدود ہیں۔', correct: false }
       ],
-      explanation: 'بالکل درست! یہ تین کلیدی الفاظ (قدیم، ذاتی، مطلق بمقابلہ حادث، عطائی، محدود) صفات میں شرک سے بچاؤ کی اساس ہیں۔'
-    },
-    {
-      id: 3,
-      q: 'ادارۂ رسالت کے تین بنیادی باہمی وابستہ اجزاء کون سے ہیں؟',
-      options: [
-        { text: 'فرشتہ (پیغام لانے والا)، کتاب (ہدایت کا متن)، رسول (زندہ عملی نمونہ)۔', correct: true },
-        { text: 'بادشاہ، وزیر اور رعایا۔', correct: false },
-        { text: 'قیاس، اجماع اور فتویٰ۔', correct: false },
-        { text: 'فلسفہ، تاریخ اور منطق۔', correct: false }
-      ],
-      explanation: 'درست جواب! رسالت ایک مربوط ادارہ ہے: فرشتہ وحی لاتا ہے، کتاب ہدایت کا مستند متن فراہم کرتی ہے، اور رسول اس کا زندہ عملی نمونہ بن کر سکھاتے ہیں۔'
+      explanation: 'درست جواب! یہ تین کلیدی الفاظ (قدیم، ذاتی، مطلق بمقابلہ حادث، عطائی، محدود) صفات میں شرک سے بچاؤ کی اساس ہیں۔'
     },
     {
       id: 4,
-      q: 'تقدیر اور انسانی اختیار کے باب میں اہلِ سنت کا برحق معتدل مؤقف کیا ہے؟',
+      q: 'تقدیر اور انسانی اختیار کے باب میں "بھوک اور روٹی" کی مثال کیا واضح کرتی ہے؟',
       options: [
-        { text: 'انسان نہ جبرِ محض میں ہے اور نہ اختیارِ مطلق میں؛ بلکہ اسے محدود اختیار و ارادہ حاصل ہے جس پر وہ مکلف ہے۔', correct: true },
-        { text: 'انسان مجبورِ محض (پتھر یا مشین کی طرح) ہے اور اس کا کوئی اختیار نہیں۔', correct: false },
-        { text: 'انسان خود ہر چیز کا خود مختار خالق ہے اور اللہ کی مشیئت کا کوئی عمل دخل نہیں۔', correct: false },
-        { text: 'تقدیر کا کوئی وجود نہیں ہے۔', correct: false }
+        { text: 'تقدیر ہاتھ پر ہاتھ رکھ کر بیٹھنے کا نام نہیں، انسان کو محنت اور تدبیر کرنی پڑتی ہے پھر اللہ برکت دیتا ہے۔', correct: true },
+        { text: 'انسان کو روٹی کھانے کی کوشش نہیں کرنی چاہیے کیونکہ کھانا خود پیٹ میں آ جائے گا۔', correct: false },
+        { text: 'انسان بالکل مجبورِ محض ہے اور اس کا کوئی ارادہ نہیں۔', correct: false },
+        { text: 'تقدیر کا کوئی وجود نہیں، انسان ہی ہر چیز کا اکیلا خالق ہے۔', correct: false }
       ],
-      explanation: 'شاباش! انسان کے پاس محدود ارادہ اور قدم ہے جس کا وہ خود ذمہ دار ہے، جبکہ خلق اور تکمیل اللہ تعالیٰ کی قدرت و مشیئت سے ہے۔'
+      explanation: 'شاباش! جیسے نوالہ منہ میں ڈالنے سے پیٹ بھرتا ہے، ویسے ہی اللہ نے محنت، دعا اور تدبیر کو کامیابی کا ذریعہ مقدر فرمایا ہے۔'
     },
     {
       id: 5,
-      q: 'طاعونِ عمواس کے موقع پر جب حضرت عمرؓ نے شام سے واپسی کا فیصلہ کیا تو حضرت ابو عبیدہؓ کے سوال پر انہوں نے کیا تاریخی جواب دیا؟',
+      q: 'طاعونِ عمواس کے موقع پر حضرت عمر فاروقؓ کا تاریخی فرمودہ کیا تھا؟',
       options: [
-        { text: '«نَفِرُّ مِنْ قَدَرِ اللّٰهِ إِلَى قَدَرِ اللّٰهِ» (ہم اللہ کی تقدیر سے اللہ ہی کی تقدیر کی طرف جا رہے ہیں)۔', correct: true },
+        { text: '«نَفِرُّ مِنْ قَدَرِ اللّٰهِ إِلَى قَدَرِ اللّٰهِ» (ہم اللہ کی ایک تقدیر سے اللہ ہی کی دوسری تقدیر کی طرف جا رہے ہیں)۔', correct: true },
         { text: 'ہم موت سے ڈر کر بھاگ رہے ہیں۔', correct: false },
-        { text: 'ہمیں تقدیر پر بھروسہ نہیں ہے۔', correct: false },
-        { text: 'بیماری انسان کو خود بخود لگ جاتی ہے۔', correct: false }
+        { text: 'بیماری انسان کو خود بخود لگ جاتی ہے۔', correct: false },
+        { text: 'تدبیر کرنا شرک ہے۔', correct: false }
       ],
-      explanation: 'بالکل صحیح! حضرت عمر فاروقؓ کا یہ فرمودہ واضح کرتا ہے کہ تقدیر پر ایمان تدبیر، احتیاط اور عقل سے کام لینے سے نہیں روکتا۔'
+      explanation: 'بالکل صحیح! حضرت عمر فاروقؓ کا یہ فرمودہ واضح کرتا ہے کہ تقدیر پر ایمان تدبیر، احتیاط اور علم و عقل سے کام لینے سے نہیں روکتا۔'
     }
   ];
 
@@ -181,7 +240,6 @@ function initQuiz() {
         const question = questions.find(q => q.id === qid);
         const selectedOpt = question.options[oidx];
 
-        // Highlight
         const parent = el.closest('.options-group');
         parent.querySelectorAll('.quiz-option').forEach(item => {
           item.style.borderColor = 'var(--border-color)';
@@ -215,6 +273,11 @@ function initQuiz() {
   function updateScore() {
     const correctCount = Object.values(userAnswers).filter(Boolean).length;
     scoreDisplay.textContent = `اسکور: ${correctCount} / ${questions.length}`;
+
+    const ctaBox = document.getElementById('quizCtaBox');
+    if (ctaBox && Object.keys(userAnswers).length === questions.length) {
+      ctaBox.style.display = 'block';
+    }
   }
 
   if (resetBtn) {
@@ -222,6 +285,8 @@ function initQuiz() {
       userAnswers = {};
       renderQuiz();
       scoreDisplay.textContent = `اسکور: ۰ / ${questions.length}`;
+      const ctaBox = document.getElementById('quizCtaBox');
+      if (ctaBox) ctaBox.style.display = 'none';
     });
   }
 

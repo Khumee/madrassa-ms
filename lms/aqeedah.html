@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="عقیدہ اور ایمانیات: ایمانِ مفصل کی بنیاد پر تمام ایمانیات (توحید، رسالت، آخرت، تقدیر) کا مفصل تعارف، آیات و احادیث اور انفرادی و معاشرتی زندگی پر اثرات">
-  <title>العقائد الإسلامية | حقيقة العقيدة والإيمان المفصل وأثرها في الحياة</title>
+  <meta name="description" content="عقیدہ اور ایمانیات: ۱ سالہ جامع اسلامی کورس کا تعارفی پیش منظر، ایمانِ مفصل کی بنیاد پر تمام ایمانیات (توحید، رسالت، آخرت، تقدیر) کا روزمرہ زندگی سے جڑا فہم، تصویری سلائیڈز اور نوجوان ذہن کے ۷ سوالات">
+  <title>العقائد الإسلامية | حقیقتِ عقیدہ، ایمانِ مفصل اور ۱ سالہ کورس پریویو</title>
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,6 +12,391 @@
   <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Noto+Nastaliq+Urdu:wght@400;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="style.css">
+
+  <style>
+    /* Custom In-page Slide Deck & Enhanced Components */
+    .slide-deck-wrapper {
+      background: var(--bg-card, #131d2e);
+      border: 1.5px solid var(--border-color, #24354d);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 1.2rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .slide-controls-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1.5px solid var(--border-color, #24354d);
+      padding-bottom: 0.9rem;
+      margin-bottom: 1.2rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .slide-progress-wrap {
+      width: 100%;
+      height: 6px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+    .slide-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #d4af37, #f59e0b);
+      width: 12.5%;
+      transition: width 0.3s ease;
+    }
+    .slide-nav-btns {
+      display: flex;
+      gap: 0.6rem;
+      align-items: center;
+    }
+    .slide-nav-btn {
+      background: #1e293b;
+      color: #f1f5f9;
+      border: 1px solid #334155;
+      padding: 0.45rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .slide-nav-btn:hover:not(:disabled) {
+      background: #b48c28;
+      border-color: #d4af37;
+      color: #000;
+    }
+    .slide-nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .slide-counter-badge {
+      font-size: 0.9rem;
+      color: #e2e8f0;
+      background: rgba(212, 175, 55, 0.15);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-weight: bold;
+    }
+
+    /* Individual Slide */
+    .lecture-slide {
+      display: none;
+      animation: fadeInSlide 0.3s ease-in-out;
+    }
+    .lecture-slide.active {
+      display: block;
+    }
+    @keyframes fadeInSlide {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .slide-header {
+      border-bottom: 1px dashed var(--border-color, #334155);
+      padding-bottom: 0.8rem;
+      margin-bottom: 1.2rem;
+    }
+    .slide-badge-category {
+      display: inline-block;
+      background: rgba(212, 175, 55, 0.2);
+      color: #fcd34d;
+      font-size: 0.82rem;
+      padding: 0.2rem 0.75rem;
+      border-radius: 12px;
+      font-weight: bold;
+      margin-bottom: 0.4rem;
+    }
+    .slide-header h3 {
+      font-family: 'Amiri', serif;
+      font-size: 1.65rem;
+      color: #fcd34d;
+      margin: 0.2rem 0 0.3rem 0;
+    }
+    .slide-header p {
+      font-size: 0.95rem;
+      color: #94a3b8;
+      margin: 0;
+    }
+
+    /* 2-Column Split: Content Bullets & Pictorial Visual Metaphor */
+    .slide-split-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 1.5rem;
+      align-items: stretch;
+    }
+    @media (max-width: 860px) {
+      .slide-split-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .slide-bullets-col {
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+    }
+    .slide-bullet-item {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-right: 4px solid #b48c28;
+      border-radius: 8px;
+      padding: 0.9rem 1.1rem;
+    }
+    .slide-bullet-item h4 {
+      font-size: 1.05rem;
+      color: #f8fafc;
+      margin: 0 0 0.4rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .slide-bullet-item p {
+      font-size: 0.92rem;
+      color: #cbd5e1;
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    .slide-visual-col {
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.85), rgba(30, 41, 59, 0.7));
+      border: 1.5px solid rgba(212, 175, 55, 0.35);
+      border-radius: 10px;
+      padding: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
+    }
+    .visual-icon-banner {
+      font-size: 2.8rem;
+      margin-bottom: 0.6rem;
+    }
+    .visual-title {
+      font-weight: bold;
+      font-size: 1.1rem;
+      color: #fcd34d;
+      margin-bottom: 0.5rem;
+    }
+    .visual-comparison-box {
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 8px;
+      padding: 0.8rem;
+      margin-top: 0.8rem;
+      text-align: right;
+      font-size: 0.88rem;
+      line-height: 1.7;
+      color: #e2e8f0;
+      border: 1px dashed rgba(255, 255, 255, 0.15);
+    }
+
+    /* Real-world Youth FAQ Cards */
+    .faq-youth-card {
+      background: var(--bg-card, #131d2e);
+      border: 1.5px solid var(--border-color, #24354d);
+      border-radius: 10px;
+      padding: 1.3rem;
+      margin-bottom: 1.2rem;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .faq-youth-card:hover {
+      transform: translateY(-2px);
+      border-color: #d4af37;
+    }
+    .faq-q-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.8rem;
+    }
+    .faq-q-num {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(212, 175, 55, 0.2);
+      color: #fcd34d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1.05rem;
+      flex-shrink: 0;
+    }
+    .faq-q-title {
+      font-size: 1.2rem;
+      color: #f8fafc;
+      font-family: 'Amiri', serif;
+      margin: 0;
+    }
+    .faq-metaphor-tag {
+      background: rgba(59, 130, 246, 0.15);
+      color: #93c5fd;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: bold;
+      display: inline-block;
+      margin-bottom: 0.5rem;
+    }
+    .faq-body-text {
+      font-size: 0.95rem;
+      line-height: 1.8;
+      color: #cbd5e1;
+    }
+    .faq-takeaway {
+      margin-top: 0.8rem;
+      padding: 0.6rem 0.9rem;
+      background: rgba(16, 185, 129, 0.1);
+      border-right: 3px solid #10b981;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      color: #6ee7b7;
+    }
+
+    /* Course Roadmap Styles */
+    .quarter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.2rem;
+      margin-top: 1.5rem;
+    }
+    .quarter-card {
+      background: var(--bg-card, #131d2e);
+      border: 1.5px solid var(--border-color, #24354d);
+      border-radius: 10px;
+      padding: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .quarter-card.highlight {
+      border-color: #d4af37;
+      background: linear-gradient(160deg, rgba(212, 175, 55, 0.08), var(--bg-card, #131d2e));
+    }
+    .quarter-badge {
+      align-self: flex-start;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      margin-bottom: 0.6rem;
+    }
+    .quarter-card h4 {
+      font-size: 1.15rem;
+      color: #f8fafc;
+      margin: 0 0 0.5rem 0;
+      font-family: 'Amiri', serif;
+    }
+    .quarter-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      font-size: 0.9rem;
+      color: #94a3b8;
+      line-height: 1.7;
+    }
+    .quarter-list li {
+      margin-bottom: 0.4rem;
+      position: relative;
+      padding-right: 1.2rem;
+    }
+    .quarter-list li::before {
+      content: '✔';
+      position: absolute;
+      right: 0;
+      color: #d4af37;
+      font-size: 0.8rem;
+    }
+
+    /* Suffering & Hope Section */
+    .suffering-banner {
+      background: linear-gradient(135deg, rgba(88, 28, 135, 0.25), rgba(15, 23, 42, 0.9));
+      border: 1.5px solid rgba(168, 85, 247, 0.4);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .hadith-quote {
+      font-family: 'Amiri', serif;
+      font-size: 1.35rem;
+      color: #fcd34d;
+      line-height: 1.9;
+      text-align: center;
+      margin: 0.8rem 0;
+    }
+
+    /* Course Registration CTA Box */
+    .course-cta-box {
+      background: linear-gradient(135deg, #78350f 0%, #1e293b 100%);
+      border: 2px solid #f59e0b;
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      margin-top: 2rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+    .course-cta-box h3 {
+      font-family: 'Amiri', serif;
+      font-size: 1.9rem;
+      color: #fef08a;
+      margin: 0 0 0.6rem 0;
+    }
+    .course-cta-box p {
+      font-size: 1.05rem;
+      color: #f1f5f9;
+      max-width: 700px;
+      margin: 0 auto 1.4rem auto;
+      line-height: 1.8;
+    }
+    .cta-action-group {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .btn-apply-now {
+      background: #f59e0b;
+      color: #0f172a;
+      font-weight: bold;
+      font-size: 1.05rem;
+      padding: 0.8rem 1.8rem;
+      border-radius: 8px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+    .btn-apply-now:hover {
+      background: #d97706;
+      transform: scale(1.03);
+    }
+    .btn-whatsapp-advisor {
+      background: #25d366;
+      color: #fff;
+      font-weight: bold;
+      font-size: 1.05rem;
+      padding: 0.8rem 1.8rem;
+      border-radius: 8px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+    .btn-whatsapp-advisor:hover {
+      background: #1da851;
+      transform: scale(1.03);
+    }
+  </style>
 </head>
 <body class="theme-dars">
 
@@ -44,9 +429,9 @@
   <header class="app-header">
     <div class="header-container">
       <div class="brand">
-        <div class="badge-islamic">درسِ نظامی • العقائد الإسلامية • نشست ۳</div>
+        <div class="badge-islamic">۱ سالہ آن لائن اسلامی کورس • پریویو نشست • علم العقائد</div>
         <h1 class="main-title">حقیقتِ عقیدہ اور ایمانِ مفصل</h1>
-        <p class="subtitle">ساری ایمانیات کا جامع تعارف، ارکانِ ستہ (توحید، رسالت، آخرت، تقدیر) اور ان کا انفرادی و اجتماعی زندگی پر اثر</p>
+        <p class="subtitle">ایمانِ مفصل کی فکری بنیاد، ارکانِ ستہ (توحید، رسالت، آخرت، تقدیر) اور جدید زندگی و دکھوں کے مقابلے میں عقیدے کی طاقت</p>
       </div>
 
       <div class="header-actions">
@@ -64,7 +449,7 @@
           <span class="icon">📜</span>
           <span class="btn-text">درسی نوٹس (PDF)</span>
         </a>
-        <a href="downloads/Aqeedah-Slides.pdf" class="action-btn download-btn secondary" download="Aqeedah-Slides.pdf" title="پریزنٹیشن سلائیڈز پی ڈی ایف ڈاؤنلوڈ کریں">
+        <a href="downloads/Aqeedah-Slides.pdf" class="action-btn download-btn secondary" download="Aqeedah-Slides.pdf" title="۸ تصویری سلائیڈز پی ڈی ایف ڈاؤنلوڈ کریں">
           <span class="icon">📽️</span>
           <span class="btn-text">سلائیڈز (PDF)</span>
         </a>
@@ -75,31 +460,31 @@
       </div>
     </div>
 
-    <!-- Navigation Tabs -->
+    <!-- Navigation Tabs (7 Structured Tabs) -->
     <nav class="nav-tabs" id="mainNav">
       <button class="nav-btn active" data-tab="tab-overview">
-        <span class="tab-icon">📖</span>
-        <span>تعارف و ایمانِ مفصل (B1)</span>
+        <span class="tab-icon">🎓</span>
+        <span>تعارف و کورس پریویو</span>
       </button>
-      <button class="nav-btn" data-tab="tab-tawheed">
-        <span class="tab-icon">☝️</span>
-        <span>توحید و ابطالِ شرک (B2)</span>
+      <button class="nav-btn" data-tab="tab-slides">
+        <span class="tab-icon">🎞️</span>
+        <span>تصویری درسی سلائیڈز (۸)</span>
       </button>
-      <button class="nav-btn" data-tab="tab-risalat">
+      <button class="nav-btn" data-tab="tab-faq">
+        <span class="tab-icon">💡</span>
+        <span>نوجوان ذہن کے ۷ سوالات</span>
+      </button>
+      <button class="nav-btn" data-tab="tab-text">
         <span class="tab-icon">📜</span>
-        <span>ادارۂ رسالت و ختمِ نبوت (B3)</span>
+        <span>درسی متن و نصاب (صفحات ۱۲-۱۷)</span>
       </button>
-      <button class="nav-btn" data-tab="tab-akhirah">
-        <span class="tab-icon">⚖️</span>
-        <span>عالمِ آخرت و نظامِ جزا (B4)</span>
+      <button class="nav-btn" data-tab="tab-suffering">
+        <span class="tab-icon">🛡️</span>
+        <span>دکھ اور آزمائش کا مقابلہ</span>
       </button>
-      <button class="nav-btn" data-tab="tab-taqdeer">
-        <span class="tab-icon">🌐</span>
-        <span>تقدیر و انسانی اختیار (B5)</span>
-      </button>
-      <button class="nav-btn highlight-tab" data-tab="tab-summary">
-        <span class="tab-icon">💎</span>
-        <span>جامع خلاصۂ کلام</span>
+      <button class="nav-btn highlight-tab" data-tab="tab-roadmap">
+        <span class="tab-icon">🗺️</span>
+        <span>۱ سالہ روڈ میپ و داخلہ</span>
       </button>
       <button class="nav-btn" data-tab="tab-quiz">
         <span class="tab-icon">📝</span>
@@ -111,41 +496,52 @@
   <!-- Main Content Area -->
   <main class="main-container">
 
-    <!-- ==================== TAB 1: OVERVIEW & IMAN-E-MUFASSAL (B1) ==================== -->
+    <!-- ==================== TAB 1: OVERVIEW & 1-YEAR COURSE PREVIEW ==================== -->
     <section id="tab-overview" class="tab-pane active">
       <div class="hero-card">
         <div class="hero-content">
-          <span class="hero-tag">صفحات ۱۲ تا ۱۷ کا خلاصہ و نصاب</span>
-          <h2>ایمانِ مفصل: ساری ایمانیات کا جامع سرچشمہ</h2>
+          <span class="hero-tag">۱ سالہ اسلامی فکری کورس کا ماڈل سبق</span>
+          <h2>کیوں عمل سے پہلے عقیدہ ضروری ہے؟</h2>
           <p class="hero-desc">
-            یہ سبق اسلامی ایمانیات کا اصل ستون ہے۔ عقیدہ محض زبانی اقرار یا ذہنی معلومات کا نام نہیں، بلکہ دل کی وہ پختہ گرہ ہے جو انسان کے فکر، عمل اور اخلاق کو اپنی گرفت میں لے لیتی ہے۔ ایمانِ مفصل دین کے تمام اساسی ارکان کو ایک لڑی میں پرو دیتا ہے جس پر پورے دین کی عمارت استوار ہوتی ہے۔
+            رسول اللہ ﷺ نے مکہ کے مشرک معاشرے میں پہلے ۱۳ سال نہ نماز کی جزئیات فرض کیں، نہ روزے اور زکوٰۃ کے احکام، بلکہ پہلے دلوں میں خدا، رسول اور آخرت کے زندہ یقین کی بنیاد رکھی۔ اگر گاڑی کا انجن نہ ہو تو شاندار باڈی اور بمپر اسٹیکر کسی کام کے نہیں۔ عقیدہ عمل کی روح اور انجن ہے!
           </p>
         </div>
         <div class="hero-stats">
-          <div class="stat-box clickable" data-goto="tab-tawheed" title="توحید پر جائیں">
-            <span class="stat-num">۱</span>
-            <span class="stat-label">توحیدِ خالص</span>
-            <span class="stat-hint">پڑھیں ☝️</span>
+          <div class="stat-box clickable" data-goto="tab-slides" title="۸ درسی سلائیڈز دیکھیں">
+            <span class="stat-num">۸</span>
+            <span class="stat-label">تصویری سلائیڈز</span>
+            <span class="stat-hint">سلائیڈ شو 🎞️</span>
           </div>
-          <div class="stat-box clickable" data-goto="tab-risalat" title="رسالت پر جائیں">
-            <span class="stat-num">۳</span>
-            <span class="stat-label">ادارۂ رسالت</span>
-            <span class="stat-hint">مطالعہ کریں 📜</span>
+          <div class="stat-box clickable" data-goto="tab-faq" title="۷ بنیادی سوالات دیکھیں">
+            <span class="stat-num">۷</span>
+            <span class="stat-label">روزمرہ سوالات</span>
+            <span class="stat-hint">فکری حل 💡</span>
           </div>
-          <div class="stat-box clickable" data-goto="tab-akhirah" title="آخرت پر جائیں">
-            <span class="stat-num">۹</span>
-            <span class="stat-label">مراحلِ آخرت</span>
-            <span class="stat-hint">دیکھیں ⚖️</span>
+          <div class="stat-box clickable" data-goto="tab-suffering" title="دکھوں کا مقابلہ">
+            <span class="stat-num">🛡️</span>
+            <span class="stat-label">ذہنی سکون</span>
+            <span class="stat-hint">تقدیر کا فہم</span>
           </div>
-          <div class="stat-box clickable" data-goto="tab-taqdeer" title="تقدیر پر جائیں">
+          <div class="stat-box clickable" data-goto="tab-roadmap" title="داخلہ اور سلیبس">
             <span class="stat-num">۴</span>
-            <span class="stat-label">مراتبِ تقدیر</span>
-            <span class="stat-hint">جانیں 🌐</span>
+            <span class="stat-label">سہ ماہی مراحل</span>
+            <span class="stat-hint">۱ سالہ روڈ میپ 🗺️</span>
           </div>
         </div>
       </div>
 
-      <!-- Iman-e-Mufassal Matn Banner -->
+      <!-- Core Question Banner: A World Without Prophets -->
+      <div class="matn-box mt-4" style="background: linear-gradient(145deg, #1e293b, #0f172a); border-right: 5px solid #f59e0b;">
+        <span class="matn-tag" style="background: #f59e0b; color: #000;">ایک فکری چیلنج (Thought Experiment)</span>
+        <h3 style="color: #fef08a; font-family: 'Amiri', serif; font-size: 1.4rem; margin: 0.6rem 0;">
+          تصور کریں: اگر اللہ تعالیٰ دنیا میں انبیاء نہ بھیجتا تو انسانیت کی حالت کیا ہوتی؟
+        </h3>
+        <p style="color: #cbd5e1; font-size: 1rem; line-height: 1.8; margin: 0;">
+          اگر انبیاء نہ ہوتے تو عقل اکیلی بھٹکتی رہتی۔ انسان چاند، سورج، سانپ یا انسانوں ہی کو خدا بنا لیتا؛ طاقتور کا قانون راج کرتا، اخلاقیات محض کمزوروں کا وہم قرار پاتیں، اور موت کے بعد کے لامتناہی سفر کا کوئی نقشہ نہ ہوتا۔ انبیاء علیہم السلام نے آ کر نہ صرف خدائے برحق کا تعارف کرایا بلکہ اخلاقیات کا ابدی معیار اور مقصدِ حیات عطا فرمایا۔
+        </p>
+      </div>
+
+      <!-- Matn of Iman-e-Mufassal -->
       <div class="matn-box mt-4">
         <span class="matn-tag">متنِ ایمانِ مفصل (اساسی عقیدہ)</span>
         <p class="matn-text" style="font-size: 1.55rem; color: #b45309; line-height: 2;">
@@ -156,528 +552,727 @@
         </p>
       </div>
 
-      <!-- Core Teaching Points (تدریسی نکات) -->
+      <!-- 3 Real World Pillars -->
       <div class="summary-cards-header mt-4">
         <div>
-          <span class="badge-islamic">علمی و اصطلاحی تحقیق</span>
-          <h3 class="section-title">عقیدہ کی لغوی و اصطلاحی تعریف اور ارکانِ ستہ</h3>
-          <p class="section-desc">مستند کلامی ماخذات سے ماخوذ بنیادی تدریسی نکات</p>
+          <span class="badge-islamic">نئی نسل کے فکری ارتقاء کے لیے</span>
+          <h3 class="section-title">اس کورس میں ہم عقیدہ کیسے پڑھاتے ہیں؟</h3>
+          <p class="section-desc">رٹنے اور بوجھل فلسفے کے بجائے زندہ مشاہدے اور روزمرہ زندگی کے ربط سے</p>
         </div>
       </div>
 
       <div class="grid-3-col mt-2">
-        <!-- Point 1 -->
         <div class="card feature-card">
           <div class="card-top-badge">
-            <span class="card-icon">🪢</span>
-            <span class="badge-mini">لغوی مفہوم</span>
+            <span class="card-icon">🚗</span>
+            <span class="badge-mini">پہلی بصیرت</span>
           </div>
-          <h3>۱. لغوی معنی: پکی گرہ</h3>
+          <h3>انجن بمقابلہ باڈی</h3>
           <p class="card-desc">
-            عقیدہ <strong>"عقد"</strong> سے ہے، جس میں شدت، قوت، ثبات اور وثوق کا مفہوم پایا جاتا ہے؛ اسی سے ہے <em>عقدِ بیع، عقدِ نکاح اور عقدِ بیعت</em>۔ یعنی ایسا پختہ یقین جس میں کوئی ڈھیل یا تزلزل نہ ہو۔
+            نماز، روزہ، حج وغیرہ گاڑی کی رفتار اور خوبصورتی ہیں؛ مگر جب تک عقیدے کا طاقتور انجن اور توحید کا ایندھن نہ ہو، گاڑی ایک انچ بھی آگے نہیں چل سکتی۔
           </p>
         </div>
-
-        <!-- Point 2 -->
-        <div class="card feature-card">
-          <div class="card-top-badge">
-            <span class="card-icon">💡</span>
-            <span class="badge-mini">اصطلاحی تعریف</span>
-          </div>
-          <h3>۲. اصطلاحی تعریف</h3>
-          <p class="card-desc">
-            وہ واضح حقائق جنہیں عقل قبول کرے، اور جب وہ دل میں راسخ ہو کر <strong>"انسان کے فکر و عمل کی قوتوں کو اپنی مضبوط گرفت میں لے لیں تو یہی حقائق عقیدہ بن جاتے ہیں"</strong>؛ کسی بات کو عقیدہ بنا لینا ہی اس پر ایمان لانا ہے۔
-          </p>
-        </div>
-
-        <!-- Point 3 -->
-        <div class="card feature-card">
-          <div class="card-top-badge">
-            <span class="card-icon">💎</span>
-            <span class="badge-mini">خصوصیات</span>
-          </div>
-          <h3>۳. سچے عقیدے کی خصوصیات</h3>
-          <p class="card-desc">
-            قبولِ مطلق، یقینِ راسخ، شک و تردد سے بالاتری، موافق کو اختیار کرنا اور مخالف کو ترک کرنا، اور اس کے لیے جان و مال تک قربان کر دینے کی ہمہ وقت آمادگی۔
-          </p>
-        </div>
-      </div>
-
-      <!-- 6 Arkan Breakdown -->
-      <div class="terms-container mt-4">
-        <h3 class="section-title">ارکانِ ستہ (ایمان کے ۶ اساسی ارکان)</h3>
-        <p class="section-desc">یہی چھ ارکان اسلام کے فرائض، احکام، اخلاق اور اوامر و نواہی کی اصل بنیاد ہیں؛ باقی احکام کا مطالبہ ان کی قبولیت کے بعد ہے:</p>
-        <div class="grid-3-col mt-2">
-          <div class="card" style="border-top: 3.5px solid #b48c28;">
-            <strong style="color: var(--gold-primary); font-size: 1.05rem;">۱. الإيمان بالله:</strong>
-            <p style="font-size: 0.9rem; margin-top: 0.3rem;">اللہ تعالیٰ کو اپنی ذات، صفات، اختیارات اور حقوق میں یکتا ماننا۔</p>
-          </div>
-          <div class="card" style="border-top: 3.5px solid #0284c7;">
-            <strong style="color: #38bdf8; font-size: 1.05rem;">۲. الإيمان بالملائكة:</strong>
-            <p style="font-size: 0.9rem; margin-top: 0.3rem;">فرشتے اللہ کا پیغام لانے والے اور اس کا تدبیری حکم نافذ کرنے والے ہیں۔</p>
-          </div>
-          <div class="card" style="border-top: 3.5px solid #16a34a;">
-            <strong style="color: #4ade80; font-size: 1.05rem;">۳. الإيمان بالكتب:</strong>
-            <p style="font-size: 0.9rem; margin-top: 0.3rem;">آسمانی کتابیں ہدایتِ الٰہی کا مستند اور غیر محرف متن ہیں۔</p>
-          </div>
-          <div class="card" style="border-top: 3.5px solid #f59e0b;">
-            <strong style="color: #fbbf24; font-size: 1.05rem;">۴. الإيمان بالرسل:</strong>
-            <p style="font-size: 0.9rem; margin-top: 0.3rem;">انبیاء و رسل ہدایتِ ربانی کا زندہ، معصوم اور کامل عملی نمونہ ہیں۔</p>
-          </div>
-          <div class="card" style="border-top: 3.5px solid #dc2626;">
-            <strong style="color: #f87171; font-size: 1.05rem;">۵. الإيمان باليوم الآخر:</strong>
-            <p style="font-size: 0.9rem; margin-top: 0.3rem;">موت کے بعد جواب دہی، جزا و سزا، میزان اور عدلِ الٰہی کا دن۔</p>
-          </div>
-          <div class="card" style="border-top: 3.5px solid #8b5cf6;">
-            <strong style="color: #a78bfa; font-size: 1.05rem;">۶. الإيمان بالقدر:</strong>
-            <p style="font-size: 0.9rem; margin-top: 0.3rem;">کائنات کا ہر واقعہ اللہ کے ازلی علم، کتابت اور مشیئت کے تحت واقع ہونا۔</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Primary Proof Hadith: Hadith Jibreel & Sahaba -->
-      <div class="card mt-4" style="background: rgba(0,0,0,0.25); border-right: 4px solid var(--gold-primary);">
-        <div style="font-weight: bold; color: var(--gold-primary); font-size: 1.1rem; margin-bottom: 0.5rem;">
-          📜 بنیادی سند: حدیثِ جبریل علیہ السلام (صحیح مسلم)
-        </div>
-        <p style="font-family: 'Amiri', serif; font-size: 1.25rem; line-height: 1.9; color: #f8fafc;">
-          «قَالَ: فَأَخْبِرْنِي عَنِ الْإِيمَانِ، قَالَ: أَنْ تُؤْمِنَ بِاللّٰهِ وَمَلَائِكَتِهِ وَكُتُبِهِ وَرُسُلِهِ وَالْيَوْمِ الْآخِرِ، وَتُؤْمِنَ بِالْقَدَرِ خَيْرِهِ وَشَرِّهِ» (صحیح مسلم)
-        </p>
-        <p style="margin-top: 0.5rem; font-size: 0.95rem; color: #cbd5e1; line-height: 1.8;">
-          <strong>ترجمہ:</strong> حضرت عمر بن الخطابؓ فرماتے ہیں کہ جب حضرت جبریلؑ نے سفید لباس میں آ کر سوال کیا کہ مجھے ایمان کے بارے میں بتائیے، تو رسول اللہ ﷺ نے فرمایا: «ایمان یہ ہے کہ تم اللہ پر، اس کے فرشتوں، اس کی کتابوں، اس کے رسولوں، اور آخرت کے دن پر ایمان لاؤ، اور اچھی و بری تقدیر پر ایمان لاؤ۔» اور آخر میں فرمایا: «هَذَا جِبْرِيلُ أَتَاكُمْ يُعَلِّمُكُمْ دِينَكُمْ»۔
-        </p>
-        <div style="background: rgba(229, 192, 93, 0.12); padding: 0.6rem 0.9rem; border-radius: 6px; margin-top: 0.8rem; border-right: 2px solid var(--gold-primary);">
-          <strong>سیرت کا سنہری اصول:</strong> حضرت جندب بن عبد اللہؓ فرماتے ہیں: «تَعَلَّمْنَا الْإِيمَانَ قَبْلَ أَنْ نَتَعَلَّمَ الْقُرْآنَ، ثُمَّ تَعَلَّمْنَا الْقُرْآنَ فَازْدَدْنَا بِهِ إِيمَانًا» (سنن ابن ماجہ) یعنی ہم نے قرآن سیکھنے سے پہلے ایمان سیکھا، پھر جب قرآن پڑھا تو ہمارا ایمان اور بڑھ گیا۔
-        </div>
-      </div>
-    </section>
-
-    <!-- ==================== TAB 2: TAWheed & REFUTATION OF SHIRK (B2) ==================== -->
-    <section id="tab-tawheed" class="tab-pane">
-      <div class="section-header-row">
-        <div>
-          <span class="badge-islamic">اصل الاصول • B2</span>
-          <h2 class="section-title">توحید: حقیقت، اقسام اور انفرادی و معاشرتی اثرات</h2>
-          <p class="section-desc">توحید دین میں ایسی ہے جیسے جسم میں دل؛ اس کے بغیر کوئی عمل عند اللہ قبول نہیں</p>
-        </div>
-      </div>
-
-      <!-- 4 Spheres of Tawheed -->
-      <div class="grid-2-col mt-2">
-        <div class="card" style="border-right: 4px solid var(--gold-primary);">
-          <div style="font-weight: bold; color: var(--gold-primary); font-size: 1.1rem; margin-bottom: 0.4rem;">
-            ۱. توحید فی الذات
-          </div>
-          <p style="font-size: 0.92rem; line-height: 1.7;">
-            وہ ذات میں احد اور صمد ہے؛ نہ کسی کی اولاد ہے اور نہ کوئی اس کی اولاد ہے۔ اس کا کوئی ہمسر یا ہم پلڑا نہیں۔
-          </p>
-        </div>
-
-        <div class="card" style="border-right: 4px solid #38bdf8;">
-          <div style="font-weight: bold; color: #38bdf8; font-size: 1.1rem; margin-bottom: 0.4rem;">
-            ۲. توحید فی الصفات
-          </div>
-          <p style="font-size: 0.92rem; line-height: 1.7;">
-            اللہ کی صفات <strong>قدیم، ذاتی اور مطلق</strong> ہیں؛ جبکہ مخلوق کی صفات <strong>حادث، عطائی اور محدود</strong> ہیں۔ یہ ۳ الفاظ یاد رہیں تو صفات کے شرک سے قطعی حفاظت رہتی ہے۔
-          </p>
-        </div>
-
-        <div class="card" style="border-right: 4px solid #4ade80;">
-          <div style="font-weight: bold; color: #4ade80; font-size: 1.1rem; margin-bottom: 0.4rem;">
-            ۳. توحید فی الاختیارات
-          </div>
-          <p style="font-size: 0.92rem; line-height: 1.7;">
-            فوق الفطری طریقے سے نفع و نقصان، حاجت روائی، مشکل کشائی، دعا سننا، قسمت بنانا و بگاڑنا؛ اور حلال و حرام اور قانون مقرر کرنا صرف اللہ کا اختیار ہے۔
-          </p>
-        </div>
-
-        <div class="card" style="border-right: 4px solid #f87171;">
-          <div style="font-weight: bold; color: #f87171; font-size: 1.1rem; margin-bottom: 0.4rem;">
-            ۴. توحید فی الحقوق
-          </div>
-          <p style="font-size: 0.92rem; line-height: 1.7;">
-            رکوع و سجود، دست بستہ قیام، نذر و نیاز، قربانی، منت، مصیبت میں پکارنا، سب سے بڑھ کر محبت، تقویٰ اور غیر مشروط اطاعت صرف اللہ کا حق ہے۔
-          </p>
-        </div>
-      </div>
-
-      <!-- Common Forms of Shirk Warning Box -->
-      <div class="card mt-4" style="background: rgba(239, 68, 68, 0.08); border: 1.5px solid #ef4444;">
-        <div style="font-weight: bold; color: #f87171; font-size: 1.1rem; margin-bottom: 0.5rem;">
-          ⚠️ ہمارے معاشرے میں شرک کی عام صورتیں (غیر اسلامی عقائد)
-        </div>
-        <ul class="styled-list" style="line-height: 1.8; font-size: 0.92rem;">
-          <li><strong>شرک فی الدعوۃ:</strong> غیر اللہ سے غائبانہ دعائیں مانگنا یا انہیں حاجات کا داتا سمجھنا۔</li>
-          <li><strong>شرک فی الطاعۃ:</strong> اللہ کی نافرمانی میں علماء و مشائخ یا لیڈروں کی اندھی اطاعت کرنا (﴿اتَّخَذُوا أَحْبَارَهُمْ وَرُهْبَانَهُمْ أَرْبَابًا مِّن دُونِ اللَّهِ﴾)۔</li>
-          <li><strong>کہانت و علمِ نجوم:</strong> ہاتھ دیکھ کر یا ستاروں کی چال سے غیب کا دعویٰ کرنا یا فال نکالنا۔</li>
-          <li><strong>بدشگونی و توہمات:</strong> کسی دن، مہینے، پرندے یا انسان کو منحوس قرار دینا۔</li>
-          <li><strong>شرکِ خفی:</strong> عبادات میں ریاکاری، نمائش اور غیر اللہ کی قسمیں کھانا۔</li>
-        </ul>
-      </div>
-
-      <!-- Real Historical & Seerah Incident -->
-      <div class="card mt-4" style="background: rgba(0,0,0,0.25); border-right: 4px solid #10b981;">
-        <div style="font-weight: bold; color: #34d399; font-size: 1.05rem; margin-bottom: 0.4rem;">
-          🌟 سیرت کا عملی ثبوت: حضرت بلال حبشیؓ کا استقلال
-        </div>
-        <p style="font-size: 0.92rem; line-height: 1.8;">
-          امیہ بن خلف مکہ کی تپتی ریت پر حضرت بلالؓ کے سینے پر بھاری گرم پتھر رکھ دیتا کہ وہ شرک کا ایک کلمہ کہہ دیں، لیکن حضرت بلالؓ کے لبوں سے صرف ایک ہی کلمہ جاری رہتا: <strong>«أَحَدٌ أَحَدٌ»</strong> (اللہ ایک ہے، اللہ ایک ہے)۔ توحید نے ایک غلام کو انسانیت کا پیشوا بنا دیا!
-        </p>
-      </div>
-
-      <!-- Impacts Table / Grid -->
-      <div class="summary-cards-header mt-4">
-        <div>
-          <h3 class="section-title">توحید کا انسانی زندگی اور معاشرے پر اثر</h3>
-        </div>
-      </div>
-      <div class="grid-2-col mt-2">
-        <div class="card" style="background: rgba(0,0,0,0.2);">
-          <strong style="color: var(--gold-primary);">۱. فرد کی ذات پر اثر:</strong>
-          <ul class="styled-list mt-2" style="font-size: 0.9rem; line-height: 1.8;">
-            <li><strong>خوف و حزن کا خاتمہ:</strong> نفع و نقصان صرف اللہ کے ہاتھ میں ہے؛ افسر کی ناراضگی پر جھوٹی رپورٹ پر دستخط نہیں کرتا۔</li>
-            <li><strong>خودداری و آزادی:</strong> چاپلوسی اور سفارش کے پیچھے نہیں بھاگتا؛ <em>"یہ ایک سجدہ جسے تو گراں سمجھتا ہے / ہزار سجدے سے دیتا ہے آدمی کو نجات"</em>۔</li>
-            <li><strong>توکل و قناعت:</strong> پڑوسی کی نئی گاڑی دیکھ کر کڑھنے کے بجائے شکر اور حرص و حسد سے نجات۔</li>
-          </ul>
-        </div>
-        <div class="card" style="background: rgba(0,0,0,0.2);">
-          <strong style="color: #38bdf8;">۲. معاشرے پر اثر:</strong>
-          <ul class="styled-list mt-2" style="font-size: 0.9rem; line-height: 1.8;">
-            <li><strong>مساوات و مواخات:</strong> مسجد کی صف میں بادشاہ و غلام ساتھ کھڑے ہوتے ہیں۔ رنگ اور زبان کا امتیاز ختم۔</li>
-            <li><strong>عدلِ اجتماعی:</strong> حاکمیت اللہ کی ہو تو قانون کسی خاص طبقے کی ہوس کا غلام نہیں بنتا۔</li>
-            <li><strong>نسلی تفاخر کی نفی:</strong> تمام انسان حضرت آدمؑ کی اولاد ہیں، فضیلت کی بنیاد صرف تقویٰ ہے۔</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <!-- ==================== TAB 3: INSTITUTION OF RISALAT & KHATM-E-NUBUWWAT (B3) ==================== -->
-    <section id="tab-risalat" class="tab-pane">
-      <div class="section-header-row">
-        <div>
-          <span class="badge-islamic">ہدایتِ الٰہی کا نظام • B3</span>
-          <h2 class="section-title">ادارۂ رسالت، ختمِ نبوت اور ان کے عملی اثرات</h2>
-          <p class="section-desc">رسالت ایک مربوط نظام ہے جس کے ۳ اجزاء ہیں: فرشتہ، کتاب، اور رسول</p>
-        </div>
-      </div>
-
-      <!-- 3 Pillars of Risalat Architecture -->
-      <div class="grid-3-col mt-2">
-        <div class="card feature-card">
-          <div class="card-top-badge">
-            <span class="card-icon">🕊️</span>
-            <span class="badge-mini">پہلا رکن</span>
-          </div>
-          <h3>۱. فرشتہ (پیغام لانے والا)</h3>
-          <p class="card-desc">
-            فرشتے سراپا اطاعت مخلوق ہیں جن کا اپنا کوئی ذاتی اختیار نہیں۔ وہ نہ اللہ کی اولاد ہیں، نہ معبود، نہ من مانی سفارش کرنے والے۔ حضرت جبرائیلؑ وحیِ الٰہی لانے پر مامور ہیں۔
-          </p>
-        </div>
-
         <div class="card feature-card">
           <div class="card-top-badge">
             <span class="card-icon">📖</span>
-            <span class="badge-mini">دوسرا رکن</span>
+            <span class="badge-mini">دوسری بصیرت</span>
           </div>
-          <h3>۲. آسمانی کتابیں (ہدایت کا متن)</h3>
+          <h3>صانع اور مینوئل</h3>
           <p class="card-desc">
-            صحفِ ابراہیمؑ و موسیٰؑ، تورات، زبور، انجیل اور قرآن مجید سب پر ایمان فرض ہے۔ قرآن <strong>"مُهَيْمِن"</strong> ہے یعنی پچھلی کتابوں کی سچائیوں کا محافظ اور ناسخ، اور قیامت تک خود محفوظ۔
+            جس کمپنی نے انسان کی پیچیدہ مشین اور کائنات بنائی، وہی سب سے بہتر جانتی ہے کہ یہ کس طرزِ زندگی پر خوشحال رہے گی۔ وحیِ الٰہی انسان کی آفیشل یوزر گائیڈ ہے۔
           </p>
         </div>
-
         <div class="card feature-card">
           <div class="card-top-badge">
-            <span class="card-icon">🌟</span>
-            <span class="badge-mini">تیسرا رکن</span>
+            <span class="card-icon">🛡️</span>
+            <span class="badge-mini">تیسری بصیرت</span>
           </div>
-          <h3>۳. رسول (زندہ عملی نمونہ)</h3>
+          <h3>صدمات کا مقابلہ</h3>
           <p class="card-desc">
-            رسول زبانی پیغام کے ساتھ خود کامل اطاعت کر کے انفرادی و اجتماعی زندگی میں نمونہ بناتے ہیں۔ انبیاء کی صفات: بشریت، عبودیت، عصمت، امانت اور صدق ہیں۔
-          </p>
-        </div>
-      </div>
-
-      <!-- Status of Prophet & Khatm-e-Nubuwwat -->
-      <div class="grid-2-col mt-4">
-        <div class="card" style="border-right: 4px solid var(--gold-primary);">
-          <div style="font-weight: bold; color: var(--gold-primary); font-size: 1.1rem; margin-bottom: 0.4rem;">
-            رسول اللہ ﷺ کی حیثیتیں
-          </div>
-          <p style="font-size: 0.92rem; line-height: 1.8;">
-            آپ ﷺ محض <strong>"مرکزِ عقیدت"</strong> نہیں بلکہ <strong>"مرکزِ اطاعت"</strong> ہیں! آپ کتاب کے مفسر، معلم و مربی، قانون ساز (شارع)، اور قاضی و حاکم ہیں۔ «مَنْ أَطَاعَنِي دَخَلَ الْجَنَّةَ، وَمَنْ عَصَانِي فَقَدْ أَبَى» (بخاری)۔
-          </p>
-        </div>
-
-        <div class="card" style="border-right: 4px solid #10b981;">
-          <div style="font-weight: bold; color: #34d399; font-size: 1.1rem; margin-bottom: 0.4rem;">
-            عقیدۂ ختمِ نبوت کی حکمت
-          </div>
-          <p style="font-size: 0.92rem; line-height: 1.8;">
-            ﴿مَّا كَانَ مُحَمَّدٌ أَبَا أَحَدٍ مِّن رِّجَالِكُمْ وَلَٰكِن رَّسُولَ اللَّهِ وَخَاتَمَ النَّبِيِّينَ﴾ دین مکمل ہو گیا، قرآن و سنت محفوظ ہیں، اب انسانیت آخری وحی کی روشنی میں قیامت تک ہر نئے مسئلے کا حل نکال سکتی ہے۔ آپ ﷺ کے بعد نبوت کا دعویٰ کفرِ محض ہے۔
-          </p>
-        </div>
-      </div>
-
-      <!-- Seerah Incident: Urwah bin Mas'ud -->
-      <div class="card mt-4" style="background: rgba(0,0,0,0.25); border-right: 4px solid var(--gold-primary);">
-        <div style="font-weight: bold; color: var(--gold-primary); font-size: 1.05rem; margin-bottom: 0.4rem;">
-          📜 تاریخی مشاہدہ: صلحِ حدیبیہ پر عروہ بن مسعود کا اعتراف
-        </div>
-        <p style="font-size: 0.92rem; line-height: 1.8;">
-          قریش کے سفیر عروہ بن مسعود نے حدیبیہ سے واپسی پر سردارانِ قریش سے کہا: «وَاللّٰهِ لَقَدْ وَفَدْتُ عَلَى الْمُلُوكِ، عَلَى قَيْصَرَ وَكِسْرَى وَالنَّجَاشِيِّ، وَاللّٰهِ مَا رَأَيْتُ مَلِكًا قَطُّ يُعَظِّمُهُ أَصْحَابُهُ مَا يُعَظِّمُ أَصْحَابُ مُحَمَّدٍ مُحَمَّدًا» (بخاری) یعنی خدا کی قسم! میں قیصر و کسریٰ اور نجاشی کے درباروں میں گیا ہوں، مگر میں نے کسی بادشاہ کے ساتھیوں کو اپنے بادشاہ کی ایسی تعظیم و اطاعت کرتے نہیں دیکھا جیسی محمد ﷺ کے صحابہ محمد ﷺ کی کرتے ہیں!
-        </p>
-      </div>
-
-      <!-- Individual and Social Impact -->
-      <div class="grid-2-col mt-4">
-        <div class="card" style="background: rgba(0,0,0,0.2);">
-          <strong style="color: var(--gold-primary);">فرد پر اثر:</strong>
-          <ul class="styled-list mt-2" style="font-size: 0.9rem; line-height: 1.8;">
-            <li><strong>جذبۂ اطاعت:</strong> "میرا دل نہیں مانتا" کے بجائے "سنت کیا کہتی ہے؟" کو معیار بنانا۔</li>
-            <li><strong>عملی نمونہ:</strong> باپ، تاجر، شوہر، حاکم اور پڑوسی کے طور پر ایک کامل اسوہ موجود ہونا۔</li>
-            <li><strong>فرشتوں پر ایمان:</strong> تنہائی میں بھی موبائل پر غلط چیز نہ دیکھنا کیونکہ کراماً کاتبین لکھ رہے ہیں۔</li>
-          </ul>
-        </div>
-        <div class="card" style="background: rgba(0,0,0,0.2);">
-          <strong style="color: #38bdf8;">معاشرے پر اثر:</strong>
-          <ul class="styled-list mt-2" style="font-size: 0.9rem; line-height: 1.8;">
-            <li><strong>وحدتِ فکر:</strong> ایک ہی معیار (قرآن و سنت) پر جمع ہونے سے گروہی اور مسلکی ٹکراؤ ختم ہوتا ہے۔</li>
-            <li><strong>دعوت کی ذمہ داری:</strong> ختمِ نبوت کے بعد دین کو آگے پہنچانے کی اجتماعی ذمہ داری اب امت کے کاندھوں پر ہے۔</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <!-- ==================== TAB 4: AKHIRAH & ACCOUNTABILITY (B4) ==================== -->
-    <section id="tab-akhirah" class="tab-pane">
-      <div class="section-header-row">
-        <div>
-          <span class="badge-islamic">حساب و کتاب کا یقین • B4</span>
-          <h2 class="section-title">عالمِ آخرت: مراحلِ جزا و سزا اور اخلاقی انقلاب</h2>
-          <p class="section-desc">موت زندگی کا خاتمہ نہیں بلکہ ابدی زندگی میں منتقلی ہے؛ دنیا آخرت کی کھیتی ہے</p>
-        </div>
-      </div>
-
-      <!-- 9 Stages Timeline -->
-      <div class="card mt-2" style="background: rgba(0,0,0,0.3); border: 1.5px solid var(--border-color);">
-        <div style="font-weight: bold; color: var(--gold-primary); font-size: 1.1rem; margin-bottom: 0.8rem;">
-          سفرِ آخرت کے اہم مراحل (The Nine Stages of Eternity)
-        </div>
-        <div style="display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center; font-size: 0.88rem;">
-          <span class="badge-islamic" style="background: rgba(229, 192, 93, 0.15); color: var(--gold-primary);">۱. موت و سکرات</span>
-          <span style="color: var(--text-muted);">←</span>
-          <span class="badge-islamic" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">۲. قبر و برزخ</span>
-          <span style="color: var(--text-muted);">←</span>
-          <span class="badge-islamic" style="background: rgba(168, 85, 247, 0.15); color: #c084fc;">۳. نفخات (فزع، صعق، قیام)</span>
-          <span style="color: var(--text-muted);">←</span>
-          <span class="badge-islamic" style="background: rgba(244, 63, 94, 0.15); color: #fb7185;">۴. بعث (قبروں سے اٹھنا)</span>
-          <span style="color: var(--text-muted);">←</span>
-          <span class="badge-islamic" style="background: rgba(234, 179, 8, 0.15); color: #fde047;">۵. حشر و میدانِ قیامت</span>
-          <span style="color: var(--text-muted);">←</span>
-          <span class="badge-islamic" style="background: rgba(20, 184, 166, 0.15); color: #2dd4bf;">۶. شفاعتِ کبریٰ</span>
-          <span style="color: var(--text-muted);">←</span>
-          <span class="badge-islamic" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">۷. حساب، نامۂ اعمال، میزان</span>
-          <span style="color: var(--text-muted);">←</span>
-          <span class="badge-islamic" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa;">۸. پل صراط</span>
-          <span style="color: var(--text-muted);">←</span>
-          <span class="badge-islamic" style="background: rgba(34, 197, 94, 0.2); color: #4ade80;">۹. جنت یا جہنم</span>
-        </div>
-      </div>
-
-      <!-- Rational Proofs of Akhirah -->
-      <div class="grid-2-col mt-4">
-        <div class="card" style="border-right: 4px solid #38bdf8;">
-          <div style="font-weight: bold; color: #38bdf8; font-size: 1.05rem; margin-bottom: 0.3rem;">
-            عقلی دلیل ۱: جب پہلی بار بنانا ممکن تھا تو دوبارہ کیوں نہیں؟
-          </div>
-          <p style="font-size: 0.9rem; line-height: 1.7;">
-            عقل کہتی ہے کہ عدم سے پہلی بار وجود میں لانا زیادہ دشوار معلوم ہوتا ہے بمقابلہ پہلے سے بنی ہوئی شے کو دوبارہ لوٹانے کے۔ پس اعادۂ حیات قطعی ممکن ہے۔
-          </p>
-        </div>
-
-        <div class="card" style="border-right: 4px solid var(--gold-primary);">
-          <div style="font-weight: bold; color: var(--gold-primary); font-size: 1.05rem; margin-bottom: 0.3rem;">
-            عقلی دلیل ۲: عدلِ مطلق اور انسان کا اخلاقی وجود
-          </div>
-          <p style="font-size: 0.9rem; line-height: 1.7;">
-            دنیا میں بے شمار ظالم عیش کر کے مر جاتے ہیں اور بے گناہ مظلوم مارے جاتے ہیں۔ کائنات کا خالق چونکہ عادل ہے، اس لیے ایک ایسا دن ناگزیر ہے جہاں ہر مظلوم کو بدلہ اور ظالم کو سزا ملے۔
-          </p>
-        </div>
-      </div>
-
-      <!-- Seerah Example: Mus'ab bin Umair -->
-      <div class="card mt-4" style="background: rgba(0,0,0,0.25); border-right: 4px solid #f59e0b;">
-        <div style="font-weight: bold; color: #fbbf24; font-size: 1.05rem; margin-bottom: 0.4rem;">
-          🌟 سیرت کا جھروکہ: حضرت مصعب بن عمیرؓ کا تاریخی ایثار
-        </div>
-        <p style="font-size: 0.92rem; line-height: 1.8;">
-          حضرت مصعب بن عمیرؓ مکہ کے سب سے خوش پوش اور ناز و نعم میں پلے نوجوان تھے۔ آخرت کے یقین نے انہیں ایسا بدلا کہ احد میں شہید ہوئے تو کفن کے لیے صرف ایک چادر تھی—سر ڈھانپتے تو پاؤں کھل جاتے، پاؤں ڈھانپتے تو سر کھل جاتا؛ آپ ﷺ نے فرمایا: سر ڈھانپ دو اور پاؤں پر اذخر گھاس ڈال دو۔ یہ آخرت کو دنیا پر ترجیح دینے کی زندہ مثال ہے!
-        </p>
-      </div>
-
-      <!-- Impacts -->
-      <div class="grid-2-col mt-4">
-        <div class="card" style="background: rgba(0,0,0,0.2);">
-          <strong style="color: var(--gold-primary);">فرد کے اخلاق پر اثر:</strong>
-          <ul class="styled-list mt-2" style="font-size: 0.9rem; line-height: 1.8;">
-            <li><strong>تقویٰ و دیانت:</strong> دکاندار ترازو میں کمی نہیں کرتا چاہے گاہک کو پتہ نہ چلے۔</li>
-            <li><strong>بے لوث قربانی:</strong> خفیہ صدقہ جس کی تصویر سوشل میڈیا پر نہ ڈالی جائے؛ نیکی کا اجر عند اللہ محفوظ ہے۔</li>
-            <li><strong>سکونِ قلب:</strong> رشوت نہ دینے پر فائل رکی رہے، پھر بھی دل مطمئن رہتا ہے کہ آخرت باقی ہے۔</li>
-          </ul>
-        </div>
-        <div class="card" style="background: rgba(0,0,0,0.2);">
-          <strong style="color: #38bdf8;">معاشرے پر اثر:</strong>
-          <ul class="styled-list mt-2" style="font-size: 0.9rem; line-height: 1.8;">
-            <li><strong>کمزوروں کے حقوق کا تحفظ:</strong> طاقتور جانتا ہے کہ اگر دنیا کی عدالت سے بچ بھی گیا تو رب کی عدالت سے نہیں بچ سکتا۔</li>
-            <li><strong>ابدی اقدار:</strong> معاشرہ "مادر پدر آزاد" ہوس کا غلام بننے کے بجائے پاکیزہ و پرامن بن جاتا ہے۔</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <!-- ==================== TAB 5: TAQDEER & FREE WILL (B5) ==================== -->
-    <section id="tab-taqdeer" class="tab-pane">
-      <div class="section-header-row">
-        <div>
-          <span class="badge-islamic">حکمتِ ربانی • B5</span>
-          <h2 class="section-title">تقدیر: حقیقت، مراتب اور انسانی اختیار کا متوازن فہم</h2>
-          <p class="section-desc">نہ جبرِ محض، نہ اختیارِ مطلق؛ اہلِ سنت کا معتدل راستہ</p>
-        </div>
-      </div>
-
-      <!-- 4 Maratib of Taqdeer -->
-      <div class="terms-container mt-2">
-        <h3 class="section-title">مراتبِ تقدیر (تقدیر کے ۴ اساسی درجات)</h3>
-        <div class="grid-2-col mt-2">
-          <div class="card" style="border-right: 4px solid #b48c28;">
-            <strong style="color: var(--gold-primary);">۱. علمِ الٰہی (العلم):</strong>
-            <p style="font-size: 0.9rem; margin-top: 0.3rem;">اللہ تعالیٰ کائنات کے وجود سے پہلے ہی ہر چھوٹی بڑی بات، ماضی، حال اور مستقبل کا کامل ازلی علم رکھتا ہے۔</p>
-          </div>
-          <div class="card" style="border-right: 4px solid #0284c7;">
-            <strong style="color: #38bdf8;">۲. لوحِ محفوظ پر لکھنا (الكتابة):</strong>
-            <p style="font-size: 0.9rem; margin-top: 0.3rem;">آسمان و زمین کی تخلیق سے ۵۰ ہزار سال قبل اللہ نے تمام مخلوقات کی تقدیریں لوحِ محفوظ میں لکھ دیں۔</p>
-          </div>
-          <div class="card" style="border-right: 4px solid #16a34a;">
-            <strong style="color: #4ade80;">۳. مشیئتِ الٰہی (المشيئة):</strong>
-            <p style="font-size: 0.9rem; margin-top: 0.3rem;">جو اللہ چاہے وہی واقع ہوتا ہے اور جو وہ نہ چاہے وہ کبھی واقع نہیں ہو سکتا۔</p>
-          </div>
-          <div class="card" style="border-right: 4px solid #f59e0b;">
-            <strong style="color: #fbbf24;">۴. تخلیق (الخلق):</strong>
-            <p style="font-size: 0.9rem; margin-top: 0.3rem;">ساری کائنات، انسان کے اعمال اور تمام اثرات کا اصل خالق فقط اللہ سبحانہ وتعالیٰ ہے۔</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Free Will Balance: Jabr vs Ikhtiyar -->
-      <div class="card mt-4" style="background: rgba(0,0,0,0.25); border: 1.5px solid var(--border-color);">
-        <div style="font-weight: bold; color: var(--gold-primary); font-size: 1.1rem; margin-bottom: 0.5rem;">
-          ⚖️ تقدیر اور انسانی اختیار کا نازک نکتہ
-        </div>
-        <p style="font-size: 0.93rem; line-height: 1.8;">
-          انسان نہ تو <strong>پتھر کی طرح مجبورِ محض</strong> ہے (ورنہ نیکی پر ثواب اور گناہ پر سزا بے معنی ہو جاتی)، اور نہ ہی <strong>مطلق خود مختار</strong> ہے (کیونکہ انسان اپنا خاندان، صلاحیتیں اور موت کا وقت خود طے نہیں کرتا)۔<br>
-          <strong>حق درمیان میں ہے:</strong> انسان کو <em>محدود ارادہ و اختیار</em> دیا گیا ہے اور وہ اسی قدر اپنے اعمال کا ذمہ دار ہے؛ <strong>ارادہ اور قدم انسان کا ہے، اور اس کی تکمیل اللہ کی مشیئت و توفیق سے ہوتی ہے۔</strong>
-        </p>
-      </div>
-
-      <!-- Historical Incident: Umar (RA) & Plague of Amwas -->
-      <div class="card mt-4" style="background: rgba(0,0,0,0.25); border-right: 4px solid #10b981;">
-        <div style="font-weight: bold; color: #34d399; font-size: 1.05rem; margin-bottom: 0.4rem;">
-          📜 تاریخی واقعہ: طاعونِ عمواس اور حضرت عمر فاروقؓ کا بصیرت افروز فیصلہ
-        </div>
-        <p style="font-size: 0.92rem; line-height: 1.8;">
-          جب شام میں طاعون پھیلا تو حضرت عمرؓ نے لشکر کو واپس موڑنے کا فیصلہ فرمایا۔ حضرت ابو عبیدہؓ نے عرض کیا: «أَفِرَارًا مِنْ قَدَرِ اللّٰهِ؟» (کیا آپ اللہ کی تقدیر سے بھاگ رہے ہیں؟) حضرت عمرؓ نے تاریخی جواب دیا: <strong>«نَعَمْ، نَفِرُّ مِنْ قَدَرِ اللّٰهِ إِلَى قَدَرِ اللّٰهِ»</strong> (ہاں! ہم اللہ کی ایک تقدیر سے اللہ ہی کی دوسری تقدیر کی طرف جا رہے ہیں—بخاری و مسلم)۔<br>
-          <em>سبق:</em> تقدیر پر ایمان انسان کو تدبیر، محنت، احتیاط اور علم و حکمت سے کام لینے سے ہرگز نہیں روکتا!
-        </p>
-      </div>
-
-      <!-- Impacts -->
-      <div class="grid-2-col mt-4">
-        <div class="card" style="background: rgba(0,0,0,0.2);">
-          <strong style="color: var(--gold-primary);">فرد پر اثرات:</strong>
-          <ul class="styled-list mt-2" style="font-size: 0.9rem; line-height: 1.8;">
-            <li><strong>صبر و شکر:</strong> ناکامی پر ڈپریشن کے بجائے ازسرِ نو جدوجہد؛ کامیابی پر تکبر کے بجائے عاجزی۔</li>
-            <li><strong>بے خوفی و توکل:</strong> حق بات کہنے پر نوکری جانے کا خوف غالب نہیں آتا؛ عزت و ذلت صرف رب کے ہاتھ میں ہے۔</li>
-            <li><strong>حسد کا خاتمہ:</strong> دوسرے کا رزق اس کا مقدر ہے، لہٰذا جلن اور بغض کا خاتمہ۔</li>
-          </ul>
-        </div>
-        <div class="card" style="background: rgba(0,0,0,0.2);">
-          <strong style="color: #38bdf8;">معاشرے پر اثرات:</strong>
-          <ul class="styled-list mt-2" style="font-size: 0.9rem; line-height: 1.8;">
-            <li><strong>معاشی کشمکش میں کمی:</strong> جب رزق مقرر ہے تو ناجائز منافع خوری، ذخیرہ اندوزی اور ملاوٹ کا محرک ختم ہو جاتا ہے۔</li>
-            <li><strong>ذمہ داری کا احساس:</strong> چونکہ اختیار دیا گیا ہے، اس لیے "قسمت میں یہی تھا" کہہ کر سستی یا گناہ چھپانے کا کلچر ختم ہوتا ہے۔</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <!-- ==================== TAB 6: GRAND SYNTHESIS (خلاصۂ کلام) ==================== -->
-    <section id="tab-summary" class="tab-pane">
-      <div class="section-header-row">
-        <div>
-          <span class="badge-islamic">جامع نچوڑ</span>
-          <h2 class="section-title">چاروں ستونوں کا باہمی ربط اور خلاصۂ کلام</h2>
-          <p class="section-desc">پوری اسلامی زندگی کا خلاصہ ان چار سوالوں کے جواب میں ہے</p>
-        </div>
-      </div>
-
-      <div class="grid-2-col mt-2">
-        <div class="card" style="border-right: 4px solid var(--gold-primary); padding: 1.5rem;">
-          <h3 style="color: var(--gold-primary); font-size: 1.3rem;">۱. توحید: کس کی بندگی؟</h3>
-          <p style="font-size: 1rem; line-height: 1.8; margin-top: 0.5rem;">
-            صرف اور صرف اللہ رب العزت کی، جو کائنات کا اکیلا خالق، مالک، معبود اور حاکم ہے۔
-          </p>
-        </div>
-
-        <div class="card" style="border-right: 4px solid #38bdf8; padding: 1.5rem;">
-          <h3 style="color: #38bdf8; font-size: 1.3rem;">۲. رسالت: کیسے بندگی؟</h3>
-          <p style="font-size: 1rem; line-height: 1.8; margin-top: 0.5rem;">
-            محمد رسول اللہ ﷺ کے بتائے ہوئے طریقے اور آپ کی سنتِ مبارکہ کی کامل پیروی کے ذریعے۔
-          </p>
-        </div>
-
-        <div class="card" style="border-right: 4px solid #f87171; padding: 1.5rem;">
-          <h3 style="color: #f87171; font-size: 1.3rem;">۳. آخرت: بندگی کا انجام کیا ہے؟</h3>
-          <p style="font-size: 1rem; line-height: 1.8; margin-top: 0.5rem;">
-            موت کے بعد رب کے حضور پیشی، اعمال کا حساب، اور اطاعت گزاروں کے لیے ابدی جنت اور نافرمانوں کے لیے دوزخ۔
-          </p>
-        </div>
-
-        <div class="card" style="border-right: 4px solid #4ade80; padding: 1.5rem;">
-          <h3 style="color: #4ade80; font-size: 1.3rem;">۴. تقدیر: بندگی کا حوصلہ کہاں سے آئے؟</h3>
-          <p style="font-size: 1rem; line-height: 1.8; margin-top: 0.5rem;">
-            اس یقین سے کہ نفع و نقصان صرف رب کی اجازت سے ہے، مصیبتیں طے شدہ ہیں اور محنت رائیگاں نہیں جاتی۔
+            ڈیپریشن، اینگزائٹی اور ناکامیوں کا حتمی توڑ تقدیر پر ایمان ہے۔ عقیدہ یہ سکھاتا ہے کہ جو چھن گیا وہ میرا تھا ہی نہیں، اور جو ملے گا وہ کوئی چھین نہیں سکتا۔
           </p>
         </div>
       </div>
     </section>
 
-    <!-- ==================== TAB 7: QUIZ ==================== -->
-    <section id="tab-quiz" class="tab-pane">
-      <div class="quiz-container">
-        <div class="section-header-row">
+    <!-- ==================== TAB 2: INTERACTIVE SLIDES PLAYER (8 PRECISE SLIDES) ==================== -->
+    <section id="tab-slides" class="tab-pane">
+      <div class="slide-deck-wrapper">
+        <div class="slide-controls-top">
           <div>
-            <h2 class="section-title">امتحانی خود آزمائی (Student Assessment Quiz)</h2>
-            <p class="section-desc">نشست ۳ کے اہم ترین عقائدی مباحث پر اپنی فہم کی جانچ کریں</p>
+            <span class="badge-islamic">آن لائن درسی سلائیڈ پلیئر</span>
+            <span style="font-weight: 700; color: #f8fafc; margin-right: 0.5rem;">۸ جامع، تصویری اور باوزن سلائیڈز</span>
           </div>
-          <div class="score-display" id="quizScore">اسکور: ۰ / ۵</div>
+          <div class="slide-nav-btns">
+            <span class="slide-counter-badge">
+              سلائیڈ <span id="slideCurrentNum">۱</span> از <span id="slideTotalNum">۸</span>
+            </span>
+            <button id="slidePrevBtn" class="slide-nav-btn" title="پچھلی سلائیڈ (کی بورڈ دائیں تیر)">
+              <span>اگلی ❯</span>
+            </button>
+            <button id="slideNextBtn" class="slide-nav-btn" title="اگلی سلائیڈ (کی بورڈ بائیں تیر)">
+              <span>❮ پچھلی</span>
+            </button>
+          </div>
+          <div class="slide-progress-wrap">
+            <div id="slideProgressBar" class="slide-progress-bar"></div>
+          </div>
         </div>
 
-        <div id="quizCardsContainer">
-          <!-- Dynamically populated by aqeedah.js -->
+        <!-- SLIDE 1: حقیقتِ عقیدہ -->
+        <div class="lecture-slide active" data-slide="1">
+          <div class="slide-header">
+            <span class="slide-badge-category">سلائیڈ ۱ • بنیادی تعریف و حقیقت</span>
+            <h3>حقیقتِ عقیدہ: دل کی پکی گرہ اور عمل کا انجن</h3>
+            <p>لفظی تحقیق، حدیثِ جبریلؑ اور صحابہ کرامؓ کا تدریجی طریقہ کار</p>
+          </div>
+          <div class="slide-split-grid">
+            <div class="slide-bullets-col">
+              <div class="slide-bullet-item">
+                <h4>🪢 لغوی معنی: گرہ اور وثوق</h4>
+                <p>عقیدہ "عقد" سے ہے جس میں پختگی، استواری اور اٹوٹ رشتے کا مفہوم ہے۔ جیسے عقدِ بیع اور عقدِ نکاح، اسی طرح دل جب اللہ کی ذات و صفات پر بندھ جائے تو یہ عقیدہ ہے۔</p>
+              </div>
+              <div class="slide-bullet-item">
+                <h4>✨ حدیثِ جبریلؑ: دین کے ۳ درجات</h4>
+                <p>دین صرف احکام کا مجموعہ نہیں؛ اسلام (اعضاء کا عمل)، ایمان (دل کا پختہ عقیدہ) اور احسان (کامل یکسوئی و مشاہدۂ حق)۔ عقیدہ ایمان کی جان ہے۔</p>
+              </div>
+              <div class="slide-bullet-item">
+                <h4>🌱 صحابہ کرامؓ کا اصول</h4>
+                <p>حضرت جندب بن عبداللہؓ فرماتے ہیں: «تَعَلَّمْنَا الْإِيمَانَ قَبْلَ أَنْ نَتَعَلَّمَ الْقُرْآنَ» (ہم نے قرآن اور احکام سیکھنے سے پہلے دل میں ایمان اور عقیدہ راسخ کیا)۔</p>
+              </div>
+            </div>
+            <div class="slide-visual-col">
+              <div class="visual-icon-banner">🪢 ⚓ 💡</div>
+              <div class="visual-title">تصویری استعارہ: لنگر اور درخت کی جڑ</div>
+              <p style="font-size: 0.9rem; color: #cbd5e1; margin: 0.5rem 0;">
+                طوفانی سمندر میں جہاز کو اس کا لنگر سنبھالتا ہے، اور زمین پر بڑے درخت کو اس کی گہری جڑ گرنے نہیں دیتی۔
+              </p>
+              <div class="visual-comparison-box">
+                <div style="color: #4ade80; font-weight: bold;">✔ پکا عقیدہ:</div>
+                شکوک و شبہات، مصائب اور فتنوں کے طوفان میں دل کو متزلزل نہیں ہونے دیتا۔
+                <div style="color: #f87171; font-weight: bold; margin-top: 0.4rem;">✖ کمزور عقیدہ:</div>
+                معمولی اعتراض یا آزمائش پر انسان الحاد یا مایوسی کا شکار ہو جاتا ہے۔
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="quiz-footer mt-4">
-          <button id="resetQuizBtn" class="action-btn secondary">تمام جوابات صاف کریں</button>
+        <!-- SLIDE 2: اثباتِ خالق -->
+        <div class="lecture-slide" data-slide="2">
+          <div class="slide-header">
+            <span class="slide-badge-category">سلائیڈ ۲ • توحید فی الذات و الصفات</span>
+            <h3>قادرِ مطلق خالق کا اثبات: کائنات کا وجود اتفاقی نہیں</h3>
+            <p>امکان کا برہان، سورج اور آئینے، اور توحید کے ۴ کلامی تقاضے</p>
+          </div>
+          <div class="slide-split-grid">
+            <div class="slide-bullets-col">
+              <div class="slide-bullet-item">
+                <h4>☀️ سورج اور آئینے کی مثال</h4>
+                <p>ہزاروں آئینے چمک رہے ہیں مگر روشنی کسی کی ذاتی نہیں، سب سورج سے مستعار ہے۔ کائنات کی ہر مخلوق کا وجود مستعار (ممکن الوجود) ہے، اس کے پیچھے ایک حقیقی منبع (واجب الوجود) ناگزیر ہے۔</p>
+              </div>
+              <div class="slide-bullet-item">
+                <h4>💻 کمپیوٹر کوڈ اور کائنات کا نظم</h4>
+                <p>ایک چھوٹے سے سوفٹ ویئر میں کوڈ خود بخود ٹائپ نہیں ہوتا۔ اربوں کہکشاؤں، ڈی این اے اور گریویٹی کا حیرت انگیز ریاضیاتی نظم کیا خود بخود بن گیا؟ ﴿أَفِي اللَّهِ شَكٌّ﴾</p>
+              </div>
+              <div class="slide-bullet-item">
+                <h4>☝️ توحید کے چار درجات</h4>
+                <p>توحید فی الذات (خدا کا کوئی شریک نہیں)، الصفات (صفات ذاتی و قدیم ہیں)، الافعال (تنہا نظامِ کائنات کا مدبر)، اور العبادة (اطاعت و بندگی کا تنہا حقدار)۔</p>
+              </div>
+            </div>
+            <div class="slide-visual-col">
+              <div class="visual-icon-banner">🌌 ☀️ 🪞</div>
+              <div class="visual-title">تصویری استعارہ: مستعار روشنی بمقابلہ حقیقی منبع</div>
+              <div class="visual-comparison-box">
+                <div style="font-weight: bold; color: #fcd34d;">کائنات (آئینہ):</div>
+                ہر لمحہ فنا ہونے والی، محتاج اور محدود۔
+                <div style="font-weight: bold; color: #4ade80; margin-top: 0.4rem;">اللہ تعالیٰ (حقیقی نور):</div>
+                «اللهُ نُورُ السَّمَاوَاتِ وَالأَرْضِ» — حیّ و قیوم، بے نیاز اور دائمی۔
+              </div>
+            </div>
+          </div>
         </div>
+
+        <!-- SLIDE 3: اگر انبیاء نہ ہوتے؟ -->
+        <div class="lecture-slide" data-slide="3">
+          <div class="slide-header">
+            <span class="slide-badge-category">سلائیڈ ۳ • فکری ضرورتِ نبوت</span>
+            <h3>تصور کریں: اگر دنیا میں انبیاء نہ ہوتے؟</h3>
+            <p>A World Without Prophets: اخلاقی انارکی، جنگل کا قانون اور وحی کی برکت</p>
+          </div>
+          <div class="slide-split-grid">
+            <div class="slide-bullets-col">
+              <div class="slide-bullet-item">
+                <h4>🐾 جنگل کا قانون اور طاقت کی حکمرانی</h4>
+                <p>اگر وحی نہ ہوتی تو اخلاق کا پیمانہ صرف طاقتور کی مرضی ہوتا۔ جو طاقتور ہوتا وہی حق دار ہوتا؛ کمزوروں، یتیموں اور مظلوموں کے لیے کوئی انصاف نہ ہوتا۔</p>
+              </div>
+              <div class="slide-bullet-item">
+                <h4>🗿 فکری و روحانی اندھیرا</h4>
+                <p>انسان اپنی عقل سے یہ تو جان لیتا کہ کوئی بنانے والا ہے، مگر وہ اس کی مرضی نہ جان پاتا۔ نتیجے میں پتھروں، درختوں، سورج یا خود غرض انسانوں کے آگے سجدہ ریز ہو جاتا۔</p>
+              </div>
+              <div class="slide-bullet-item">
+                <h4>🕯️ وحی: تاریکی میں آسمانی روشنی</h4>
+                <p>انبیاء علیہم السلام نے انسان کو خود پرستی سے نکال کر خدا پرستی کی راہ دکھائی، عدلِ اجتماعی قائم کیا اور انسان کو جانور سے اٹھا کر اشرف المخلوقات بنایا۔</p>
+              </div>
+            </div>
+            <div class="slide-visual-col">
+              <div class="visual-icon-banner">🌑 ➡️ ☀️</div>
+              <div class="visual-title">تصویری تضاد: وحی سے پہلے اور وحی کے بعد</div>
+              <div class="visual-comparison-box">
+                <div style="color: #f87171; font-weight: bold;">بغیرِ وحی (جاہلیت):</div>
+                بیٹیوں کو زندہ دفن کرنا، غلاموں پر ظلم، شرک اور مایوسی۔
+                <div style="color: #4ade80; font-weight: bold; margin-top: 0.5rem;">وحی کے بعد (نبوت کا فیض):</div>
+                عدل، تقویٰ، مساوات (سیدنا بلالؓ اور ابوبکرؓ برابر بھائی)، اور ابدی امید!
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 4: ادارۂ رسالت اور رسول ﷺ کی ضرورت -->
+        <div class="lecture-slide" data-slide="4">
+          <div class="slide-header">
+            <span class="slide-badge-category">سلائیڈ ۴ • ادارۂ رسالت و اسوہ</span>
+            <h3>ادارۂ رسالت: صرف کتاب کافی کیوں نہیں؟</h3>
+            <p>کار کا مینوئل بمقابلہ ڈرائیونگ انسٹرکٹر، اور رسول ﷺ کی عملی زندگی</p>
+          </div>
+          <div class="slide-split-grid">
+            <div class="slide-bullets-col">
+              <div class="slide-bullet-item">
+                <h4>🚘 مینوئل اور استاد کا فرق</h4>
+                <p>اگر آپ کسی کو جہاز یا کار چلانے کی کتاب دے دیں اور کہیں کہ بغیر انسٹرکٹر کے سڑک پر نکل جاؤ تو حادثہ یقینی ہے۔ کتاب قانون ہے، رسول اس کا زندہ عملی ماڈل ہیں۔</p>
+              </div>
+              <div class="slide-bullet-item">
+                <h4>📜 کتاب اور صاحبِ کتاب</h4>
+                <p>قرآن نے فرمایا «أَقِيمُوا الصَّلَاةَ» (نماز قائم کرو)، مگر فجر کی دو رکعتیں اور رکوع و سجود رسول اللہ ﷺ نے کر کے دکھائے: «صَلُّوا كَمَا رَأَيْتُمُونِي أُصَلِّي»۔</p>
+              </div>
+              <div class="slide-bullet-item">
+                <h4>❤️ مرکزِ محبت و مرکزِ اطاعت</h4>
+                <p>رسول اللہ ﷺ محض پوسٹ مین نہیں تھے (معاذ اللہ)، بلکہ آپ ﷺ کی ذات مقتدا، مطاع اور ایمان کی روح ہے: «قُلْ إِن كُنتُمْ تُحِبُّونَ اللَّهَ فَاتَّبِعُونِي»۔</p>
+              </div>
+            </div>
+            <div class="slide-visual-col">
+              <div class="visual-icon-banner">📖 ➕ 👤 ➡️ 🎯</div>
+              <div class="visual-title">کتاب + رسول = زندہ دین</div>
+              <p style="font-size: 0.9rem; color: #cbd5e1; margin: 0.5rem 0;">
+                صرف کتاب سے گمراہی کے امکانات کھل جاتے ہیں، جب تک اس کا حقیقی مفسر اور شارح (رسول اللہ ﷺ) سامنے نہ ہو۔
+              </p>
+              <div class="visual-comparison-box">
+                <span style="color: #fcd34d; font-weight: bold;">ام المومنین عائشہؓ کا فرمان:</span><br>
+                «كَانَ خُلُقُهُ الْقُرْآنَ» (رسول اللہ ﷺ چلتا پھرتا قرآن تھے)۔
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 5: ختمِ نبوت -->
+        <div class="lecture-slide" data-slide="5">
+          <div class="slide-header">
+            <span class="slide-badge-category">سلائیڈ ۵ • عقیدہ ختمِ نبوت</span>
+            <h3>حکمتِ ختمِ نبوت: انسانیت کی فکری بلوغت اور دین کی تکمیل</h3>
+            <p>﴿الْيَوْمَ أَكْمَلْتُ لَكُمْ دِينَكُمْ﴾ اور امتِ مسلمہ کی ذمہ داری</p>
+          </div>
+          <div class="slide-split-grid">
+            <div class="slide-bullets-col">
+              <div class="slide-bullet-item">
+                <h4>🏛️ عمارت کی آخری اینٹ کا استعارہ</h4>
+                <p>حدیثِ نبوی ہے کہ ایک خوبصورت محل بنایا گیا جس میں صرف ایک اینٹ کی جگہ خالی تھی، آپ ﷺ نے فرمایا: «فَأَنَا اللَّبِنَةُ وَأَنَا خَاتَمُ النَّبِيِّينَ»۔</p>
+              </div>
+              <div class="slide-bullet-item">
+                <h4>🎓 فکری بلوغت کا مرحلہ</h4>
+                <p>پچھلی کتابوں میں تحریف ہو جاتی تھی اس لیے نئے نبی آتے تھے۔ قرآن کو اللہ نے خود محفوظ فرما دیا: ﴿إِنَّا نَحْنُ نَزَّلْنَا الذِّكْرَ وَإِنَّا لَهُ لَحَافِظُونَ﴾۔ جب کتاب محفوظ ہے تو نئے نبی کی ضرورت باقی نہیں رہی۔</p>
+              </div>
+              <div class="slide-bullet-item">
+                <h4>🌍 آفاقی شریعت قیامت تک کے لیے</h4>
+                <p>سابقہ انبیاء مخصوص قوموں کے لیے آئے، لیکن رسول اللہ ﷺ ساری انسانیت کے لیے آئے: ﴿وَمَا أَرْسَلْنَاكَ إِلَّا كَافَّةً لِّلنَّاسِ﴾۔</p>
+              </div>
+            </div>
+            <div class="slide-visual-col">
+              <div class="visual-icon-banner">👑 🛡️ 📜</div>
+              <div class="visual-title">ختمِ نبوت: دین کا تاج محل</div>
+              <div class="visual-comparison-box">
+                <div style="font-weight: bold; color: #fcd34d;">صلحِ حدیبیہ میں عروہ بن مسعود کا تاثر:</div>
+                "میں نے قیصر و کسریٰ کے دربار دیکھے ہیں، مگر محمد ﷺ کے ساتھی ان کا جیسا ادب و اطاعت کرتے ہیں ویسی دنیا میں کہیں نہیں دیکھی!"
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 6: عالمِ آخرت اور عدلِ الٰہی -->
+        <div class="lecture-slide" data-slide="6">
+          <div class="slide-header">
+            <span class="slide-badge-category">سلائیڈ ۶ • آخرت و نظامِ جزا</span>
+            <h3>عالمِ آخرت: دنیا امتحان ہال اور قیامت رزلٹ ڈے</h3>
+            <p>عدلِ مطلق کا تقاضا، موت سے جنت تک کے مراحل اور سیدنا مصعب بن عمیرؓ</p>
+          </div>
+          <div class="slide-split-grid">
+            <div class="slide-bullets-col">
+              <div class="slide-bullet-item">
+                <h4>🏫 امتحان گاہ میں فیصلہ نہیں ہوتا</h4>
+                <p>دنیا امتحان کی جگہ ہے (دار الامتحان)، یہاں اچھے اور برے دونوں کو سانس اور رزق ملتا ہے۔ رزلٹ ہال (دار الجزاء) آخرت میں ہے جہاں ذرہ برابر عمل کا حساب ہو گا۔</p>
+              </div>
+              <div class="slide-bullet-item">
+                <h4>⚖️ عقل کا تقاضا: عدلِ مطلق</h4>
+                <p>ہٹلر نے لاکھوں انسان مارے اور خودکشی کر لی، کیا دنیا کی کوئی عدالت اسے انصاف کے مطابق سزا دے سکتی تھی؟ صرف آخرت کا میزان ہی حقیقی عدل قائم کر سکتا ہے۔</p>
+              </div>
+              <div class="slide-bullet-item">
+                <h4>🌹 مصعب بن عمیرؓ کا سودا</h4>
+                <p>مکہ کے سب سے امیر اور خوش لباس نوجوان نے دنیا کا آرام چھوڑ دیا اور غزوہ احد میں جب شہید ہوئے تو کفن کے لیے ایک چھوٹی چادر تھی۔ یہ آخرت پر یقین کی طاقت تھی!</p>
+              </div>
+            </div>
+            <div class="slide-visual-col">
+              <div class="visual-icon-banner">📝 ➡️ ⚖️ ➡️ 🏆</div>
+              <div class="visual-title">دنیا = بونے کی جگہ • آخرت = کاٹنے کی جگہ</div>
+              <div class="visual-comparison-box">
+                <div style="color: #4ade80; font-weight: bold;">«الدُّنْيَا مَزْرَعَةُ الْآخِرَةِ»</div>
+                جو شخص سمجھتا ہے کہ موت کے بعد کچھ نہیں، وہ دنیا کو تفریح گاہ بناتا ہے۔ جو آخرت پر ایمان رکھتا ہے وہ ہر سانس کو نیکی اور عدل میں لگاتا ہے۔
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 7: تقدیر اور دکھوں کا مقابلہ -->
+        <div class="lecture-slide" data-slide="7">
+          <div class="slide-header">
+            <span class="slide-badge-category">سلائیڈ ۷ • تقدیر اور ذہنی استقامت</span>
+            <h3>تقدیر: طاعونِ عمواس اور دکھوں کا مقابلہ</h3>
+            <p>«نَفِرُّ مِنْ قَدَرِ اللّٰهِ إِلَى قَدَرِ اللّٰهِ» — تدبیر بمقابلہ تقدیر</p>
+          </div>
+          <div class="slide-split-grid">
+            <div class="slide-bullets-col">
+              <div class="slide-bullet-item">
+                <h4>🛡️ طاعونِ عمواس میں حضرت عمر فاروقؓ</h4>
+                <p>جب شام میں طاعون پھیلا تو سیدنا عمرؓ نے فوج کو واپس لے جانے کا فیصلہ کیا۔ حضرت ابو عبیدہؓ نے پوچھا: کیا اللہ کی تقدیر سے بھاگ رہے ہیں؟ فرمایا: "ہاں! ہم اللہ کی ایک تقدیر سے اللہ کی دوسری تقدیر کی طرف جا رہے ہیں!"</p>
+              </div>
+              <div class="slide-bullet-item">
+                <h4>🩺 تدبیر اور توکل کا توازن</h4>
+                <p>بیمار ہونے پر دوا کھانا تقدیر کے خلاف نہیں بلکہ شریعت کا حکم ہے۔ آگ میں ہاتھ نہ ڈالنا تدبیر ہے؛ نتائج اللہ کے ہاتھ میں سونپنا توکل ہے۔</p>
+              </div>
+              <div class="slide-bullet-item">
+                <h4>🛑 لفظ "کاش" (What if) کا خاتمہ</h4>
+                <p>رسول اللہ ﷺ نے فرمایا: اگر نقصان پہنچے تو یہ نہ کہو کہ "کاش میں یوں کرتا تو یوں ہوتا"، بلکہ کہو: «قَدَرُ اللَّهِ وَمَا شَاءَ فَعَلَ» کیونکہ "کاش" شیطان کے وسوسوں کا دروازہ کھولتا ہے۔</p>
+              </div>
+            </div>
+            <div class="slide-visual-col">
+              <div class="visual-icon-banner">🛡️ 🌿 🕊️</div>
+              <div class="visual-title">اینگزائٹی اور ڈپریشن کا روحانی علاج</div>
+              <div class="visual-comparison-box">
+                <div style="font-weight: bold; color: #38bdf8;">پوری کوشش کرو (تدبیر):</div>
+                جیسے اونٹ کا گھٹنا باندھنا۔
+                <div style="font-weight: bold; color: #4ade80; margin-top: 0.4rem;">نتیجے پر راضی رہو (رضا بالقضاء):</div>
+                «عَجَبًا لِأَمْرِ الْمُؤْمِنِ إِنَّ أَمْرَهُ كُلَّهُ خَيْرٌ»
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 8: کورس کا سفر اور داخلہ -->
+        <div class="lecture-slide" data-slide="8">
+          <div class="slide-header">
+            <span class="slide-badge-category">سلائیڈ ۸ • ۱ سالہ تعلیمی سفر</span>
+            <h3>۱ سالہ جامع کورس کا روڈ میپ: شکوک سے یقین تک</h3>
+            <p>۴ سہ ماہی مراحل، لائیو کلاسز اور شخصی و فکری تعمیر کی دعوت</p>
+          </div>
+          <div class="slide-split-grid">
+            <div class="slide-bullets-col">
+              <div class="slide-bullet-item">
+                <h4>📚 مرحلہ ۱: فکری استحکام (عقائد و معاصر چیلنجز)</h4>
+                <p>الحاد، مادیت پرستی، شکوک و شبہات اور اسلام کے عقلی و نقلی دلائل کا جدید اسلوب میں مطالعہ۔</p>
+              </div>
+              <div class="slide-bullet-item">
+                <h4>📖 مرحلہ ۲: فہمِ قرآن و حدیث</h4>
+                <p>قرآن کی بنیادی سورتوں کی تفسیری روح، رسول اللہ ﷺ کی سیرتِ طیبہ اور احادیثِ مبارکہ کا عملی ادراک۔</p>
+              </div>
+              <div class="slide-bullet-item">
+                <h4>🧭 مرحلہ ۳ و ۴: فقہِ زندگی و معاشرتی قیادت</h4>
+                <p>حلال و حرام، جدید معاشی مسائل، خاندانی نظام اور مسلم نوجوان کا اپنے پیشے میں قائدانہ کردار۔</p>
+              </div>
+            </div>
+            <div class="slide-visual-col">
+              <div class="visual-icon-banner">🎓 🌟 🤝</div>
+              <div class="visual-title">آج ہی اپنے داخلے کو یقینی بنائیں!</div>
+              <p style="font-size: 0.92rem; color: #cbd5e1; margin: 0.5rem 0;">
+                ہفتہ وار انٹرایکٹو لائیو زوم سیشنز، ریکارڈنگز، پی ڈی ایف نوٹس اور باقاعدہ سرٹیفیکیشن۔
+              </p>
+              <div style="margin-top: 1rem;">
+                <button class="slide-nav-btn clickable" data-goto="tab-roadmap" style="background: #f59e0b; color: #000; border: none; font-size: 1rem; padding: 0.6rem 1.4rem; font-weight: bold; width: 100%; justify-content: center;">
+                  مکمل نصاب و داخلہ فارم دیکھیں 🗺️
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: YOUTH REAL-WORLD FAQ (7 QUESTIONS) ==================== -->
+    <section id="tab-faq" class="tab-pane">
+      <div class="summary-cards-header">
+        <div>
+          <span class="badge-islamic">روزمرہ تشبیہات و سادہ مثالیں</span>
+          <h2 class="section-title">نوجوان ذہن کے ۷ بنیادی سوالات اور ان کے جوابات</h2>
+          <p class="section-desc">بغیر کسی فلسفیانہ اصطلاح کے، روزمرہ زندگی کی سادہ اور عملی مثالوں سے عقیدے کی تفہیم</p>
+        </div>
+      </div>
+
+      <!-- Question 1: بھوک اور روٹی -->
+      <div class="faq-youth-card">
+        <div class="faq-q-header">
+          <div class="faq-q-num">۱</div>
+          <h3 class="faq-q-title">بھوک اور روٹی: جب تک بھوک کا احساس نہ ہو دسترخوان کی قدر کیوں نہیں ہوتی؟</h3>
+        </div>
+        <span class="faq-metaphor-tag">💡 استعارہ: روحانی ضرورت کا احساس</span>
+        <div class="faq-body-text">
+          اگر کسی شخص کا پیٹ بالکل بھرا ہو تو بہترین بریانی یا پیزا بھی اس کے سامنے بے وقعت لگتا ہے۔ لیکن جو تین دن کا بھوکا ہو، وہ خشک روٹی کے ٹکڑے کو بھی نعمت سمجھ کر چومتا ہے۔ انسان مادی ترقی، ڈگریاں اور پیسہ جمع کر کے بھی اندر سے خالی اور مضطرب کیوں ہے؟ کیونکہ روح کی ایک الگ بھوک ہے جو صرف اپنے خالق کی یاد اور عقیدے کی روشنی سے مٹتی ہے۔ جب تک انسان اپنی روحانی بھوک کو نہیں پہچانتا، دین اور وحی کا دسترخوان اسے سمجھ نہیں آتا۔
+        </div>
+        <div class="faq-takeaway">
+          <strong>حاصلِ کلام:</strong> جیسے جسم روٹی کا محتاج ہے، ویسے ہی روح ایمان اور خدا کے تعلق کی محتاج ہے۔
+        </div>
+      </div>
+
+      <!-- Question 2: پیاس اور نلکا -->
+      <div class="faq-youth-card">
+        <div class="faq-q-header">
+          <div class="faq-q-num">۲</div>
+          <h3 class="faq-q-title">پیاس اور نلکا: اگر پانی پینا مقصد ہے تو نلکے کے کنکشن کی جانچ کیوں ضروری ہے؟</h3>
+        </div>
+        <span class="faq-metaphor-tag">☝️ استعارہ: توحید فی الصفات و منبعِ حیات</span>
+        <div class="faq-body-text">
+          آپ دیوار میں ایک خوبصورت سنہری نلکا لگا دیں، مگر اگر اس کے پیچھے مین واٹر سپلائی کا پائپ نہ جڑا ہو تو چاہے آپ ہزار بار ٹونٹی گھمائیں، ایک بوند پانی نہیں آئے گا۔ شرک کی مثال بالکل ایسے ہی ہے جیسے انسان پانی حاصل کرنے کے لیے کٹے ہوئے پائپ سے امید باندھ لے۔ کائنات کی تمام مخلوقات (انسان، فرشتے، ستارے) خود محتاج ہیں۔ حقیقی نفع و نقصان اور حیات کا منبع صرف اللہ تعالیٰ کی ذات ہے۔ جب تک کنکشن براہِ راست اللہ سے نہ ہو، انسان وہموں اور خوف کے اندھیروں میں بھٹکتا رہے گا۔
+        </div>
+        <div class="faq-takeaway">
+          <strong>حاصلِ کلام:</strong> توحید کا مطلب ہے اپنے دل کے پائپ کو براہِ راست کائنات کے واحد مالک سے جوڑنا۔
+        </div>
+      </div>
+
+      <!-- Question 3: امتحان اور رزلٹ ڈے -->
+      <div class="faq-youth-card">
+        <div class="faq-q-header">
+          <div class="faq-q-num">۳</div>
+          <h3 class="faq-q-title">امتحان اور رزلٹ ڈے: اگر کوئی کہے کہ امتحان گاہ میں ہی ڈگری بانٹ دی جائے تو کیا ہو گا؟</h3>
+        </div>
+        <span class="faq-metaphor-tag">⚖️ استعارہ: عالمِ آخرت اور عدلِ مطلق</span>
+        <div class="faq-body-text">
+          کوئی طالب علم پرچہ حل کرتے ہی ممتحن سے کہے کہ مجھے ابھی پہلی پوزیشن کی ٹرافی اور نوکری کا لیٹر دو! ممتحن کہے گا: بیوقوف، یہ امتحانی ہال ہے، یہاں صرف پرچہ دینا ہوتا ہے؛ نتائج اور انعامات رزلٹ ڈے پر ملیں گے۔ دنیا محض امتحانی مرکز ہے، یہاں مظلوم کو دکھ پہنچ سکتا ہے اور ظالم عیاشی کر سکتا ہے کیونکہ ابھی پرچہ چل رہا ہے۔ اگر آخرت کا رزلٹ ڈے نہ ہو تو دنیا کا پورا نظام ایک بے معنی مذاق بن جائے گا۔
+        </div>
+        <div class="faq-takeaway">
+          <strong>حاصلِ کلام:</strong> آخرت پر ایمان انسان کو ہر آزمائش میں محنت کرنے اور ناانصافی پر مایوس نہ ہونے کا حوصلہ دیتا ہے۔
+        </div>
+      </div>
+
+      <!-- Question 4: ڈاکٹر اور نسخہ -->
+      <div class="faq-youth-card">
+        <div class="faq-q-header">
+          <div class="faq-q-num">۴</div>
+          <h3 class="faq-q-title">ڈاکٹر اور نسخہ: شدید بیمار خود دوائیں چننے کے بجائے معالج کے پاس کیوں جاتا ہے؟</h3>
+        </div>
+        <span class="faq-metaphor-tag">🩺 استعارہ: ضرورتِ رسالت و وحی</span>
+        <div class="faq-body-text">
+          میڈیکل اسٹور پر ہزاروں دوائیں خوبصورت ڈبوں میں سجی ہوتی ہیں، مگر کوئی بھی عقلمند انسان وہاں جا کر آنکھیں بند کر کے گولیاں نہیں کھاتا، بلکہ اسپیشلسٹ ڈاکٹر کے پاس جا کر معائنہ کراتا ہے اور اس کا لکھا ہوا نسخہ ہی لیتا ہے۔ انسان کی عقل خیر اور شر کے تمام اثرات کو خود جانچنے کی صلاحیت نہیں رکھتی۔ اللہ تعالیٰ کائنات کا سب سے بڑا معالج ہے اور انبیاء علیہم السلام وہ مستند طبیب ہیں جو ہماری روحانی بیماریوں کا حتمی اور محفوظ نسخہ (شریعت) لے کر آئے۔
+        </div>
+        <div class="faq-takeaway">
+          <strong>حاصلِ کلام:</strong> رسول کی ضرورت اس لیے ہے کہ عقل اکیلی اپنی بیماریوں کا علاج نہیں کر سکتی۔
+        </div>
+      </div>
+
+      <!-- Question 5: نانبائی اور روٹی -->
+      <div class="faq-youth-card">
+        <div class="faq-q-header">
+          <div class="faq-q-num">۵</div>
+          <h3 class="faq-q-title">نانبائی اور روٹی: بچے کو تندور میں ہاتھ ڈالنے سے روکنا پابندی ہے یا محبت و تحفظ؟</h3>
+        </div>
+        <span class="faq-metaphor-tag">🛡️ استعارہ: شریعت کے حلال و حرام کا مقصد</span>
+        <div class="faq-body-text">
+          تندور پر تازہ روٹی کی خوشبو دیکھ کر چھوٹا بچہ لپک کر گرم تندور میں ہاتھ ڈالنا چاہتا ہے، لیکن ماں فورا اس کا ہاتھ سختی سے جھٹک دیتی ہے۔ بچہ روتا ہے اور سمجھتا ہے کہ ماں نے میری آزادی چھین لی، لیکن ماں جانتی ہے کہ یہ پابندی بچے کی حفاظت کے لیے ہے۔ شریعت میں سود، زنا، شراب اور جھوٹ پر پابندیاں انسان کی دشمنی میں نہیں بلکہ انسان کو اس کی اپنی تباہی اور جہنم سے بچانے کے لیے لگائی گئی ہیں۔
+        </div>
+        <div class="faq-takeaway">
+          <strong>حاصلِ کلام:</strong> اللہ کے احکام آزادی چھیننے کے لیے نہیں، بلکہ انسان کو آگ سے بچانے کی حفاظتی دیوار ہیں۔
+        </div>
+      </div>
+
+      <!-- Question 6: گاڑی کی چابی اور بمپر اسٹیکر -->
+      <div class="faq-youth-card">
+        <div class="faq-q-header">
+          <div class="faq-q-num">۶</div>
+          <h3 class="faq-q-title">گاڑی کی چابی اور بمپر اسٹیکر: کیا صرف کار پر 'مسلم' لکھوانے سے گاڑی چلے گی بغیر چابی کے؟</h3>
+        </div>
+        <span class="faq-metaphor-tag">🚗 استعارہ: عقیدہ بمقابلہ محض روایتی دعوے</span>
+        <div class="faq-body-text">
+          ایک شخص مرسیڈیز کار خریدے، اس پر دنیا کے خوبصورت ترین اسٹیکر لگوائے، مگر اس کے پاس نہ کار کی چابی ہو اور نہ انجن میں پٹرول ہو۔ کیا وہ کار سفر طے کرے گی؟ ہرگز نہیں! نام کا مسلمان ہونا، شناختی کارڈ پر مذہب لکھوانا محض بمپر اسٹیکر ہے۔ دل کے اندر جب تک اللہ اور رسول ﷺ پر غیر متزلزل یقین اور عقیدہ نہ ہو، زندگی کی گاڑی جہنم کی طرف پھسلتی رہے گی اور کوئی عمل بارگاہِ الٰہی میں وزن نہیں پائے گا۔
+        </div>
+        <div class="faq-takeaway">
+          <strong>حاصلِ کلام:</strong> عقیدہ دل کی چابی اور انجن ہے؛ اس کے بغیر اعمال کی باڈی بے جان ہے۔
+        </div>
+      </div>
+
+      <!-- Question 7: کار مینوئل اور استاد -->
+      <div class="faq-youth-card">
+        <div class="faq-q-header">
+          <div class="faq-q-num">۷</div>
+          <h3 class="faq-q-title">کار مینوئل اور استاد: اگر جدید ترین کار دی جائے اور چلانا سکھانے والا نہ ہو تو کیا ہو گا؟</h3>
+        </div>
+        <span class="faq-metaphor-tag">🏎️ استعارہ: قرآن اور سنت کا باہمی اٹوٹ ربط</span>
+        <div class="faq-body-text">
+          اگر آپ کو ایک جدید ترین کمپیوٹرائزڈ گاڑی دے کر صرف ایک موٹی یوزر مینوئل پکڑا دی جائے اور آپ نے زندگی میں کبھی گاڑی نہ چلائی ہو، تو کیا آپ مینوئل پڑھ کر جی ٹی روڈ پر ٹریفک میں گاڑی چلا سکتے ہیں؟ یقینی طور پر حادثہ ہو گا۔ آپ کو ڈرائیونگ انسٹرکٹر کی ضرورت ہوتی ہے جو بیٹھ کر اسٹیرنگ سنبھالنا، بریک لگانا اور موڑ کاٹنا سکھائے۔ قرآن پاک زندگی کی عظیم ترین یوزر گائیڈ ہے، اور رسول اللہ ﷺ وہ ہادی اور معلم ہیں جنہوں نے عملاً جی کر دکھایا کہ قرآن پر کیسے عمل کیا جاتا ہے۔
+        </div>
+        <div class="faq-takeaway">
+          <strong>حاصلِ کلام:</strong> قرآن کو رسول اللہ ﷺ کی سنت اور سیرت سے الگ کر کے سمجھنے کی کوشش فکری حادثے کا سبب بنتی ہے۔
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4: COMPLETE TEXT (PAGES 12 TO 17) ==================== -->
+    <section id="tab-text" class="tab-pane">
+      <div class="summary-cards-header">
+        <div>
+          <span class="badge-islamic">مستند درسی کتاب کا خلاصہ</span>
+          <h2 class="section-title">درسی متن و سلیبس: صفحات ۱۲ تا ۱۷</h2>
+          <p class="section-desc">کتاب "العقائد الإسلامية" سے نشست ۳ کا اصل علمی و تدریسی متن</p>
+        </div>
+      </div>
+
+      <!-- B1: Haqeeqat-e-Aqeedah -->
+      <div class="card p-4 mt-3">
+        <h3 style="color: #fcd34d; font-family: 'Amiri', serif; font-size: 1.4rem;">
+          الباب الأول (B1): حقيقة العقيدة والإيمان المفصل وأثرهما في حياة المسلم
+        </h3>
+        <p style="line-height: 1.85; color: #e2e8f0; font-size: 0.98rem;">
+          عقیدہ کا مادہ "عقد" ہے جس سے مراد وہ پختہ گرہ ہے جس کے کھلنے کا کوئی امکان نہ رہے۔ اصطلاح میں عقیدہ ان حتمی اور غیر مشکوک سچائیوں کا نام ہے جن پر دل کامل یقین رکھے اور جن میں کسی شک، تردد یا ظن کی گنجائش نہ ہو۔ ایمانِ مفصل دراصل ان تمام ایمانیات کا احاطہ کرتا ہے جن پر ایمان لائے بغیر انسان دائرۂ اسلام میں داخل نہیں ہو سکتا۔ صحابہ کرام رضی اللہ عنہم نے رسول اللہ ﷺ کی صحبت میں سب سے پہلے ایمان اور عقیدہ سیکھا، جس نے ان کے کردار کو چٹان کی طرح مضبوط کر دیا۔
+        </p>
+      </div>
+
+      <!-- B2: Tawheed & Ibtal-e-Shirk -->
+      <div class="card p-4 mt-3">
+        <h3 style="color: #fcd34d; font-family: 'Amiri', serif; font-size: 1.4rem;">
+          الباب الثاني (B2): الإيمان بالله وإثبات التوحيد وإبطال الشرك
+        </h3>
+        <p style="line-height: 1.85; color: #e2e8f0; font-size: 0.98rem;">
+          اللہ تعالیٰ کے وجود کے عقلی و فطری دلائل میں امکان کا برہان سب سے قوی ہے: کائنات کا وجود خود اپنی ذات سے نہیں بلکہ ایک واجب الوجود ہستی کا محتاج ہے۔ توحید کے چار ارکان ہیں:
+          <br><strong>۱. توحید فی الذات:</strong> اللہ اپنی ذات میں یکتا ہے، نہ اس کا کوئی باپ ہے، نہ بیٹا، نہ ہمسر (﴿قُلْ هُوَ اللَّهُ أَحَدٌ﴾)۔
+          <br><strong>۲. توحید فی الصفات:</strong> اللہ کی صفات قدیم، ازلی اور ذاتی ہیں، جبکہ مخلوق کی صفات حادث اور عطائی ہیں۔
+          <br><strong>۳. توحید فی الافعال:</strong> اس کائنات میں حقیقی خالق اور مدبر صرف اللہ تعالیٰ ہے۔
+          <br><strong>۴. توحید فی العبادة:</strong> نماز، دعا، نذر و نیاز اور سجدہ صرف اللہ کے لیے مخصوص ہے؛ کسی غیر اللہ کو پکارنا یا اس کے آگے جھکنا صریح شرک ہے۔
+        </p>
+      </div>
+
+      <!-- B3: Risalat & Khatam-e-Nubuwwat -->
+      <div class="card p-4 mt-3">
+        <h3 style="color: #fcd34d; font-family: 'Amiri', serif; font-size: 1.4rem;">
+          الباب الثالث (B3): الإيمان بالرسل والكتب والملائكة وختم النبوة
+        </h3>
+        <p style="line-height: 1.85; color: #e2e8f0; font-size: 0.98rem;">
+          ادارۂ رسالت انسان کی سب سے بڑی ضرورت ہے۔ انبیاء علیہم السلام گناہوں سے معصوم ہوتے ہیں اور اللہ کے احکام کی کامل تبلیغ فرماتے ہیں۔ سیدنا محمد رسول اللہ ﷺ تمام نبیوں کے سردار اور آخری نبی ہیں: ﴿مَّا كَانَ مُحَمَّدٌ أَبَا أَحَدٍ مِّن رِّجَالِكُمْ وَلَٰكِن رَّسُولَ اللَّهِ وَخَاتَمَ النَّبِيِّينَ﴾۔ آپ ﷺ کی نبوت قیامت تک کی تمام انسانیت کے لیے عام ہے، آپ کے بعد کسی نئے نبی کی کوئی گنجائش نہیں اور جو نبوت کا دعویٰ کرے وہ کذاب اور خارج از اسلام ہے۔
+        </p>
+      </div>
+
+      <!-- B4: Akhirah -->
+      <div class="card p-4 mt-3">
+        <h3 style="color: #fcd34d; font-family: 'Amiri', serif; font-size: 1.4rem;">
+          الباب الرابع (B4): الإيمان باليوم الآخر والبعث والجزاء
+        </h3>
+        <p style="line-height: 1.85; color: #e2e8f0; font-size: 0.98rem;">
+          آخرت پر ایمان انسان کو ذمہ دار شہری بناتا ہے۔ مراحلِ آخرت میں موت، عذاب و ثوابِ قبر، نفخۂ صور، بعث بعد الموت، میدانِ محشر، شفاعتِ کبریٰ، اعمال کا تلنا (میزان)، اعمال نامہ ملنا، پل صراط سے گزرنا اور اہل ایمان کا جنت اور کافروں کا جہنم میں داخل ہونا شامل ہے۔ آخرت کا عقیدہ دنیا کے عارضی فتنوں سے دل کو بے نیاز کرتا ہے اور انسان کو مظلوموں کی مدد اور عدل قائم کرنے پر ابھارتا ہے۔
+        </p>
+      </div>
+
+      <!-- B5: Taqdeer -->
+      <div class="card p-4 mt-3">
+        <h3 style="color: #fcd34d; font-family: 'Amiri', serif; font-size: 1.4rem;">
+          الباب الخامس (B5): الإيمان بالقدر خيره وشره
+        </h3>
+        <p style="line-height: 1.85; color: #e2e8f0; font-size: 0.98rem;">
+          اہلِ سنت والجماعت کا عقیدہ جبر اور قدر (انکارِ تقدیر) کے درمیان معتدل ہے۔ تقدیر کے چار درجات ہیں: (۱) اللہ کا ازلی علم، (۲) لوحِ محفوظ پر تحریر، (۳) مشیئتِ عامہ، (۴) تخلیق۔ انسان مجبورِ محض نہیں بلکہ اسے ارادہ اور اختیار دیا گیا ہے جس کی بنیاد پر جزا اور سزا ہے۔ انسان کا کام اسباب اختیار کرنا اور کوشش کرنا ہے، اور نتیجے کو اللہ کے فضل و عدل پر چھوڑ دینا ہے۔
+        </p>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 5: SUFFERING & RESILIENCE ==================== -->
+    <section id="tab-suffering" class="tab-pane">
+      <div class="suffering-banner">
+        <span class="badge-islamic" style="background: #a855f7; color: #fff;">نفسیاتی و روحانی استحکام</span>
+        <h2 style="font-family: 'Amiri', serif; color: #fef08a; font-size: 1.8rem; margin: 0.5rem 0;">
+          دکھ، صدمات، غزہ اور اینگزائٹی کا مقابلہ: عقیدہ کیسے ڈھال بنتا ہے؟
+        </h2>
+        <p style="color: #e9d5ff; font-size: 1.02rem; line-height: 1.8; margin: 0;">
+          جب ایک ملحد یا مادہ پرست کے ساتھ سانحہ پیش آتا ہے تو وہ کہتا ہے: "کائنات اندھی اور ظالم ہے، میرا نقصان بالکل بے مقصد تھا۔" لیکن جب ایک باایمان بندے پر مصیبت آتی ہے تو وہ اپنے رب کے حضور جھک جاتا ہے کیونکہ وہ جانتا ہے کہ کائنات میں کوئی پتہ بھی رب کی اجازت اور حکمت کے بغیر نہیں گرتا۔
+        </p>
+      </div>
+
+      <div class="matn-box" style="border-right-color: #a855f7;">
+        <span class="matn-tag" style="background: #a855f7; color: #fff;">ارشادِ نبوی ﷺ</span>
+        <div class="hadith-quote">
+          «عَجَبًا لِأَمْرِ الْمُؤْمِنِ إِنَّ أَمْرَهُ كُلَّهُ خَيْرٌ، وَلَيْسَ ذَاكَ لِأَحَدٍ إِلَّا لِلْمُؤْمِنِ، إِنْ أَصَابَتْهُ سَرَّاءُ شَكَرَ فَكَانَ خَيْرًا لَهُ، وَإِنْ أَصَابَتْهُ ضَرَّاءُ صَبَرَ فَكَانَ خَيْرًا لَهُ»
+        </div>
+        <p style="text-align: center; color: #cbd5e1; font-size: 0.95rem; margin: 0;">
+          (صحیح مسلم: ۲۹۹۹) — "مومن کا معاملہ بھی خوب ہے، اس کے ہر معاملے میں خیر ہے؛ اگر خوشی ملے تو شکر کرتا ہے جو اس کے لیے خیر ہے، اور اگر تکلیف پہنچے تو صبر کرتا ہے جو اس کے لیے خیر ہے۔"
+        </p>
+      </div>
+
+      <div class="grid-3-col mt-4">
+        <div class="card">
+          <h3 style="color: #fcd34d; font-size: 1.15rem;">۱. "کاش" کا روگ ختم</h3>
+          <p style="color: #cbd5e1; font-size: 0.92rem; line-height: 1.7;">
+            اکثر نفسیاتی الجھنیں ماضی کے پچھتاوے (کاش میں ایسا کر لیتا) سے جنم لیتی ہیں۔ رسول اللہ ﷺ نے فرمایا کہ یہ لفظ شیطان کے وسوسوں کا دروازہ کھولتا ہے۔ تقدیر پر ایمان دل کو سکون دیتا ہے کہ «قَدَرُ اللَّهِ وَمَا شَاءَ فَعَلَ»۔
+          </p>
+        </div>
+        <div class="card">
+          <h3 style="color: #fcd34d; font-size: 1.15rem;">۲. غزہ اور مظلومین کی قربانیاں</h3>
+          <p style="color: #cbd5e1; font-size: 0.92rem; line-height: 1.7;">
+            دنیا دیکھ کر حیران رہ گئی کہ ملبے تلے دبے فلسطینی بچے اور مائیں «الحمد للّٰہ» اور «حسبنا اللّٰہ ونعم الوکیل» پکار رہے ہیں۔ یہ چٹان جیسی ہمت صرف آخرت اور تقدیر کے پختہ عقیدے سے پیدا ہوتی ہے!
+          </p>
+        </div>
+        <div class="card">
+          <h3 style="color: #fcd34d; font-size: 1.15rem;">۳. درد کبھی رائیگاں نہیں جاتا</h3>
+          <p style="color: #cbd5e1; font-size: 0.92rem; line-height: 1.7;">
+            مسلمان کا کانٹا چبھنا بھی گناہوں کا کفارہ اور درجات کی بلندی ہے۔ آخرت کا یقین یہ طمانیت بخشتا ہے کہ دنیا کے ہر آنسو اور درد کا حساب رب کے پاس محفوظ ہے اور جنت میں اس کا ایسا بدلہ ملے گا کہ انسان کہے گا: کاش مجھ پر دنیا میں اور آزمائشیں آتیں!
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 6: 1-YEAR ROADMAP & ADMISSION ==================== -->
+    <section id="tab-roadmap" class="tab-pane">
+      <div class="hero-card">
+        <div class="hero-content">
+          <span class="hero-tag">۱ سالہ آن لائن سرٹیفکیٹ کورس</span>
+          <h2>جامع اسلامی فکری و تربیتی نصاب: روڈ میپ</h2>
+          <p class="hero-desc">
+            کالج، یونیورسٹی کے طلبہ، پروفیشنلز اور سنجیدہ نوجوانوں کے لیے خصوصی طور پر تیار کردہ آن لائن پروگرام، جس میں اسلام کے اساسی فکری نظام کو جدید دور کے سوالات کی روشنی میں سکھایا جائے گا۔
+          </p>
+        </div>
+      </div>
+
+      <div class="quarter-grid">
+        <!-- Quarter 1 -->
+        <div class="quarter-card highlight">
+          <span class="quarter-badge" style="background: rgba(212, 175, 55, 0.2); color: #fcd34d;">سہ ماہی ۱ (ماہ ۱ تا ۳)</span>
+          <h4>علم العقائد اور معاصر فکری چیلنجز</h4>
+          <ul class="quarter-list">
+            <li>حقیقتِ عقیدہ اور ارکانِ ستہ کی تفصیلی کلامی تفہیم</li>
+            <li>الحاد، تشکیک اور ماڈرن ازم کے شبہات کے تسلی بخش عقلی جوابات</li>
+            <li>قرآنی دلائلِ توحید اور نظامِ ہستی کا سائنسی و فلسفیانہ جائزہ</li>
+            <li>ختمِ نبوت کا قانونی و تاریخی تحفظ اور عصمتِ انبیاء</li>
+          </ul>
+        </div>
+
+        <!-- Quarter 2 -->
+        <div class="quarter-card">
+          <span class="quarter-badge" style="background: rgba(59, 130, 246, 0.2); color: #93c5fd;">سہ ماہی ۲ (ماہ ۴ تا ۶)</span>
+          <h4>علوم القرآن اور منتخب سورتوں کا فہم</h4>
+          <ul class="quarter-list">
+            <li>تاریخِ جمع و تدوینِ قرآن اور حفظِ الٰہی کے شواہد</li>
+            <li>سورۃ الفاتحہ، یٰس، الحجرات، اور الملک کا تفصیلی فکری مطالعہ</li>
+            <li>قرآنی نفسیات: انسانی انا، تکبر اور تزکیۂ نفس</li>
+            <li>قرآن کو اپنی روزمرہ رہنمائی کا محور بنانے کا طریقہ</li>
+          </ul>
+        </div>
+
+        <!-- Quarter 3 -->
+        <div class="quarter-card">
+          <span class="quarter-badge" style="background: rgba(16, 185, 129, 0.2); color: #6ee7b7;">سہ ماہی ۳ (ماہ ۷ تا ۹)</span>
+          <h4>سیرتِ نبوی ﷺ اور فہمِ حدیث</h4>
+          <ul class="quarter-list">
+            <li>مکی اور مدنی دور کی انقلابی دعوتی حکمتِ عملی</li>
+            <li>رسول اللہ ﷺ کی سیاسی، عسکری اور خاندانی قیادت کا مطالعہ</li>
+            <li>اصولِ حدیث: روایات کی جانچ پڑتال کا بے مثال اسلامی نظام</li>
+            <li>چالیس منتخب احادیثِ نبویہ کا عملی زندگی سے انطباق</li>
+          </ul>
+        </div>
+
+        <!-- Quarter 4 -->
+        <div class="quarter-card">
+          <span class="quarter-badge" style="background: rgba(168, 85, 247, 0.2); color: #d8b4fe;">سہ ماہی ۴ (ماہ ۱۰ تا ۱۲)</span>
+          <h4>فقہِ زندگی، اخلاقیات اور مسلم قیادت</h4>
+          <ul class="quarter-list">
+            <li>عبادات کی فقہی روح (نماز، روزہ، زکوٰۃ کا گہرا فہم)</li>
+            <li>جدید معاشی مسائل: سود سے پاک بینکنگ، کرپٹو، اور حلال رزق</li>
+            <li>شادی، خاندان، اور ورک لائف بیلنس کا اسلامی اصول</li>
+            <li>حتمی پروجیکٹ اور جامع اسنادِ فراغت کی تقسیم</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Application CTA Box -->
+      <div class="course-cta-box">
+        <h3>کیا آپ اپنے فکری و ایمانی سفر کا آغاز کرنے کے لیے تیار ہیں؟</h3>
+        <p>
+          محدود نشستیں! ہفتہ وار لائیو آن لائن نشستیں، ہر کلاس کی ایچ ڈی ریکارڈنگ، پی ڈی ایف درسی خلاصے اور اساتذہ کے ساتھ براہِ راست سوال و جواب کی سہولت۔
+        </p>
+        <div class="cta-action-group">
+          <a href="https://wa.me/923000000000?text=I%20want%20to%20enroll%20in%201-Year%20Islamic%20Studies%20Course" target="_blank" class="btn-whatsapp-advisor">
+            <span>💬 واٹس ایپ ایڈوائزر سے رابطہ کریں</span>
+          </a>
+          <button class="btn-apply-now clickable" data-goto="tab-quiz">
+            <span>📝 پہلے اپنی صلاحیت آزمائیں (کوئز)</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 7: INTERACTIVE QUIZ ==================== -->
+    <section id="tab-quiz" class="tab-pane">
+      <div class="summary-cards-header">
+        <div>
+          <span class="badge-islamic">فوری ذہنی آزمائش</span>
+          <h2 class="section-title">امتحانی خود آزمائی (علم العقائد)</h2>
+          <p class="section-desc">درست جواب منتخب کر کے اپنی فکری گرفت اور سمجھ بوجھ کا فوری نتیجہ حاصل کریں</p>
+        </div>
+        <div style="display: flex; gap: 0.8rem; align-items: center;">
+          <span id="quizScore" style="font-weight: bold; color: #f59e0b; font-size: 1.15rem; background: rgba(245, 158, 11, 0.15); padding: 0.4rem 1rem; border-radius: 20px; border: 1px solid rgba(245, 158, 11, 0.3);">
+            اسکور: ۰ / ۵
+          </span>
+          <button id="resetQuizBtn" class="action-btn secondary" style="padding: 0.4rem 0.9rem;">
+            <span>🔄 دوبارہ شروع کریں</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quiz Questions Container (Injected by JS) -->
+      <div id="quizCardsContainer" class="mt-3"></div>
+
+      <!-- Certificate & Admission CTA when quiz completes -->
+      <div id="quizCtaBox" class="card mt-4" style="display: none; background: linear-gradient(135deg, rgba(22, 101, 52, 0.2), rgba(15, 23, 42, 0.9)); border: 2px solid #22c55e; padding: 1.8rem; text-align: center;">
+        <span style="font-size: 2.5rem;">🎉</span>
+        <h3 style="color: #4ade80; font-family: 'Amiri', serif; font-size: 1.6rem; margin: 0.4rem 0;">مبارک ہو! آپ نے فکری خود آزمائی مکمل کر لی ہے</h3>
+        <p style="color: #cbd5e1; font-size: 1rem; max-width: 600px; margin: 0 auto 1.2rem auto; line-height: 1.8;">
+          آپ کا شوق اور فہم قابلِ داد ہے۔ ہمارے باقاعدہ ۱ سالہ اسلامی کورس میں داخلہ لے کر اپنے علم کو مستند اساتذہ کی زیرِ نگرانی مزید نکھاریں۔
+        </p>
+        <button class="btn-apply-now clickable" data-goto="tab-roadmap" style="background: #22c55e; color: #000; border: none; margin: 0 auto;">
+          <span>کورس میں باقاعدہ داخلہ کا طریقہ دیکھیں 🎓</span>
+        </button>
       </div>
     </section>
 
   </main>
 
-  <!-- Sticky Footer -->
-  <footer class="app-footer">
-    <div class="footer-content">
-      <p>منظومہ کلامیہ • حقیقتِ عقیدہ و ایمانِ مفصل (نشست ۳) • مدرسہ لرننگ مینجمنٹ سسٹم (KUI LMS)</p>
+  <!-- LMS Topic Footer Navigation -->
+  <footer class="topic-footer">
+    <div class="footer-container">
+      <div class="footer-links">
+        <a href="burhan-tatbiq.html" class="footer-btn prev-topic">
+          <span class="btn-arrow">❮</span>
+          <div class="btn-content">
+            <span class="btn-sub">پچھلا موضوع (نشست ۲)</span>
+            <span class="btn-main">برہانِ تطبیق اور ابطالِ تسلسل</span>
+          </div>
+        </a>
+        <a href="index.html" class="footer-btn home-topic">
+          <span class="btn-icon">📚</span>
+          <div class="btn-content">
+            <span class="btn-sub">فہرستِ کتب</span>
+            <span class="btn-main">تمام موضوعات</span>
+          </div>
+        </a>
+        <a href="tarjeeh.html" class="footer-btn next-topic">
+          <div class="btn-content">
+            <span class="btn-sub">پہلا موضوع (نشست ۱)</span>
+            <span class="btn-main">ترجیح بلا مرجح کا بطلان</span>
+          </div>
+          <span class="btn-arrow">❯</span>
+        </a>
+      </div>
+      <div class="footer-bottom">
+        <p>جامعہ آن لائن لرننگ مینجمنٹ سسٹم (LMS) • نشست ۳: حقیقتِ عقیدہ و ایمانِ مفصل • تمام حقوق محفوظ ہیں</p>
+      </div>
     </div>
   </footer>
 
