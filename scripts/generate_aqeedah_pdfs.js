@@ -347,7 +347,7 @@ async function generateAqeedahPDFs() {
     <h2 class="hero-title">کیوں عمل سے پہلے عقیدہ ضروری ہے؟</h2>
     <p class="hero-desc">
       رسول اللہ ﷺ نے مکہ مکرمہ کے مشرک معاشرے میں پہلے ۱۳ سال نہ نماز کی جزئیات فرض کیں، نہ روزے، زکوٰۃ یا حج کے احکام؛ بلکہ پہلے دلوں میں خدا، رسول اور آخرت کے زندہ یقین کی بنیاد رکھی۔ 
-      اگر گاڑی کا انجن نہ ہو تو شاندار باڈی اور بمپر اسٹیکر کسی کام کے نہیں۔ <strong>عقیدہ عمل کی روح اور انجن ہے</strong>۔ جب تک دل کی زمین میں عقیدے کی جڑ مضبوط نہ ہو، اعمال کی شاخیں پھل نہیں لا سکتیں۔
+      اگر جسم میں روح نہ ہو تو خوبصورت پوشاک کسی کام کی نہیں، اور اگر جڑ نہ ہو تو شاخیں قائم نہیں رہ سکتیں۔ <strong>عقیدہ عمل کی اصل، بنیاد اور روح ہے</strong>۔ جب تک دل کی زمین میں عقیدے کی جڑ مضبوط نہ ہو، اعمال کی شاخیں پھل نہیں لا سکتیں۔
     </p>
   </div>
 
@@ -775,11 +775,11 @@ async function generateAqeedahPDFs() {
 
   <!-- FAQ 6 -->
   <div class="metaphor-box">
-    <span class="metaphor-tag">استعارہ ۶ • عقیدہ انجن ہے، محض نام کافی نہیں</span>
-    <div class="metaphor-title">۶. گاڑی کی چابی اور بمپر اسٹیکر: کیا کار پر صرف 'مسلم' لکھوانے سے گاڑی چلے گی بغیر چابی کے؟</div>
+    <span class="metaphor-tag">استعارہ ۶ • اصل اور فروع (قرآنی تمثیل: شجرۂ طیبہ)</span>
+    <div class="metaphor-title">۶. شجرِ طیبہ اور جڑ: کیا سوکھے درخت پر مصنوعی پھول لگانے سے درخت زندہ ہو سکتا ہے؟</div>
     <div>
-      کار پر دنیا کا خوبصورت ترین اسٹیکر لگا ہو مگر نہ چابی ہو اور نہ انجن میں ایندھن، تو وہ کار نہیں چل سکتی۔ نام کا مسلمان ہونا محض بمپر اسٹیکر ہے۔ دل کے اندر جب تک اللہ اور رسول ﷺ پر پختہ عقیدہ نہ ہو، زندگی کی گاڑی جہنم کی طرف لڑھکتی رہے گی اور کوئی عمل بارگاہِ الٰہی میں وزن نہیں پائے گا۔
-      <br><strong>حاصلِ کلام:</strong> عقیدہ دل کی چابی اور انجن ہے؛ اس کے بغیر ظاہری اعمال بے جان ہیں۔
+      ایک شخص اپنے باغ کے سوکھے، بے جان درخت پر خوبصورت پلاسٹک کے پھل، پھول اور سبز پتے چپکا دے اور کہے کہ میرا باغ ہرابھرا ہے۔ کیا کوئی عقلمند اسے زندہ درخت مانے گا؟ ہرگز نہیں! جب تک زمین کے اندر گہری، مضبوط اور تر و تازہ جڑیں نہ ہوں، اوپر کی کوئی مصنوعی سجاوٹ درخت کو زندگی نہیں دے سکتی۔ محض نام کا مسلمان ہونا یا رسمی دعوے کرنا سوکھے تنے پر مصنوعی پتے لگانے کی طرح ہے۔ قرآن نے کلمۂ طیبہ اور عقیدے کو "شجرۂ طیبہ" فرمایا ہے جس کی جڑیں دل کی گہرائیوں میں جمی ہوتی ہیں: ﴿أَصْلُهَا ثَابِتٌ وَفَرْعُهَا فِي السَّمَاءِ﴾۔ جب تک دل میں سچا عقیدہ نہ ہو، ظاہری اعمال بارگاہِ الٰہی میں قبولیت کا وزن نہیں پاتے۔
+      <br><strong>حاصلِ کلام:</strong> عقیدہ تمام اعمال کی جڑ اور روح ہے؛ جڑ کٹ جائے تو عمل کے تمام پھل اور پتے سوکھ کر گر جاتے ہیں۔
     </div>
   </div>
 
@@ -1140,7 +1140,7 @@ async function generateAqeedahPDFs() {
       {
         num: 1,
         tag: 'سلائیڈ ۱ • بنیادی تعریف و حقیقت',
-        title: 'حقیقتِ عقیدہ: دل کی پکی گرہ اور عمل کا انجن',
+        title: 'حقیقتِ عقیدہ: دل کی پکی گرہ اور اعمال کی روح',
         sub: 'لفظی تحقیق، حدیثِ جبریلؑ اور صحابہ کرامؓ کا تدریجی طریقہ کار',
         bullets: [
           { icon: '🪢', title: 'لغوی معنی: گرہ اور وثوق', text: 'عقیدہ "عقد" سے ہے جس میں پختگی، استواری اور اٹوٹ رشتے کا مفہوم ہے۔ جیسے عقدِ بیع اور عقدِ نکاح، دل جب اللہ کی ذات و صفات پر بندھ جائے تو یہ عقیدہ ہے۔' },
@@ -1340,7 +1340,7 @@ async function generateAqeedahPDFs() {
       flex-direction: column;
       justify-content: space-between;
       page-break-after: always;
-      padding: 14px 20px;
+      padding: 18px 24px;
       border: 2px solid #b48c28;
       border-radius: 12px;
       box-sizing: border-box;
@@ -1355,83 +1355,83 @@ async function generateAqeedahPDFs() {
       justify-content: space-between;
       align-items: center;
       border-bottom: 1.5px solid #24354d;
-      padding-bottom: 6px;
+      padding-bottom: 8px;
     }
     .slide-tag {
       background: rgba(212, 175, 55, 0.2);
       color: #fcd34d;
-      border: 1px solid rgba(212, 175, 55, 0.4);
-      padding: 2px 12px;
-      border-radius: 12px;
-      font-size: 8.5pt;
+      border: 1px solid rgba(212, 175, 55, 0.45);
+      padding: 3px 15px;
+      border-radius: 14px;
+      font-size: 10.5pt;
       font-weight: bold;
     }
     .slide-book-name {
-      font-size: 8.5pt;
+      font-size: 10.5pt;
       color: #94a3b8;
       font-weight: 600;
     }
     .slide-counter {
       background: #b48c28;
       color: #0f172a;
-      padding: 2px 10px;
-      border-radius: 12px;
-      font-size: 8.5pt;
+      padding: 3px 14px;
+      border-radius: 14px;
+      font-size: 10.5pt;
       font-weight: bold;
     }
     .slide-title-wrap {
-      margin: 6px 0 8px 0;
+      margin: 8px 0 10px 0;
     }
     .slide-title {
       font-family: 'Amiri', serif;
-      font-size: 18.5pt;
+      font-size: 23pt;
       color: #fcd34d;
-      margin: 0 0 2px 0;
+      margin: 0 0 3px 0;
       line-height: 1.25;
     }
     .slide-sub {
-      font-size: 9pt;
+      font-size: 11.5pt;
       color: #94a3b8;
       margin: 0;
     }
-    /* 2-Column Split Layout matching webpage */
+    /* 2-Column Split Layout matching webpage & projector */
     .slide-split-grid {
       display: grid;
-      grid-template-columns: 1.2fr 0.8fr;
-      gap: 14px;
+      grid-template-columns: 1.22fr 0.78fr;
+      gap: 18px;
       flex-grow: 1;
       align-items: stretch;
-      margin: 6px 0 8px 0;
+      margin: 8px 0 10px 0;
     }
     .slide-bullets-col {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
       justify-content: space-around;
     }
     .slide-bullet-item {
-      background: rgba(15, 23, 42, 0.75);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-right: 4.5px solid #b48c28;
-      border-radius: 8px;
-      padding: 8px 12px;
+      background: rgba(15, 23, 42, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-right: 5px solid #b48c28;
+      border-radius: 9px;
+      padding: 11px 16px;
     }
     .bullet-item-title {
       font-weight: bold;
-      font-size: 10pt;
+      font-size: 12.5pt;
       color: #f8fafc;
-      margin-bottom: 3px;
+      margin-bottom: 4px;
     }
     .bullet-item-text {
-      font-size: 8.8pt;
-      line-height: 1.65;
+      font-size: 10.5pt;
+      line-height: 1.75;
       color: #cbd5e1;
     }
     .slide-visual-col {
-      background: linear-gradient(145deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.8));
-      border: 1.5px solid rgba(212, 175, 55, 0.35);
-      border-radius: 10px;
-      padding: 12px;
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.85));
+      border: 1.5px solid rgba(212, 175, 55, 0.4);
+      border-radius: 12px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -1439,40 +1439,40 @@ async function generateAqeedahPDFs() {
       box-shadow: inset 0 0 25px rgba(0,0,0,0.4);
     }
     .visual-icon-banner {
-      font-size: 26pt;
-      margin-bottom: 4px;
+      font-size: 36pt;
+      margin-bottom: 6px;
       line-height: 1;
     }
     .visual-title {
       font-weight: bold;
-      font-size: 11pt;
+      font-size: 13.5pt;
       color: #fcd34d;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
       font-family: 'Amiri', serif;
     }
     .visual-desc {
-      font-size: 8.5pt;
+      font-size: 10.5pt;
       color: #cbd5e1;
-      line-height: 1.55;
-      margin-bottom: 6px;
+      line-height: 1.65;
+      margin-bottom: 8px;
     }
     .visual-comparison-box {
-      background: rgba(0, 0, 0, 0.45);
-      border-radius: 8px;
-      padding: 8px 10px;
+      background: rgba(0, 0, 0, 0.48);
+      border-radius: 9px;
+      padding: 11px 14px;
       text-align: right;
-      font-size: 8.5pt;
-      line-height: 1.65;
+      font-size: 10.5pt;
+      line-height: 1.8;
       color: #e2e8f0;
-      border: 1px dashed rgba(212, 175, 55, 0.3);
+      border: 1px dashed rgba(212, 175, 55, 0.35);
     }
     .slide-footer-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
       border-top: 1px solid #24354d;
-      padding-top: 6px;
-      font-size: 8pt;
+      padding-top: 8px;
+      font-size: 9.2pt;
       color: #64748b;
     }
   </style>

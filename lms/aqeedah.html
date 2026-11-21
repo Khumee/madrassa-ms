@@ -14,30 +14,30 @@
   <link rel="stylesheet" href="style.css">
 
   <style>
-    /* Custom In-page Slide Deck & Enhanced Components */
+    /* Custom In-page Slide Deck & Enhanced Components (Projector & 1360px+ Optimized) */
     .slide-deck-wrapper {
       background: var(--bg-card, #131d2e);
       border: 1.5px solid var(--border-color, #24354d);
-      border-radius: 12px;
-      padding: 1.5rem;
+      border-radius: 14px;
+      padding: 1.8rem 2rem;
       margin-top: 1.2rem;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
     }
     .slide-controls-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
       border-bottom: 1.5px solid var(--border-color, #24354d);
-      padding-bottom: 0.9rem;
+      padding-bottom: 1rem;
       margin-bottom: 1.2rem;
       flex-wrap: wrap;
-      gap: 0.75rem;
+      gap: 0.85rem;
     }
     .slide-progress-wrap {
       width: 100%;
-      height: 6px;
+      height: 7px;
       background: rgba(255,255,255,0.08);
-      border-radius: 3px;
+      border-radius: 4px;
       overflow: hidden;
       margin-top: 0.5rem;
     }
@@ -49,39 +49,40 @@
     }
     .slide-nav-btns {
       display: flex;
-      gap: 0.6rem;
+      gap: 0.8rem;
       align-items: center;
     }
     .slide-nav-btn {
       background: #1e293b;
       color: #f1f5f9;
-      border: 1px solid #334155;
-      padding: 0.45rem 1rem;
-      border-radius: 6px;
+      border: 1px solid #475569;
+      padding: 0.6rem 1.3rem;
+      border-radius: 8px;
       cursor: pointer;
       font-family: inherit;
-      font-size: 0.92rem;
-      font-weight: 600;
+      font-size: 1.05rem;
+      font-weight: 700;
       transition: all 0.2s ease;
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.5rem;
     }
     .slide-nav-btn:hover:not(:disabled) {
       background: #b48c28;
       border-color: #d4af37;
       color: #000;
+      transform: translateY(-1px);
     }
     .slide-nav-btn:disabled {
-      opacity: 0.4;
+      opacity: 0.35;
       cursor: not-allowed;
     }
     .slide-counter-badge {
-      font-size: 0.9rem;
-      color: #e2e8f0;
-      background: rgba(212, 175, 55, 0.15);
-      border: 1px solid rgba(212, 175, 55, 0.4);
-      padding: 0.3rem 0.8rem;
+      font-size: 1.05rem;
+      color: #fef08a;
+      background: rgba(212, 175, 55, 0.2);
+      border: 1.5px solid rgba(212, 175, 55, 0.45);
+      padding: 0.45rem 1.1rem;
       border-radius: 20px;
       font-weight: bold;
     }
@@ -89,38 +90,40 @@
     /* Individual Slide */
     .lecture-slide {
       display: none;
-      animation: fadeInSlide 0.3s ease-in-out;
+      animation: fadeInSlide 0.25s ease-in-out;
     }
     .lecture-slide.active {
       display: block;
     }
     @keyframes fadeInSlide {
-      from { opacity: 0; transform: translateY(6px); }
+      from { opacity: 0; transform: translateY(4px); }
       to { opacity: 1; transform: translateY(0); }
     }
     .slide-header {
-      border-bottom: 1px dashed var(--border-color, #334155);
-      padding-bottom: 0.8rem;
-      margin-bottom: 1.2rem;
+      border-bottom: 1.5px dashed var(--border-color, #334155);
+      padding-bottom: 0.9rem;
+      margin-bottom: 1.3rem;
     }
     .slide-badge-category {
       display: inline-block;
       background: rgba(212, 175, 55, 0.2);
       color: #fcd34d;
-      font-size: 0.82rem;
-      padding: 0.2rem 0.75rem;
-      border-radius: 12px;
+      font-size: 1rem;
+      padding: 0.3rem 1rem;
+      border-radius: 14px;
       font-weight: bold;
       margin-bottom: 0.4rem;
+      border: 1px solid rgba(212, 175, 55, 0.3);
     }
     .slide-header h3 {
       font-family: 'Amiri', serif;
-      font-size: 1.65rem;
+      font-size: 2.25rem;
       color: #fcd34d;
       margin: 0.2rem 0 0.3rem 0;
+      line-height: 1.3;
     }
     .slide-header p {
-      font-size: 0.95rem;
+      font-size: 1.15rem;
       color: #94a3b8;
       margin: 0;
     }
@@ -128,11 +131,11 @@
     /* 2-Column Split: Content Bullets & Pictorial Visual Metaphor */
     .slide-split-grid {
       display: grid;
-      grid-template-columns: 1.15fr 0.85fr;
-      gap: 1.5rem;
+      grid-template-columns: 1.18fr 0.82fr;
+      gap: 1.8rem;
       align-items: stretch;
     }
-    @media (max-width: 860px) {
+    @media (max-width: 900px) {
       .slide-split-grid {
         grid-template-columns: 1fr;
       }
@@ -140,61 +143,71 @@
     .slide-bullets-col {
       display: flex;
       flex-direction: column;
-      gap: 0.9rem;
+      gap: 1.15rem;
+      justify-content: space-between;
     }
     .slide-bullet-item {
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-right: 4px solid #b48c28;
-      border-radius: 8px;
-      padding: 0.9rem 1.1rem;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-right: 5px solid #b48c28;
+      border-radius: 10px;
+      padding: 1.1rem 1.4rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
     .slide-bullet-item h4 {
-      font-size: 1.05rem;
+      font-size: 1.32rem;
       color: #f8fafc;
-      margin: 0 0 0.4rem 0;
+      margin: 0 0 0.45rem 0;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.6rem;
     }
     .slide-bullet-item p {
-      font-size: 0.92rem;
+      font-size: 1.12rem;
       color: #cbd5e1;
-      line-height: 1.7;
+      line-height: 1.82;
       margin: 0;
     }
 
     .slide-visual-col {
-      background: linear-gradient(145deg, rgba(15, 23, 42, 0.85), rgba(30, 41, 59, 0.7));
-      border: 1.5px solid rgba(212, 175, 55, 0.35);
-      border-radius: 10px;
-      padding: 1.2rem;
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.8));
+      border: 1.5px solid rgba(212, 175, 55, 0.4);
+      border-radius: 12px;
+      padding: 1.6rem 1.5rem;
       display: flex;
       flex-direction: column;
       justify-content: center;
       text-align: center;
-      box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
+      box-shadow: inset 0 0 25px rgba(0,0,0,0.35);
     }
     .visual-icon-banner {
-      font-size: 2.8rem;
+      font-size: 3.5rem;
       margin-bottom: 0.6rem;
+      line-height: 1;
     }
     .visual-title {
       font-weight: bold;
-      font-size: 1.1rem;
+      font-size: 1.45rem;
       color: #fcd34d;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.6rem;
+      font-family: 'Amiri', serif;
+    }
+    .slide-visual-col p {
+      font-size: 1.1rem !important;
+      line-height: 1.75;
+      color: #cbd5e1;
+      margin: 0.4rem 0 0.8rem 0;
     }
     .visual-comparison-box {
-      background: rgba(0, 0, 0, 0.35);
-      border-radius: 8px;
-      padding: 0.8rem;
+      background: rgba(0, 0, 0, 0.45);
+      border-radius: 10px;
+      padding: 1.1rem 1.3rem;
       margin-top: 0.8rem;
       text-align: right;
-      font-size: 0.88rem;
-      line-height: 1.7;
+      font-size: 1.1rem;
+      line-height: 1.85;
       color: #e2e8f0;
-      border: 1px dashed rgba(255, 255, 255, 0.15);
+      border: 1px dashed rgba(212, 175, 55, 0.35);
     }
 
     /* Real-world Youth FAQ Cards */
@@ -503,7 +516,7 @@
           <span class="hero-tag">۱ سالہ اسلامی فکری کورس کا ماڈل سبق</span>
           <h2>کیوں عمل سے پہلے عقیدہ ضروری ہے؟</h2>
           <p class="hero-desc">
-            رسول اللہ ﷺ نے مکہ کے مشرک معاشرے میں پہلے ۱۳ سال نہ نماز کی جزئیات فرض کیں، نہ روزے اور زکوٰۃ کے احکام، بلکہ پہلے دلوں میں خدا، رسول اور آخرت کے زندہ یقین کی بنیاد رکھی۔ اگر گاڑی کا انجن نہ ہو تو شاندار باڈی اور بمپر اسٹیکر کسی کام کے نہیں۔ عقیدہ عمل کی روح اور انجن ہے!
+            رسول اللہ ﷺ نے مکہ کے مشرک معاشرے میں پہلے ۱۳ سال نہ نماز کی جزئیات فرض کیں، نہ روزے اور زکوٰۃ کے احکام، بلکہ پہلے دلوں میں خدا، رسول اور آخرت کے زندہ یقین کی بنیاد رکھی۔ اگر جسم میں روح نہ ہو تو خوبصورت پوشاک کسی کام کی نہیں، اور اگر جڑ نہ ہو تو شاخیں قائم نہیں رہ سکتیں۔ عقیدہ عمل کی اصل، بنیاد اور روح ہے!
           </p>
         </div>
         <div class="hero-stats">
@@ -564,12 +577,12 @@
       <div class="grid-3-col mt-2">
         <div class="card feature-card">
           <div class="card-top-badge">
-            <span class="card-icon">🚗</span>
+            <span class="card-icon">🌱</span>
             <span class="badge-mini">پہلی بصیرت</span>
           </div>
-          <h3>انجن بمقابلہ باڈی</h3>
+          <h3>روح بمقابلہ جسم (اصل اور شاخیں)</h3>
           <p class="card-desc">
-            نماز، روزہ، حج وغیرہ گاڑی کی رفتار اور خوبصورتی ہیں؛ مگر جب تک عقیدے کا طاقتور انجن اور توحید کا ایندھن نہ ہو، گاڑی ایک انچ بھی آگے نہیں چل سکتی۔
+            نماز، روزہ، حج وغیرہ اعمال کا جسم اور شاخیں ہیں؛ اور عقیدہ اس کی حیات، روح اور جڑ ہے۔ بغیر روح کے جسم بے جان لاشہ ہے اور بغیر جڑ کے درخت سوکھ جاتا ہے۔
           </p>
         </div>
         <div class="card feature-card">
@@ -623,7 +636,7 @@
         <div class="lecture-slide active" data-slide="1">
           <div class="slide-header">
             <span class="slide-badge-category">سلائیڈ ۱ • بنیادی تعریف و حقیقت</span>
-            <h3>حقیقتِ عقیدہ: دل کی پکی گرہ اور عمل کا انجن</h3>
+            <h3>حقیقتِ عقیدہ: دل کی پکی گرہ اور اعمال کی روح</h3>
             <p>لفظی تحقیق، حدیثِ جبریلؑ اور صحابہ کرامؓ کا تدریجی طریقہ کار</p>
           </div>
           <div class="slide-split-grid">
@@ -989,18 +1002,18 @@
         </div>
       </div>
 
-      <!-- Question 6: گاڑی کی چابی اور بمپر اسٹیکر -->
+      <!-- Question 6: شجرِ طیبہ اور مصنوعی پتے -->
       <div class="faq-youth-card">
         <div class="faq-q-header">
           <div class="faq-q-num">۶</div>
-          <h3 class="faq-q-title">گاڑی کی چابی اور بمپر اسٹیکر: کیا صرف کار پر 'مسلم' لکھوانے سے گاڑی چلے گی بغیر چابی کے؟</h3>
+          <h3 class="faq-q-title">شجرِ طیبہ اور جڑ: کیا سوکھے درخت پر مصنوعی پھول لگانے سے درخت زندہ ہو سکتا ہے؟</h3>
         </div>
-        <span class="faq-metaphor-tag">🚗 استعارہ: عقیدہ بمقابلہ محض روایتی دعوے</span>
+        <span class="faq-metaphor-tag">🌳 استعارہ: اصل اور فروع (قرآنی تمثیل: شجرۂ طیبہ)</span>
         <div class="faq-body-text">
-          ایک شخص مرسیڈیز کار خریدے، اس پر دنیا کے خوبصورت ترین اسٹیکر لگوائے، مگر اس کے پاس نہ کار کی چابی ہو اور نہ انجن میں پٹرول ہو۔ کیا وہ کار سفر طے کرے گی؟ ہرگز نہیں! نام کا مسلمان ہونا، شناختی کارڈ پر مذہب لکھوانا محض بمپر اسٹیکر ہے۔ دل کے اندر جب تک اللہ اور رسول ﷺ پر غیر متزلزل یقین اور عقیدہ نہ ہو، زندگی کی گاڑی جہنم کی طرف پھسلتی رہے گی اور کوئی عمل بارگاہِ الٰہی میں وزن نہیں پائے گا۔
+          ایک شخص اپنے باغ کے سوکھے، بے جان درخت پر خوبصورت پلاسٹک کے پھل، پھول اور سبز پتے چپکا دے اور کہے کہ میرا باغ ہرابھرا ہے۔ کیا کوئی عقلمند اسے زندہ درخت مانے گا؟ ہرگز نہیں! جب تک زمین کے اندر گہری، مضبوط اور تر و تازہ جڑیں نہ ہوں، اوپر کی کوئی مصنوعی سجاوٹ درخت کو زندگی نہیں دے سکتی۔ محض نام کا مسلمان ہونا یا رسمی دعوے کرنا سوکھے تنے پر مصنوعی پتے لگانے کی طرح ہے۔ قرآن نے کلمۂ طیبہ اور عقیدے کو "شجرۂ طیبہ" فرمایا ہے جس کی جڑیں دل کی گہرائیوں میں جمی ہوتی ہیں: ﴿أَصْلُهَا ثَابِتٌ وَفَرْعُهَا فِي السَّمَاءِ﴾۔ جب تک دل میں سچا عقیدہ نہ ہو، ظاہری اعمال بارگاہِ الٰہی میں قبولیت کا وزن نہیں پاتے۔
         </div>
         <div class="faq-takeaway">
-          <strong>حاصلِ کلام:</strong> عقیدہ دل کی چابی اور انجن ہے؛ اس کے بغیر اعمال کی باڈی بے جان ہے۔
+          <strong>حاصلِ کلام:</strong> عقیدہ تمام اعمال کی جڑ اور روح ہے؛ جڑ کٹ جائے تو عمل کے تمام پھل اور پتے سوکھ کر گر جاتے ہیں۔
         </div>
       </div>
 
