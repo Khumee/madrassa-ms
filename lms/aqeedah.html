@@ -409,6 +409,200 @@
       background: #1da851;
       transform: scale(1.03);
     }
+
+    /* ========================================================
+       TOPIC FOOTER NAVIGATION STYLES
+       ======================================================== */
+    .topic-footer {
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(8, 13, 26, 0.99) 100%);
+      border-top: 2px solid var(--border-color, #24354d);
+      margin-top: 5rem;
+      padding: 3.5rem 1.5rem 2.5rem 1.5rem;
+      position: relative;
+      z-index: 10;
+      clear: both;
+    }
+    body.theme-dars .topic-footer {
+      background: linear-gradient(180deg, #131d2e 0%, #0d1522 100%);
+      border-top-color: #24354d;
+    }
+    body.theme-light .topic-footer {
+      background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+      border-top-color: #cbd5e1;
+    }
+    .footer-container {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    .footer-links {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .footer-btn {
+      background: rgba(30, 41, 59, 0.65);
+      backdrop-filter: blur(8px);
+      border: 1.5px solid var(--border-color, #24354d);
+      border-radius: 14px;
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    body.theme-light .footer-btn {
+      background: #ffffff;
+      border-color: #e2e8f0;
+    }
+    .footer-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      left: 0;
+      height: 3px;
+      background: transparent;
+      transition: background 0.25s ease;
+    }
+    .footer-btn.prev-topic::before {
+      background: #38bdf8;
+    }
+    .footer-btn.home-topic::before {
+      background: #f59e0b;
+    }
+    .footer-btn.next-topic::before {
+      background: #10b981;
+    }
+    .footer-btn:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+      border-color: rgba(212, 175, 55, 0.4);
+      background: rgba(30, 41, 59, 0.95);
+    }
+    body.theme-light .footer-btn:hover {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    }
+    .footer-btn-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+      transition: transform 0.25s ease;
+    }
+    .footer-btn.prev-topic .footer-btn-icon {
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: #38bdf8;
+    }
+    .footer-btn.home-topic .footer-btn-icon {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #f59e0b;
+    }
+    .footer-btn.next-topic .footer-btn-icon {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #10b981;
+    }
+    .footer-btn:hover .footer-btn-icon {
+      transform: scale(1.12);
+    }
+    .footer-btn .btn-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+    .footer-btn .btn-sub {
+      font-size: 0.82rem;
+      color: #94a3b8;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    body.theme-light .footer-btn .btn-sub {
+      color: #64748b;
+    }
+    .footer-btn .btn-main {
+      font-size: 1.12rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      font-family: 'Amiri', serif;
+      line-height: 1.4;
+      transition: color 0.2s ease;
+    }
+    body.theme-light .footer-btn .btn-main {
+      color: #0f172a;
+    }
+    .footer-btn:hover .btn-main {
+      color: #fcd34d;
+    }
+    body.theme-light .footer-btn:hover .btn-main {
+      color: #b45309;
+    }
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 2rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      align-items: center;
+    }
+    body.theme-light .footer-bottom {
+      border-top-color: #e2e8f0;
+    }
+    .footer-brand {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 0.6rem;
+      color: #cbd5e1;
+      font-size: 0.95rem;
+    }
+    body.theme-light .footer-brand {
+      color: #475569;
+    }
+    .footer-brand-title {
+      font-weight: 700;
+      color: #fcd34d;
+    }
+    body.theme-light .footer-brand-title {
+      color: #b45309;
+    }
+    .footer-brand-sep {
+      color: #64748b;
+    }
+    .footer-copy {
+      color: #94a3b8;
+      font-size: 0.85rem;
+      margin: 0;
+    }
+    body.theme-light .footer-copy {
+      color: #64748b;
+    }
+    @media (max-width: 768px) {
+      .footer-links {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      .topic-footer {
+        padding: 2.5rem 1rem 2rem 1rem;
+        margin-top: 3rem;
+      }
+    }
   </style>
 </head>
 <body class="theme-dars">
@@ -1170,7 +1364,6 @@
         </button>
       </div>
     </section>
-    </section>
 
   </main>
 
@@ -1179,29 +1372,42 @@
     <div class="footer-container">
       <div class="footer-links">
         <a href="burhan-tatbiq.html" class="footer-btn prev-topic">
-          <span class="btn-arrow">❮</span>
+          <div class="footer-btn-icon">
+            <span class="btn-arrow">➡️</span>
+          </div>
           <div class="btn-content">
             <span class="btn-sub">پچھلا موضوع (نشست ۲)</span>
             <span class="btn-main">برہانِ تطبیق اور ابطالِ تسلسل</span>
           </div>
         </a>
         <a href="index.html" class="footer-btn home-topic">
-          <span class="btn-icon">📚</span>
+          <div class="footer-btn-icon">
+            <span class="btn-icon">📚</span>
+          </div>
           <div class="btn-content">
-            <span class="btn-sub">فہرستِ کتب</span>
-            <span class="btn-main">تمام موضوعات</span>
+            <span class="btn-sub">فہرستِ کتب و مضامین</span>
+            <span class="btn-main">تمام موضوعات پر واپس جائیں</span>
           </div>
         </a>
         <a href="tarjeeh.html" class="footer-btn next-topic">
+          <div class="footer-btn-icon">
+            <span class="btn-arrow">⬅️</span>
+          </div>
           <div class="btn-content">
             <span class="btn-sub">پہلا موضوع (نشست ۱)</span>
             <span class="btn-main">ترجیح بلا مرجح کا بطلان</span>
           </div>
-          <span class="btn-arrow">❯</span>
         </a>
       </div>
       <div class="footer-bottom">
-        <p>جامعہ آن لائن لرننگ مینجمنٹ سسٹم (LMS) • نشست ۳: حقیقتِ عقیدہ و ایمانِ مفصل • تمام حقوق محفوظ ہیں</p>
+        <div class="footer-brand">
+          <span class="footer-brand-title">جامعہ آن لائن لرننگ مینجمنٹ سسٹم (LMS)</span>
+          <span class="footer-brand-sep">•</span>
+          <span>نشست ۳: حقیقتِ عقیدہ و ایمانِ مفصل</span>
+          <span class="footer-brand-sep">•</span>
+          <span>دورۂ ایمانیات و کلامیات</span>
+        </div>
+        <p class="footer-copy">© تمام حقوق محفوظ ہیں • دینی و فکری رہنمائی کے لیے ایک جدید اور سلیس پیشکش</p>
       </div>
     </div>
   </footer>
