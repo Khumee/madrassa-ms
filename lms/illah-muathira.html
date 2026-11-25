@@ -133,64 +133,90 @@
 
 <body class="theme-dars">
 
-  <!-- Top App Header -->
-  <header class="app-header">
-    <div class="header-inner">
-      <div class="brand-area">
-        <a href="index.html" class="back-link" title="تمام موضوعات پر واپس جائیں">
-          <span class="back-arrow">➜</span>
-          <span>فہرستِ نصاب</span>
+  <!-- Top LMS Portal Navigation -->
+  <div class="lms-top-nav">
+    <div class="lms-nav-container">
+      <div class="lms-nav-links">
+        <a href="index.html" class="lms-nav-btn lms-btn-topics" title="فہرستِ اسباق پر واپس جائیں">
+          <span class="lms-icon">📚</span>
+          <span>فہرستِ اسباق</span>
         </a>
-        <div class="brand-divider"></div>
-        <div class="brand-titles">
-          <span class="sub-title">جامعہ آن لائن LMS • تخصص فی الفقہ والافتاء</span>
-          <h1 class="main-title">التوضيح: القياس (فصل في دفع العلل المؤثرة)</h1>
-        </div>
+        <a href="/" class="lms-nav-btn lms-btn-home" title="مرکزی مدرسہ پورٹل پر جائیں">
+          <span class="lms-icon">🏛️</span>
+          <span>مرکزی پورٹل</span>
+        </a>
+      </div>
+      <div class="lms-breadcrumb">
+        <span class="crumb-root">مدرسہ پورٹل</span>
+        <span class="crumb-sep">/</span>
+        <span class="crumb-item">درجہ سابعہ (العالیۃ الثانیۃ)</span>
+        <span class="crumb-sep">/</span>
+        <span class="crumb-item">أصول الفقه</span>
+        <span class="crumb-sep">/</span>
+        <span class="crumb-active">التوضيح: فصل في دفع العلل المؤثرة</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header Section -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="badge-islamic">درسِ نظامی • أصول الفقه الحنفي</div>
+        <h1 class="main-title">التوضيح في حل غوامض التنقيح</h1>
+        <p class="subtitle">للإمام صدر الشريعة عبيد الله بن مسعود المحبوبي الحنفيؒ | القياس: فصل في دفع العلل المؤثرة والموانع الخمسة (صفحات ۳۷۰ تا ۳۸۰)</p>
       </div>
 
-      <div class="actions-area">
-        <div class="audio-control-pill" id="audioToggleBtn" title="صوتی تلاوت و تشریح سنیں">
-          <span class="audio-wave"><span></span><span></span><span></span></span>
-          <span class="audio-text">صوتی مطالعہ</span>
+      <div class="header-actions">
+        <div class="theme-switcher">
+          <button id="themeToggleBtn" class="action-btn" title="تھیم تبدیل کریں">
+            <span class="icon">🌓</span>
+            <span class="btn-text">اندازِ ظاہری</span>
+          </button>
         </div>
-
-        <button class="theme-toggle-btn" id="themeToggleBtn" title="تھیم تبدیل کریں">
-          <span class="theme-icon">🌓</span>
-          <span class="theme-label">ڈارک / لائٹ</span>
+        <a href="downloads/Tawzeeh-Muathira-Complete.pdf" class="action-btn download-btn" download="Tawzeeh-Muathira-Complete.pdf" title="سارا موضوع ایک جامع پی ڈی ایف میں ڈاؤنلوڈ کریں">
+          <span class="icon">📚</span>
+          <span class="btn-text">ڈاؤنلوڈ مکمل گائیڈ (PDF)</span>
+        </a>
+        <a href="downloads/Tawzeeh-Muathira-Lecture-Notes.pdf" class="action-btn download-btn secondary" download="Tawzeeh-Muathira-Lecture-Notes.pdf" title="درسی نوٹس پی ڈی ایف ڈاؤنلوڈ کریں">
+          <span class="icon">📜</span>
+          <span class="btn-text">درسی نوٹس (PDF)</span>
+        </a>
+        <button id="printBtn" class="action-btn secondary" onclick="window.print()" title="صفحہ پرنٹ کریں">
+          <span class="icon">🖨️</span>
+          <span class="btn-text">پرنٹ</span>
         </button>
       </div>
     </div>
-  </header>
 
-  <!-- Sticky Sub-Navigation Bar -->
-  <nav class="sticky-nav">
-    <div class="nav-container">
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs" id="mainNav">
       <button class="nav-btn active" data-tab="tab-overview">
-        <span class="nav-icon">📌</span>
-        <span>۱. خاکہ و تعارف</span>
+        <span class="tab-icon">📖</span>
+        <span>تعارف و خلاصہ</span>
       </button>
       <button class="nav-btn" data-tab="tab-text">
-        <span class="nav-icon">📖</span>
-        <span>۲. متن و مفصل نوٹس</span>
+        <span class="tab-icon">📜</span>
+        <span>متن و مفصل نوٹس</span>
       </button>
       <button class="nav-btn" data-tab="tab-logic">
-        <span class="nav-icon">🌳</span>
-        <span>۳. شجرۂ اعتراضات و مناہج</span>
+        <span class="tab-icon">🌳</span>
+        <span>شجرۂ اعتراضات و مناہج</span>
       </button>
       <button class="nav-btn" data-tab="tab-mawani">
-        <span class="nav-icon">🏹</span>
-        <span>۴. موانعِ خمسہ وتخصیصِ علت</span>
+        <span class="tab-icon">🏹</span>
+        <span>موانعِ خمسہ وتخصیصِ علت</span>
       </button>
       <button class="nav-btn" data-tab="tab-debates">
-        <span class="nav-icon">⚖️</span>
-        <span>۵. تقابلی مناظرات و امثلہ</span>
+        <span class="tab-icon">⚖️</span>
+        <span>تقابلی مناظرات و امثلہ</span>
       </button>
       <button class="nav-btn" data-tab="tab-quiz">
-        <span class="nav-icon">📝</span>
-        <span>۶. امتحانی خود آزمائی</span>
+        <span class="tab-icon">📝</span>
+        <span>امتحانی خود آزمائی</span>
       </button>
-    </div>
-  </nav>
+    </nav>
+  </header>
 
   <!-- Main Content Container -->
   <main class="main-container">

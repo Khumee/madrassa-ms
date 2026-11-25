@@ -133,64 +133,90 @@
 
 <body class="theme-dars">
 
-  <!-- Top App Header -->
-  <header class="app-header">
-    <div class="header-inner">
-      <div class="brand-area">
-        <a href="index.html" class="back-link" title="تمام موضوعات پر واپس جائیں">
-          <span class="back-arrow">➜</span>
-          <span>فہرستِ نصاب</span>
+  <!-- Top LMS Portal Navigation -->
+  <div class="lms-top-nav">
+    <div class="lms-nav-container">
+      <div class="lms-nav-links">
+        <a href="index.html" class="lms-nav-btn lms-btn-topics" title="فہرستِ اسباق پر واپس جائیں">
+          <span class="lms-icon">📚</span>
+          <span>فہرستِ اسباق</span>
         </a>
-        <div class="brand-divider"></div>
-        <div class="brand-titles">
-          <span class="sub-title">جامعہ آن لائن LMS • تخصص فی الفقہ والافتاء</span>
-          <h1 class="main-title">التوضيح: القياس (فصل في دفع العلل الطردية والانتقال والحجج الفاسدة)</h1>
-        </div>
+        <a href="/" class="lms-nav-btn lms-btn-home" title="مرکزی مدرسہ پورٹل پر جائیں">
+          <span class="lms-icon">🏛️</span>
+          <span>مرکزی پورٹل</span>
+        </a>
+      </div>
+      <div class="lms-breadcrumb">
+        <span class="crumb-root">مدرسہ پورٹل</span>
+        <span class="crumb-sep">/</span>
+        <span class="crumb-item">درجہ سابعہ (العالیۃ الثانیۃ)</span>
+        <span class="crumb-sep">/</span>
+        <span class="crumb-item">أصول الفقه</span>
+        <span class="crumb-sep">/</span>
+        <span class="crumb-active">التوضيح: فصل في دفع العلل الطردية</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header Section -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="badge-islamic">درسِ نظامی • أصول الفقه الحنفي</div>
+        <h1 class="main-title">التوضيح في حل غوامض التنقيح</h1>
+        <p class="subtitle">للإمام صدر الشريعة عبيد الله بن مسعود المحبوبي الحنفيؒ | القياس: فصل في دفع العلل الطردية والانتقال والاستصحاب (صفحات ۳۸۲ تا ۳۸۹)</p>
       </div>
 
-      <div class="actions-area">
-        <div class="audio-control-pill" id="audioToggleBtn" title="صوتی تلاوت و تشریح سنیں">
-          <span class="audio-wave"><span></span><span></span><span></span></span>
-          <span class="audio-text">صوتی مطالعہ</span>
+      <div class="header-actions">
+        <div class="theme-switcher">
+          <button id="themeToggleBtn" class="action-btn" title="تھیم تبدیل کریں">
+            <span class="icon">🌓</span>
+            <span class="btn-text">اندازِ ظاہری</span>
+          </button>
         </div>
-
-        <button class="theme-toggle-btn" id="themeToggleBtn" title="تھیم تبدیل کریں">
-          <span class="theme-icon">🌓</span>
-          <span class="theme-label">ڈارک / لائٹ</span>
+        <a href="downloads/Tawzeeh-Tardiyah-Complete.pdf" class="action-btn download-btn" download="Tawzeeh-Tardiyah-Complete.pdf" title="سارا موضوع ایک جامع پی ڈی ایف میں ڈاؤنلوڈ کریں">
+          <span class="icon">📚</span>
+          <span class="btn-text">ڈاؤنلوڈ مکمل گائیڈ (PDF)</span>
+        </a>
+        <a href="downloads/Tawzeeh-Tardiyah-Lecture-Notes.pdf" class="action-btn download-btn secondary" download="Tawzeeh-Tardiyah-Lecture-Notes.pdf" title="درسی نوٹس پی ڈی ایف ڈاؤنلوڈ کریں">
+          <span class="icon">📜</span>
+          <span class="btn-text">درسی نوٹس (PDF)</span>
+        </a>
+        <button id="printBtn" class="action-btn secondary" onclick="window.print()" title="صفحہ پرنٹ کریں">
+          <span class="icon">🖨️</span>
+          <span class="btn-text">پرنٹ</span>
         </button>
       </div>
     </div>
-  </header>
 
-  <!-- Sticky Sub-Navigation Bar -->
-  <nav class="sticky-nav">
-    <div class="nav-container">
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs" id="mainNav">
       <button class="nav-btn active" data-tab="tab-overview">
-        <span class="nav-icon">📌</span>
-        <span>۱. خاکہ و تعارف</span>
+        <span class="tab-icon">📖</span>
+        <span>تعارف و خلاصہ</span>
       </button>
       <button class="nav-btn" data-tab="tab-text">
-        <span class="nav-icon">📖</span>
-        <span>۲. متن و مفصل نوٹس</span>
+        <span class="tab-icon">📜</span>
+        <span>متن، ترجمہ و مفصل نوٹس</span>
       </button>
       <button class="nav-btn" data-tab="tab-logic">
-        <span class="nav-icon">🌳</span>
-        <span>۳. شجرۂ مناہجِ دفع</span>
+        <span class="tab-icon">🌳</span>
+        <span>شجرۂ مناہجِ دفع</span>
       </button>
       <button class="nav-btn" data-tab="tab-intiqal">
-        <span class="nav-icon">🌟</span>
-        <span>۴. فنِ انتقال ومناظرۂ ابراہیمیؑ</span>
+        <span class="tab-icon">🌟</span>
+        <span>فنِ انتقال ومناظرۂ ابراہیمیؑ</span>
       </button>
       <button class="nav-btn" data-tab="tab-istishab">
-        <span class="nav-icon">⚖️</span>
-        <span>۵. استصحاب وحججِ فاسدہ</span>
+        <span class="tab-icon">⚖️</span>
+        <span>استصحاب وحججِ فاسدہ</span>
       </button>
       <button class="nav-btn" data-tab="tab-quiz">
-        <span class="nav-icon">📝</span>
-        <span>۶. امتحانی خود آزمائی</span>
+        <span class="tab-icon">📝</span>
+        <span>امتحانی خود آزمائی</span>
       </button>
-    </div>
-  </nav>
+    </nav>
+  </header>
 
   <!-- Main Content Container -->
   <main class="main-container">
@@ -324,11 +350,52 @@
       <div class="text-controls-bar">
         <div class="page-pills">
           <span class="pill-label">صفحاتِ التوضیح:</span>
-          <a href="#page-382" class="page-pill active">ص ۳۸۲ - ۳۸۳</a>
+          <a href="#tamheed-tard" class="page-pill active">تمہید: حقیقتِ طرد</a>
+          <a href="#page-382" class="page-pill">ص ۳۸۲ - ۳۸۳</a>
           <a href="#page-384" class="page-pill">ص ۳۸۴ - ۳۸۵</a>
           <a href="#page-385" class="page-pill">ص ۳۸۵ - ۳۸۶</a>
           <a href="#page-387" class="page-pill">ص ۳۸۷ - ۳۸۸</a>
           <a href="#page-388" class="page-pill">ص ۳۸۸ - ۳۸۹</a>
+        </div>
+      </div>
+
+      <!-- Scholastic Introduction: What is Illah Tardiyyah? -->
+      <div class="page-container mt-4" id="tamheed-tard">
+        <div class="page-ribbon" style="background: linear-gradient(90deg, #d97706, #b45309);">تمہیدِ اصولی: «العلة الطردية» کی حقیقت اور اس کا علتِ مؤثرہ سے بنیادی فرق</div>
+
+        <div class="tafseel-section" style="margin-top: 0.5rem; border-right-color: #f59e0b; background: rgba(15, 23, 42, 0.85);">
+          <div class="tafseel-header-pill" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24;">اصولی و فکری بنیاد • Foundational Inquiry</div>
+          <div class="tafseel-title" style="font-size: 1.4rem; color: #fef08a;">۱. العلة الطردية (طردی علت) کیا ہے اور اس کی پیدائش کیسے ہوئی؟</div>
+          <div class="tafseel-body" style="font-size: 0.95rem; line-height: 1.9;">
+            علمِ اصولِ فقہ میں قیاس کا پورا دارومدار <strong>"علت"</strong> پر ہے۔ ائمہ اصولیین کے مابین علت کے ثبوت کا سب سے بڑا معرکہ یہی ہے کہ کیا محض <strong>"دوران"</strong> سے علت ثابت ہو جاتی ہے یا اس میں <strong>"تاثیر"</strong> کی شرط لازمی ہے؟
+            <div class="tafseel-grid mt-2">
+              <div class="tafseel-card" style="border-right: 3px solid #10b981;">
+                <strong style="color: #34d399; font-size: 1.05rem;">العلة المؤثرة (احناف کی معتبر علت):</strong>
+                <p style="margin-top: 0.4rem; font-size: 0.89rem; line-height: 1.75;">
+                  وہ علت ہے جس کی تاثیر شریعت کے نصوصِ قطعیہ یا اجماع سے ثابت ہو۔ یعنی شریعت نے خود بتا دیا ہو کہ یہی وصف اس حکم کی غرض اور مصلحت (جلبِ نفع یا دفعِ ضرر) ہے۔ جیسے شراب کی حرمت میں <strong>«اسکار» (نشہ لانا)</strong> کہ عقل اور شریعت دونوں گواہی دیتے ہیں کہ حرمت کا سبب عقل کا زائل ہونا ہے۔
+                </p>
+              </div>
+
+              <div class="tafseel-card" style="border-right: 3px solid #f59e0b;">
+                <strong style="color: #fbbf24; font-size: 1.05rem;">العلة الطردية (شوافع و معتزلہ کے ہاں دوران والی علت):</strong>
+                <p style="margin-top: 0.4rem; font-size: 0.89rem; line-height: 1.75;">
+                  وہ وصف جو حکم کے ساتھ صرف <strong>ہمیشہ پایا جائے (الدوران وجوداً وعدماً)</strong>، یعنی جب وہ وصف آئے تو حکم آئے اور جب وہ نہ ہو تو حکم نہ ہو؛ لیکن <em>شرعاً اس وصف کی اس حکم کے اندر کوئی معقول مناسبت یا تاثیر ثابت نہ ہو!</em>
+                  <br>• جیسے کوئی کہے: «شراب اس لیے حرام ہے کہ اس کا رنگ لال ہے یا وہ سیال مائع ہے»، کیونکہ جب تک مائع پیا جائے نشہ ہوگا اور جب نہ پیا جائے تو نہیں ہوگا۔ یہ محض اتفاقی ہمراہی (طرد) ہے، حقیقی علت نہیں۔
+                </p>
+              </div>
+            </div>
+
+            <div class="tafseel-card mt-3" style="border-right: 3px solid #ef4444; background: rgba(239, 68, 68, 0.08);">
+              <strong style="color: #fca5a5; font-size: 1.02rem;">صدر الشریعہؒ کا قطعی فیصلہ: «الطرد باطل عندنا»</strong>
+              <p style="margin-top: 0.4rem; font-size: 0.91rem; line-height: 1.8;">
+                امام صدر الشریعہؒ فرماتے ہیں: احناف کے نزدیک قیاس میں علتِ طردیہ کو دلیل بنانا <strong>سرے سے باطل ہے</strong>! کیونکہ محض کسی بے جان صفت کا حکم کے ساتھ گھومنا (دوران) اس بات کی قطعی دلیل نہیں بن سکتا کہ وہی اس کی علت ہے۔ جب مخالف علتِ طردیہ پر اپنا قیاس کھڑا کرے تو حنفی فقیہ فوری طور پر اس کے قیاس کو توڑنے کے لیے <strong>۴ مناہجِ دفع</strong> کا استعمال کرتا ہے:
+                <br>• <strong>۱. القول بموجب العلة</strong> (معلل کی بات کا ظاہری تقاضا مان کر بھی اپنا موقف بچا لینا)۔
+                <br>• <strong>۲. الممانعة</strong> (وصف یا حکم کی بنیاد پر ہی ممانعت لگا دینا)۔
+                <br>• <strong>۳. فساد الوضع</strong> (یہ ثابت کرنا کہ اس وصف کو علت بنانا شرعی مصلحت کے الٹ ہے جیسے اسلام کو فرقت کی علت بنانا)۔
+                <br>• <strong>۴. المناقضة</strong> (اس طردی علت کو کسی دوسری شرعی نظیر سے توڑ کر معلل کو علتِ مؤثرہ کی طرف بھاگنے پر مجبور کر دینا)۔
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
