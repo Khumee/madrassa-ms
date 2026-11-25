@@ -182,6 +182,10 @@
           <span class="icon">📜</span>
           <span class="btn-text">درسی نوٹس (PDF)</span>
         </a>
+        <a href="downloads/Tawzeeh-Tardiyah-Slides.pdf" class="action-btn download-btn secondary" download="Tawzeeh-Tardiyah-Slides.pdf" title="پریزنٹیشن سلائیڈز پی ڈی ایف ڈاؤنلوڈ کریں">
+          <span class="icon">📽️</span>
+          <span class="btn-text">سلائیڈز (PDF)</span>
+        </a>
         <button id="printBtn" class="action-btn secondary" onclick="window.print()" title="صفحہ پرنٹ کریں">
           <span class="icon">🖨️</span>
           <span class="btn-text">پرنٹ</span>
@@ -203,11 +207,23 @@
         <span class="tab-icon">🌳</span>
         <span>شجرۂ مناہجِ دفع</span>
       </button>
+      <button class="nav-btn highlight-tab" data-tab="tab-slides">
+        <span class="tab-icon">📽️</span>
+        <span>پریزنٹیشن سلائیڈز و تصویری تفہیم</span>
+      </button>
       <button class="nav-btn" data-tab="tab-intiqal">
         <span class="tab-icon">🌟</span>
         <span>فنِ انتقال ومناظرۂ ابراہیمیؑ</span>
       </button>
       <button class="nav-btn" data-tab="tab-istishab">
+        <span class="tab-icon">⚖️</span>
+        <span>استصحاب وحججِ فاسدہ</span>
+      </button>
+      <button class="nav-btn" data-tab="tab-quiz">
+        <span class="tab-icon">📝</span>
+        <span>امتحانی خود آزمائی</span>
+      </button>
+    </nav>
         <span class="tab-icon">⚖️</span>
         <span>استصحاب وحججِ فاسدہ</span>
       </button>
@@ -737,6 +753,262 @@
               <strong>مثال:</strong> وضوء اور تیمم میں نیت کی شرط کو طہارتِ خبث سے توڑنا۔
             </div>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB: PRESENTATION SLIDES ==================== -->
+    <section id="tab-slides" class="tab-pane">
+      <div class="section-header-row">
+        <div>
+          <span class="badge-islamic">کلاس روم موڈ • 8 Visual Slides Deck</span>
+          <h2 class="section-title">پریزنٹیشن سلائیڈز: مختصر عبارات اور تصویری خاکے</h2>
+          <p class="section-desc">کلاس میں تدریس کے لیے جامع، غیر بوجھل، اور تصویری تفہیم پر مبنی ۸ سلائیڈز</p>
+        </div>
+      </div>
+
+      <div class="slide-deck-container">
+        <div class="slide-header-bar">
+          <div class="slide-counter">
+            سلائیڈ <span id="slideCurrentNum">۱</span> از <span id="slideTotalNum">۸</span>
+          </div>
+          <div style="font-size: 0.85rem; color: var(--text-muted);">
+            کی بورڈ کے بائیں/دائیں تیر (Arrow Keys) یا نیچے بٹن سے سلائیڈ تبدیل کریں
+          </div>
+        </div>
+
+        <div class="slide-progress-track">
+          <div class="slide-progress-bar" id="slideProgressBar"></div>
+        </div>
+
+        <!-- Slide 1 -->
+        <div class="lecture-slide active" data-slide="1">
+          <span class="slide-tag">سلائیڈ ۱: حقیقتِ عللِ طردیہ</span>
+          <h3 class="slide-title">العلة الطردية کیا ہے؟ اور احناف کا موقف</h3>
+          <div class="slide-pictorial-layout">
+            <div class="slide-text-col">
+              <ul class="slide-bullets">
+                <li><strong>تعریف:</strong> وہ علت جس کا ثبوت صرف "دوران" (ہمراہی) سے ہو، تاثیر کے بغیر۔</li>
+                <li><strong>شوافع کا موقف:</strong> جب وصف اور حکم ہمیشہ ساتھ پائے جائیں تو علیت مان لیتے ہیں۔</li>
+                <li><strong>احناف کا فیصلہ:</strong> <em>«الطرد باطل عندنا»</em>؛ بے اثر ہمراہی علت نہیں بنتی۔</li>
+                <li><strong>بنیادی عیب:</strong> طردی وصف اور حکم کے مابین کوئی شرعی مصلحت نہیں ہوتی۔</li>
+              </ul>
+              <div class="slide-formula-badge">
+                الدوران المجرد (طرد) ≠ العلية الشرعية المؤثرة
+              </div>
+            </div>
+            <div class="pictorial-box">
+              <span class="pictorial-icon">🌀</span>
+              <div class="pictorial-title">تصویری خاکہ: طرد بمقابلہ تاثیر</div>
+              <div class="pictorial-diagram-row">
+                <div class="pictorial-card-mini card-mini-gold">طردی وصف (بے اثر ہمراہی)</div>
+                <div style="font-size: 1.4rem; font-weight: bold; color: var(--gold-primary);">≠</div>
+                <div class="pictorial-card-mini card-mini-green">علتِ مؤثرہ (شرعی مصلحت)</div>
+              </div>
+              <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.5rem;">
+                احناف صرف اس علت کو مانتے ہیں جس کی تاثیر شریعت سے ثابت ہو!
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="lecture-slide" data-slide="2">
+          <span class="slide-tag">سلائیڈ ۲: تمثیلِ دوران بمقابلہ تاثیر</span>
+          <h3 class="slide-title">شراب کی حرمت میں رنگ بمقابلہ نشہ</h3>
+          <div class="slide-pictorial-layout">
+            <div class="slide-text-col">
+              <ul class="slide-bullets">
+                <li><strong>طردی قیاس (باطل):</strong> «شراب اس لیے حرام ہے کہ اس کا رنگ لال ہے یا وہ مائع ہے»!</li>
+                <li><strong>حقیقی مؤثر علت:</strong> شراب کی حرمت کی اصل علت «اسکار» (نشہ لانا) ہے۔</li>
+                <li><strong>اصول:</strong> جب تک لال مائع رہے گا نشہ ہوگا، مگر لال رنگ کو علت کہنا جہالت ہے۔</li>
+              </ul>
+              <div class="slide-formula-badge">
+                شراب کا لال رنگ = طرد | اسکار (نشہ) = علتِ مؤثرہ
+              </div>
+            </div>
+            <div class="pictorial-box">
+              <span class="pictorial-icon">🍷</span>
+              <div class="pictorial-title">تصویری موازنہ</div>
+              <div class="pictorial-diagram-row">
+                <div class="pictorial-card-mini card-mini-red">سرخ رنگ (طرد محض ❌)</div>
+                <div class="pictorial-card-mini card-mini-green">اسکار و نشہ (مؤثرہ ✔️)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="lecture-slide" data-slide="3">
+          <span class="slide-tag">سلائیڈ ۳: منهج ۱ (القول بموجب العلة)</span>
+          <h3 class="slide-title">تقاضا تسلیم کرنا مگر اصل نزاع محفوظ رکھنا</h3>
+          <div class="slide-pictorial-layout">
+            <div class="slide-text-col">
+              <ul class="slide-bullets">
+                <li><strong>دعویٰ معلل:</strong> مسحِ سر رکن ہے لہٰذا چہرے کی طرح ۳ بار کا تکرار مسنون ہوگا۔</li>
+                <li><strong>حنفی جواب:</strong> ہم بھی مسح میں تثلیث کو مسنون مانتے ہیں!</li>
+                <li><strong>حل:</strong> فرض چوتھائی سر ہے، جب پورے سر کا مسح کیا تو تثلیث سے بھی زائد ہو گیا!</li>
+              </ul>
+              <div class="slide-formula-badge">
+                ربع سر (فرض) + باقی تین چوتھائی = تثلیث و زیادہ
+              </div>
+            </div>
+            <div class="pictorial-box">
+              <span class="pictorial-icon">🛡️</span>
+              <div class="pictorial-title">فنِ القول بموجب العلة</div>
+              <div class="pictorial-diagram-row">
+                <div class="pictorial-card-mini card-mini-blue">معلل کی دلیل مانی</div>
+                <div style="font-size: 1.2rem;">➡️</div>
+                <div class="pictorial-card-mini card-mini-gold">مگر اپنا مدعا بچا لیا!</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 4 -->
+        <div class="lecture-slide" data-slide="4">
+          <span class="slide-tag">سلائیڈ ۴: منهج ۲ (الممانعة)</span>
+          <h3 class="slide-title">وصف اور حکم میں ممانعت وارد کرنا</h3>
+          <div class="slide-pictorial-layout">
+            <div class="slide-text-col">
+              <ul class="slide-bullets">
+                <li><strong>مسئلہ:</strong> رمضان میں کھانے پینے پر کفارہ واجب نہ ہونے کا شوافع کا قیاس۔</li>
+                <li><strong>دعویٰ شوافع:</strong> کفارہ ایسی عقوبت ہے جو جماع پر موقوف ہے جیسے حدِ زنا۔</li>
+                <li><strong>ممانعتِ احناف:</strong> ہم تسلیم نہیں کرتے کہ کفارہ جماع پر ہے، بلکہ فطر (روزہ توڑنے) پر ہے!</li>
+              </ul>
+              <div class="slide-formula-badge">
+                کفارہ = جنایتِ فطر پر عقوبت (نہ کہ صرف جماع پر)
+              </div>
+            </div>
+            <div class="pictorial-box">
+              <span class="pictorial-icon">✋</span>
+              <div class="pictorial-title">الممانعة فی الوصف</div>
+              <div class="pictorial-diagram-row">
+                <div class="pictorial-card-mini card-mini-red">جماع کے ساتھ خاص ❌</div>
+                <div class="pictorial-card-mini card-mini-green">فطر و اکل و شرب ✔️</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 5 -->
+        <div class="lecture-slide" data-slide="5">
+          <span class="slide-tag">سلائیڈ ۵: منهج ۳ (فساد الوضع)</span>
+          <h3 class="slide-title">اسلام نعمت ہے، فرقت کا سبب نہیں بن سکتا</h3>
+          <div class="slide-pictorial-layout">
+            <div class="slide-text-col">
+              <ul class="slide-bullets">
+                <li><strong>قیاسِ شافعی:</strong> میاں بیوی میں سے ایک کے اسلام لانے پر فوری نکاح ٹوٹ جائے گا۔</li>
+                <li><strong>فسادِ وضع:</strong> اسلام کو زوجین کے درمیان جدائی اور سلبِ نعمت کی علت بنا دیا!</li>
+                <li><strong>اصولِ احناف:</strong> اسلام نعمت اور رحمت ہے، وہ نکاح کی نعمت کو نہیں کاٹتا!</li>
+              </ul>
+              <div class="slide-formula-badge">
+                الإسلام لا يصلح قاطعاً للنعمة والردة لا تصلح عفواً
+              </div>
+            </div>
+            <div class="pictorial-box">
+              <span class="pictorial-icon">🕊️</span>
+              <div class="pictorial-title">فسادِ وضع کا بطلان</div>
+              <div class="pictorial-diagram-row">
+                <div class="pictorial-card-mini card-mini-gold">اسلام = الفت و نعمت</div>
+                <div style="font-size: 1.2rem;">⚡</div>
+                <div class="pictorial-card-mini card-mini-red">فرقت و طلاق ❌</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 6 -->
+        <div class="lecture-slide" data-slide="6">
+          <span class="slide-tag">سلائیڈ ۶: منهج ۴ (المناقضة)</span>
+          <h3 class="slide-title">طرد کو توڑ کر مؤثرہ کی پناہ پر لانا</h3>
+          <div class="slide-pictorial-layout">
+            <div class="slide-text-col">
+              <ul class="slide-bullets">
+                <li><strong>قیاس:</strong> «وضوء اور تیمم دونوں طہارتیں ہیں لہٰذا نیت میں برابر ہوں گی»۔</li>
+                <li><strong>مناقضہ:</strong> طہارتِ خبث (کپڑے سے نجاست دھونا) بھی طہارت ہے مگر نیت شرط نہیں۔</li>
+                <li><strong>نتیجہ:</strong> معلل مجبور ہو کر طرد چھوڑ کر علتِ مؤثرہ کی طرف بھاگتا ہے۔</li>
+              </ul>
+              <div class="slide-formula-badge">
+                مناقضہ بطہارتِ خبث ➡️ اضطرار الی العلة المؤثرة
+              </div>
+            </div>
+            <div class="pictorial-box">
+              <span class="pictorial-icon">💧</span>
+              <div class="pictorial-title">مناقضہ کا عمل</div>
+              <div class="pictorial-diagram-row">
+                <div class="pictorial-card-mini card-mini-blue">وضوء + تیمم (نیت)</div>
+                <div style="font-size: 1.2rem;">💥</div>
+                <div class="pictorial-card-mini card-mini-green">طہارتِ خبث (نیت نہیں)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 7 -->
+        <div class="lecture-slide" data-slide="7">
+          <span class="slide-tag">سلائیڈ ۷: فنِ انتقال و مناظرۂ ابراہیمیؑ</span>
+          <h3 class="slide-title">عوام کے سامنے نمرود کے مغالطے کا توڑ</h3>
+          <div class="slide-pictorial-layout">
+            <div class="slide-text-col">
+              <ul class="slide-bullets">
+                <li><strong>پہلی دلیل:</strong> ﴿رَبِّيَ الَّذِي يُحْيِي وَيُمِيتُ﴾ قطعی اور ملزم تھی۔</li>
+                <li><strong>نمرود کا مغالطہ:</strong> دو قیدی لا کر ایک کو چھوڑا اور دوسرے کو قتل کیا۔</li>
+                <li><strong>ابراہیمؑ کا کمال:</strong> فورا مشرق و مغرب والی بدیہی دلیل لا کر نمرود کو ہکا بکا کیا!</li>
+              </ul>
+              <div class="slide-formula-badge">
+                ﴿فَأْتِ بِهَا مِنَ الْمَغْرِبِ فَبُهِتَ الَّذِي كَفَرَ﴾
+              </div>
+            </div>
+            <div class="pictorial-box">
+              <span class="pictorial-icon">☀️</span>
+              <div class="pictorial-title">افحامِ خصم و دفعِ تلبيس</div>
+              <div class="pictorial-diagram-row">
+                <div class="pictorial-card-mini card-mini-gold">احیاء و اماتہ (ملزم)</div>
+                <div style="font-size: 1.2rem;">➡️</div>
+                <div class="pictorial-card-mini card-mini-green">طلوعِ شمس (بدیہی قاطع)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 8 -->
+        <div class="lecture-slide" data-slide="8">
+          <span class="slide-tag">سلائیڈ ۸: استصحابِ حال کا حنفی شاہکار</span>
+          <h3 class="slide-title">«الاستصحاب حجة للدفع لا للإثبات»</h3>
+          <div class="slide-pictorial-layout">
+            <div class="slide-text-col">
+              <ul class="slide-bullets">
+                <li><strong>شوافع:</strong> استصحاب اثبات اور دفع دونوں کی دلیل بنتا ہے۔</li>
+                <li><strong>احناف:</strong> استصحاب صرف حق کے تحفظ (دفع) کی دلیل ہے، نیا حق پانے (اثبات) کی نہیں۔</li>
+                <li><strong>مفقود الخبر:</strong> اپنے مال میں زندہ رہے گا (دفع)، دوسروں کی وراثت نہیں پا سکتا (اثبات)۔</li>
+              </ul>
+              <div class="slide-formula-badge">
+                حفظ المال القديم = دفع (جائز) | أخذ الميراث الجديد = إثبات (ممتنع)
+              </div>
+            </div>
+            <div class="pictorial-box">
+              <span class="pictorial-icon">⚖️</span>
+              <div class="pictorial-title">استصحاب کا حنفی میزان</div>
+              <div class="pictorial-diagram-row">
+                <div class="pictorial-card-mini card-mini-green">الدفع (حق بچانا ✔️)</div>
+                <div class="pictorial-card-mini card-mini-red">الإثبات (نیا حق جمانا ❌)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide Controls Bar -->
+        <div class="slide-controls-bar">
+          <button id="slidePrevBtn" class="action-btn secondary" disabled>
+            <span>اگلی سلائیڈ (Next ➡️)</span>
+          </button>
+          <div style="font-size: 0.9rem; font-weight: bold; color: var(--gold-primary);">
+            جامعہ آن لائن LMS • دورۂ التوضیح
+          </div>
+          <button id="slideNextBtn" class="action-btn">
+            <span>پچھلی سلائیڈ (⬅️ Prev)</span>
+          </button>
         </div>
       </div>
     </section>

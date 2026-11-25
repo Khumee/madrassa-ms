@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initThemeToggle();
   initAudioPill();
   initPagePills();
+  initSlidesPlayer();
   initQuiz();
 });
 
@@ -116,7 +117,64 @@ function initPagePills() {
 }
 
 /* ========================================================
-   5. STUDENT ASSESSMENT QUIZ
+   5. VISUAL SLIDES PLAYER
+======================================================== */
+function initSlidesPlayer() {
+  const slides = document.querySelectorAll('.lecture-slide');
+  const prevBtn = document.getElementById('slidePrevBtn');
+  const nextBtn = document.getElementById('slideNextBtn');
+  const currentIndicator = document.getElementById('slideCurrentNum');
+  const totalIndicator = document.getElementById('slideTotalNum');
+  const progressBar = document.getElementById('slideProgressBar');
+
+  if (!slides.length) return;
+
+  let currentSlideIndex = 0;
+  const totalSlides = slides.length;
+  if (totalIndicator) totalIndicator.textContent = totalSlides;
+
+  function showSlide(index) {
+    if (index < 0) index = 0;
+    if (index >= totalSlides) index = totalSlides - 1;
+    currentSlideIndex = index;
+
+    slides.forEach((slide, idx) => {
+      slide.classList.toggle('active', idx === currentSlideIndex);
+    });
+
+    if (currentIndicator) currentIndicator.textContent = currentSlideIndex + 1;
+    if (progressBar) {
+      const pct = ((currentSlideIndex + 1) / totalSlides) * 100;
+      progressBar.style.width = `${pct}%`;
+    }
+
+    if (prevBtn) prevBtn.disabled = currentSlideIndex === 0;
+    if (nextBtn) nextBtn.disabled = currentSlideIndex === totalSlides - 1;
+  }
+
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => showSlide(currentSlideIndex - 1));
+  }
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => showSlide(currentSlideIndex + 1));
+  }
+
+  document.addEventListener('keydown', (e) => {
+    const slidesTab = document.getElementById('tab-slides');
+    if (slidesTab && slidesTab.classList.contains('active')) {
+      if (e.key === 'ArrowLeft') {
+        showSlide(currentSlideIndex + 1); // RTL Next
+      } else if (e.key === 'ArrowRight') {
+        showSlide(currentSlideIndex - 1); // RTL Prev
+      }
+    }
+  });
+
+  showSlide(0);
+}
+
+/* ========================================================
+   6. STUDENT ASSESSMENT QUIZ
 ======================================================== */
 function initQuiz() {
   const quizData = [

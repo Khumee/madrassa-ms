@@ -182,6 +182,10 @@
           <span class="icon">📜</span>
           <span class="btn-text">درسی نوٹس (PDF)</span>
         </a>
+        <a href="downloads/Tawzeeh-Muathira-Slides.pdf" class="action-btn download-btn secondary" download="Tawzeeh-Muathira-Slides.pdf" title="پریزنٹیشن سلائیڈز پی ڈی ایف ڈاؤنلوڈ کریں">
+          <span class="icon">📽️</span>
+          <span class="btn-text">سلائیڈز (PDF)</span>
+        </a>
         <button id="printBtn" class="action-btn secondary" onclick="window.print()" title="صفحہ پرنٹ کریں">
           <span class="icon">🖨️</span>
           <span class="btn-text">پرنٹ</span>
@@ -202,6 +206,10 @@
       <button class="nav-btn" data-tab="tab-logic">
         <span class="tab-icon">🌳</span>
         <span>شجرۂ اعتراضات و مناہج</span>
+      </button>
+      <button class="nav-btn highlight-tab" data-tab="tab-slides">
+        <span class="tab-icon">📽️</span>
+        <span>پریزنٹیشن سلائیڈز و تصویری تفہیم</span>
       </button>
       <button class="nav-btn" data-tab="tab-mawani">
         <span class="tab-icon">🏹</span>
@@ -755,6 +763,262 @@
               <strong>شہکار:</strong> صومِ رمضان میں شوافع کی فرضیت والی دلیل سے عدمِ تعیین کا اثبات۔
             </div>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB: PRESENTATION SLIDES ==================== -->
+    <section id="tab-slides" class="tab-pane">
+      <div class="section-header-row">
+        <div>
+          <span class="badge-islamic">کلاس روم موڈ • 8 Visual Slides Deck</span>
+          <h2 class="section-title">پریزنٹیشن سلائیڈز: مختصر عبارات اور تصویری خاکے</h2>
+          <p class="section-desc">کلاس میں تدریس کے لیے جامع، غیر بوجھل، اور تصویری تفہیم پر مبنی ۸ سلائیڈز</p>
+        </div>
+      </div>
+
+      <div class="slide-deck-container">
+        <div class="slide-header-bar">
+          <div class="slide-counter">
+            سلائیڈ <span id="slideCurrentNum">۱</span> از <span id="slideTotalNum">۸</span>
+          </div>
+          <div style="font-size: 0.85rem; color: var(--text-muted);">
+            کی بورڈ کے بائیں/دائیں تیر (Arrow Keys) یا نیچے بٹن سے سلائیڈ تبدیل کریں
+          </div>
+        </div>
+
+        <div class="slide-progress-track">
+          <div class="slide-progress-bar" id="slideProgressBar"></div>
+        </div>
+
+        <!-- Slide 1 -->
+        <div class="lecture-slide active" data-slide="1">
+          <span class="slide-tag">سلائیڈ ۱: حقیقتِ عللِ مؤثرہ</span>
+          <h3 class="slide-title">علتِ مؤثرہ کیا ہے؟ اور اعتراضاتِ ستہ</h3>
+          <div class="slide-pictorial-layout">
+            <div class="slide-text-col">
+              <ul class="slide-bullets">
+                <li><strong>تعریف:</strong> وہ علت جس کی تاثیر شریعت کے نصوص یا اجماع سے ثابت ہو۔</li>
+                <li><strong>احناف کا مذہب:</strong> صرف علتِ مؤثرہ ہی قیاسِ شرعی کے لیے معتبر ہے۔</li>
+                <li><strong>اعتراضاتِ ستہ:</strong> النقض، فساد الوضع، عدم الانعكاس، الفرق، الممانعة، المعارضة۔</li>
+                <li><strong>بنیادی مقصد:</strong> مناظرے میں قیاسِ شرعی کا بھرپور علمی و عقلی دفاع۔</li>
+              </ul>
+              <div class="slide-formula-badge">
+                علتِ مؤثرہ = نص یا اجماع سے ثابت شدہ شرعی مصلحت
+              </div>
+            </div>
+            <div class="pictorial-box">
+              <span class="pictorial-icon">🏛️</span>
+              <div class="pictorial-title">تصویری خاکہ: علتِ مؤثرہ کے ۶ قلعے</div>
+              <div class="pictorial-diagram-row">
+                <div class="pictorial-card-mini card-mini-gold">النقض 🛡️</div>
+                <div class="pictorial-card-mini card-mini-blue">فساد الوضع ⚖️</div>
+                <div class="pictorial-card-mini card-mini-green">المعارضة ⚔️</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="lecture-slide" data-slide="2">
+          <span class="slide-tag">سلائیڈ ۲: قلعہ ۱ (منع الوصف)</span>
+          <h3 class="slide-title">خونِ قلیل میں وضو نہ ٹوٹنے کا حل</h3>
+          <div class="slide-pictorial-layout">
+            <div class="slide-text-col">
+              <ul class="slide-bullets">
+                <li><strong>اعتراض:</strong> نجاست کا نکلنا ناقض ہے تو انگلی کے نہ بہنے والے قطرے سے وضو کیوں نہیں ٹوٹا؟</li>
+                <li><strong>منعِ وصف:</strong> شریعت میں "خروج" نام ہے نجاست کے <strong>بہہ جانے</strong> کا۔</li>
+                <li><strong>نتیجہ:</strong> قلیل غیر سائل میں سرے سے "خروج" (علت) ہی مفقود ہے!</li>
+              </ul>
+              <div class="slide-formula-badge">
+                الخروج الشرعي = السيلان إلى موضع يلحقه التطهير
+              </div>
+            </div>
+            <div class="pictorial-box">
+              <span class="pictorial-icon">🩸</span>
+              <div class="pictorial-title">خروج بمقابلہ ظہور</div>
+              <div class="pictorial-diagram-row">
+                <div class="pictorial-card-mini card-mini-red">ظہور بغیر سیلان ❌</div>
+                <div class="pictorial-card-mini card-mini-green">سیلان و بہنا (ناقض) ✔️</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="lecture-slide" data-slide="3">
+          <span class="slide-tag">سلائیڈ ۳: قلعہ ۲ (منع المعنی)</span>
+          <h3 class="slide-title">مسحِ سر اور استنجاء میں معقولیت کا فرق</h3>
+          <div class="slide-pictorial-layout">
+            <div class="slide-text-col">
+              <ul class="slide-bullets">
+                <li><strong>اعتراض:</strong> مسح میں تکرار مسنون نہیں تو استنجاء کے ڈھیلوں میں ۳ بار کیوں ہے؟</li>
+                <li><strong>معنی کا فرق:</strong> استنجاء میں معنی <em>ازالہ نجاست یعنی تطہیرِ حقیقی</em> ہے (معقول)۔</li>
+                <li><strong>مسحِ سر:</strong> مسح میں معنی <em>تطہیرِ حکمی غیر معقول</em> اور تخفیف ہے، پس تکرار نہیں۔</li>
+              </ul>
+              <div class="slide-formula-badge">
+                استنجاء = ازالہ حقیقی (تکرار مسنون) | مسحِ سر = تعبدی غیر معقول (تکرار نہیں)
+              </div>
+            </div>
+            <div class="pictorial-box">
+              <span class="pictorial-icon">🧼</span>
+              <div class="pictorial-title">تطہیر معقول بمقابلہ غیر معقول</div>
+              <div class="pictorial-diagram-row">
+                <div class="pictorial-card-mini card-mini-blue">استنجاء (معقول)</div>
+                <div style="font-size: 1.2rem;">≠</div>
+                <div class="pictorial-card-mini card-mini-gold">مسحِ سر (غیر معقول)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 4 -->
+        <div class="lecture-slide" data-slide="4">
+          <span class="slide-tag">سلائیڈ ۴: قلعہ ۳ (الدفع بالحکم)</span>
+          <h3 class="slide-title">صدر الشریعہؒ کا شاہکار: وضوء اور تیمم</h3>
+          <div class="slide-pictorial-layout">
+            <div class="slide-text-col">
+              <ul class="slide-bullets">
+                <li><strong>اعتراض:</strong> بے آب مسافر پر خروجِ نجاست کے باوجود وضو کا وجوب ساقط ہو گیا!</li>
+                <li><strong>صدر الشریعہؒ کا رد:</strong> وضوء کا وجوب سرے سے ساقط ہی نہیں ہوا!</li>
+                <li><strong>اصول:</strong> وضوء بدستور واجب ہے، البتہ تیمم اس کا <strong>«خلف»</strong> بن کر عاجزی دور کرتا ہے۔</li>
+              </ul>
+              <div class="slide-formula-badge">
+                الوجوب باقٍ بالعلة الأصلية والتيمم خلفٌ عنه
+              </div>
+            </div>
+            <div class="pictorial-box">
+              <span class="pictorial-icon">🏜️</span>
+              <div class="pictorial-title">اثباتِ وجوب خلفاً</div>
+              <div class="pictorial-diagram-row">
+                <div class="pictorial-card-mini card-mini-gold">وجوبِ وضو (اصل)</div>
+                <div style="font-size: 1.2rem;">➡️</div>
+                <div class="pictorial-card-mini card-mini-green">تیمم (خلفِ وجوب)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 5 -->
+        <div class="lecture-slide" data-slide="5">
+          <span class="slide-tag">سلائیڈ ۵: قلعہ ۴ (الدفع بالغرض)</span>
+          <h3 class="slide-title">استحاضہ میں عفوِ عارض اور تسویہ</h3>
+          <div class="slide-pictorial-layout">
+            <div class="slide-text-col">
+              <ul class="slide-bullets">
+                <li><strong>غرض:</strong> سبیلین اور غیر سبیلین کے نجس خروج میں برابری قائم کرنا۔</li>
+                <li><strong>اعتراض:</strong> مستحاضہ کا مسلسل خون نکلنے پر وضو قائم رہتا ہے تو علت ٹوٹی!</li>
+                <li><strong>جواب:</strong> علت ناقض ہی ہے، مگر مسلسل عذر کی بنا پر <strong>عفوِ عارض</strong> آیا ہے۔</li>
+              </ul>
+              <div class="slide-formula-badge">
+                الغرض التسوية بين السبيلين والعفو لضرورة الاستمرار
+              </div>
+            </div>
+            <div class="pictorial-box">
+              <span class="pictorial-icon">🌿</span>
+              <div class="pictorial-title">حقیقتِ غرض و عفو</div>
+              <div class="pictorial-diagram-row">
+                <div class="pictorial-card-mini card-mini-blue">ناقضیتِ خروج (اصل)</div>
+                <div class="pictorial-card-mini card-mini-gold">عفوِ ضرورت (عارض)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 6 -->
+        <div class="lecture-slide" data-slide="6">
+          <span class="slide-tag">سلائیڈ ۶: تیر اندازی اور موانعِ خمسہ</span>
+          <h3 class="slide-title">صدر الشریعہؒ کا نایاب فلسفۂ موانع</h3>
+          <div class="slide-pictorial-layout">
+            <div class="slide-text-col">
+              <ul class="slide-bullets">
+                <li><strong>۱. مانع انعقاد:</strong> تانت ٹوٹنا = آزاد انسان (حر) کی بیع۔</li>
+                <li><strong>۲. مانع تمام:</strong> ہوا سے رکنا = غیر مملوک کی بیع۔</li>
+                <li><strong>۳. مانع ابتداء حکم:</strong> زرہ سے رکنا = خیارِ شرط۔</li>
+                <li><strong>۴. مانع تمام حکم:</strong> مرہم سے زخم بھرنا = خیارِ رؤیت۔</li>
+                <li><strong>۵. مانع لزوم حکم:</strong> ناسور بننا = خیارِ عیب۔</li>
+              </ul>
+              <div class="slide-formula-badge">
+                عدم المانع = جزء العلة أو شرطها فلا تخصيص في الشرع!
+              </div>
+            </div>
+            <div class="pictorial-box">
+              <span class="pictorial-icon">🏹</span>
+              <div class="pictorial-title">نظائرِ تیر اندازی</div>
+              <div class="pictorial-diagram-row">
+                <div class="pictorial-card-mini card-mini-gold">کمان و تانت</div>
+                <div class="pictorial-card-mini card-mini-blue">زرہ و خود</div>
+                <div class="pictorial-card-mini card-mini-green">مرہم و علاج</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 7 -->
+        <div class="lecture-slide" data-slide="7">
+          <span class="slide-tag">سلائیڈ ۷: خیاراتِ ثلاثہ میں اصولی تمایز</span>
+          <h3 class="slide-title">خیارِ شرط، خیارِ رؤیت اور خیارِ عیب</h3>
+          <div class="slide-pictorial-layout">
+            <div class="slide-text-col">
+              <ul class="slide-bullets">
+                <li><strong>خیارِ شرط (مانعِ ابتداء):</strong> شرط لگا کر ملکیت کے آغاز کو ہی روک دیا۔</li>
+                <li><strong>خیارِ رؤیت (مانعِ تمام):</strong> ملکیت شروع ہوئی مگر دیکھنے تک تام نہ ہوئی۔</li>
+                <li><strong>خیارِ عیب (مانعِ لزوم):</strong> عقد تام ہوا مگر عیب نے لزوم ختم کر کے فسخ کا حق دیا۔</li>
+              </ul>
+              <div class="slide-formula-badge">
+                شرط (مانعِ ابتداء) ➡️ رؤیت (مانعِ تمام) ➡️ عیب (مانعِ لزوم)
+              </div>
+            </div>
+            <div class="pictorial-box">
+              <span class="pictorial-icon">📜</span>
+              <div class="pictorial-title">خیارات کے درجات</div>
+              <div class="pictorial-diagram-row">
+                <div class="pictorial-card-mini card-mini-red">خیارِ شرط</div>
+                <div class="pictorial-card-mini card-mini-gold">خیارِ رؤیت</div>
+                <div class="pictorial-card-mini card-mini-green">خیارِ عیب</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 8 -->
+        <div class="lecture-slide" data-slide="8">
+          <span class="slide-tag">سلائیڈ ۸: فنِ قلب و معارضہ</span>
+          <h3 class="slide-title">صومِ رمضان میں تعیینِ نیت اور فراشِ صحیح</h3>
+          <div class="slide-pictorial-layout">
+            <div class="slide-text-col">
+              <ul class="slide-bullets">
+                <li><strong>شوافع:</strong> رمضان فرض ہے لہٰذا قضا کی طرح نیت کی تعیین شرط ہوگی۔</li>
+                <li><strong>القلب المعين:</strong> رمضان فرض ہے اور وقت اللہ نے معین کیا لہٰذا تعیین ساقط!</li>
+                <li><strong>فراشِ صحیح بمقابلہ فاسد:</strong> زندہ شوہر صاحب فراش صحیح ہے لہٰذا نسب اسی کا ہے!</li>
+              </ul>
+              <div class="slide-formula-badge">
+                القلب: إثبات نقيض دعوى الخصم بنفس دليله
+              </div>
+            </div>
+            <div class="pictorial-box">
+              <span class="pictorial-icon">🔄</span>
+              <div class="pictorial-title">القلب کا فقہی وار</div>
+              <div class="pictorial-diagram-row">
+                <div class="pictorial-card-mini card-mini-blue">مخالف کی دلیل مانی</div>
+                <div style="font-size: 1.2rem;">↪️</div>
+                <div class="pictorial-card-mini card-mini-gold">اسی سے اس کی نقیض ماری!</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide Controls Bar -->
+        <div class="slide-controls-bar">
+          <button id="slidePrevBtn" class="action-btn secondary" disabled>
+            <span>اگلی سلائیڈ (Next ➡️)</span>
+          </button>
+          <div style="font-size: 0.9rem; font-weight: bold; color: var(--gold-primary);">
+            جامعہ آن لائن LMS • دورۂ التوضیح
+          </div>
+          <button id="slideNextBtn" class="action-btn">
+            <span>پچھلی سلائیڈ (⬅️ Prev)</span>
+          </button>
         </div>
       </div>
     </section>
